@@ -64,16 +64,31 @@ def train(train_set_dir, val_set_dir, epochs, batch_size, learning_rate, logdir)
     trainer.run(train_loader, max_epochs=epochs)
 
 
+class Clock:
+    def __init__(self):
+        self.start_time = time.time()
+        self.last_time = self.start_time
+
+    def measure(self):
+        now = time.time()
+        elapsed = now - self.last_time
+        self.last_time = now
+        return elapsed
+
+
 def setup_tensorboard_logger(trainer, train_evaluator, val_evaluator, logdir):
     # Define a Tensorboard logger
     tb_logger = ignite.contrib.handlers.TensorboardLogger(log_dir=logdir)
+    
+    clock_step = Clock()
+    clock_epoch = Clock()
 
     # Attach handler to plot trainer's loss every 100 iterations
     tb_logger.attach_output_handler(
         trainer,
         event_name=Events.ITERATION_COMPLETED(every=100),
         tag="training",
-        output_transform=lambda loss: {"batch_loss": loss},
+        output_transform=lambda loss: {"batch_loss": loss, "step_time": clock_step.measure()},
     )
 
     # Attach handler for plotting both evaluators' metrics after every epoch completes
@@ -85,6 +100,16 @@ def setup_tensorboard_logger(trainer, train_evaluator, val_evaluator, logdir):
             metric_names="all",
             global_step_transform=ignite.contrib.handlers.global_step_from_engine(trainer),
         )
+
+    tb_logger.attach_output_handler(
+        trainer,
+        event_name=Events.EPOCH_COMPLETED,
+        tag="system",
+        output_transform=lambda loss: {
+            #"learning_rate": trainer.state.optimizer.param_groups[0]["lr"]
+            "epoch_time": clock_epoch.measure()
+        },
+    )
 
 if __name__ == '__main__':
     import argparse

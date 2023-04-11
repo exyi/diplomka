@@ -10,8 +10,26 @@ import random
 from dataset import StructuresDataset
 from utils import TensorDict, device
 
+class EncoderBaseline(nn.Module):
+    def __init__(self, input_size, hidden_size, window_size = 3) -> None:
+        """
+        Encoder which predicts NtC based on the  only small window
+        Used to test if the more advanced predictor is actually working better than "nothing"
+        """
+        super().__init__()
+        self.embedding = nn.Embedding(input_size, hidden_size)
+        self.conv = nn.Conv1d(hidden_size, hidden_size, kernel_size=window_size, padding='same')
+
+    def forward(self, input: torch.Tensor, lengths = None):
+        x = self.embedding(input)
+        # conv expects (batch, channels, seq_len)
+        x = torch.swapaxes(x, -1, -2)
+        x = self.conv(x)
+        x = torch.swapaxes(x, -1, -2)
+        return x
+
 class EncoderRNN(nn.Module):
-    def __init__(self, input_size, embedding_size, hidden_size, bidirectional=True):
+    def __init__(self, input_size, embedding_size, hidden_size, bidirectional=False):
         super(EncoderRNN, self).__init__()
         self.embedding_size = embedding_size
         self.hidden_size = hidden_size
@@ -51,6 +69,7 @@ class Network(nn.Module):
     def __init__(self, embedding_size, hidden_size):
         super(Network, self).__init__()
         self.encoder = EncoderRNN(len(csv_loader.basic_nucleotides), embedding_size, hidden_size)
+        # self.encoder = EncoderBaseline(len(csv_loader.basic_nucleotides), hidden_size)
         self.ntc_decoder = Decoder(hidden_size, len(csv_loader.ntcs))
 
         self.ntc_loss = nn.CrossEntropyLoss()
