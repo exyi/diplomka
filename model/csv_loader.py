@@ -208,7 +208,7 @@ def get_joined_arrays(chains: Dict[Tuple[str, str], dict]):
         arrays = insert_spacers(arrays, np.array([ zero_element, zero_element ], dtype=dtype))
         return np.concatenate(arrays, axis=0, dtype=dtype)
 
-    print(sequence)
+    # print(sequence)
     result = {
         "sequence": sequence,
         "sequence_full": sequence_full,

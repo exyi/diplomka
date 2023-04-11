@@ -7,43 +7,28 @@ import pandas as pd, numpy as np, os, sys
 import csv_loader
 # import torchtext
 import random
-
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-class StructuresDataset(Dataset):
-    def __init__(self, dir: str, files: Optional[List[str]]):
-        self.dir = dir
-        if files is None:
-            self.files = [ d for d in os.listdir(dir) if d.endswith('.csv') ]
-        else:
-            self.files = files
-
-    def __len__(self):
-        return len(self.files)
-
-    def __getitem__(self, idx):
-        img_path = os.path.join(self.dir, self.files[idx])
-        table, chains = csv_loader.load_csv_file(img_path)
-        joined = csv_loader.get_joined_arrays(chains)
-        input = { "sequence": csv_loader.encode_nucleotides(joined['sequence']), "is_dna": joined['is_dna'] }
-        target = {
-            "NtC": csv_loader.encode_ntcs(joined['NtC']),
-            # "CANA": joined['CANA']
-        }
-        return input, target
+from dataset import StructuresDataset
+from utils import TensorDict, device
 
 class EncoderRNN(nn.Module):
-    def __init__(self, input_size, embedding_size, hidden_size):
+    def __init__(self, input_size, embedding_size, hidden_size, bidirectional=True):
         super(EncoderRNN, self).__init__()
         self.embedding_size = embedding_size
         self.hidden_size = hidden_size
+        self.bidirectional = bidirectional
 
         self.embedding = nn.Embedding(input_size, embedding_size)
-        self.rnn = nn.LSTM(embedding_size, hidden_size)
+        self.rnn = nn.LSTM(embedding_size, hidden_size, bidirectional=bidirectional)
 
-    def forward(self, input):
+    def forward(self, input, lengths=None):
         embedded = self.embedding(input)
+        if lengths is not None:
+            embedded = torch.nn.utils.rnn.pack_padded_sequence(embedded, lengths, batch_first=True)
         output, _ = self.rnn(embedded)
+        if lengths is not None:
+            output, _ = torch.nn.utils.rnn.pad_packed_sequence(output, batch_first=True)
+        if self.bidirectional:
+            output = output[:, :, :self.hidden_size] + output[:, :, self.hidden_size:]
         return output
 
 class Decoder(nn.Module):
@@ -51,9 +36,7 @@ class Decoder(nn.Module):
         super(Decoder, self).__init__()
         self.hidden_size = hidden_size
         self.output_size = output_size
-
         self.out = nn.Linear(hidden_size, output_size)
-
         # self.attn = nn.Linear(self.hidden_size, self.max_length)
         # self.attn_combine = nn.Linear(self.hidden_size * 2, self.hidden_size)
 
@@ -62,11 +45,33 @@ class Decoder(nn.Module):
         output = self.out(output).softmax(dim=1)
         return output
 
-teacher_forcing_ratio = 0.5
+class Network(nn.Module):
+    NUCLEOTIDE_LABELS = csv_loader.basic_nucleotides
+    NTC_LABELS = csv_loader.ntcs
+    def __init__(self, embedding_size, hidden_size):
+        super(Network, self).__init__()
+        self.encoder = EncoderRNN(len(csv_loader.basic_nucleotides), embedding_size, hidden_size)
+        self.ntc_decoder = Decoder(hidden_size, len(csv_loader.ntcs))
+
+        self.ntc_loss = nn.CrossEntropyLoss()
+    
+    def forward(self, input: TensorDict):
+        encoder_output = self.encoder(input["sequence"], input.get("lengths", None))
+        encoder_output = encoder_output[:, 1:, :] # there is one less NtC than nucleotides
+        decoder_output = self.ntc_decoder(encoder_output)
+        return {
+            "NtC": torch.swapaxes(decoder_output, -1, -2)
+        }
+
+    def loss(self, output: TensorDict, target):
+        # print(output["NtC"].shape)
+        # print(target["NtC"].shape)
+        loss = self.ntc_loss(output["NtC"], target["NtC"])
+        return loss
 
 def train(
-    input_data: Dict[str, torch.Tensor],
-    target_data: Dict[str, torch.Tensor],
+    input_data: TensorDict,
+    target_data: TensorDict,
     encoder: EncoderRNN, decoder: Decoder,
     encoder_optimizer, decoder_optimizer,
     criterion):
@@ -76,17 +81,14 @@ def train(
 
     input_sequence = input_data['sequence']
     target_ntc_sequence = target_data['NtC']
-    # print(input_sequence.shape, target_ntc_sequence.shape)
 
     encoder_output = encoder(input_sequence)
 
-    encoder_output = encoder_output[:, 1:, :] # there is one less nucleotide than nucleotide
+    encoder_output = encoder_output[:, 1:, :] # there is one less NtC than nucleotides
 
     decoder_output = decoder(encoder_output)
 
-    # print(f"{decoder_output.shape=} {target_ntc_sequence.shape=}")
     loss = criterion(torch.swapaxes(decoder_output, -1, -2), target_ntc_sequence)
-    # loss = criterion(decoder_output, F.one_hot(target_ntc_sequence, num_classes=decoder.output_size))
 
     loss.backward()
 
@@ -105,7 +107,7 @@ def trainIters(encoder, decoder, n_iters, print_every=10, plot_every=100, learni
     decoder_optimizer = optim.Adam(decoder.parameters(), lr=learning_rate)
     criterion = nn.CrossEntropyLoss()
 
-    dataset = StructuresDataset("../data/sample/", None) # ["2d47_v41C35A23.csv"]
+    dataset = StructuresDataset("data/sample/", None) # ["2d47_v41C35A23.csv"]
     datasetLoader = DataLoader(dataset, shuffle=True)
 
     iter = 1
