@@ -2,15 +2,9 @@ from typing import Dict, Tuple
 import pandas as pd, numpy as np
 import sys
 import os
-import argparse
-import duckdb
 from collections import defaultdict
 
-
-parser = argparse.ArgumentParser(description='Parse CSVs')
-parser.add_argument('--path', type=str, help='directory containing CSVs to load', required=True)
-parser.add_argument('--out', type=str, help='output file', required=True)
-
+# maps nucleotide codes from the CSV to a single letter
 nucleotide_mapping = defaultdict(lambda: 'X', {
     'A': 'A', 'C': 'C', 'G': 'G', 'T': 'T', 'U': 'U',
     'DA': 'A', 'DC': 'C', 'DG': 'G', 'DT': 'T', 'DU': 'U',
@@ -118,22 +112,50 @@ ntcs = [
     "BB1S", # 80
     "AB1S", # 33
 ]
+# mapping NTC-string -> integer index into the ntcs array
 ntc_index = { word: index for index, word in enumerate(ntcs) }
+# mapping nucleotide -> integer index into the basic_nucleotides array
 nucleotide_index = { nucleotide: index for index, nucleotide in enumerate(basic_nucleotides) }
 
 def encode_ntcs(ntcs: np.ndarray) -> np.ndarray:
+    """
+    Encodes a string array of NtCs into an array of integers.
+    """
     return np.vectorize(lambda ntc: ntc_index[ntc])(ntcs)
 
 def encode_nucleotides(nucleotides: str) -> np.ndarray:
+    """
+    Encodes a string of nucleotides into an array of integers.
+    """
     return np.array([ nucleotide_index[nucleotide] for nucleotide in nucleotides ])
 
-def map_nucleotide(nucleotide: str):
+def map_nucleotide(nucleotide: str) -> str:
+    """
+    Maps a nucleotide from the CSVs to a single letter nucleotide.
+    """
     if '.' in nucleotide:
         nucleotide = nucleotide.split('.')[0]
     return nucleotide_mapping[nucleotide]
 
-def load_csv_file(file, name) -> Tuple[pd.DataFrame, Dict[Tuple[str, str], dict]]:
+def load_csv_file(file) -> Tuple[pd.DataFrame, Dict[Tuple[str, str], dict]]:
+    """
+    Loads the CSV into
+    * pandas dataframe including all columns from the CSV, plus
+        - pdbid: string
+        - chain: string
+        - nt_1: string - first nucleotide of the step
+        - nt_2: string - second nucleotide
+        - ntix_1: int - second nucleotide index in the chain
+        - ntix_2: int - second nucleotide index
+    * dictionary of chains: pdbid, chain -> dict
+        - steps: subdataframe
+        - sequence: string - single letter nucleotides
+        - sequence_full: string array
+        - is_dna: bool array
+    """
     table = pd.read_csv(file, sep=',', header='infer')
+
+    # split stepID into parts
     stepID: pd.Series[str] = table['step_ID']
     table['pdbid'] = [ s.split('_')[0] for s in stepID ]
     table['chain'] = [ s.split('_')[1] for s in stepID ]
@@ -141,7 +163,6 @@ def load_csv_file(file, name) -> Tuple[pd.DataFrame, Dict[Tuple[str, str], dict]
     table['nt_2'] = [ s.split('_')[4] for s in stepID ]
     table['ntix_1'] = [ s.split('_')[3] for s in stepID ]
     table['ntix_2'] = [ s.split('_')[5] for s in stepID ]
-    # chains = list(set(zip(table.pdbid, table.chain)))
 
     # create array columns for each column in table, grouped by pdbid and chain
     # identity = lambda x: x
@@ -160,6 +181,16 @@ def load_csv_file(file, name) -> Tuple[pd.DataFrame, Dict[Tuple[str, str], dict]
     return table, groups2
 
 def get_joined_arrays(chains: Dict[Tuple[str, str], dict]):
+    """
+    Joins the separated chains from load_csv_file into single arrays:
+    * sequence: string - joined sequence separated by spaces
+    * sequence_full: string array - joined sequence separated by spaces
+    * is_dna: bool array - on separators it's False
+    * NtC: ntc name array - on separators it's 'NANT'
+    * nearest_NtC: ntc name array - on separators it's 'NANT'
+    * CANA: name array - on separators it's 'NAN'
+    * d1, e1, ... rmsd, confalA, ... - float arrays, on separators it's 0.0
+    """
     def insert_spacers(arr, spacer):
         result = []
         for i in range(len(arr)):
@@ -195,14 +226,17 @@ def save_parquet(structs, file):
     frame = pd.DataFrame(pd.concat(structs).groupby("name").apply(lambda x: x.to_dict(orient='records')), columns=['chains'])
     frame.to_parquet(file)
 
-def load_csvs(path, output_file):
+def load_csvs(path):
+    """
+    Dumps the csvs into parquet files for DuckDB querying
+    """
     structs = []
     dirs = os.listdir(path)
     tmp_counter = 0
     for ix, file in enumerate(dirs):
         if file.endswith('.csv'):
             print(f'Loading {ix+1:<8}/{len(dirs)}: {file}                                 ', end='')
-            structs.append(load_csv_file(os.path.join(path, file), name = os.path.splitext(file)[0]))
+            structs.append(load_csv_file(os.path.join(path, file)))
             print('\r', end='')
 
         if len(structs) > 500:
@@ -212,13 +246,9 @@ def load_csvs(path, output_file):
 
     save_parquet(structs, f'./tmp_{tmp_counter}.parquet')
 
-    duckdb.query(f"""
-        COPY (SELECT * FROM './tmp_*.parquet') TO '{output_file}' (FORMAT 'parquet');
-    """)
-
-
 if __name__ == '__main__':
+    import argparse
+    parser = argparse.ArgumentParser(description='Parse CSVs')
+    parser.add_argument('--path', type=str, help='directory containing CSVs to load', required=True)
     args = parser.parse_args()
-    df = load_csvs(args.path, args.out)
-
-    print(f"Loaded {len(df)} structures.                             ")
+    load_csvs(args.path)

@@ -4,13 +4,11 @@ from typing import Dict, List, Optional, Tuple
 import torch, torch.nn as nn, torch.nn.functional as F, torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
 import pandas as pd, numpy as np, os, sys
-import scripts.csv_loader as csv_loader
+import csv_loader
 # import torchtext
 import random
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-MAX_LENGTH = 1024
-
 
 class StructuresDataset(Dataset):
     def __init__(self, dir: str, files: Optional[List[str]]):
@@ -23,17 +21,10 @@ class StructuresDataset(Dataset):
     def __len__(self):
         return len(self.files)
 
-    # def convert_target(self, table: pd.DataFrame, chains: Dict[Tuple[str, str], dict]):
-        
-
-    # def convert_input(self, table, chains: Dict[Tuple[str, str], dict]):
-    #     return ([ s['sequence'] for s in chains.values() ], [ s['is_dna'] for s in chains.values() ])
-
     def __getitem__(self, idx):
         img_path = os.path.join(self.dir, self.files[idx])
-        table, chains = csv_loader.load_csv_file(img_path, os.path.splitext(self.files[idx])[0])
+        table, chains = csv_loader.load_csv_file(img_path)
         joined = csv_loader.get_joined_arrays(chains)
-        # N x 6
         input = { "sequence": csv_loader.encode_nucleotides(joined['sequence']), "is_dna": joined['is_dna'] }
         target = {
             "NtC": csv_loader.encode_ntcs(joined['NtC']),
@@ -56,10 +47,9 @@ class EncoderRNN(nn.Module):
         return output
 
 class Decoder(nn.Module):
-    def __init__(self, hidden_size, output_size, max_length=MAX_LENGTH):
+    def __init__(self, hidden_size, output_size):
         super(Decoder, self).__init__()
         self.hidden_size = hidden_size
-        self.max_length = max_length
         self.output_size = output_size
 
         self.out = nn.Linear(hidden_size, output_size)
@@ -79,7 +69,7 @@ def train(
     target_data: Dict[str, torch.Tensor],
     encoder: EncoderRNN, decoder: Decoder,
     encoder_optimizer, decoder_optimizer,
-    criterion, max_length=MAX_LENGTH):
+    criterion):
 
     encoder_optimizer.zero_grad()
     decoder_optimizer.zero_grad()
@@ -142,21 +132,17 @@ def trainIters(encoder, decoder, n_iters, print_every=10, plot_every=100, learni
 
     # showPlot(plot_losses)
 
-
-
 def asMinutes(s):
     m = math.floor(s / 60)
     s -= m * 60
-    return '%dm %ds' % (m, s)
-
+    return f'{m}m {s}s'
 
 def timeSince(since, percent):
     now = time.time()
     s = now - since
     es = s / (percent)
     rs = es - s
-    return '%s (- %s)' % (asMinutes(s), asMinutes(rs))
-
+    return f'{asMinutes(s)} (- {asMinutes(rs)})'
 
 if __name__ == "__main__":
     trainIters(EncoderRNN(input_size=len(csv_loader.basic_nucleotides), embedding_size=123, hidden_size=124), Decoder(124, len(csv_loader.ntcs)), 100000)
