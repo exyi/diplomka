@@ -234,7 +234,7 @@ def load_csvs(path):
     dirs = os.listdir(path)
     tmp_counter = 0
     for ix, file in enumerate(dirs):
-        if file.endswith('.csv'):
+        if file.endswith('.csv') or file.endswith('.csv.gz'):
             print(f'Loading {ix+1:<8}/{len(dirs)}: {file}                                 ', end='')
             structs.append(load_csv_file(os.path.join(path, file)))
             print('\r', end='')
