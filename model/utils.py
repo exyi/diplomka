@@ -62,3 +62,6 @@ def make_conv(kind: ConvKind,
     if kind == "resnet":
         return ResnetBlock(dim, in_channels, out_channels, window_size, stride, dilation)
 
+
+def clamp(v, min_v, max_v):
+    return min(max_v, max(min_v, v))

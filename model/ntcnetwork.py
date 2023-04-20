@@ -8,7 +8,7 @@ import csv_loader
 # import torchtext
 import random
 from dataset import StructuresDataset
-from utils import ConvKind, TensorDict, device, make_conv, ResnetBlock
+from utils import ConvKind, TensorDict, clamp, device, make_conv, ResnetBlock
 
 class ConvEncoder(nn.Module):
     def __init__(self, input_size, channels = [64, 64], window_size = 3, kind: ConvKind ="resnet") -> None:
@@ -119,7 +119,15 @@ class Network(nn.Module):
         # self.encoder = EncoderBaseline(Network.INPUT_SIZE, hidden_size)
         self.ntc_decoder = Decoder(hidden_size, len(csv_loader.ntcs))
 
-        self.ntc_loss = nn.CrossEntropyLoss()
+        self.ntc_loss = nn.CrossEntropyLoss(
+            weight=torch.Tensor([
+                0.01 if k == "NANT" else
+                clamp(1 / (v / 20_000), 0.2, 1)
+                for k, v in csv_loader.ntc_frequencies.items()
+            ]),
+            label_smoothing=0.1
+        )
+        print(self.ntc_loss.weight)
     
     def forward(self, input: TensorDict):
         # print(input["sequence"].shape, input["is_dna"].shape)
