@@ -17,6 +17,18 @@ import ignite.engine
 from ignite.engine import Events
 import ignite.contrib.handlers
 
+def print_model(model: nn.Module):
+    for name, module in model.named_modules():
+        if name == "":
+            name = "total"
+        if len(name) > 30:
+            name = "…" + name[len(name)-29:]
+        parameters = sum(p.size().numel() for p in module.parameters())
+        if parameters > 0:
+            print(f"#Parameters {name:30s}: {parameters}")
+        
+    print(model)
+
 
 def train(train_set_dir, val_set_dir, epochs, batch_size, learning_rate, logdir):
 
@@ -26,7 +38,8 @@ def train(train_set_dir, val_set_dir, epochs, batch_size, learning_rate, logdir)
     model = ntcnetwork.Network(
         embedding_size=32,
         hidden_size=32
-    )
+    ).to(device)
+    print_model(model)
 
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
     trainer = ignite.engine.create_supervised_trainer(model, optimizer, model.loss, device)
