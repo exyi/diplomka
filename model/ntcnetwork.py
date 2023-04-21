@@ -120,9 +120,14 @@ class Network(nn.Module):
         self.ntc_decoder = Decoder(hidden_size, len(csv_loader.ntcs))
 
         self.ntc_loss = nn.CrossEntropyLoss(
+            # weight=torch.Tensor([
+            #     0.01 if k == "NANT" else
+            #     clamp(1 / (v / 20_000), 0.2, 1)
+            #     for k, v in csv_loader.ntc_frequencies.items()
+            # ]),
             weight=torch.Tensor([
                 0.01 if k == "NANT" else
-                clamp(1 / (v / 20_000), 0.2, 1)
+                1
                 for k, v in csv_loader.ntc_frequencies.items()
             ]),
             label_smoothing=0.1

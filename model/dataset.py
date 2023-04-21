@@ -17,7 +17,7 @@ class StructuresDataset(Dataset):
         """
         self.dir = dir
         if files is None:
-            self.files = [ d for d in os.listdir(dir) if d.endswith('.csv') or d.endswith('.csv.gz') ]
+            self.files = [ d for d in os.listdir(dir) if csv_loader.csv_extensions.search(d) ]
         else:
             self.files = files
 

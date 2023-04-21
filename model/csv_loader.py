@@ -1,8 +1,9 @@
 from typing import Dict, Tuple
 import pandas as pd, numpy as np
-import sys
-import os
+import sys, os, re
 from collections import defaultdict
+
+csv_extensions = re.compile(r"\.csv(\.(zst|gz|xz|bz2))?$")
 
 # maps nucleotide codes from the CSV to a single letter
 nucleotide_mapping = defaultdict(lambda: 'X', {
@@ -235,7 +236,7 @@ def load_csvs(path):
     dirs = os.listdir(path)
     tmp_counter = 0
     for ix, file in enumerate(dirs):
-        if file.endswith('.csv') or file.endswith('.csv.gz'):
+        if csv_extensions.search(file):
             print(f'Loading {ix+1:<8}/{len(dirs)}: {file}                                 ', end='')
             structs.append(load_csv_file(os.path.join(path, file)))
             print('\r', end='')
