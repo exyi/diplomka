@@ -5,12 +5,15 @@ import time
 from typing import Dict, List, Optional, Tuple
 import torch, torch.nn as nn, torch.nn.functional as F, torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
+import dataclasses
+from dataclasses import dataclass, field
 # import torchtext
 import random
+from hparams import Hyperparams
 
 import ntcnetwork
 import dataset
-from utils import device
+from utils import count_parameters, device
 
 import ignite.metrics as metrics
 import ignite.engine
@@ -23,25 +26,22 @@ def print_model(model: nn.Module):
             name = "total"
         if len(name) > 30:
             name = "…" + name[len(name)-29:]
-        parameters = sum(p.size().numel() for p in module.parameters())
+        parameters = count_parameters(module)
         if parameters > 0:
             print(f"#Parameters {name:30s}: {parameters}")
         
     print(model)
 
+def train(train_set_dir, val_set_dir, p: Hyperparams, logdir):
+    train_loader = DataLoader(
+        dataset.StructuresDataset(train_set_dir), batch_size=p.batch_size, shuffle=True, collate_fn=dataset.StructuresDataset.collate_fn, num_workers=4)
+    batch_count = len(train_loader)
+    val_loader = DataLoader(dataset.StructuresDataset(val_set_dir), batch_size=64, shuffle=False, collate_fn=dataset.StructuresDataset.collate_fn, num_workers=4)
 
-def train(train_set_dir, val_set_dir, epochs, batch_size, learning_rate, logdir):
-
-    train_loader = DataLoader(dataset.StructuresDataset(train_set_dir), batch_size=4, shuffle=True, collate_fn=dataset.StructuresDataset.collate_fn)
-    val_loader = DataLoader(dataset.StructuresDataset(val_set_dir), batch_size=4, shuffle=False, collate_fn=dataset.StructuresDataset.collate_fn)
-
-    model = ntcnetwork.Network(
-        embedding_size=32,
-        hidden_size=32
-    ).to(device)
+    model = ntcnetwork.Network(p).to(device)
     print_model(model)
 
-    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+    optimizer = optim.Adam(model.parameters(), lr=p.learning_rate)
     trainer = ignite.engine.create_supervised_trainer(model, optimizer, model.loss, device)
 
     recall_metric = metrics.Recall(output_transform=lambda x: (x[0]["NtC"], x[1]["NtC"]), average=False)
@@ -57,7 +57,7 @@ def train(train_set_dir, val_set_dir, epochs, batch_size, learning_rate, logdir)
 
     @trainer.on(Events.ITERATION_COMPLETED(every=100))
     def log_training_loss(engine):
-        print(f"train - Epoch[{engine.state.epoch}], Iter[{engine.state.iteration}] Loss: {engine.state.output:.2f}")
+        print(f"train - Epoch[{engine.state.epoch}], Iter[{engine.state.iteration:7d}|{engine.state.iteration / batch_count:6.2f}] Loss: {engine.state.output:.2f}")
 
     @trainer.on(Events.EPOCH_COMPLETED)
     def log_training_results(trainer):
@@ -74,7 +74,7 @@ def train(train_set_dir, val_set_dir, epochs, batch_size, learning_rate, logdir)
 
     setup_tensorboard_logger(trainer, train_evaluator, val_evaluator, logdir)
 
-    trainer.run(train_loader, max_epochs=epochs)
+    trainer.run(train_loader, max_epochs=p.epochs)
 
 
 class Clock:
@@ -130,10 +130,33 @@ if __name__ == '__main__':
     parser.add_argument('--train_set', type=str, help='Path to directory training data CSVs')
     parser.add_argument('--val_set', type=str, help='Path to directory validation data CSVs')
     parser.add_argument('--logdir', type=str, default="tb-logs", help='Path for saving Tensorboard logs and other outputs')
-    parser.add_argument('--epochs', type=int, default=500, help='Number of epochs to train')
-    parser.add_argument('--batch_size', type=int, default=1, help='Batch size')
-    parser.add_argument('--learning_rate', type=float, default=0.004, help='Learning rate')
+
+    for k, w in Hyperparams.__dataclass_fields__.items():
+        p_config = {}
+        if w.metadata.get("list", False):
+            p_config["nargs"] = "+"
+            p_config["type"] = w.type.__args__[0]
+        elif dataclasses.MISSING != w.type:
+            p_config["type"] = w.type
+        else: 
+            p_config["type"] = type(w.default)
+        if dataclasses.MISSING != w.default:
+            p_config["default"] = w.default
+        else:
+            p_config["required"] = True
+        
+        if "help" in w.metadata:
+            p_config["help"] = w.metadata["help"]
+
+        if "choices" in w.metadata:
+            p_config["choices"] = w.metadata["choices"]
+        
+        parser.add_argument(f'--{k}', **p_config)
 
     args = parser.parse_args()
 
-    train(args.train_set, args.val_set, args.epochs, args.batch_size, args.learning_rate, args.logdir)
+    hyperparameters = Hyperparams(**{ k: v for k, v in vars(args).items() if k in Hyperparams.__dataclass_fields__ })
+    
+    print(f"device: {device}    logdir: {args.logdir}")
+    print(hyperparameters)
+    train(args.train_set, args.val_set, hyperparameters, args.logdir)

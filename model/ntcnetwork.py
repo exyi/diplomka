@@ -1,3 +1,4 @@
+from collections import namedtuple
 import math
 import time
 from typing import Dict, List, Optional, Tuple
@@ -8,10 +9,11 @@ import csv_loader
 # import torchtext
 import random
 from dataset import StructuresDataset
+from hparams import Hyperparams
 from utils import ConvKind, TensorDict, clamp, device, make_conv, ResnetBlock
 
 class ConvEncoder(nn.Module):
-    def __init__(self, input_size, channels = [64, 64], window_size = 3, kind: ConvKind ="resnet") -> None:
+    def __init__(self, input_size, channels = [64, 64], window_size = 3, kind: ConvKind = "resnet") -> None:
         """
         set of convolutional layers
         """
@@ -62,16 +64,19 @@ class EncoderRNN(nn.Module):
         self.embedding_size = embedding_size
         self.hidden_size = hidden_size
         self.bidirectional = bidirectional
-        self.input_dropout = nn.Dropout(0.1)
+        self.embedded_dropout = nn.Dropout(0.1)
         self.embed_dropout = nn.Dropout(0.2)
 
         self.embedding = embedding
+        self.embedded_dropout = nn.Dropout(dropout)
         self.rnn = nn.LSTM(embedding_size, hidden_size, bidirectional=bidirectional, num_layers=num_layers, dropout=dropout)
+        self.output_dropout = nn.Dropout(dropout)
 
     def forward(self, input, lengths=None):
-        if self.input_dropout.p > 0:
-            input = self.input_dropout(input)
+        if self.embedded_dropout.p > 0:
+            input = self.embedded_dropout(input)
         embedded = self.embedding(input)
+        embedded = self.embedded_dropout(embedded)
 
         if lengths is not None:
             embedded = torch.nn.utils.rnn.pack_padded_sequence(embedded, lengths, batch_first=True)
@@ -80,6 +85,7 @@ class EncoderRNN(nn.Module):
             output, _ = torch.nn.utils.rnn.pad_packed_sequence(output, batch_first=True)
         if self.bidirectional:
             output = output[:, :, :self.hidden_size] + output[:, :, self.hidden_size:]
+        output = self.output_dropout(output)
         return output
 
 class Decoder(nn.Module):
@@ -109,13 +115,17 @@ class Network(nn.Module):
     NUCLEOTIDE_LABELS = csv_loader.basic_nucleotides
     INPUT_SIZE = len(csv_loader.basic_nucleotides) + 1
     NTC_LABELS = csv_loader.ntcs
-    def __init__(self, embedding_size, hidden_size):
+    OUTPUT_TUPLE = namedtuple("Output", ["NtC"])
+    def __init__(self, p: Hyperparams):
         super(Network, self).__init__()
+        self.p = p
+        embedding_size = p.conv_channels[-1]
+        hidden_size = p.rnn_size if p.rnn_layers > 0 else embedding_size
         if True:
-            embedding = ConvEncoder(Network.INPUT_SIZE, channels=[64, hidden_size])
+            embedding = ConvEncoder(Network.INPUT_SIZE, channels=p.conv_channels, window_size=p.conv_window_size, kind=p.conv_kind)
         else:
             embedding = nn.Embedding(Network.INPUT_SIZE, embedding_size)
-        self.encoder = EncoderRNN(embedding, embedding_size, hidden_size, num_layers=1, dropout=0.4, bidirectional=True)
+        self.encoder = EncoderRNN(embedding, embedding_size, hidden_size, num_layers=p.rnn_layers, dropout=p.rnn_dropout, bidirectional=True)
         # self.encoder = EncoderBaseline(Network.INPUT_SIZE, hidden_size)
         self.ntc_decoder = Decoder(hidden_size, len(csv_loader.ntcs))
 
@@ -134,7 +144,7 @@ class Network(nn.Module):
         )
         print(self.ntc_loss.weight)
     
-    def forward(self, input: TensorDict):
+    def forward(self, input: TensorDict, whatever =None):
         # print(input["sequence"].shape, input["is_dna"].shape)
         in_tensor = torch.cat([
             F.one_hot(input["sequence"], num_classes=len(csv_loader.basic_nucleotides)),
@@ -142,6 +152,8 @@ class Network(nn.Module):
         ], dim=-1)
         in_tensor = in_tensor.type(torch.float32)
         lengths = input.get("lengths", None)
+        if lengths is not None:
+            lengths = lengths.to("cpu")
         encoder_output = self.encoder(in_tensor, lengths)
         encoder_output = encoder_output[:, 1:, :] # there is one less NtC than nucleotides
         decoder_output = self.ntc_decoder(encoder_output, lengths)

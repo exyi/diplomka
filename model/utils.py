@@ -65,3 +65,6 @@ def make_conv(kind: ConvKind,
 
 def clamp(v, min_v, max_v):
     return min(max_v, max(min_v, v))
+
+def count_parameters(module:  nn.Module) -> int:
+    return sum(p.numel() for p in module.parameters() if p.requires_grad)
