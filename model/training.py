@@ -72,7 +72,28 @@ def train(train_set_dir, val_set_dir, p: Hyperparams, logdir):
         metrics = val_evaluator.state.metrics
         print(f"evalV - Epoch[{trainer.state.epoch}] accuracy: {metrics['accuracy']:.2f} F1: {metrics['f1']:.2f} loss: {metrics['loss']:.2f}")
 
-    setup_tensorboard_logger(trainer, train_evaluator, val_evaluator, logdir)
+    tb_log = setup_tensorboard_logger(trainer, train_evaluator, val_evaluator, logdir)
+    if tb_log is not None:
+        from torch.utils.tensorboard._pytorch_graph import graph
+        tb_log.writer._get_file_writer().add_graph(graph(model, next(iter(val_loader)), use_strict_trace=False))
+
+        hparams = dict(vars(p))
+        for k, v in hparams.items():
+            if not (isinstance(v, str) or isinstance(v, int) or isinstance(v, float) or isinstance(v, bool)):
+                hparams[k] = str(v)
+
+        import tensorboardX.summary
+        hmetrics = {
+            "model/total_params": count_parameters(model),
+            "training/loss": 0,
+            "training/step_time": 0,
+            "validation/miou": 0,
+            "validation/f1": 0
+        }
+        a, b, c = tensorboardX.summary.hparams(hparams, hmetrics)
+        tb_log.writer._get_file_writer().add_summary(a)
+        tb_log.writer._get_file_writer().add_summary(b)
+        tb_log.writer._get_file_writer().add_summary(c)
 
     trainer.run(train_loader, max_epochs=p.epochs)
 
@@ -89,10 +110,10 @@ class Clock:
         return elapsed
 
 
-def setup_tensorboard_logger(trainer, train_evaluator, val_evaluator, logdir):
+def setup_tensorboard_logger(trainer: ignite.engine.Engine, train_evaluator, val_evaluator, logdir) -> ignite.contrib.handlers.TensorboardLogger:
     # Define a Tensorboard logger
     tb_logger = ignite.contrib.handlers.TensorboardLogger(log_dir=logdir)
-    
+
     clock_step = Clock()
     clock_epoch = Clock()
 
@@ -117,12 +138,13 @@ def setup_tensorboard_logger(trainer, train_evaluator, val_evaluator, logdir):
     tb_logger.attach_output_handler(
         trainer,
         event_name=Events.EPOCH_COMPLETED,
-        tag="system",
+        tag="training",
         output_transform=lambda loss: {
             #"learning_rate": trainer.state.optimizer.param_groups[0]["lr"]
             "epoch_time": clock_epoch.measure()
         },
     )
+    return tb_logger
 
 if __name__ == '__main__':
     import argparse
