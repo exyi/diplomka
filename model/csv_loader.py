@@ -3,6 +3,8 @@ import pandas as pd, numpy as np
 import sys, os, re
 from collections import defaultdict
 
+from utils import retry_on_error
+
 csv_extensions = re.compile(r"\.csv(\.(zst|gz|xz|bz2))?$")
 
 # maps nucleotide codes from the CSV to a single letter
@@ -155,7 +157,7 @@ def load_csv_file(file) -> Tuple[pd.DataFrame, Dict[Tuple[str, str], dict]]:
         - sequence_full: string array
         - is_dna: bool array
     """
-    table = pd.read_csv(file, sep=',', header='infer')
+    table = retry_on_error(lambda: pd.read_csv(file, sep=',', header='infer'))
 
     # split stepID into parts
     stepID: pd.Series[str] = table['step_ID']
