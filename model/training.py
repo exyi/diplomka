@@ -17,8 +17,11 @@ from utils import count_parameters, device
 
 import ignite.metrics as metrics
 import ignite.engine
+import ignite.handlers
+import ignite.handlers.param_scheduler
 from ignite.engine import Events
 import ignite.contrib.handlers
+import itertools
 
 def print_model(model: nn.Module):
     for name, module in model.named_modules():
@@ -44,6 +47,14 @@ def train(train_set_dir, val_set_dir, p: Hyperparams, logdir):
     optimizer = optim.Adam(model.parameters(), lr=p.learning_rate)
     trainer = ignite.engine.create_supervised_trainer(model, optimizer, model.loss, device)
 
+    if p.lr_decay == "cosine":
+        torch_lr_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=batch_count * p.epochs)
+        # scheduler = ignite.handlers.param_scheduler.LRScheduler(torch_lr_scheduler)
+        # trainer.add_event_handler(Events.ITERATION_STARTED, scheduler)
+        @trainer.on(Events.ITERATION_COMPLETED)
+        def lr_decay():
+            torch_lr_scheduler.step()
+
     recall_metric = metrics.Recall(output_transform=lambda x: (x[0]["NtC"], x[1]["NtC"]), average=False)
     precision_metric = metrics.Precision(output_transform=lambda x: (x[0]["NtC"], x[1]["NtC"]), average=False)
     val_metrics: Dict[str, metrics.Metric] = {
@@ -56,24 +67,36 @@ def train(train_set_dir, val_set_dir, p: Hyperparams, logdir):
     val_evaluator = ignite.engine.create_supervised_evaluator(model, metrics=val_metrics, device=device)
 
     logger_clock = Clock()
+    epoch_clock = Clock()
     @trainer.on(Events.ITERATION_COMPLETED(every=100))
     def log_training_loss(engine):
         print(f"train - Epoch[{engine.state.epoch}], Iter[{engine.state.iteration:7d}|{engine.state.iteration / batch_count:6.2f}] Loss: {engine.state.output:.2f} Time: {logger_clock.measure():3.1f}s")
 
+    @trainer.on(Events.EPOCH_STARTED)
+    def reset_timer(trainer):
+        res_step = logger_clock.measure()
+        res_epoch = epoch_clock.measure()
+        print(f"Epoch[{trainer.state.epoch}] Residual time: {res_epoch/60:3.1f}m residual step time: {res_step/60:3.1f}m")
+
     @trainer.on(Events.EPOCH_COMPLETED)
     def log_training_results(trainer):
-        train_evaluator.run(train_loader)
+        epoch_time = epoch_clock.measure()
+        eval_clock = Clock()
+        train_evaluator.run(itertools.islice(train_loader, 3)) # limit to 3 batches, otherwise it takes longer than training (??)
+        eval_time = eval_clock.measure()
         metrics = train_evaluator.state.metrics
-        print(f"evalT - Epoch[{trainer.state.epoch}] accuracy: {metrics['accuracy']:.2f} F1: {metrics['f1']:.2f} loss: {metrics['loss']:.2f}")
+        print(f"evalT - Epoch[{trainer.state.epoch}] accuracy: {metrics['accuracy']:.2f} F1: {metrics['f1']:.2f} loss: {metrics['loss']:.2f} Train Time: {epoch_time/60:3.1f}m Eval Time: {eval_time/60:3.2f}m")
 
 
     @trainer.on(Events.EPOCH_COMPLETED)
     def log_validation_results(trainer):
+        eval_clock = Clock()
         val_evaluator.run(val_loader)
+        eval_time = eval_clock.measure()
         metrics = val_evaluator.state.metrics
-        print(f"evalV - Epoch[{trainer.state.epoch}] accuracy: {metrics['accuracy']:.2f} F1: {metrics['f1']:.2f} loss: {metrics['loss']:.2f}")
+        print(f"evalV - Epoch[{trainer.state.epoch}] accuracy: {metrics['accuracy']:.2f} F1: {metrics['f1']:.2f} loss: {metrics['loss']:.2f} Eval Time: {eval_time/60:3.2f}m")
 
-    tb_log = setup_tensorboard_logger(trainer, train_evaluator, val_evaluator, logdir)
+    tb_log = setup_tensorboard_logger(trainer, optimizer, train_evaluator, val_evaluator, logdir)
     if tb_log is not None:
         from torch.utils.tensorboard._pytorch_graph import graph
         tb_log.writer._get_file_writer().add_graph(graph(model, next(iter(val_loader)), use_strict_trace=False))
@@ -85,7 +108,7 @@ def train(train_set_dir, val_set_dir, p: Hyperparams, logdir):
 
         import tensorboardX.summary
         hmetrics = {
-            "model/total_params": count_parameters(model),
+            "model/total_params": 0,
             "training/loss": 0,
             "training/step_time": 0,
             "validation/miou": 0,
@@ -95,6 +118,8 @@ def train(train_set_dir, val_set_dir, p: Hyperparams, logdir):
         tb_log.writer._get_file_writer().add_summary(a)
         tb_log.writer._get_file_writer().add_summary(b)
         tb_log.writer._get_file_writer().add_summary(c)
+        tb_log.writer.add_scalar("model/total_params", count_parameters(model))
+        tb_log.writer.add_text("model/structure", str(model))
 
     trainer.run(train_loader, max_epochs=p.epochs)
 
@@ -111,7 +136,7 @@ class Clock:
         return elapsed
 
 
-def setup_tensorboard_logger(trainer: ignite.engine.Engine, train_evaluator, val_evaluator, logdir) -> ignite.contrib.handlers.TensorboardLogger:
+def setup_tensorboard_logger(trainer: ignite.engine.Engine, optimizer: optim.Optimizer, train_evaluator, val_evaluator, logdir) -> ignite.contrib.handlers.TensorboardLogger:
     # Define a Tensorboard logger
     tb_logger = ignite.contrib.handlers.TensorboardLogger(log_dir=logdir)
 
@@ -141,7 +166,7 @@ def setup_tensorboard_logger(trainer: ignite.engine.Engine, train_evaluator, val
         event_name=Events.EPOCH_COMPLETED,
         tag="training",
         output_transform=lambda loss: {
-            #"learning_rate": trainer.state.optimizer.param_groups[0]["lr"]
+            "learning_rate": optimizer.param_groups[0]["lr"],
             "epoch_time": clock_epoch.measure()
         },
     )
