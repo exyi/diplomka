@@ -69,7 +69,10 @@ class EncoderRNN(nn.Module):
 
         self.embedding = embedding
         self.embedded_dropout = nn.Dropout(dropout)
-        self.rnn = nn.LSTM(embedding_size, hidden_size, bidirectional=bidirectional, num_layers=num_layers, dropout=dropout)
+        if num_layers > 0:
+            self.rnn = nn.LSTM(embedding_size, hidden_size, bidirectional=bidirectional, num_layers=num_layers, dropout=dropout)
+        else:
+            self.rnn = None
         self.output_dropout = nn.Dropout(dropout)
 
     def forward(self, input, lengths=None):
@@ -77,6 +80,9 @@ class EncoderRNN(nn.Module):
             input = self.embedded_dropout(input)
         embedded = self.embedding(input)
         embedded = self.embedded_dropout(embedded)
+
+        if self.rnn is None:
+            return embedded
 
         if lengths is not None:
             embedded = torch.nn.utils.rnn.pack_padded_sequence(embedded, lengths, batch_first=True)
@@ -140,7 +146,8 @@ class Network(nn.Module):
                 1
                 for k, v in csv_loader.ntc_frequencies.items()
             ]),
-            label_smoothing=0.1
+            label_smoothing=0.1,
+            reduction="sum"
         )
         print(self.ntc_loss.weight)
     
@@ -149,7 +156,7 @@ class Network(nn.Module):
         in_tensor = torch.cat([
             F.one_hot(input["sequence"], num_classes=len(csv_loader.basic_nucleotides)),
             torch.unsqueeze(input["is_dna"], -1)
-        ], dim=-1)
+        ], dim=-1).to(device)
         in_tensor = in_tensor.type(torch.float32)
         lengths = input.get("lengths", None)
         if lengths is not None:
