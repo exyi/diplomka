@@ -55,9 +55,10 @@ def train(train_set_dir, val_set_dir, p: Hyperparams, logdir):
     train_evaluator = ignite.engine.create_supervised_evaluator(model, metrics=val_metrics, device=device)
     val_evaluator = ignite.engine.create_supervised_evaluator(model, metrics=val_metrics, device=device)
 
+    logger_clock = Clock()
     @trainer.on(Events.ITERATION_COMPLETED(every=100))
     def log_training_loss(engine):
-        print(f"train - Epoch[{engine.state.epoch}], Iter[{engine.state.iteration:7d}|{engine.state.iteration / batch_count:6.2f}] Loss: {engine.state.output:.2f}")
+        print(f"train - Epoch[{engine.state.epoch}], Iter[{engine.state.iteration:7d}|{engine.state.iteration / batch_count:6.2f}] Loss: {engine.state.output:.2f} Time: {logger_clock.measure():3.1f}s")
 
     @trainer.on(Events.EPOCH_COMPLETED)
     def log_training_results(trainer):
