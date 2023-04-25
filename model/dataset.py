@@ -50,8 +50,9 @@ class StructuresDataset(Dataset):
         result_in = dict()
         for key in [ "sequence", "is_dna" ]:
             result_in[key] = torch.nn.utils.rnn.pad_sequence([ t[0][key] for t in batch ], batch_first=True)
-        result_in["lengths"] = lengths
         result_out = dict()
         for key in [ "NtC" ]:
             result_out[key] = torch.nn.utils.rnn.pad_sequence([ t[1][key] for t in batch ], batch_first=True)
+        result_in["lengths"] = lengths
+        result_out["lengths"] = lengths
         return result_in, result_out

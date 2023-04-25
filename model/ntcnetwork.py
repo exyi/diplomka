@@ -147,7 +147,7 @@ class Network(nn.Module):
                 for k, v in csv_loader.ntc_frequencies.items()
             ]),
             label_smoothing=0.1,
-            reduction="sum"
+            reduction="none"
         )
         print(self.ntc_loss.weight)
     
@@ -165,11 +165,19 @@ class Network(nn.Module):
         encoder_output = encoder_output[:, 1:, :] # there is one less NtC than nucleotides
         decoder_output = self.ntc_decoder(encoder_output, lengths)
         return {
-            "NtC": torch.swapaxes(decoder_output, -1, -2)
+            "NtC": torch.swapaxes(decoder_output, -1, -2),
+            "lengths": lengths
         }
 
     def loss(self, output: TensorDict, target):
-        # print(output["NtC"].shape)
-        # print(target["NtC"].shape)
-        loss = self.ntc_loss(output["NtC"], target["NtC"])
+        loss: torch.Tensor = self.ntc_loss(output["NtC"], target["NtC"])
+        
+        total_count = loss.shape.numel()
+        if target.get("lengths", None) is not None:
+            lengths = target["lengths"].to(loss.device)
+            mask = torch.arange(target["NtC"].shape[1]).to(loss.device) < lengths.unsqueeze(-1)
+            total_count = mask.sum()
+            loss = loss * mask
+
+        loss = loss.sum() / total_count
         return loss

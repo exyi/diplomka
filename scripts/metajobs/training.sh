@@ -26,8 +26,8 @@ fi
 if test -z "$VAL_SET"; then
 	VAL_SET=/mnt/storage-brno12-cerit/nfs4/home/exyi/rna-csvs/rna-puzzles-test
 fi
-if test -z "$LOGNAME"; then
-	LOGNAME=tt
+if test -z "$TBLOG"; then
+	TBLOG=tt
 fi
 
 # define a DATADIR variable: directory where the input files are taken from and where output will be copied to
@@ -43,7 +43,7 @@ fi
 cd "$DATADIR"
 py="$SCRATCH/torch-venv/bin/python"
 function train {
-	$py "$DATADIR/model/training.py" --train_set "$TRAINING_SET" --val_set "$VAL_SET" --logdir "$DATADIR/metac-logs/$LOGNAME-`date --utc +%y%m%d-%H%M`" $@
+	$py "$DATADIR/model/training.py" --train_set "$TRAINING_SET" --val_set "$VAL_SET" --logdir "$DATADIR/metac-logs/$TBLOG-`date --utc +%y%m%d-%H%M`" $@
 }
 
 echo "init done, running the python script"

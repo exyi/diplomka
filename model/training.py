@@ -82,7 +82,7 @@ def train(train_set_dir, val_set_dir, p: Hyperparams, logdir):
     def log_training_results(trainer):
         epoch_time = epoch_clock.measure()
         eval_clock = Clock()
-        train_evaluator.run(itertools.islice(train_loader, 3)) # limit to 3 batches, otherwise it takes longer than training (??)
+        train_evaluator.run(itertools.islice(train_loader, 6)) # limit to few batches, otherwise it takes longer than training (??)
         eval_time = eval_clock.measure()
         metrics = train_evaluator.state.metrics
         print(f"evalT - Epoch[{trainer.state.epoch}] accuracy: {metrics['accuracy']:.2f} F1: {metrics['f1']:.2f} loss: {metrics['loss']:.2f} Train Time: {epoch_time/60:3.1f}m Eval Time: {eval_time/60:3.2f}m")
