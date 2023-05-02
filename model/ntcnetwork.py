@@ -10,7 +10,7 @@ import csv_loader
 import random
 from dataset import StructuresDataset
 from hparams import Hyperparams
-from utils import ConvKind, TensorDict, clamp, device, make_conv, ResnetBlock
+from torchutils import ConvKind, TensorDict, clamp, device, make_conv, ResnetBlock
 
 class ConvEncoder(nn.Module):
     def __init__(self, input_size, channels = [64, 64], window_size = 3, kind: ConvKind = "resnet") -> None:
@@ -24,7 +24,7 @@ class ConvEncoder(nn.Module):
             for in_size, out_size in zip(input_sizes, channels)
         ])
 
-    def forward(self, input: torch.Tensor, lengths = None):
+    def forward(self, input: torch.Tensor, lengths: Optional[torch.LongTensor] = None):
         # conv expects (batch, channels, seq_len)
         x = input
         x = torch.swapaxes(x, -1, -2)
@@ -71,11 +71,12 @@ class EncoderRNN(nn.Module):
         self.embedded_dropout = nn.Dropout(dropout)
         if num_layers > 0:
             self.rnn = nn.LSTM(embedding_size, hidden_size, bidirectional=bidirectional, num_layers=num_layers, dropout=dropout)
+            self.rnn.flatten_parameters()
         else:
             self.rnn = None
         self.output_dropout = nn.Dropout(dropout)
 
-    def forward(self, input, lengths=None):
+    def forward(self, input: torch.Tensor, lengths: Optional[torch.LongTensor] = None):
         if self.embedded_dropout.p > 0:
             input = self.embedded_dropout(input)
         embedded = self.embedding(input)
@@ -85,10 +86,11 @@ class EncoderRNN(nn.Module):
             return embedded
 
         if lengths is not None:
-            embedded = torch.nn.utils.rnn.pack_padded_sequence(embedded, lengths, batch_first=True)
-        output, _ = self.rnn(embedded)
-        if lengths is not None:
-            output, _ = torch.nn.utils.rnn.pad_packed_sequence(output, batch_first=True)
+            packed = torch.nn.utils.rnn.pack_padded_sequence(embedded, lengths, batch_first=True)
+            output_packed, _ = self.rnn(packed)
+            output, _ = torch.nn.utils.rnn.pad_packed_sequence(output_packed, batch_first=True)
+        else:
+            output, _ = self.rnn(embedded)
         if self.bidirectional:
             output = output[:, :, :self.hidden_size] + output[:, :, self.hidden_size:]
         output = self.output_dropout(output)
@@ -112,7 +114,7 @@ class Decoder(nn.Module):
             self.attn = nn.Linear(self.hidden_size, attention_span)
             self.attn_combine = nn.Linear(self.hidden_size * 2, self.hidden_size)
 
-    def forward(self, encoder_outputs, lengths):
+    def forward(self, encoder_outputs, lengths: torch.LongTensor):
         output = F.relu(encoder_outputs)
         output = self.out(output).softmax(dim=1)
         return output
@@ -127,7 +129,7 @@ class Network(nn.Module):
         self.p = p
         embedding_size = p.conv_channels[-1]
         hidden_size = p.rnn_size if p.rnn_layers > 0 else embedding_size
-        if True:
+        if len(p.conv_channels) > 0 or p.conv_window_size > 1:
             embedding = ConvEncoder(Network.INPUT_SIZE, channels=p.conv_channels, window_size=p.conv_window_size, kind=p.conv_kind)
         else:
             embedding = nn.Embedding(Network.INPUT_SIZE, embedding_size)
