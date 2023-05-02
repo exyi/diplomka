@@ -3,7 +3,7 @@ from typing import Dict, List, Optional, Tuple
 from torch.utils.data import Dataset, DataLoader
 import torch
 import csv_loader
-from utils import TensorDict
+from torchutils import TensorDict
 
 class StructuresDataset(Dataset):
     def __init__(self, dir: str, files: Optional[List[str]] = None):
