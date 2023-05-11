@@ -3,33 +3,38 @@
 import math, time, os, sys
 os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "2")
 from typing import Any, Dict, List, Optional, Tuple
-import tensorflow as tf
+import tensorflow as tf, tensorflow_addons as tfa
 import dataclasses
-# import torchtext
 import random
 from hparams import Hyperparams
 
 import ntcnetwork_tf as ntcnetwork
 import dataset_tf
 
-import itertools
+class NtcMetricWrapper(tf.keras.metrics.Metric):
+    def __init__(self, metric: tf.keras.metrics.Metric, argmax_output=False):
+        super().__init__(metric.name, metric.dtype)
+        self.inner_metric = metric
+        self.argmax_output = argmax_output
 
-def filter_dict(d: Dict[str, Any], keys: List[str]) -> Dict[str, Any]:
-    return { k: v for k, v in d.items() if k in keys }
+    def update_state(self, y_true, y_pred, sample_weight=None):
+        y_pred = y_pred.values
+        y_true = y_true.values
+        y_true = tf.one_hot(y_true, len(ntcnetwork.Network.NTC_LABELS))
 
-def create_dataset(file, batch_size: int, shuffle=False):
-    loader = dataset_tf.NtcDatasetLoader(file)
-    dataset = loader.dataset
-    if shuffle:
-        dataset = dataset.shuffle(3000)
-    dataset = dataset.map(lambda x: (
-        filter_dict(x, ["is_dna", "sequence"]),
-        filter_dict(x, ["NtC"]),
-    ))
-    dataset = dataset.ragged_batch(batch_size)
-    return dataset
+        if self.argmax_output:
+            y_pred = tf.argmax(y_pred, axis=-1)
+            y_pred = tf.one_hot(y_pred, len(ntcnetwork.Network.NTC_LABELS))
 
-def create_model(p: Hyperparams, step_count, logdir, eager=False):
+        self.inner_metric.update_state(y_true, y_pred, sample_weight)
+    def result(self):
+        return self.inner_metric.result()
+    def reset_state(self):
+        self.inner_metric.reset_state()
+    def get_config(self):
+        return self.inner_metric.get_config()
+
+def create_model(p: Hyperparams, step_count, logdir, eager=False, profile=False):
     model = ntcnetwork.Network(p)
     if p.lr_decay == "cosine":
         learning_rate: Any = tf.optimizers.schedules.CosineDecay(
@@ -41,23 +46,17 @@ def create_model(p: Hyperparams, step_count, logdir, eager=False):
         learning_rate = p.learning_rate
     optimizer = tf.optimizers.Adam(learning_rate)
 
-    # recall_metric = metrics.Recall(output_transform=lambda x: (x[0]["NtC"], x[1]["NtC"]), average=False)
-    # precision_metric = metrics.Precision(output_transform=lambda x: (x[0]["NtC"], x[1]["NtC"]), average=False)
-    # val_metrics: Dict[str, metrics.Metric] = {
-    #     "accuracy": metrics.Accuracy(output_transform=lambda x: (x[0]["NtC"], x[1]["NtC"])),
-    #     "f1": (precision_metric * recall_metric * 2 / (precision_metric + recall_metric)).nanmean(),
-    #     "miou": metrics.mIoU(metrics.ConfusionMatrix(len(ntcnetwork.Network.NTC_LABELS), output_transform=lambda x: (x[0]["NtC"], x[1]["NtC"]))),
-    #     "loss": metrics.Loss(model.loss)
-    # }
-
     model.compile(optimizer=optimizer, loss={
         "NtC": model.ntcloss,
     }, metrics={
         "NtC": [
-            # tf.keras.metrics.Accuracy(),
-            # tf.keras.metrics.
+            tf.keras.metrics.SparseCategoricalAccuracy(name="acc"),
+            tf.keras.metrics.SparseTopKCategoricalAccuracy(k=2, name="acc2"),
+            tf.keras.metrics.SparseTopKCategoricalAccuracy(k=5, name="acc5"),
+            NtcMetricWrapper(tfa.metrics.F1Score(name="f1", num_classes=len(ntcnetwork.Network.NTC_LABELS), average="macro")),
         ]
-    })
+    },
+    )
     model.run_eagerly = eager
     model.tb_callback = tf.keras.callbacks.TensorBoard(args.logdir)
     return model
