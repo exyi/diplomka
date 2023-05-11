@@ -74,9 +74,9 @@ def train(train_set_dir, val_set_dir, p: Hyperparams, logdir, eager=False):
 
     logger_clock = Clock()
     epoch_clock = Clock()
-    model.summary()
+    model.summary(expand_nested=True)
     summary_text = []
-    model.summary(print_fn=lambda x: summary_text.append(x))
+    model.summary(expand_nested=True, print_fn=lambda x: summary_text.append(x))
     tf.summary.text("model/structure", "\n".join(summary_text), step=0)
     tf.summary.scalar("model/total_params", model.count_params(), step=0)
 
