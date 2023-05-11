@@ -35,9 +35,9 @@ user=$(whoami)
 
 if test $user = "exyi"; then
 #   DATADIR=/auto/pruhonice1-ibot/home/exyi/ntcnet
-  DATADIR=/storage/praha1/home/exyi/ntcnet
+	DATADIR=/storage/praha1/home/exyi/ntcnet
 elif test $user = "TODO"; then
-  DATADIR=TODO
+	DATADIR=TODO
 fi
 
 cd "$DATADIR"

@@ -15,6 +15,7 @@ module add python/3.9.12-gcc-10.2.1-rg2lpmk
 module add cuda/cuda-11.2.0-intel-19.0.4-tn4edsz 
 #module add cudnn/cudnn-8.1.0.77-11.2-linux-x64-intel-19.0.4-wx22b5t
 
+export TMPDIR=$SCRATCHDIR
 cd "$SCRATCH"
 tar -I zstd -xf /storage/brno2/home/exyi/torch-venv.tar.zst
 
