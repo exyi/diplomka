@@ -13,7 +13,7 @@ from hparams import Hyperparams
 
 import ntcnetwork
 import dataset
-from utils import count_parameters, device
+from torchutils import count_parameters, device
 
 import ignite.metrics as metrics
 import ignite.engine
