@@ -43,12 +43,12 @@ class NtcMetricWrapper(tf.keras.metrics.Metric):
     def get_config(self):
         return self.inner_metric.get_config()
 
-def create_model(p: Hyperparams, step_count, logdir, eager=False, profile=False):
+def create_model(p: Hyperparams, batch_count, logdir, eager=False, profile=False):
     model = ntcnetwork.Network(p)
     if p.lr_decay == "cosine":
         learning_rate: Any = tf.optimizers.schedules.CosineDecay(
             p.learning_rate,
-            decay_steps=step_count,
+            decay_steps=batch_count * p.epochs,
             alpha=p.learning_rate/50,
         )
     else:
