@@ -7,6 +7,7 @@ def hyperparameter(default, help, **kwargs):
 
 @dataclass
 class Hyperparams:
+    seq_length_limit: int = hyperparameter(512, "Maximum length of a sequence to train on, longer sequences will be randomly truncated")
     learning_rate: float = hyperparameter(0.001, "ADAM Learning rate")
     lr_decay: str = hyperparameter("cosine", "Learning rate decay")
     batch_size: int = hyperparameter(32, "Training batch size")

@@ -23,6 +23,27 @@ class StructuresDataset(Dataset):
 
     def __len__(self):
         return len(self.files)
+    
+    # def mapping(self, x):
+    #     length = tf.shape(x["sequence"])[0]
+    #     s_slice = 0
+    #     if trim_prob > 0 and tf.random.uniform(shape=[], minval=0, maxval=1) < trim_prob:
+    #         new_len = tf.random.uniform(shape=[], minval=0, maxval=(max_len or length), dtype=tf.int32)
+    #         s_slice = tf.random.uniform(shape=[], minval=0, maxval=length - new_len, dtype=tf.int32)
+    #         length = new_len
+
+    #     elif max_len and length > max_len:
+    #         s_slice = tf.random.uniform(shape=[], minval=0, maxval=length - max_len, dtype=tf.int32)
+    #         length = max_len
+        
+    #     return {
+    #         "sequence": x["sequence"][s_slice:s_slice+length],
+    #         "sequence_full": x["sequence_full"][s_slice:s_slice+length],
+    #         "is_dna": x["is_dna"][s_slice:s_slice+length],
+    #         "NtC": x["NtC"][s_slice:s_slice+length-1],
+    #         "nearest_NtC": x["nearest_NtC"][s_slice:s_slice+length-1],
+    #         # "CANA": x["CANA"][s_slice:s_slice+length-1],
+    #     }
 
     def __getitem__(self, idx) -> Tuple[TensorDict, TensorDict]:
         img_path = os.path.join(self.dir, self.files[idx])
