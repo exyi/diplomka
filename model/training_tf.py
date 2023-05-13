@@ -67,10 +67,16 @@ def create_model(p: Hyperparams, step_count, logdir, eager=False, profile=False)
     },
     )
     model.run_eagerly = eager
-    model.tb_callback = tf.keras.callbacks.TensorBoard(args.logdir)
+    if profile == False:
+        profile_batch: Any = 0
+    elif profile == True or profile == None:
+        profile_batch = (2, 100)
+    else:
+        profile_batch = tuple(map(int, profile.split(",")))
+    model.tb_callback = tf.keras.callbacks.TensorBoard(args.logdir, profile_batch=profile_batch)
     return model
 
-def train(train_set_dir, val_set_dir, p: Hyperparams, logdir, eager=False):
+def train(train_set_dir, val_set_dir, p: Hyperparams, logdir, eager=False, profile=False):
     train_ds = dataset_tf.NtcDatasetLoader(train_set_dir).get_data(max_len=p.seq_length_limit, batch=p.batch_size, shuffle=3000)
     batch_count = int(train_ds.cardinality())
     assert batch_count > 0, f"batch_count = {batch_count}"
@@ -89,6 +95,7 @@ def train(train_set_dir, val_set_dir, p: Hyperparams, logdir, eager=False):
     tf.summary.text("model/structure", "\n".join(summary_text), step=0)
     tf.summary.scalar("model/total_params", model.count_params(), step=0)
 
+    # with tf.profiler.experimental.Profile(logdir):
     model.fit(
         train_ds,
         validation_data=val_ds,
@@ -116,6 +123,9 @@ if __name__ == '__main__':
     parser.add_argument('--val_set', type=str, help='Path to directory validation data CSVs')
     parser.add_argument('--logdir', type=str, default="tb-logs", help='Path for saving Tensorboard logs and other outputs')
     parser.add_argument('--eager', action="store_true", help='Run in eager mode', default=False)
+    parser.add_argument('--profile', type=str, help='Run tensorflow profiler. The value specified for which batches the profiler should be run (for example 10,20 for 10..20)', default=False)
+    parser.add_argument('--fp16', action="store_true", help='Run in (mixed) Float16 mode. By default, float32 is used', default=False)
+    parser.add_argument('--bfp16', action="store_true", help='Run in (mixed) BFloat16 mode', default=False)
 
     for k, w in Hyperparams.__dataclass_fields__.items():
         p_config = {}
@@ -141,19 +151,22 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
+    if args.fp16:
+        tf.keras.mixed_precision.set_global_policy(tf.keras.mixed_precision.Policy("mixed_float16"))
+    elif args.bfp16:
+        tf.keras.mixed_precision.set_global_policy(tf.keras.mixed_precision.Policy("mixed_bfloat16"))
+
     hyperparameters = Hyperparams(**{ k: v for k, v in vars(args).items() if k in Hyperparams.__dataclass_fields__ })
 
     tb_writer = tf.summary.create_file_writer(args.logdir)
     with tb_writer.as_default():
-        
-
         print(f"logdir: {args.logdir}")
         print(f"devices: {[ x.name for x in tf.config.list_physical_devices() ]}")
         print(hyperparameters)
         tf.summary.text("model/hyperparams", str(hyperparameters), step=0)
 
         try:
-            train(args.train_set, args.val_set, hyperparameters, args.logdir, eager=args.eager)
+            train(args.train_set, args.val_set, hyperparameters, args.logdir, eager=args.eager, profile=args.profile)
         except KeyboardInterrupt:
             print("Keyboard interrupt")
         except Exception as e:
