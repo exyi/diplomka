@@ -12,7 +12,7 @@ import random
 from hparams import Hyperparams
 
 import ntcnetwork
-import dataset
+import dataset_torch as dataset_torch
 from torchutils import count_parameters, device
 
 import ignite.metrics as metrics
@@ -37,9 +37,9 @@ def print_model(model: nn.Module):
 
 def train(train_set_dir, val_set_dir, p: Hyperparams, logdir):
     train_loader = DataLoader(
-        dataset.StructuresDataset(train_set_dir), batch_size=p.batch_size, shuffle=True, collate_fn=dataset.StructuresDataset.collate_fn, num_workers=4)
+        dataset_torch.StructuresDataset(train_set_dir), batch_size=p.batch_size, shuffle=True, collate_fn=dataset_torch.StructuresDataset.collate_fn, num_workers=4)
     batch_count = len(train_loader)
-    val_loader = DataLoader(dataset.StructuresDataset(val_set_dir), batch_size=64, shuffle=False, collate_fn=dataset.StructuresDataset.collate_fn, num_workers=4)
+    val_loader = DataLoader(dataset_torch.StructuresDataset(val_set_dir), batch_size=64, shuffle=False, collate_fn=dataset_torch.StructuresDataset.collate_fn, num_workers=4)
 
     model = ntcnetwork.Network(p).to(device)
     print_model(model)
@@ -68,15 +68,15 @@ def train(train_set_dir, val_set_dir, p: Hyperparams, logdir):
 
     logger_clock = Clock()
     epoch_clock = Clock()
-    @trainer.on(Events.ITERATION_COMPLETED(every=100))
+    @trainer.on(Events.ITERATION_COMPLETED(every=10))
     def log_training_loss(engine):
-        print(f"train - Epoch[{engine.state.epoch}], Iter[{engine.state.iteration:7d}|{engine.state.iteration / batch_count:6.2f}] Loss: {engine.state.output:.2f} Time: {logger_clock.measure():3.1f}s")
+        print(f"train - Epoch[{engine.state.epoch}], Iter[{engine.state.iteration:7d}|{engine.state.iteration / batch_count:6.2f}] Loss: {engine.state.output:.2f} Time: {logger_clock.measure():3.1f}s      ")
 
     @trainer.on(Events.EPOCH_STARTED)
     def reset_timer(trainer):
         res_step = logger_clock.measure()
         res_epoch = epoch_clock.measure()
-        print(f"Epoch[{trainer.state.epoch}] Residual time: {res_epoch/60:3.1f}m residual step time: {res_step/60:3.1f}m")
+        print(f"Epoch[{trainer.state.epoch}] Residual time: {res_epoch/60:3.1f}m residual step time: {res_step/60:3.1f}m    ")
 
     @trainer.on(Events.EPOCH_COMPLETED)
     def log_training_results(trainer):
@@ -85,7 +85,7 @@ def train(train_set_dir, val_set_dir, p: Hyperparams, logdir):
         train_evaluator.run(itertools.islice(train_loader, 6)) # limit to few batches, otherwise it takes longer than training (??)
         eval_time = eval_clock.measure()
         metrics = train_evaluator.state.metrics
-        print(f"evalT - Epoch[{trainer.state.epoch}] accuracy: {metrics['accuracy']:.2f} F1: {metrics['f1']:.2f} loss: {metrics['loss']:.2f} Train Time: {epoch_time/60:3.1f}m Eval Time: {eval_time/60:3.2f}m")
+        print(f"evalT - Epoch[{trainer.state.epoch}] accuracy: {metrics['accuracy']:.2f} F1: {metrics['f1']:.2f} loss: {metrics['loss']:.2f} Train Time: {epoch_time/60:3.1f}m Eval Time: {eval_time/60:3.2f}m    ")
 
 
     @trainer.on(Events.EPOCH_COMPLETED)
