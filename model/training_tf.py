@@ -55,6 +55,16 @@ def create_model(p: Hyperparams, batch_count, logdir, eager=False, profile=False
         learning_rate = p.learning_rate
     optimizer = tf.optimizers.Adam(learning_rate, global_clipnorm=p.clip_grad)
 
+    all_submodules: List[tf.Module] = model.submodules
+    config_json = {
+        "hyperparams": dataclasses.asdict(p),
+        "optimizer": optimizer.get_config(),
+        "submodules": [m.get_config() for m in all_submodules],
+    }
+    with open(os.path.join(logdir, "tf_modules.json"), "w") as f:
+        import json
+        json.dump(config_json, f, indent=4)
+
     model.compile(optimizer=optimizer, loss={
         "NtC": model.ntcloss,
     }, metrics={
@@ -73,7 +83,7 @@ def create_model(p: Hyperparams, batch_count, logdir, eager=False, profile=False
         profile_batch = (2, 100)
     else:
         profile_batch = tuple(map(int, profile.split(",")))
-    model.tb_callback = tf.keras.callbacks.TensorBoard(args.logdir, profile_batch=profile_batch)
+    model.tb_callback = tf.keras.callbacks.TensorBoard(logdir, profile_batch=profile_batch)
     return model
 
 def train(train_set_dir, val_set_dir, p: Hyperparams, logdir, eager=False, profile=False):
@@ -83,15 +93,16 @@ def train(train_set_dir, val_set_dir, p: Hyperparams, logdir, eager=False, profi
     val_ds = dataset_tf.NtcDatasetLoader(val_set_dir).get_data(batch=p.batch_size)
     
     model = create_model(p, batch_count, logdir, eager=eager, profile=profile)
+    # tf.summary.trace_on(graph=True, profiler=False)
     # build the model, otherwise the .summary() call is unhappy
-    predictions = model.predict(next(iter(train_ds.map(lambda x, y: x))))
-    # print(predictions)
+    predictions = model(next(iter(train_ds.map(lambda x, y: x))))
+    # tf.summary.trace_export(name="model_trace", step=0, profiler_outdir=logdir)
+    # tf.summary.trace_off()
 
-    logger_clock = Clock()
-    epoch_clock = Clock()
-    model.summary(expand_nested=True)
     summary_text = []
     model.summary(expand_nested=True, print_fn=lambda x: summary_text.append(x))
+    print("\n".join(summary_text))
+
     tf.summary.text("model/structure", "\n".join(summary_text), step=0)
     tf.summary.scalar("model/total_params", model.count_params(), step=0)
 
