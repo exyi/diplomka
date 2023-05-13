@@ -119,9 +119,13 @@ class EncoderRNN(layers.Layer):
             num_layers,
             dropout,
             bidirectional=False,
+            layer_norm=True,
             name=None
         ):
         super(EncoderRNN, self).__init__(name=name)
+
+        if name is None:
+            name = "encoder_rnn"
 
         self.embedding_size = embedding_size
         self.hidden_size = hidden_size
@@ -129,18 +133,27 @@ class EncoderRNN(layers.Layer):
         self.input_dropout = 0.1
         self.dropout = dropout
         self.embedding = embedding
-        if num_layers > 0:
+        self.rnn = []
+        for layer_i in range(num_layers):
             # TODO multiple layers
-            self.rnn = layers.LSTM(
+            rnn = layers.LSTM(
                 input_shape=(None, embedding_size),
                 units=hidden_size,
-                return_sequences=True)
+                return_sequences=True,
+                name=f"{name}/rnn{layer_i}"
+            )
             if bidirectional:
-                self.rnn = layers.Bidirectional(self.rnn, merge_mode="sum")
-        else:
-            self.rnn = None
+                self.rnn.append(layers.Bidirectional(rnn, merge_mode="sum", name=f"{name}/birnn{layer_i}"))
+            else:
+                self.rnn.append(rnn)
 
-        self.layers = [ self.embedding, self.rnn ]
+        self.layer_norm = None
+        if layer_norm:
+            self.layer_norm = []
+            for layer_i in range(num_layers - 1):
+                self.layer_norm.append(layers.LayerNormalization(name=f"{name}/ln{layer_i+1}"))
+
+        self.layers = [ self.embedding, *self.rnn ]
 
     # @tf.Module.with_name_scope
     def call(self, input: tf.RaggedTensor):
@@ -151,12 +164,20 @@ class EncoderRNN(layers.Layer):
 
         embedded = tf.nn.dropout(embedded, rate=self.dropout)
 
-        if self.rnn is None:
+        if len(self.rnn) == 0:
             return embedded
 
-        output = self.rnn(embedded)
-        output = tf.nn.dropout(output, rate=self.dropout)
-        return output
+        x = embedded
+        for rnn_i in range(len(self.rnn)):
+            bypass = x
+            if rnn_i > 0 and self.layer_norm is not None:
+                x = self.layer_norm[rnn_i-1](x)
+            x = self.rnn[rnn_i](x)
+            x = tf.nn.dropout(x, rate=self.dropout)
+            tf.keras.layers.LayerNormalization()
+            if rnn_i > 0:
+                x = x + bypass
+        return x
 
 class Decoder(layers.Layer):
     def __init__(self, hidden_size, output_size, attention = 0, name=None):
@@ -187,8 +208,9 @@ class Decoder(layers.Layer):
         return output
 
 class Network(tf.keras.Model):
-    INPUT_SIZE = dataset.NtcDatasetLoader.letters_mapping.vocabulary_size() + 1 # +1 UNK token, +1 is_dna
-    OUTPUT_NTC_SIZE = dataset.NtcDatasetLoader.ntc_mapping.vocabulary_size()
+    INPUT_SIZE_NUCLEOTIDE = int(dataset.NtcDatasetLoader.letters_mapping.vocabulary_size())
+    INPUT_SIZE = INPUT_SIZE_NUCLEOTIDE + 1 # +1 UNK token, +1 is_dna
+    OUTPUT_NTC_SIZE = int(dataset.NtcDatasetLoader.ntc_mapping.vocabulary_size())
     def __init__(self, p: Hyperparams):
         super(Network, self).__init__()
         self.p = p
@@ -219,14 +241,14 @@ class Network(tf.keras.Model):
 
     def call(self, input: TensorDict, whatever =None):
         # print(input["sequence"].shape, input["is_dna"].shape)
-        one_hot_seq = tf.one_hot(input["sequence"], depth=dataset.NtcDatasetLoader.letters_mapping.vocabulary_size(), dtype=self.compute_dtype)
+        one_hot_seq = tf.one_hot(input["sequence"], depth=self.INPUT_SIZE_NUCLEOTIDE, dtype=self.compute_dtype)
         # tf.print("Sequence: ", input["sequence"])
         in_tensor = tf.concat([
             one_hot_seq,
             tf.cast(tf.expand_dims(input["is_dna"], -1), self.compute_dtype)
         ], axis=-1)
-        assert in_tensor.shape[-1] == Network.INPUT_SIZE
-        assert in_tensor.shape[-2] == None
+        tf.assert_equal(in_tensor.shape[-1], Network.INPUT_SIZE)
+        tf.assert_equal(in_tensor.shape[-2], None)
 
         encoder_output: tf.RaggedTensor = self.encoder(in_tensor)
         # tf.print("Input: ", in_tensor.shape, in_tensor.values.shape)
