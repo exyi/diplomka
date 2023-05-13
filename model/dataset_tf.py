@@ -2,6 +2,7 @@
 from typing import Any, Dict, List
 import tensorflow as tf
 import sys, os, math, json
+import numpy as np
 import csv_loader
 
 
@@ -9,6 +10,10 @@ import csv_loader
 class NtcDatasetLoader:
     LETTERS = csv_loader.basic_nucleotides
     NTCS = csv_loader.ntcs
+    letters_mapping = tf.keras.layers.StringLookup(vocabulary=csv_loader.basic_nucleotides, oov_token="X")
+    ntc_mapping = tf.keras.layers.StringLookup(vocabulary=csv_loader.ntcs)
+    cana_mapping = tf.keras.layers.StringLookup(vocabulary=csv_loader.ntcs)
+
     def parse(self, example) -> Dict[str, tf.Tensor]:
         example = tf.io.parse_single_example(example, {
             "pdbid": tf.io.FixedLenFeature([], tf.string),
@@ -58,9 +63,6 @@ class NtcDatasetLoader:
         self.convert_to_numbers = convert_to_numbers
         self.file_name = files
         self.metadata = [ self.try_load_metadata(f) for f in files ]
-        self.letters_mapping = tf.keras.layers.StringLookup(vocabulary=self.LETTERS)
-        self.ntc_mapping = tf.keras.layers.StringLookup(vocabulary=self.NTCS)
-        self.cana_mapping = tf.keras.layers.StringLookup(vocabulary=self.NTCS)
 
         self.cardinality = sum([ m.get("count", float('nan')) for m in self.metadata ])
         if math.isnan(self.cardinality):
@@ -74,6 +76,49 @@ class NtcDatasetLoader:
 
         if self.cardinality:
             self.dataset = self.dataset.apply(tf.data.experimental.assert_cardinality(self.cardinality))
+
+    def get_data(self, max_len = None, trim_prob: float = 0, shuffle = None, batch = None):
+        data = self.dataset
+
+        def mapping(x):
+            length = tf.shape(x["sequence"])[0]
+            s_slice = 0
+            separator = self.letters_mapping(" ") if self.convert_to_numbers else " "
+            # sequences = tf.strings.split(tf.shape(x["sequence"]), sep=separator)
+            if trim_prob > 0 and tf.random.uniform(shape=[], minval=0, maxval=1) < trim_prob:
+                new_len = tf.random.uniform(shape=[], minval=0, maxval=(max_len or length), dtype=tf.int32)
+                s_slice = tf.random.uniform(shape=[], minval=0, maxval=length - new_len, dtype=tf.int32)
+                length = new_len
+
+            elif max_len and length > max_len:
+                s_slice = tf.random.uniform(shape=[], minval=0, maxval=length - max_len, dtype=tf.int32)
+                length = max_len
+            
+            return {
+                "sequence": x["sequence"][s_slice:s_slice+length],
+                "sequence_full": x["sequence_full"][s_slice:s_slice+length],
+                "is_dna": x["is_dna"][s_slice:s_slice+length],
+                "NtC": x["NtC"][s_slice:s_slice+length-1],
+                "nearest_NtC": x["nearest_NtC"][s_slice:s_slice+length-1],
+                # "CANA": x["CANA"][s_slice:s_slice+length-1],
+            }
+
+
+        data = data.map(mapping)
+        def filter_dict(d: Dict[str, Any], keys: List[str]) -> Dict[str, Any]:
+            return { k: v for k, v in d.items() if k in keys }
+        data = data.map(lambda x: (
+            filter_dict(x, ["is_dna", "sequence"]),
+            filter_dict(x, ["NtC"]),
+        ))
+
+        if shuffle:
+            data = data.shuffle(shuffle)
+
+        if batch:
+            data = data.ragged_batch(batch)
+        return data
+
 
 
 
@@ -185,11 +230,13 @@ if __name__ == "__main__":
         if args.verbose:
             print(f"# Cardinality = {loader.dataset.cardinality()}")
             print(f"# count =       {sum(1 for _ in loader.dataset)}")
-            print(f"PDBID   LENGTH #CHAINS")
+            print(f"PDBID   LENGTH #CHAINS  SEQUENCE")
         for i, example in enumerate(loader.dataset):
-            seq: str = bytes(example['sequence'].numpy()).decode('utf-8')
+            seq: str = "".join(csv_loader.basic_nucleotides[example['sequence'].numpy() - 1])
+            print(seq)
             seqs = seq.split(' ')
-            print(f"{bytes(example['pdbid'].numpy()).decode('utf-8'):<8} {sum(len(x) for x in seqs):5d} {len(seqs):2d}")
+            print_seq = (" " + seq) if args.verbose else ""
+            print(f"{bytes(example['pdbid'].numpy()).decode('utf-8'):<8} {sum(len(x) for x in seqs):5d} {len(seqs):2d}{print_seq}")
 
     elif args.input and args.output:
         files = [os.path.join(args.input, f) for f in os.listdir(args.input) if csv_loader.csv_extensions.search(f)]
