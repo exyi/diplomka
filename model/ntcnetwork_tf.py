@@ -68,6 +68,9 @@ def swapaxes(tensor, dim1, dim2):
     transpose[dim1], transpose[dim2] = transpose[dim2], transpose[dim1]
     return tf.transpose(tensor, transpose)
 
+def pad_start(tensor: tf.RaggedTensor, pad_width: int):
+    paddingshape = (tensor.nrows(), pad_width, *tensor.values.shape[1:])
+    return tf.concat([tf.zeros(paddingshape, dtype=tensor.dtype), tensor], axis=1)
 
 class ConvEncoder(layers.Layer):
     def __init__(self, input_size, channels = [64, 64], window_size = 3, kind = "resnet", name=None) -> None:
@@ -75,9 +78,10 @@ class ConvEncoder(layers.Layer):
         set of convolutional layers
         """
         super().__init__(name=name)
+        self.max_window_size = window_size
         input_sizes = [input_size, *channels]
-        self.convolutions = tf.keras.Sequential(*[
-            ResnetBlock(1, in_size, out_size, window_size)
+        self.convolutions = tf.keras.Sequential([
+            ResnetBlock(in_size, out_size, window_size)
             for in_size, out_size in zip(input_sizes, channels)
         ])
         # self.convolutions.build(input_shape=(None, None, input_size))
@@ -91,12 +95,19 @@ class ConvEncoder(layers.Layer):
         if isragged:
             lengths = x.row_lengths()
             x = x.to_tensor()
+            # x = pad_start(x, self.max_window_size - 1)
+            # x = x.values
+            # x = tf.expand_dims(x, axis=0) # virtual batch to make batchnorm happy
 
         # x = swapaxes(x, -1, -2)
         x = self.convolutions(x)
         # x = swapaxes(x, -1, -2)
         if isragged:
+            # x = tf.squeeze(x, axis=0)
+            # x = tf.RaggedTensor.from_row_lengths(x, row_lengths=(lengths + (self.max_window_size - 1)))
+            # x = x[:, (self.max_window_size - 1):]
             x = tf.RaggedTensor.from_tensor(x, lengths=lengths)
+            tf.assert_equal(x.values.shape[-2], input.values.shape[-2])
         return x
 
 class EncoderRNN(layers.Layer):
