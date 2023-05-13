@@ -18,5 +18,6 @@ class Hyperparams:
     rnn_size: int = hyperparameter(64, "Size of hidden state in RNN layer")
     rnn_layers: int = hyperparameter(1, "Number of RNN layers")
     rnn_dropout: float = hyperparameter(0.4, "Dropout rate in RNN layers")
+    clip_grad: float = hyperparameter(None, "Gradient clipping (see ADAM global_clipnorm argument)")
 
 

@@ -53,7 +53,7 @@ def create_model(p: Hyperparams, step_count, logdir, eager=False, profile=False)
         )
     else:
         learning_rate = p.learning_rate
-    optimizer = tf.optimizers.Adam(learning_rate)
+    optimizer = tf.optimizers.Adam(learning_rate, global_clipnorm=p.clip_grad)
 
     model.compile(optimizer=optimizer, loss={
         "NtC": model.ntcloss,
