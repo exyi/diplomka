@@ -16,33 +16,39 @@ TensorDict = Dict[str, tf.Tensor]
 class ResnetBlock(layers.Layer):
     def __init__(self, in_channels, out_channels = None, window_size = 3, stride=1, dilation = 1, name=None) -> None:
         super(ResnetBlock, self).__init__(name=name)
+        name = self.name
         if out_channels is None:
             out_channels = in_channels
         self.in_channels = in_channels
         self.out_channels = out_channels
 
-        self.bn1 = layers.BatchNormalization(input_shape=(None, in_channels))
+        self.bn1 = layers.BatchNormalization(input_shape=(None, in_channels), name=f"{name}/bn1")
         self.conv1 = layers.Conv1D(
             input_shape=(None, in_channels),
             filters=out_channels,
             strides=stride,
             kernel_size=window_size, use_bias=False, padding='same', dilation_rate=dilation,
+            name=f"{name}/conv1"
         )
         
-        self.bn2 = layers.BatchNormalization(input_shape=(None, out_channels))
+        self.bn2 = layers.BatchNormalization(input_shape=(None, out_channels), name=f"{name}/bn2")
         self.conv2 = layers.Conv1D(
             input_shape=(None, out_channels),
             filters=out_channels,
-            strides=1, kernel_size=window_size, use_bias=False, padding='same', dilation_rate=dilation)
+            strides=1, kernel_size=window_size, use_bias=False, padding='same', dilation_rate=1, name=f"{name}/conv2")
 
         if stride != 1 or in_channels != out_channels:
             self.conv_bypass = layers.Conv1D(
                 input_shape=(None, in_channels),
                 filters=out_channels,
-                kernel_size=1, strides=stride, padding='same', use_bias=False)
+                kernel_size=1, strides=stride, padding='same', use_bias=False, name=f"{name}/dense_bypass")
         else:
             self.conv_bypass = None
         # TODO: L2 regularization of conv layers
+
+        self.layers = [self.bn1, self.conv1, self.bn2, self.conv2]
+        if self.conv_bypass is not None:
+            self.layers.append(self.conv_bypass)
 
     # @tf.Module.with_name_scope
     def call(self, input: tf.Tensor) -> tf.Tensor:
@@ -74,16 +80,18 @@ def pad_start(tensor: tf.RaggedTensor, pad_width: int):
     return tf.concat([tf.zeros(paddingshape, dtype=tensor.dtype), tensor], axis=1)
 
 class ConvEncoder(layers.Layer):
-    def __init__(self, input_size, channels = [64, 64], window_size = 3, kind = "resnet", name=None) -> None:
+    def __init__(self, input_size, channels = [64, 64], window_size = 3, max_dilatation = 1, kind = "resnet", name=None) -> None:
         """
         set of convolutional layers
         """
         super().__init__(name=name)
         self.max_window_size = window_size
         input_sizes = [input_size, *channels]
+        dilations = [ round(2 ** (math.log2(max_dilatation) * (i / (max(1, len(channels) - 1))))) for i in range(len(channels))]
+        # print("dilations", dilations)
         self.convolutions = tf.keras.Sequential([
-            ResnetBlock(in_size, out_size, window_size)
-            for in_size, out_size in zip(input_sizes, channels)
+            ResnetBlock(in_size, out_size, window_size, dilation=dilation)
+            for in_size, out_size, dilation in zip(input_sizes, channels, dilations)
         ])
         # self.convolutions.build(input_shape=(None, None, input_size))
 
@@ -154,6 +162,17 @@ class EncoderRNN(layers.Layer):
                 self.layer_norm.append(layers.LayerNormalization(name=f"{name}/ln{layer_i+1}"))
 
         self.layers = [ self.embedding, *self.rnn ]
+    def get_config(self):
+        return {
+            "embedding_size": self.embedding_size,
+            "hidden_size": self.hidden_size,
+            "bidirectional": self.bidirectional,
+            "input_dropout": self.input_dropout,
+            "dropout": self.dropout,
+            "embedding": self.embedding.get_config(),
+            "rnn_layers": len(self.rnn),
+            "layer_norm": self.layer_norm is not None
+        }
 
     # @tf.Module.with_name_scope
     def call(self, input: tf.RaggedTensor):
@@ -217,7 +236,7 @@ class Network(tf.keras.Model):
         embedding_size = p.conv_channels[-1]
         hidden_size = p.rnn_size if p.rnn_layers > 0 else embedding_size
         if len(p.conv_channels) > 0 or p.conv_window_size > 1:
-            embedding = ConvEncoder(Network.INPUT_SIZE, channels=p.conv_channels, window_size=p.conv_window_size, kind=p.conv_kind)
+            embedding = ConvEncoder(Network.INPUT_SIZE, channels=p.conv_channels, window_size=p.conv_window_size, kind=p.conv_kind, max_dilatation=p.conv_dilation)
         else:
             embedding = layers.Embedding(Network.INPUT_SIZE, embedding_size)
         self.encoder = EncoderRNN(embedding, embedding_size, hidden_size, num_layers=p.rnn_layers, dropout=p.rnn_dropout, bidirectional=True)
