@@ -8,7 +8,6 @@ import pandas as pd, numpy as np, os, sys
 import csv_loader
 # import torchtext
 import random
-from dataset import StructuresDataset
 from hparams import Hyperparams
 from torchutils import ConvKind, TensorDict, clamp, device, make_conv, ResnetBlock
 

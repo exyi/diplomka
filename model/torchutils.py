@@ -38,10 +38,10 @@ class ResnetBlock(nn.Module):
 
     def forward(self, input: torch.Tensor):
         x = input
-        # x = self.bn1(x)
+        x = self.bn1(x)
         x = F.relu(x)
         x = self.conv1(x)
-        # x = self.bn2(x)
+        x = self.bn2(x)
         x = self.conv2(x)
         x = F.relu(x)
         x = self.conv2(x)
@@ -61,7 +61,7 @@ def make_conv(kind: ConvKind,
     if kind == "plain":
         return conv_nd(dim)(in_channels, out_channels, window_size, stride, padding='same', dilation=dilation, bias=bias)
     if kind == "resnet":
-        return torch.jit.script(ResnetBlock(in_channels, out_channels, window_size, stride, dilation))
+        return ResnetBlock(in_channels, out_channels, window_size, stride, dilation)
 
 
 def clamp(v, min_v, max_v):
