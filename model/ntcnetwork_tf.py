@@ -9,6 +9,7 @@ import csv_loader
 # import torchtext
 import random
 from hparams import Hyperparams
+import dataset_tf as dataset
 
 TensorDict = Dict[str, tf.Tensor]
 
@@ -186,9 +187,8 @@ class Decoder(layers.Layer):
         return output
 
 class Network(tf.keras.Model):
-    NUCLEOTIDE_LABELS = csv_loader.basic_nucleotides
-    INPUT_SIZE = len(csv_loader.basic_nucleotides) + 1
-    NTC_LABELS = csv_loader.ntcs
+    INPUT_SIZE = dataset.NtcDatasetLoader.letters_mapping.vocabulary_size() + 1 # +1 UNK token, +1 is_dna
+    OUTPUT_NTC_SIZE = dataset.NtcDatasetLoader.ntc_mapping.vocabulary_size()
     def __init__(self, p: Hyperparams):
         super(Network, self).__init__()
         self.p = p
@@ -200,24 +200,26 @@ class Network(tf.keras.Model):
             embedding = layers.Embedding(Network.INPUT_SIZE, embedding_size)
         self.encoder = EncoderRNN(embedding, embedding_size, hidden_size, num_layers=p.rnn_layers, dropout=p.rnn_dropout, bidirectional=True)
         # self.encoder = EncoderBaseline(Network.INPUT_SIZE, hidden_size)
-        self.ntc_decoder = Decoder(hidden_size, len(csv_loader.ntcs))
+        self.ntc_decoder = Decoder(hidden_size, self.OUTPUT_NTC_SIZE)
 
         self.ntc_loss_weights = tf.convert_to_tensor([
+                0 if k == "[UNK]" else
                 0.01 if k == "NANT" else
                 1
-                for k, v in csv_loader.ntc_frequencies.items()
+                for k in dataset.NtcDatasetLoader.ntc_mapping.get_vocabulary()
             ], dtype=self.compute_dtype)
         # weight=torch.Tensor([
             #     0.01 if k == "NANT" else
             #     clamp(1 / (v / 20_000), 0.2, 1)
             #     for k, v in csv_loader.ntc_frequencies.items()
             # ]),
-
+        # print("NtC loss weights: ", self.ntc_loss_weights.shape)
         # print("NtC loss weights: ", self.ntc_loss_weights)
+
 
     def call(self, input: TensorDict, whatever =None):
         # print(input["sequence"].shape, input["is_dna"].shape)
-        one_hot_seq = tf.one_hot(input["sequence"], depth=len(csv_loader.basic_nucleotides), dtype=self.compute_dtype)
+        one_hot_seq = tf.one_hot(input["sequence"], depth=dataset.NtcDatasetLoader.letters_mapping.vocabulary_size(), dtype=self.compute_dtype)
         # tf.print("Sequence: ", input["sequence"])
         in_tensor = tf.concat([
             one_hot_seq,
@@ -234,9 +236,12 @@ class Network(tf.keras.Model):
         tf.assert_equal(encoder_output.values.shape[-2], in_tensor.values.shape[-2])
         encoder_output = encoder_output[:, 1:, :] # there is one less NtC than nucleotides
         decoder_output = self.ntc_decoder(encoder_output)
-        assert decoder_output.shape[-1] == len(csv_loader.ntcs)
+        assert decoder_output.shape[-1] == self.OUTPUT_NTC_SIZE
         assert decoder_output.shape[-2] == None
         tf.assert_equal(decoder_output.shape[-3], encoder_output.shape[-3])
+
+        # tf.print("Input size: ", input["sequence"].row_lengths())
+        # tf.print("Output: ", decoder_output)
         return {
             "NtC": decoder_output,
             # "nearest_NtC": decoder_output,
@@ -244,7 +249,7 @@ class Network(tf.keras.Model):
         }
 
     def ntcloss(self, target: tf.RaggedTensor, output: tf.RaggedTensor):
-        target_onehot = tf.one_hot(target.values, depth=len(csv_loader.ntcs), dtype=self.compute_dtype)
+        target_onehot = tf.one_hot(target.values, depth=self.OUTPUT_NTC_SIZE, dtype=self.compute_dtype)
 
         loss = tf.losses.categorical_crossentropy(
             target_onehot,
@@ -252,8 +257,8 @@ class Network(tf.keras.Model):
             label_smoothing=0.1 #self.p.label_smoothing
         )
         # remove out of range indices
-        target_masked = tf.where(target.values < len(csv_loader.ntcs), target.values, tf.constant(0, dtype=tf.int64))
-        weights = tf.gather(self.ntc_loss_weights, target_masked)
+        # target_masked = tf.where(target.values < self.OUTPUT_NTC_SIZE, target.values, tf.constant(0, dtype=tf.int64))
+        weights = tf.gather(self.ntc_loss_weights, target.values)
         loss = loss * weights
         # assert isinstance(loss, tf.RaggedTensor)
 

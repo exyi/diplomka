@@ -33,8 +33,8 @@ class NtcMetricWrapper(tf.keras.metrics.Metric):
             y_pred_argmax = tf.argmax(y_pred, axis=-1)
             y_true_argmax = tf.argmax(y_true, axis=-1)
             tf.print("Prediction vs true NTC: ", tf.stack([
-                tf.gather(csv_loader.ntcs, y_pred_argmax),
-                tf.gather(csv_loader.ntcs, y_true_argmax)
+                tf.gather(dataset_tf.NtcDatasetLoader.ntc_mapping.get_vocabulary(), y_pred_argmax),
+                tf.gather(dataset_tf.NtcDatasetLoader.ntc_mapping.get_vocabulary(), y_true_argmax)
             ], axis=1))
     def result(self):
         return self.inner_metric.result()
