@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-#PBS -N ntcnet-interactive
+#PBS -N ntcnet-tf.py
 #PBS -q gpu
-#PBS -l select=1:ncpus=3:ngpus=1:mem=16gb:scratch_local=8gb
-#PBS -l walltime=2:00:00
+#PBS -l select=1:ncpus=6:ngpus=1:mem=16gb:scratch_local=12gb
+#PBS -l walltime=10:00:00
 #PBS -m ae
 
 ## paste this into an interactive job
@@ -25,7 +25,6 @@ NVIDIA_DIR="$(dirname "$(dirname "$(which nvcc)")")"
 export XLA_FLAGS="--xla_gpu_cuda_data_dir=$NVIDIA_DIR"
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$SCRATCH/cudnn-linux-x86_64-8.9.1.23_cuda11-archive/lib
 export CPATH=$CPATH:$SCRATCH/cudnn-linux-x86_64-8.9.1.23_cuda11-archive/include
-
 
 # venv python is just a symlink to local python installation, we need to fix it to point to the correct python on the specific machine
 real_python="$(which python3.10)"
@@ -54,5 +53,15 @@ fi
 cd "$DATADIR"
 py="$VENV_DIR/bin/python"
 function train {
-	$py "$DATADIR/model/training_tf.py" --train_set "$TRAINING_SET" --val_set "$VAL_SET" --logdir "$DATADIR/metac-logs/$TBLOG-`date --utc +%y%m%d-%H%M`" $@
+	current_logdir="$DATADIR/metac-logs/$TBLOG-`date --utc +%y%m%d-%H%M`"
+	mkdir -p "$current_logdir"
+	hostname >> "$current_logdir/hostinfo.txt"
+	nvidia-smi >> "$current_logdir/hostinfo.txt"
+	$py "$DATADIR/model/training_tf.py" --train_set "$TRAINING_SET" --val_set "$VAL_SET" --logdir "$current_logdir" $@ 2>&1 | tee "$current_logdir/stdouterr.txt"
 }
+
+if test -n "$CMD"; then
+    eval "$CMD"
+else
+    train $ARGS
+fi
