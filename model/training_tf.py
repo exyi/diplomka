@@ -4,6 +4,7 @@ import math, time, os, sys
 os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "2")
 from typing import Any, Dict, List, Optional, Tuple
 import tensorflow as tf, tensorflow_addons as tfa
+import tensorboard.plugins.hparams.api as hparams
 import dataclasses
 import random
 from hparams import Hyperparams
@@ -132,7 +133,7 @@ def create_model(p: Hyperparams, batch_count, logdir, eager=False, profile=False
     model.tb_callbacks = [
         tf.keras.callbacks.TensorBoard(logdir, profile_batch=profile_batch, write_steps_per_second=True),
         HackedTB(),
-        FilteredProgbar(count_mode="steps", include=["loss", "acc", "f1", "val_acc", "val_acc5", "val_f1"]),
+        FilteredProgbar(count_mode="steps", include=["loss", "acc", "f1", "val_acc", "val_acc5", "val_f1"])
     ]
     return model
 
@@ -168,7 +169,7 @@ def train(train_set_dir, val_set_dir, p: Hyperparams, logdir, eager=False, profi
     model.summary(expand_nested=True, print_fn=lambda x: summary_text.append(x))
     print("\n".join(summary_text))
 
-    tf.summary.text("model/structure", "\n".join(summary_text), step=0)
+    tf.summary.text("model/structure", "```\n" + "\n".join(summary_text) + "\n```\n", step=0)
     tf.summary.scalar("model/total_params", model.count_params(), step=0)
     # tf.keras.utils.plot_model(model, to_file=os.path.join(logdir, "model.png"), expand_nested=True, show_shapes=True, show_layer_activations=True, dpi=300, show_trainable=True)
 
@@ -235,13 +236,32 @@ if __name__ == '__main__':
         print(f"logdir: {args.logdir}")
         print(f"devices: {[ x.name for x in tf.config.list_physical_devices() ]}")
         print(hyperparameters)
+        print(hyperparameters.get_nondefault())
         tf.summary.trace_off()
-        tf.summary.text("model/hyperparams", str(hyperparameters), step=0)
+        tf.summary.text("model/hyperparams", "```python\n" + str(hyperparameters) + "\n\n" + str(hyperparameters.get_nondefault()) + "\n```\n", step=0)
+
+        ## log hparams
+        # tensorboard.plugins.hparams.api.hparams(
+        hparams_keys = {f.name: hparams.HParam(name=f.name, description=f.metadata.get("help", None)) for f in dataclasses.fields(Hyperparams) if f.metadata.get("hyperparameter", False)}
+        hparams.hparams_config(
+            hparams=list(hparams_keys.values()),
+            metrics=[
+                hparams.Metric("epochmetrics/val_f1", display_name="Validation F1 score"),
+                hparams.Metric("epochmetrics/val_acc", display_name="Validation accuracy"),
+                hparams.Metric("epochmetrics/val_loss", display_name="Validation loss"),
+                hparams.Metric("epochmetrics/f1", display_name="Training F1 score"),
+                hparams.Metric("epochmetrics/acc", display_name="Training accuracy"),
+            ]
+        )
+        hparams.hparams(
+            {k: (v if isinstance(v, (int, float, bool, str)) else str(v)) for k, v in dataclasses.asdict(hyperparameters).items() if k in hparams_keys},
+            trial_id=os.path.basename(args.logdir)
+        )
 
         try:
             train(args.train_set, args.val_set, hyperparameters, args.logdir, eager=args.eager, profile=args.profile)
         except KeyboardInterrupt:
             print("Keyboard interrupt")
         except Exception as e:
-            tf.summary.text("crash", str(e), step=(tf.summary.experimental.get_step() or 0))
+            tf.summary.text("crash", "```\n" + str(e) + "\n```\n", step=(tf.summary.experimental.get_step() or 0))
             raise e
