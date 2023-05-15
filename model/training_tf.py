@@ -57,6 +57,38 @@ def get_step_count(seq_len_schedule: List[Tuple[int, int]], ds_cardinality, base
     base_seq_len = min([ seq_len for _, seq_len in seq_len_schedule ])
     return sum([ epochs * math.ceil(ds_cardinality / math.ceil(base_seq_len * base_batch_size / seq_len)) for epochs, seq_len in seq_len_schedule ])
 
+class HackedTB(tf.keras.callbacks.Callback):
+    def on_epoch_end(self, epoch, logs=None):
+        if isinstance(logs, dict):
+            for k, v in logs.items():
+                tf.summary.scalar(f"epochmetrics/{k}", v, step=epoch)
+
+class FilteredProgbar(tf.keras.callbacks.ProgbarLogger):
+    def __init__(self, count_mode: str = "samples", stateful_metrics=None, include: Optional[List[str]] = None, exclude: Optional[List[str]] = None):
+        super().__init__(count_mode, stateful_metrics)
+        self.include = set(include) if include is not None else None
+        self.exclude = set(exclude) if exclude is not None else None
+        # print("FilteredProgbar: include=", self.include, " exclude=", self.exclude)
+
+    def _filter_logs(self, logs):
+        if logs is None or not isinstance(logs, dict):
+            return logs
+
+        if self.include is not None:
+            logs = { k: v for k, v in logs.items() if k in self.include }
+        if self.exclude is not None:
+            logs = { k: v for k, v in logs.items() if k not in self.exclude }
+        
+        # print("FilteredProgbar: logs=", logs)
+        return logs
+    
+    def on_train_batch_end(self, batch, logs=None):
+        return super().on_train_batch_end(batch, self._filter_logs(logs))
+    def on_test_batch_end(self, batch, logs=None):
+        return super().on_test_batch_end(batch, self._filter_logs(logs))
+    def on_predict_batch_end(self, batch, logs=None):
+        return super().on_predict_batch_end(batch, self._filter_logs(logs))
+
 def create_model(p: Hyperparams, batch_count, logdir, eager=False, profile=False):
     model = ntcnetwork.Network(p)
     if p.lr_decay == "cosine":
@@ -97,7 +129,11 @@ def create_model(p: Hyperparams, batch_count, logdir, eager=False, profile=False
         profile_batch = (2, 100)
     else:
         profile_batch = tuple(map(int, profile.split(",")))
-    model.tb_callback = tf.keras.callbacks.TensorBoard(logdir, profile_batch=profile_batch)
+    model.tb_callbacks = [
+        tf.keras.callbacks.TensorBoard(logdir, profile_batch=profile_batch, write_steps_per_second=True),
+        HackedTB(),
+        FilteredProgbar(count_mode="steps", include=["loss", "acc", "f1", "val_acc", "val_acc5", "val_f1"]),
+    ]
     return model
 
 def model_fit(model: tf.keras.Model, train_loader: dataset_tf.NtcDatasetLoader, val_ds, seq_len_schedule: List[Tuple[int, int]], base_batch_size: int):
