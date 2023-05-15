@@ -22,7 +22,9 @@ class Hyperparams:
     rnn_layers: int = hyperparameter(1, "Number of RNN layers")
     rnn_dropout: float = hyperparameter(0.4, "Dropout rate in RNN layers")
     clip_grad: float = hyperparameter(None, "Gradient clipping (see ADAM global_clipnorm argument)")
+    clip_grad_value: float = hyperparameter(None, "Another method of gradient clipping (see ADAM clipvalue argument)")
     attention_heads: int = hyperparameter(4, "Number of attention heads. If != 0 multihead attention is inserted after each RNN layer")
+    sample_weight: str = hyperparameter("flat", "Sample weight mode", choices=["flat", "log", "clip-sqrt", "sqrt", "clip-linear", "linear"])
 
 
     def get_nondefault(self):

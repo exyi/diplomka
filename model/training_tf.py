@@ -100,7 +100,7 @@ def create_model(p: Hyperparams, step_count, logdir, eager=False, profile=False)
         )
     else:
         learning_rate = p.learning_rate
-    optimizer = tf.optimizers.Adam(learning_rate, global_clipnorm=p.clip_grad)
+    optimizer = tf.optimizers.Adam(learning_rate, global_clipnorm=p.clip_grad, clipvalue=p.clip_grad_value)
 
     all_submodules: List[tf.Module] = model.submodules
     config_json = {

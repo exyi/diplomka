@@ -248,6 +248,9 @@ class Decoder(layers.Layer):
         output = tf.nn.softmax(output)
         return output
 
+def clamp(v, min_v, max_v):
+    return tf.minimum(max_v, tf.maximum(min_v, v))
+
 class Network(tf.keras.Model):
     INPUT_SIZE_NUCLEOTIDE = int(dataset.NtcDatasetLoader.letters_mapping.vocabulary_size())
     INPUT_SIZE = INPUT_SIZE_NUCLEOTIDE + 1 # +1 UNK token, +1 is_dna
@@ -265,12 +268,44 @@ class Network(tf.keras.Model):
         # self.encoder = EncoderBaseline(Network.INPUT_SIZE, hidden_size)
         self.ntc_decoder = Decoder(hidden_size, self.OUTPUT_NTC_SIZE)
 
-        self.ntc_loss_weights = tf.convert_to_tensor([
-                0 if k == "[UNK]" else
-                0.01 if k == "NANT" else
-                1
-                for k in dataset.NtcDatasetLoader.ntc_mapping.get_vocabulary()
-            ], dtype=self.compute_dtype)
+        min_frequency = 100
+        clip_min = 0.1
+        clip_max = 5
+        if p.sample_weight == "flat":
+            self.ntc_loss_weights = tf.convert_to_tensor([
+                    0 if k == "[UNK]" else
+                    0.01 if k == "NANT" else
+                    1
+                    for k in dataset.NtcDatasetLoader.ntc_mapping.get_vocabulary()
+                ], dtype=self.compute_dtype)
+        elif p.sample_weight == "clip-linear":
+            self.ntc_loss_weights = tf.convert_to_tensor([
+                    0 if k == "[UNK]" else
+                    0.01 if k == "NANT" else
+                    clamp(5 / (csv_loader.ntc_frequencies[k] / 20_000), clip_min, clip_max)
+                    for k in dataset.NtcDatasetLoader.ntc_mapping.get_vocabulary()
+                ], dtype=self.compute_dtype)
+        elif p.sample_weight == "linear":
+            self.ntc_loss_weights = tf.convert_to_tensor([
+                    0 if k == "[UNK]" else
+                    0.01 if k == "NANT" else
+                    5 / (csv_loader.ntc_frequencies[k] / min_frequency)
+                    for k in dataset.NtcDatasetLoader.ntc_mapping.get_vocabulary()])
+        elif p.sample_weight == "clip-sqrt":
+            self.ntc_loss_weights = tf.convert_to_tensor([
+                    0 if k == "[UNK]" else
+                    0.01 if k == "NANT" else
+                    clamp(5 / tf.math.sqrt(csv_loader.ntc_frequencies[k] / min_frequency), clip_min, clip_max)
+                    for k in dataset.NtcDatasetLoader.ntc_mapping.get_vocabulary()
+                ], dtype=self.compute_dtype)
+        elif p.sample_weight == "log":
+            self.ntc_loss_weights = tf.convert_to_tensor([
+                    0 if k == "[UNK]" else
+                    0.01 if k == "NANT" else
+                    5.0 / tf.math.log(5.0 + csv_loader.ntc_frequencies[k] / min_frequency)
+                    for k in dataset.NtcDatasetLoader.ntc_mapping.get_vocabulary()
+                ], dtype=self.compute_dtype)
+
         # weight=torch.Tensor([
             #     0.01 if k == "NANT" else
             #     clamp(1 / (v / 20_000), 0.2, 1)
