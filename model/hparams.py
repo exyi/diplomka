@@ -5,12 +5,14 @@ from typing import List
 def hyperparameter(default, help, **kwargs):
     return field(default=default, metadata={"hyperparameter": True, "help": help, **kwargs})
 
-@dataclass
+@dataclass()
 class Hyperparams:
-    seq_length_limit: int = hyperparameter(512, "Maximum length of a sequence to train on, longer sequences will be randomly truncated")
+    # seq_length_limit: int = hyperparameter(512, "Maximum length of a sequence to train on, longer sequences will be randomly truncated")
+    seq_length_schedule: str = hyperparameter("x*512", "Maximum length of a sequence to train on, longer sequences will be randomly truncated. Format is `((x|\\d+)\\*\\d+;)*`")
     learning_rate: float = hyperparameter(0.001, "ADAM Learning rate")
     lr_decay: str = hyperparameter("cosine", "Learning rate decay")
-    batch_size: int = hyperparameter(32, "Training batch size")
+    max_batch_size: int = hyperparameter(32, "Maximum batch size, limits batch_size adjustion when seq_length low")
+    batch_size: int = hyperparameter(64, "Training batch size given minimal seq_length. When seq_len is increased, batch size is decreased accordingly.")
     epochs: int = hyperparameter(30, "Number of epochs to train")
     conv_channels: List[int] = hyperparameter((64, 64), "Number of channels in each convolutional layer", list=True)
     conv_window_size: int = hyperparameter(11, "Size of convolutional window")
@@ -21,5 +23,10 @@ class Hyperparams:
     rnn_dropout: float = hyperparameter(0.4, "Dropout rate in RNN layers")
     clip_grad: float = hyperparameter(None, "Gradient clipping (see ADAM global_clipnorm argument)")
     attention_heads: int = hyperparameter(4, "Number of attention heads. If != 0 multihead attention is inserted after each RNN layer")
+
+
+    def get_nondefault(self):
+        default = dataclasses.asdict(Hyperparams())
+        return {k: v for k, v in dataclasses.asdict(self).items() if default[k] != v}
 
 

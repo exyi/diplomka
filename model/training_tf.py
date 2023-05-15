@@ -42,6 +42,20 @@ class NtcMetricWrapper(tf.keras.metrics.Metric):
         self.inner_metric.reset_state()
     def get_config(self):
         return self.inner_metric.get_config()
+    
+def parse_len_schedule(input_str: str, num_epochs: int) -> List[Tuple[int, int]]:
+    splits = [ s.split('*') for s in input_str.split(";") ]
+    non_x_sum = sum([ int(epochs) for epochs, _ in splits if epochs != "x" ])
+    x_count = sum([ 1 for epochs, _ in splits if epochs == "x" ])
+    x_min = (num_epochs - non_x_sum) // x_count
+    x_mod = (num_epochs - non_x_sum) % x_count
+    x = [ x_min + (1 if i < x_mod else 0) for i in range(x_count) ]
+    x.reverse()
+    return [ ((int(epochs) if epochs != "x" else x.pop()), int(max_len)) for epochs, max_len in splits ]
+
+def get_step_count(seq_len_schedule: List[Tuple[int, int]], ds_cardinality, base_batch_size: int) -> int:
+    base_seq_len = min([ seq_len for _, seq_len in seq_len_schedule ])
+    return sum([ epochs * math.ceil(ds_cardinality / math.ceil(base_seq_len * base_batch_size / seq_len)) for epochs, seq_len in seq_len_schedule ])
 
 def create_model(p: Hyperparams, batch_count, logdir, eager=False, profile=False):
     model = ntcnetwork.Network(p)
@@ -86,16 +100,31 @@ def create_model(p: Hyperparams, batch_count, logdir, eager=False, profile=False
     model.tb_callback = tf.keras.callbacks.TensorBoard(logdir, profile_batch=profile_batch)
     return model
 
+def model_fit(model: tf.keras.Model, train_loader: dataset_tf.NtcDatasetLoader, val_ds, seq_len_schedule: List[Tuple[int, int]], base_batch_size: int):
+    base_seq_len = min([ seq_len for _, seq_len in seq_len_schedule ])
+    e = 0
+    for epochs, seq_len in seq_len_schedule:
+        batch_size = math.ceil(base_batch_size * base_seq_len / seq_len)
+        model.fit(
+            train_loader.get_data(batch=batch_size, max_len=seq_len, shuffle=15000),
+            validation_data=val_ds,
+            initial_epoch=e,
+            epochs=e + epochs,
+            callbacks=[ *model.tb_callbacks ],
+        )
+        e += epochs
+
 def train(train_set_dir, val_set_dir, p: Hyperparams, logdir, eager=False, profile=False):
-    train_ds = dataset_tf.NtcDatasetLoader(train_set_dir).get_data(max_len=p.seq_length_limit, batch=p.batch_size, shuffle=3000)
-    batch_count = int(train_ds.cardinality())
+    seq_len_schedule = parse_len_schedule(p.seq_length_schedule, p.epochs)
+    train_loader = dataset_tf.NtcDatasetLoader(train_set_dir)
+    batch_count = get_step_count(seq_len_schedule, train_loader.cardinality, p.batch_size)
     assert batch_count > 0, f"batch_count = {batch_count}"
     val_ds = dataset_tf.NtcDatasetLoader(val_set_dir).get_data(batch=p.batch_size)
     
     model = create_model(p, batch_count, logdir, eager=eager, profile=profile)
     # tf.summary.trace_on(graph=True, profiler=False)
     # build the model, otherwise the .summary() call is unhappy
-    predictions = model(next(iter(train_ds.map(lambda x, y: x))))
+    predictions = model(next(iter(train_loader.get_data(max_len=128, batch=2).map(lambda x, y: x))))
     # tf.summary.trace_export(name="model_trace", step=0, profiler_outdir=logdir)
     # tf.summary.trace_off()
 
@@ -108,13 +137,8 @@ def train(train_set_dir, val_set_dir, p: Hyperparams, logdir, eager=False, profi
     # tf.keras.utils.plot_model(model, to_file=os.path.join(logdir, "model.png"), expand_nested=True, show_shapes=True, show_layer_activations=True, dpi=300, show_trainable=True)
 
     # with tf.profiler.experimental.Profile(logdir):
-    model.fit(
-        train_ds,
-        validation_data=val_ds,
-        epochs=p.epochs,
-        callbacks=[ model.tb_callback ],
-    )
 
+    model_fit(model, train_loader, val_ds, seq_len_schedule, p.batch_size)
 
 class Clock:
     def __init__(self):
