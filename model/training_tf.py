@@ -90,12 +90,12 @@ class FilteredProgbar(tf.keras.callbacks.ProgbarLogger):
     def on_predict_batch_end(self, batch, logs=None):
         return super().on_predict_batch_end(batch, self._filter_logs(logs))
 
-def create_model(p: Hyperparams, batch_count, logdir, eager=False, profile=False):
+def create_model(p: Hyperparams, step_count, logdir, eager=False, profile=False):
     model = ntcnetwork.Network(p)
     if p.lr_decay == "cosine":
         learning_rate: Any = tf.optimizers.schedules.CosineDecay(
             p.learning_rate,
-            decay_steps=batch_count * p.epochs,
+            decay_steps=step_count,
             alpha=p.learning_rate/50,
         )
     else:
@@ -154,11 +154,11 @@ def model_fit(model: tf.keras.Model, train_loader: dataset_tf.NtcDatasetLoader, 
 def train(train_set_dir, val_set_dir, p: Hyperparams, logdir, eager=False, profile=False):
     seq_len_schedule = parse_len_schedule(p.seq_length_schedule, p.epochs)
     train_loader = dataset_tf.NtcDatasetLoader(train_set_dir)
-    batch_count = get_step_count(seq_len_schedule, train_loader.cardinality, p.batch_size)
-    assert batch_count > 0, f"batch_count = {batch_count}"
+    step_count = get_step_count(seq_len_schedule, train_loader.cardinality, p.batch_size)
+    assert step_count > 0, f"{step_count=}"
     val_ds = dataset_tf.NtcDatasetLoader(val_set_dir).get_data(batch=p.batch_size)
     
-    model = create_model(p, batch_count, logdir, eager=eager, profile=profile)
+    model = create_model(p, step_count, logdir, eager=eager, profile=profile)
     # tf.summary.trace_on(graph=True, profiler=False)
     # build the model, otherwise the .summary() call is unhappy
     predictions = model(next(iter(train_loader.get_data(max_len=128, batch=2).map(lambda x, y: x))))
