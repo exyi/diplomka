@@ -20,5 +20,6 @@ class Hyperparams:
     rnn_layers: int = hyperparameter(1, "Number of RNN layers")
     rnn_dropout: float = hyperparameter(0.4, "Dropout rate in RNN layers")
     clip_grad: float = hyperparameter(None, "Gradient clipping (see ADAM global_clipnorm argument)")
+    attention_heads: int = hyperparameter(4, "Number of attention heads. If != 0 multihead attention is inserted after each RNN layer")
 
 

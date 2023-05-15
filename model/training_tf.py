@@ -105,6 +105,7 @@ def train(train_set_dir, val_set_dir, p: Hyperparams, logdir, eager=False, profi
 
     tf.summary.text("model/structure", "\n".join(summary_text), step=0)
     tf.summary.scalar("model/total_params", model.count_params(), step=0)
+    # tf.keras.utils.plot_model(model, to_file=os.path.join(logdir, "model.png"), expand_nested=True, show_shapes=True, show_layer_activations=True, dpi=300, show_trainable=True)
 
     # with tf.profiler.experimental.Profile(logdir):
     model.fit(
@@ -174,6 +175,7 @@ if __name__ == '__main__':
         print(f"logdir: {args.logdir}")
         print(f"devices: {[ x.name for x in tf.config.list_physical_devices() ]}")
         print(hyperparameters)
+        tf.summary.trace_off()
         tf.summary.text("model/hyperparams", str(hyperparameters), step=0)
 
         try:

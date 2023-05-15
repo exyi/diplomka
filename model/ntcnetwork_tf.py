@@ -78,6 +78,10 @@ def swapaxes(tensor, dim1, dim2):
 def pad_start(tensor: tf.RaggedTensor, pad_width: int):
     paddingshape = (tensor.nrows(), pad_width, *tensor.values.shape[1:])
     return tf.concat([tf.zeros(paddingshape, dtype=tensor.dtype), tensor], axis=1)
+def ragged_reshape(tensor: tf.RaggedTensor, new_shape: Tuple[int, ...]):
+    x = tensor.values
+    x = tf.reshape(x, (tf.shape(x)[0], *new_shape))
+    return tf.RaggedTensor.from_row_splits(x, tensor.row_splits)
 
 class ConvEncoder(layers.Layer):
     def __init__(self, input_size, channels = [64, 64], window_size = 3, max_dilatation = 1, kind = "resnet", name=None) -> None:
@@ -126,6 +130,7 @@ class EncoderRNN(layers.Layer):
             hidden_size,
             num_layers,
             dropout,
+            attention_heads,
             bidirectional=False,
             layer_norm=True,
             name=None
@@ -161,7 +166,14 @@ class EncoderRNN(layers.Layer):
             for layer_i in range(num_layers - 1):
                 self.layer_norm.append(layers.LayerNormalization(name=f"{name}/ln{layer_i+1}"))
 
-        self.layers = [ self.embedding, *self.rnn ]
+        self.attn_query, self.attn_value, self.attn = [], [], []
+        if attention_heads > 0:
+            for layer_i in range(num_layers):
+                self.attn_query.append(layers.Dense(hidden_size, name=f"{name}/attn_query{layer_i}"))
+                self.attn_value.append(layers.Dense(hidden_size, name=f"{name}/attn_value{layer_i}"))
+                self.attn.append(layers.MultiHeadAttention(num_heads=attention_heads, key_dim=self.hidden_size//attention_heads, dropout=dropout, name=f"{name}/attn{layer_i}"))
+
+        self.layers = [ self.embedding, *self.rnn, *(self.layer_norm or []), *self.attn_query, *self.attn_value, *self.attn ]
     def get_config(self):
         return {
             "embedding_size": self.embedding_size,
@@ -193,9 +205,19 @@ class EncoderRNN(layers.Layer):
                 x = self.layer_norm[rnn_i-1](x)
             x = self.rnn[rnn_i](x)
             x = tf.nn.dropout(x, rate=self.dropout)
-            tf.keras.layers.LayerNormalization()
             if rnn_i > 0:
                 x = x + bypass
+
+            bypass = x
+            if len(self.attn_query) > rnn_i:
+                query: tf.RaggedTensor = tf.nn.relu(self.attn_query[rnn_i](x))
+                # query = ragged_reshape(query, (4, self.hidden_size//4))
+                value: tf.RaggedTensor = tf.nn.relu(self.attn_value[rnn_i](x))
+                # value = ragged_reshape(value, (4, self.hidden_size//4))
+                x = self.attn[rnn_i](query, value)
+                # x = ragged_reshape(x, (self.hidden_size,))
+                x = tf.nn.dropout(x, rate=self.dropout)
+                x = bypass + x
         return x
 
 class Decoder(layers.Layer):
@@ -239,7 +261,7 @@ class Network(tf.keras.Model):
             embedding = ConvEncoder(Network.INPUT_SIZE, channels=p.conv_channels, window_size=p.conv_window_size, kind=p.conv_kind, max_dilatation=p.conv_dilation)
         else:
             embedding = layers.Embedding(Network.INPUT_SIZE, embedding_size)
-        self.encoder = EncoderRNN(embedding, embedding_size, hidden_size, num_layers=p.rnn_layers, dropout=p.rnn_dropout, bidirectional=True)
+        self.encoder = EncoderRNN(embedding, embedding_size, hidden_size, num_layers=p.rnn_layers, dropout=p.rnn_dropout, attention_heads=p.attention_heads, bidirectional=True)
         # self.encoder = EncoderBaseline(Network.INPUT_SIZE, hidden_size)
         self.ntc_decoder = Decoder(hidden_size, self.OUTPUT_NTC_SIZE)
 

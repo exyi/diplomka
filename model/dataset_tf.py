@@ -117,7 +117,7 @@ class NtcDatasetLoader:
 
         if batch:
             data = data.ragged_batch(batch)
-        return data
+        return data.prefetch(tf.data.AUTOTUNE)
 
 
 
