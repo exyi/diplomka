@@ -14,17 +14,17 @@ class Hyperparams:
     max_batch_size: int = hyperparameter(32, "Maximum batch size, limits batch_size adjustion when seq_length low")
     batch_size: int = hyperparameter(64, "Training batch size given minimal seq_length. When seq_len is increased, batch size is decreased accordingly.")
     epochs: int = hyperparameter(30, "Number of epochs to train")
-    conv_channels: List[int] = hyperparameter((64, 64), "Number of channels in each convolutional layer", list=True)
+    conv_channels: List[int] = hyperparameter((64, 64, 128, 128), "Number of channels in each convolutional layer", list=True)
     conv_window_size: int = hyperparameter(11, "Size of convolutional window")
     conv_kind: str = hyperparameter("resnet", "Type of convolutional layer to use", choices=["resnet", "plain"])
     conv_dilation: int = hyperparameter(1, "Max dilatation of convolutional layers.")
-    rnn_size: int = hyperparameter(64, "Size of hidden state in RNN layer")
+    rnn_size: int = hyperparameter(256, "Size of hidden state in RNN layer")
     rnn_layers: int = hyperparameter(1, "Number of RNN layers")
     rnn_dropout: float = hyperparameter(0.4, "Dropout rate in RNN layers")
-    clip_grad: float = hyperparameter(None, "Gradient clipping (see ADAM global_clipnorm argument)")
+    clip_grad: float = hyperparameter(0.1, "Gradient clipping (see ADAM global_clipnorm argument)")
     clip_grad_value: float = hyperparameter(None, "Another method of gradient clipping (see ADAM clipvalue argument)")
-    attention_heads: int = hyperparameter(4, "Number of attention heads. If != 0 multihead attention is inserted after each RNN layer")
-    sample_weight: str = hyperparameter("flat", "Sample weight mode", choices=["flat", "log", "clip-sqrt", "sqrt", "clip-linear", "linear"])
+    attention_heads: int = hyperparameter(0, "Number of attention heads. If != 0 multihead attention is inserted after each RNN layer")
+    sample_weight: str = hyperparameter("flat", "Sample weight mode", choices=["flat", "log", "clip-sqrt", "sqrt", "sqrtB", "clip-linear", "linear"])
 
 
     def get_nondefault(self):
