@@ -269,8 +269,9 @@ class Network(tf.keras.Model):
         self.ntc_decoder = Decoder(hidden_size, self.OUTPUT_NTC_SIZE)
 
         min_frequency = 100
+        max_frequency = max(csv_loader.ntc_frequencies.values())
         clip_min = 0.1
-        clip_max = 5
+        clip_max = 5.0
         if p.sample_weight == "flat":
             self.ntc_loss_weights = tf.convert_to_tensor([
                     0 if k == "[UNK]" else
@@ -288,8 +289,8 @@ class Network(tf.keras.Model):
         elif p.sample_weight == "linear":
             self.ntc_loss_weights = tf.convert_to_tensor([
                     0 if k == "[UNK]" else
-                    0.01 if k == "NANT" else
-                    5 / (csv_loader.ntc_frequencies[k] / min_frequency)
+                    0.001 if k == "NANT" else
+                    clamp(max_frequency / csv_loader.ntc_frequencies[k] * 0.01, 0.0, 10.0)
                     for k in dataset.NtcDatasetLoader.ntc_mapping.get_vocabulary()])
         elif p.sample_weight == "clip-sqrt":
             self.ntc_loss_weights = tf.convert_to_tensor([
@@ -298,6 +299,14 @@ class Network(tf.keras.Model):
                     clamp(5 / tf.math.sqrt(csv_loader.ntc_frequencies[k] / min_frequency), clip_min, clip_max)
                     for k in dataset.NtcDatasetLoader.ntc_mapping.get_vocabulary()
                 ], dtype=self.compute_dtype)
+        elif p.sample_weight == "sqrtB":
+            self.ntc_loss_weights = tf.convert_to_tensor([
+                    0 if k == "[UNK]" else
+                    0.01 if k == "NANT" else
+                    clamp(math.sqrt(max_frequency / csv_loader.ntc_frequencies[k]) * 0.01, 0.0, 10.0)
+                    for k in dataset.NtcDatasetLoader.ntc_mapping.get_vocabulary()
+                ], dtype=self.compute_dtype)
+
         elif p.sample_weight == "log":
             self.ntc_loss_weights = tf.convert_to_tensor([
                     0 if k == "[UNK]" else
@@ -312,7 +321,7 @@ class Network(tf.keras.Model):
             #     for k, v in csv_loader.ntc_frequencies.items()
             # ]),
         # print("NtC loss weights: ", self.ntc_loss_weights.shape)
-        # print("NtC loss weights: ", self.ntc_loss_weights)
+        print("NtC loss weights: ", self.ntc_loss_weights)
 
 
     def call(self, input: TensorDict, whatever =None):
