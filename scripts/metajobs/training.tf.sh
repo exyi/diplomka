@@ -63,5 +63,5 @@ function train {
 if test -n "$CMD"; then
     eval "$CMD"
 else
-    train $ARGS
+    train "$@"
 fi
