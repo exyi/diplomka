@@ -147,10 +147,16 @@ def _int64_feature(value):
   """Returns an int64_list from a bool / enum / int / uint."""
   return tf.train.Feature(int64_list=tf.train.Int64List(value=value))
 
+def sequence_np(x):
+    if isinstance(x, str):
+        return np.array(list(x), dtype='U1')
+    else:
+        return np.array(list(x['sequence']), dtype='U1')
 def write_tfrecord_dataset(
     files: List[str],
     output_file: str,
-    verbose = False):
+    verbose = False,
+    dna_handling = None):
     import csv_loader
 
     if output_file.endswith(".gz"):
@@ -163,14 +169,30 @@ def write_tfrecord_dataset(
         for i, f in enumerate(files):
             count += 1
             df, chains = csv_loader.load_csv_file(f)
+            orig_chains = chains
+            if dna_handling == "ignore":
+                chains = { k: v for k, v in chains.items() if np.mean(v["is_dna"] & (sequence_np(v) != 'X') & (sequence_np(v) != ' ')) < 0.1 }
+
+            if len(chains) == 0:
+                print("Skipping (all chains filtered out)", f)
+                continue
+
             joined = csv_loader.get_joined_arrays(chains)
+
+            if dna_handling == "ignorepure":
+                # print(sequence_np(joined))
+                # print(joined['is_dna'])
+                # print( (sequence_np(joined) == 'X') | (sequence_np(joined) == ' '))
+                if np.mean(joined['is_dna'] | (sequence_np(joined) == 'X') | (sequence_np(joined) == ' ')) > 0.8:
+                    print("Skipping (no RNA)", f)
+                    continue
             pdbid = list(chains.keys())[0][0]
 
             if max_len < len(joined['sequence']):
                 max_len = len(joined['sequence'])
 
             if verbose:
-                print(f"Processing {i+1:5d}/{len(files)}: {f} ({len(joined['sequence_full'])} nt)")
+                print(f"Processing {i+1:5d}/{len(files)}: {f} ({len(joined['sequence_full']): 5} nt, {len(chains)}/{len(orig_chains)} chains)")
             features = {
                 "pdbid": _bytes_feature([pdbid.encode('utf-8')]),
                 "sequence": _bytes_feature([joined['sequence'].encode('utf-8')]),
@@ -179,10 +201,22 @@ def write_tfrecord_dataset(
                 "NtC": _bytes_feature([x.encode('utf-8') for x in joined['NtC']]),
                 "nearest_NtC": _bytes_feature([x.encode('utf-8') for x in joined['nearest_NtC']]),
                 "CANA": _bytes_feature([x.encode('utf-8') for x in  joined['CANA']]),
-                "rmsd": _float_feature(joined['rmsd']),
-                "confalA": _float_feature(joined['confalA']),
-                "confalG": _float_feature(joined['confalG']),
-                "confalH": _float_feature(joined['confalH']),
+                # "rmsd": _float_feature(joined['rmsd']),
+                # "confalA": _float_feature(joined['confalA']),
+                # "confalG": _float_feature(joined['confalG']),
+                # "confalH": _float_feature(joined['confalH']),
+                # "angle_d1": _float_feature(joined['d1']),
+                # "angle_e1": _float_feature(joined['e1']),
+                # "angle_z1": _float_feature(joined['z1']),
+                # "angle_a2": _float_feature(joined['a2']),
+                # "angle_b2": _float_feature(joined['b2']),
+                # "angle_g2": _float_feature(joined['g2']),
+                # "angle_d2": _float_feature(joined['d2']),
+                # "angle_ch1": _float_feature(joined['ch1']),
+                # "angle_ch2": _float_feature(joined['ch2']),
+                # "angle_mu": _float_feature(joined['mu']),
+                # "dist_NN": _float_feature(joined['NN']),
+                # "dist_CC": _float_feature(joined['CC']),
             }
             example = tf.train.Example(features=tf.train.Features(feature=features))
             serialized = example.SerializeToString()
@@ -217,6 +251,7 @@ if __name__ == "__main__":
     parser.add_argument('--input', type=str, help='Input directory with CSV files')
     parser.add_argument('--output', type=str, help='Output TFRecord file')
     parser.add_argument('--verbose', action='store_true', help='Verbose output', default=False)
+    parser.add_argument('--dna_handling', type=str, help="How to handle DNA chains. Ignore removes any chains with at least 10% DNA. Ignorepure removes the structure if it is more than 80% DNA", choices=["ignore", "ignorepure", "keep"], default="keep")
     args = parser.parse_args()
 
     if args.testload:
@@ -240,7 +275,7 @@ if __name__ == "__main__":
 
     elif args.input and args.output:
         files = [os.path.join(args.input, f) for f in os.listdir(args.input) if csv_loader.csv_extensions.search(f)]
-        write_tfrecord_dataset(files, args.output, args.verbose)
+        write_tfrecord_dataset(files, args.output, args.verbose, args.dna_handling)
     
     else:
         print("Invalid parameter combination")
