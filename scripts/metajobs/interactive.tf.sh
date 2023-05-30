@@ -9,6 +9,16 @@
 ## paste this into an interactive job
 
 nvidia-smi
+DATADIR=/storage/praha1/home/exyi/ntcnet
+RNA_CSVS=/storage/brno12-cerit/home/exyi/rna-csvs
+BASEPAIRING_DIR=/storage/plzen1/home/exyi/fr3d-python/output-dir/
+cd "$DATADIR"
+source scripts/setup_tf.sh "$SCRATCH"
+
+function train {
+	$py "$DATADIR/model/training_tf.py" --train_set "$TRAINING_SET" --val_set "$VAL_SET" --logdir "$DATADIR/metac-logs/$TBLOG-`date --utc +%y%m%d-%H%M`" $@
+}
+# $py $DATADIR/model/dataset_tf.py --input ./train_set --pairing_input $BASEPAIRING_DIR --output train_set_nodna.tfrecord.gz --dna_handling ignore --verbose
 
 module add zstd/1.5.2-gcc-10.2.1-jj6bl5j
 module add python/3.10.4-gcc-8.3.0-ovkjwzd

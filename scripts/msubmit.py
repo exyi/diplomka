@@ -13,17 +13,20 @@ parser.add_argument("--walltime", help="walltime in hours", default=8, type=floa
 parser.add_argument("--cpu", help="cpu count", default=6, type=int)
 parser.add_argument("--training_set", help="training set to use", default=None, type=str)
 parser.add_argument("--val_set", help="validation set to use", default=None, type=str)
-parser.add_argument("--script", help="script to run", default="scripts/metajobs/training.tf.py")
+parser.add_argument("--script", help="script to run", default="scripts/metajobs/training.tf.sh", type=str)
 parser.add_argument("name", help="job name", default="bjob")
 parser.add_argument("args", nargs=argparse.REMAINDER, help="arguments to script")
 
 args = parser.parse_args()
 
-variables = { "TBLOG": args.name }
+variables = {
+	"TBLOG": args.name,
+	"ARGS": " ".join(args.args), # TODO: escape/validate
+}
 if args.training_set is not None:
-	variables["TRAINING_SET"] = args.training_set
+	variables["TRAINING_SET"] = os.path.join("/storage/brno12-cerit/home/exyi/rna-csvs/", args.training_set)
 if args.val_set is not None:
-	variables["VAL_SET"] = args.val_set
+	variables["VAL_SET"] = os.path.join("/storage/brno12-cerit/home/exyi/rna-csvs/", args.val_set)
 lflags = [ "select=1", f"ncpus={args.cpu}", f"scratch_local=12gb", f"mem=16gb" ]
 qsubargs = [
 	"-N", f"ntcnet-{os.path.basename(args.script)}-{args.name}",
@@ -45,5 +48,7 @@ qsubargs += [ "-l", f"walltime={math.floor(args.walltime)}:{math.floor(args.wall
 
 qsubargs += [ "-v", ",".join([ f"{k}='{v}'" for k, v in variables.items() ]) ]
 
-print("qsub", *qsubargs, args.script, *args.args)
-subprocess.run(["qsub", *qsubargs, "--", args.script, *args.args])
+script_abs = os.path.abspath(args.script)
+command = ["qsub", *qsubargs, args.script]
+print(*command)
+subprocess.run(command)
