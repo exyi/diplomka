@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Set, TextIO, Tuple, Union
 import pandas as pd, numpy as np
 import sys, os, re
@@ -157,34 +158,66 @@ def _separate_subchains(v: pd.DataFrame) -> List[Dict[str, Any]]:
     """
 
     steps = dict()
+    alt_letters = set()
     for _, row in v.iterrows():
         pdbid = row['pdbid']
         chain = row['chain']
         nt1 = row['ntix_1']
         nt2 = row['ntix_2']
-        if (pdbid, chain, nt1) in steps:
-            raise ValueError(f"Duplicate step: {pdbid} {chain} {nt1}")
-        steps[(pdbid, chain, nt1)] = (nt2, row)
+        key = (pdbid, chain, nt1, row['ntalt_1'])
+        key2 = (pdbid, chain, nt2, row['ntalt_2'])
+        alt_letters.add(row['ntalt_1'])
+        alt_letters.add(row['ntalt_2'])
+        if key in steps:
+            if not row['ntalt_2']:
+                raise ValueError(f"Duplicate step: {key}")
+            
+            # on alternates, use the lower numbered nucleotide, drop the other one
+            if row['ntalt_2'] < steps[key][1]['ntalt_2']:
+                steps[key] = (key2, row)
+        else:
+            steps[key] = (key2, row)
+
+    alt_letters.discard("")
 
     roots = set(steps.keys())
-    for (pdbid, chain, _), (nt2, _) in steps.values():
-        if (pdbid, chain, nt2) in roots:
-            roots.remove((pdbid, chain, nt2))
+    for _, (key2, _) in steps.items():
+        if key2 in roots:
+            roots.remove(key2)
+
+    assert len(roots) > 0
+    # remove alternative chains to avoid id conflicts
+    for root in reversed(list(roots)):
+        pdbid, chain, nt1, alt = root
+        if alt and len(roots) > 1:
+            for alt_alt in alt_letters:
+                if alt_alt != alt and (pdbid, chain, nt1, alt_alt) in steps:
+                    print(f"Removing alternate chain: {root}, alternative {alt_alt} exists")
+                    roots.remove(root)
+                    del steps[root]
+                    break
 
     subchains = []
     for root in roots:
         subchain = []
         while root in steps:
-            nt2, row = steps[root]
+            key2, row = steps[root]
             del steps[root]
             subchain.append(row)
-            root = (*root[:2], nt2)
+            root = key2
+        assert len(subchain) > 0
         subchains.append(subchain)
 
-    if len(steps) > 0:
-        print("WARNING: loop or something weird detected in ", list(sorted(steps.keys())), v['step_ID'])
+    # remove all B variants, we only dropped the roots, not all members of a potentially longer chain
+    for key in list(steps):
+        pdbid, chain, nt1, alt = key
+        if alt:
+            del steps[key]
 
-    subchains.sort(key=lambda subchain: (subchain[0]['pdbid'], subchain[0]['chain'], try_parse_int(subchain[0]['ntix_1'], subchain[0]['ntix_1'])))
+    if len(steps) > 0:
+        print("WARNING: loop or something weird detected in ", list(sorted(steps.keys())), v['step_ID'].array)
+
+    # subchains.sort(key=lambda subchain: (subchain[0]['pdbid'], subchain[0]['chain'], try_parse_int(subchain[0]['ntix_1'], subchain[0]['ntix_1'])))
     return subchains
 
 def _process_subchain(steps):
@@ -199,12 +232,12 @@ def _process_subchain(steps):
     indices = [ steps[0]['ntix_1'] ]
     for s in steps:
         assert s['ntix_1'] == indices[-1]
-        assert s['nt_1'] == sequence[-1]
+        assert s['nt_1'] == sequence[-1], f"Nucleotide {s['nt_1']} != {sequence[-1]}, at position {s.get('pdbid', '?')}:{s.get('chain', '?')}:{s['ntix_1']}-{s['ntix_2']}, all steps: {', '.join([ s['step_ID'] for s in steps])}"
         indices.append(s['ntix_2'])
         sequence.append(s['nt_2'])
     
     return {
-        'steps': steps,
+        'steps': pd.DataFrame(steps),
         'sequence': ''.join([ map_nucleotide(n) for n in sequence ]),
         'sequence_full': sequence,
         'indices': indices,
@@ -218,7 +251,9 @@ def load_csv_file(file) -> Tuple[pd.DataFrame, Dict[Tuple[str, str, Optional[int
         - pdbid: string
         - chain: string
         - nt_1: string - first nucleotide of the step
+        - ntalt_1: string - alternative code of the first nucleotide (e.g. '1' for 'A.1')
         - nt_2: string - second nucleotide
+        - ntalt_2: string - alternative code of the second nucleotide
         - ntix_1: int - second nucleotide index (index is 1-based in the whole sequence, sometimes it's a string like '20.A')
         - ntix_2: int - second nucleotide index
     * dictionary of chains: pdbid, chain -> dict
@@ -231,15 +266,18 @@ def load_csv_file(file) -> Tuple[pd.DataFrame, Dict[Tuple[str, str, Optional[int
 
     # split stepID into parts
     stepID: pd.Series[str] = table['step_ID']
-    table['pdbid'] = [ s.split('_')[0] for s in stepID ]
-    table['chain'] = [ s.split('_')[1] for s in stepID ]
-    table['nt_1'] = [ s.split('_')[2] for s in stepID ]
-    table['nt_2'] = [ s.split('_')[4] for s in stepID ]
-    table['ntix_1'] = [ s.split('_')[3] for s in stepID ]
-    table['ntix_2'] = [ s.split('_')[5] for s in stepID ]
+    splitStepID = list(zip(*[ s.split('_') for s in stepID ]))
+    table['pdbid'] = splitStepID[0]
+    table['chain'] = splitStepID[1]
+    table['nt_1'] = [ x.split('.')[0] for x in splitStepID[2] ]
+    table['ntalt_1'] = [ x.split('.')[1] if '.' in x else '' for x in splitStepID[2] ]
+    table['nt_2'] = [ x.split('.')[0] for x in splitStepID[4] ]
+    table['ntalt_2'] = [ x.split('.')[1] if '.' in x else '' for x in splitStepID[4] ]
+    table['ntix_1'] = splitStepID[3]
+    table['ntix_2'] = splitStepID[5]
 
     # some structures contain multiple variants of one nucleotide, the CSV then contain one step multiple times - for all possible conformations
-    table.drop_duplicates(subset=['pdbid', 'chain', 'ntix_1', 'ntix_2'], inplace=True, ignore_index=True)
+    # table.drop_duplicates(subset=['pdbid', 'chain', 'ntix_1', 'ntalt_1', 'ntix_2', 'ntalt_2'], inplace=True, ignore_index=True)
 
     # create array columns for each column in table, grouped by pdbid and chain
     # identity = lambda x: x
@@ -247,53 +285,14 @@ def load_csv_file(file) -> Tuple[pd.DataFrame, Dict[Tuple[str, str, Optional[int
 
     groups_dict: Dict[Tuple[str, str, Optional[int]], Dict[str, Any]] = {}
     for (k_pdb, k_chain), v in groups.items():
-        # split the chain into subchains if there are any breaks in the sequence
-        start_i = 0
-        end_i = 0
-        subchain_index = 0
-        all_indices = set() # detect loops and weird things
+        subchains_raw = _separate_subchains(v)
+        subchains = [ _process_subchain(s) for s in subchains_raw ]
 
-        sequence = [ v['nt_1'].array[0] ]
-        indices = [ v['ntix_1'].array[0] ]
-
-        def yield_subchain():
-            assert start_i < end_i, f"Can't yield empty subchain with {start_i=} and {end_i=}"
-            assert end_i - start_i + 1 == len(sequence), f"Sequence length {sequence} doesn't match {end_i=} - {start_i=} + 1"
-            if len(sequence) == 2:
-                print(f"WARNING: Sus short sequence {k_pdb} {k_chain} {start_i}:{end_i}     {sequence}")
-            slicing = not (subchain_index == 0 and end_i == len(v))
-            if slicing:
-                print(f"Slicing {k_pdb} {k_chain} {start_i}:{end_i}     {sequence}")
-            key = (k_pdb, k_chain, subchain_index) if slicing else (k_pdb, k_chain, None)
-            steps = v.iloc[start_i:end_i]
-            groups_dict[key] = 
-
-        for i in range(0, len(v)):
-            if v['ntix_1'].array[i] != indices[-1]:
-                all_indices.add(indices[-1])
-                yield_subchain()
-
-                start_i = end_i
-                subchain_index += 1
-                sequence = [ v['nt_1'].array[i] ]
-                indices = [ v['ntix_1'].array[i] ]
-
-            if v['ntix_1'].array[i] in all_indices:
-                if start_i == i:
-                    start_i += 1
-                print(f"WARNING: Loop or something weird detected, skipping at {k_pdb} {k_chain} {v['ntix_1'].array[i]}")
-                continue
-
-            assert v['ntix_1'].array[i] == indices[-1]
-            assert v['nt_1'].array[i] == sequence[-1]
-
-            all_indices.add(v['ntix_1'].array[i])
-
-            end_i = i + 1
-            sequence.append(v['nt_2'].array[i])
-            indices.append(v['ntix_2'].array[i])
-
-        yield_subchain()
+        if len(subchains) > 1:
+            for i, subchain in enumerate(subchains):
+                groups_dict[(k_pdb, k_chain, i)] = subchain
+        else:
+            groups_dict[(k_pdb, k_chain, None)] = subchains[0]
 
     return table, groups_dict
 
@@ -345,7 +344,194 @@ def get_joined_arrays(chains: Dict[Tuple[str, str, Optional[int]], dict]):
         result[k] = join_arrays([ c['steps'][k].to_numpy(np.float32) for c in cs ], 0.0, dtype=np.float32)
     return result
 
-def read_fr3d_basepairing(file: Union[str, TextIO], filter_model = None, filter_chains: Optional[Set[str]] = None) -> Dict[str, np.ndarray]:
+@dataclass
+class StepID:
+    pdbid: str
+    model: int
+    chain: str
+    nt1_base: str
+    nt1_alternate_id: str
+    nt1_component_number: str
+    nt1_insertion_code: str
+    nt2_base: str
+    nt2_alternate_id: str
+    nt2_component_number: str
+    nt2_insertion_code: str
+
+    @property
+    def unit1(self):
+        return UnitID(self.pdbid, self.model, self.chain, self.nt1_base, self.nt1_component_number, alternate_id=self.nt1_alternate_id, insertion_code=self.nt1_insertion_code)
+
+    @property
+    def unit2(self):
+        return UnitID(self.pdbid, self.model, self.chain, self.nt2_base, self.nt2_component_number, alternate_id=self.nt2_alternate_id, insertion_code=self.nt2_insertion_code)
+    
+    @property
+    def nt1_ix(self):
+        return self.nt1_component_number + "." + self.nt1_insertion_code if self.nt1_insertion_code else self.nt1_component_number
+    @property
+    def nt2_ix(self):
+        return self.nt2_component_number + "." + self.nt2_insertion_code if self.nt2_insertion_code else self.nt2_component_number
+
+    @staticmethod
+    def parse_csv_step(unit_id: str) -> Tuple['UnitID', 'UnitID']:
+        # format is {pdbid}[-m{model_i}]_{chain}_{nt1}[.{nt1-alternate}]_{nt1ix}[.{insertion_code}]_{nt2}[.{nt2-alternate}]_{nt2ix}[.{insertion_code}]
+
+        def split_dot(s: str):
+            if '.' in s:
+                return s.split('.')
+            else:
+                return s, ""
+
+        pdbid, chain, nt1, nt1ix, nt2, nt2ix = unit_id.split('_')
+        if '-' in pdbid:
+            pdbid, model_i = pdbid.split('-')
+            model_i = int(model_i.lstrip('m'))
+        else:
+            model_i = 1
+        
+        nt1, nt1_alt = split_dot(nt1)
+        nt2, nt2_alt = split_dot(nt2)
+        nt1ix, nt1_ins = split_dot(nt1ix)
+        nt2ix, nt2_ins = split_dot(nt2ix)
+
+        return (
+            UnitID(pdbid, model_i, chain, nt1, nt1ix, "", nt1_alt, nt1_ins, None),
+            UnitID(pdbid, model_i, chain, nt2, nt2ix, "", nt2_alt, nt2_ins, None)
+        )
+
+@dataclass
+class UnitID:
+    """
+    Represents https://www.bgsu.edu/research/rna/help/rna-3d-hub-help/unit-ids.html
+    Used for parsing FR3D files
+    """
+    pdbid: str
+    """
+    PDB ID Code
+        From PDBx/mmCIF item: _entry.id
+        4 characters, case-insensitive
+    """
+    model_i: int
+    """
+    Model Number
+        From PDBx/mmCIF item: _atom_site.pdbx_PDB_model_num
+        integer, range 1-99
+    """
+    chain: str
+    """
+    Model Number
+        From PDBx/mmCIF item: _atom_site.pdbx_PDB_model_num
+        integer, range 1-99
+    """
+    residue_base: str
+    """
+    Residue/Nucleotide/Component Identifier
+        From PDBx/mmCIF item: _atom_site.label_comp_id
+        1-3 characters, case-insensitive
+    """
+    residue_component_number: str
+    """
+    Residue/Nucleotide/Component Number
+        From PDBx/mmCIF item: _atom_site.auth_seq_id
+        integer, range: -999..9999 (there are negative residue numbers)
+    """
+    atom_name: str = ""
+    """
+    Atom Name (Optional, default: blank)
+        From PDBx/mmCIF item: _atom_site.label_atom_id
+        0-4 characters, case-insensitive
+        blank means all atoms
+    """
+    alternate_id: str = ""
+    """
+    Alternate ID (Optional, default: blank)
+        From PDBx/mmCIF item: _atom_site.label_alt_id
+        Default value: blank
+        One of ['A', 'B', 'C', '0'], case-insensitive
+        This represents alternate coordinates for the model of one or more atoms
+    """
+    insertion_code: str = ""
+    """
+    Insertion Code (Optional, default: blank)
+        From PDBx/mmCIF item: _atom_site.pdbx_PDB_ins_code
+        1 character, case-insensitive
+    """
+    symmetry_operation: Optional[str] = None
+    """
+    Symmetry Operation (Optional, default: 1_555)
+        As defined in PDBx/mmCIF item: _pdbx_struct_oper_list.name
+        5-6 characters, case-insensitive
+        For viral icosahedral structures, use “P_” + operator number instead of symmetry operators. For example, 1A34|1|A|VAL|88|||P_1
+    """
+
+    @property
+    def residue_id(self) -> str:
+        """
+        Residue ID in form {number}.{insertion_code}, if the insertion_code id is non-empty
+        """
+        if self.insertion_code:
+            return str(self.residue_component_number) + "." + self.insertion_code
+        else:
+            return str(self.residue_component_number)
+        
+    @property
+    def base_with_alt(self) -> str:
+        """
+        Base with alternate ID, if the alternate ID is non-empty
+        """
+        if self.alternate_id:
+            return self.residue_base + "." + self.alternate_id
+        else:
+            return self.residue_base
+
+    @property
+    def residue_position(self) -> Tuple[str, int, str, str]:
+        return (self.pdbid, self.model_i, self.chain, self.residue_id)
+
+    @staticmethod
+    def parse(unit_id: str) -> 'UnitID':
+        split = unit_id.split('|')
+        # more than 5 is ok, sometimes the unit ID is something like 2D34|1|A|DC|5||||8_665, but we don't care about that
+        assert len(split) >= 5, f"Invalid unit id {unit_id}"
+        pdbid, model_i, chain, nt, ntix = split[:5]
+        assert len(pdbid) == 4, f"Invalid pdbid {pdbid}"
+
+        if len(split) > 5:
+            atom_name = split[5]
+        else:
+            atom_name = ""
+        
+        if len(split) > 6:
+            alternate_id = split[6]
+        else:
+            alternate_id = ""
+        
+        if len(split) > 7:
+            insertion_code = split[7]
+        else:
+            insertion_code = ""
+        
+        if len(split) > 8:
+            symmetry_operation = split[8]
+        else:
+            symmetry_operation = None
+
+        return UnitID(pdbid, int(model_i), chain, nt, ntix, atom_name, alternate_id, insertion_code, symmetry_operation)
+
+    def __str__(self) -> str:
+        components = [ self.pdbid, str(self.model_i), self.chain, self.residue_base, self.residue_id, self.atom_name, self.alternate_id, self.insertion_code, self.symmetry_operation ]
+
+        while len(components) > 5 and not components[-1]:
+            components.pop()
+
+        return "|".join(components)
+    
+    def __repr__(self) -> str:
+        return str(self)
+
+
+def read_fr3d_basepairing(file: Union[str, TextIO], pdbid: str, filter_model = None, filter_chains: Optional[Set[str]] = None) -> Dict[str, np.ndarray]:
     """
     Reads the fr3d basepairing file into a dictionary of
     * model_i: int - model identifier
@@ -361,14 +547,14 @@ def read_fr3d_basepairing(file: Union[str, TextIO], filter_model = None, filter_
         if file.endswith('.gz'):
             import gzip
             with gzip.open(file, 'rt') as f:
-                return read_fr3d_basepairing(f, filter_model, filter_chains)
+                return read_fr3d_basepairing(f, pdbid, filter_model, filter_chains)
         elif file.endswith('.zst'):
             import zstandard
             with zstandard.open(file, 'rt') as f:
-                return read_fr3d_basepairing(f, filter_model, filter_chains)
+                return read_fr3d_basepairing(f, pdbid, filter_model, filter_chains)
         else:
             with open(file, 'rt') as f:
-                return read_fr3d_basepairing(f, filter_model, filter_chains)
+                return read_fr3d_basepairing(f, pdbid, filter_model, filter_chains)
 
     pairs: Dict = {
         "model_i": [],
@@ -380,48 +566,41 @@ def read_fr3d_basepairing(file: Union[str, TextIO], filter_model = None, filter_
         "nt2_ix": [],
         "pairing": [],
     }
-    def parse_UnitID(unit_id: str):
-        split = unit_id.split('|')
-        # more than 5 is ok, sometimes the unit ID is something like 2D34|1|A|DC|5||||8_665, but we don't care about that
-        assert len(split) >= 5, f"Invalid unit id {unit_id}"
-        pdbid, model_i, chain, nt, ntix = split[:5]
-        assert len(pdbid) == 4, f"Invalid pdbid {pdbid}"
-        return (pdbid, int(model_i), chain, nt, ntix)
     all_models = defaultdict(lambda: 0)
     all_chains = defaultdict(lambda: 0)
     for line in file:
-        left_nt, basepair_type, right_nt, some_number_which_is_always_zero_so_whatetever = line.split()
-        left_pdbid, left_model_i, left_chain, left_nt, left_ntix = parse_UnitID(left_nt)
-        right_pdbid, right_model_i, right_chain, right_nt, right_ntix = parse_UnitID(right_nt)
+        left_unit_id, basepair_type, right_unit_id, some_number_which_is_always_zero_so_whatetever = line.split()
+        left = UnitID.parse(left_unit_id)
+        right = UnitID.parse(right_unit_id)
 
-        if right_model_i != left_model_i:
-            print(f"WARNING: {left_pdbid}:{left_model_i} has pairing with different model {right_pdbid}:{right_model_i}")
+        if right.model_i != left.model_i:
+            print(f"WARNING: {left} has pairing with different model {right}")
 
-        all_models[left_model_i] += 1
+        all_models[left.model_i] += 1
         # print("filter_model", filter_model)
         if filter_model is not None:
             if filter_model == 'first':
-                filter_model = left_model_i
-            elif left_model_i != filter_model:
+                filter_model = left.model_i
+            elif left.model_i != filter_model:
                 continue
-        all_chains["-".join(sorted((left_chain, right_chain)))] += 1
+        all_chains["-".join(sorted((left.chain, right.chain)))] += 1
         if filter_chains is not None:
-            if left_chain not in filter_chains or right_chain not in filter_chains:
+            if left.chain not in filter_chains or right.chain not in filter_chains:
                 continue
 
-        pairs["model_i"].append(left_model_i)
-        pairs["nt1_base"].append(left_nt)
-        pairs["nt2_base"].append(right_nt)
-        pairs["nt1_chain"].append(left_chain)
-        pairs["nt2_chain"].append(right_chain)
-        pairs["nt1_ix"].append(left_ntix)
-        pairs["nt2_ix"].append(right_ntix)
+        pairs["model_i"].append(left.model_i)
+        pairs["nt1_base"].append(left.residue_base)
+        pairs["nt2_base"].append(right_unit_id)
+        pairs["nt1_chain"].append(left.chain)
+        pairs["nt2_chain"].append(right.chain)
+        pairs["nt1_ix"].append(left.residue_id)
+        pairs["nt2_ix"].append(right.residue_id)
         pairs["pairing"].append(basepair_type)
 
     if len(all_models) > 0 and filter_model not in all_models:
-        print(f"WARNING: model filter ({filter_model}) filtered out all basepairs. All models: {dict(sorted(all_models.items()))}")
-    if len(pairs["model_i"]) == 0:
-        print(f"WARNING: chain filter ({filter_chains}) filtered out all basepairs. All chains: {dict(sorted(all_chains.items()))}")
+        print(f"WARNING: model filter ({filter_model}) filtered out all basepairs in {pdbid}. All models: {dict(sorted(all_models.items()))}")
+    if len(all_chains) > 0 and len(pairs["model_i"]) == 0:
+        print(f"WARNING: chain filter ({filter_chains}) filtered out all basepairs in {pdbid}. All chains: {dict(sorted(all_chains.items()))}")
 
     pairs["model_i"] = np.array(pairs["model_i"], dtype=np.int32)
     pairs["nt1_base"] = np.array(pairs["nt1_base"], dtype=np.str_)
