@@ -289,8 +289,14 @@ class Network(tf.keras.Model):
         elif p.sample_weight == "linear":
             self.ntc_loss_weights = tf.convert_to_tensor([
                     0 if k == "[UNK]" else
-                    0.001 if k == "NANT" else
-                    clamp(max_frequency / csv_loader.ntc_frequencies[k] * 0.01, 0.0, 10.0)
+                    0.01 if k == "NANT" else
+                    clamp(max_frequency / csv_loader.ntc_frequencies[k] * 0.03, 0.0, 7.0)
+                    for k in dataset.NtcDatasetLoader.ntc_mapping.get_vocabulary()])
+        elif p.sample_weight == "almostlinear":
+            self.ntc_loss_weights = tf.convert_to_tensor([
+                    0 if k == "[UNK]" else
+                    0.01 if k == "NANT" else
+                    clamp((max_frequency / csv_loader.ntc_frequencies[k] * 0.01) ** 0.7, 0.0, 7.0)
                     for k in dataset.NtcDatasetLoader.ntc_mapping.get_vocabulary()])
         elif p.sample_weight == "clip-sqrt":
             self.ntc_loss_weights = tf.convert_to_tensor([
@@ -303,7 +309,14 @@ class Network(tf.keras.Model):
             self.ntc_loss_weights = tf.convert_to_tensor([
                     0 if k == "[UNK]" else
                     0.01 if k == "NANT" else
-                    clamp(math.sqrt(max_frequency / csv_loader.ntc_frequencies[k]) * 0.01, 0.0, 10.0)
+                    clamp(math.sqrt(max_frequency / csv_loader.ntc_frequencies[k]) * 0.01, 0.0, 20.0)
+                    for k in dataset.NtcDatasetLoader.ntc_mapping.get_vocabulary()
+                ], dtype=self.compute_dtype)
+        elif p.sample_weight == "sqrtB-clip":
+            self.ntc_loss_weights = tf.convert_to_tensor([
+                    0 if k == "[UNK]" else
+                    0.01 if k == "NANT" else
+                    clamp(math.sqrt(max_frequency / csv_loader.ntc_frequencies[k]) * 0.03, 0.1, 3.0)
                     for k in dataset.NtcDatasetLoader.ntc_mapping.get_vocabulary()
                 ], dtype=self.compute_dtype)
 
@@ -314,6 +327,14 @@ class Network(tf.keras.Model):
                     5.0 / tf.math.log(5.0 + csv_loader.ntc_frequencies[k] / min_frequency)
                     for k in dataset.NtcDatasetLoader.ntc_mapping.get_vocabulary()
                 ], dtype=self.compute_dtype)
+            
+        elif p.sample_weight == "ignore-AAs":
+            self.ntc_loss_weights = tf.convert_to_tensor([
+                    0 if k == "[UNK]" else
+                    0.01 if k == "NANT" else
+                    0.01 if k in ["AA00", "AA08", "AA04"] else
+                    1
+                    for k in dataset.NtcDatasetLoader.ntc_mapping.get_vocabulary() ])
 
         # weight=torch.Tensor([
             #     0.01 if k == "NANT" else

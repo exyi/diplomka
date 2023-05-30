@@ -1,55 +1,29 @@
 #!/usr/bin/env python3
 
 import math, time, os, sys
+
 os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "2")
 from typing import Any, Dict, List, Optional, Tuple
+import numpy as np
 import tensorflow as tf, tensorflow_addons as tfa
 import tensorboard.plugins.hparams.api as hparams
 import dataclasses
 import random
-from hparams import Hyperparams
 
+from hparams import Hyperparams
 import ntcnetwork_tf as ntcnetwork
 import dataset_tf
 import csv_loader
+from metrics import FilteredSparseCategoricalAccuracy, NtcMetricWrapper
 
-class NtcMetricWrapper(tf.keras.metrics.Metric):
-    def __init__(self, metric: tf.keras.metrics.Metric, argmax_output=False):
-        super().__init__(metric.name, metric.dtype)
-        self.inner_metric = metric
-        self.argmax_output = argmax_output
-
-    def update_state(self, y_true, y_pred, sample_weight=None):
-        y_pred = y_pred.values
-        y_true = y_true.values
-        y_true = tf.one_hot(y_true, ntcnetwork.Network.OUTPUT_NTC_SIZE)
-
-        if self.argmax_output:
-            y_pred = tf.argmax(y_pred, axis=-1)
-            y_pred = tf.one_hot(y_pred, ntcnetwork.Network.OUTPUT_NTC_SIZE)
-
-        self.inner_metric.update_state(y_true, y_pred, sample_weight)
-
-        if False:
-            y_pred_argmax = tf.argmax(y_pred, axis=-1)
-            y_true_argmax = tf.argmax(y_true, axis=-1)
-            tf.print("Prediction vs true NTC: ", tf.stack([
-                tf.gather(dataset_tf.NtcDatasetLoader.ntc_mapping.get_vocabulary(), y_pred_argmax),
-                tf.gather(dataset_tf.NtcDatasetLoader.ntc_mapping.get_vocabulary(), y_true_argmax)
-            ], axis=1))
-    def result(self):
-        return self.inner_metric.result()
-    def reset_state(self):
-        self.inner_metric.reset_state()
-    def get_config(self):
-        return self.inner_metric.get_config()
-    
 def parse_len_schedule(input_str: str, num_epochs: int) -> List[Tuple[int, int]]:
     splits = [ s.split('*') for s in input_str.split(";") ]
     non_x_sum = sum([ int(epochs) for epochs, _ in splits if epochs != "x" ])
     x_count = sum([ 1 for epochs, _ in splits if epochs == "x" ])
     x_min = (num_epochs - non_x_sum) // x_count
     x_mod = (num_epochs - non_x_sum) % x_count
+    if x_min < 0:
+        raise ValueError(f"Can't fit {num_epochs} epochs into {input_str}")
     x = [ x_min + (1 if i < x_mod else 0) for i in range(x_count) ]
     x.reverse()
     return [ ((int(epochs) if epochs != "x" else x.pop()), int(max_len)) for epochs, max_len in splits ]
@@ -90,6 +64,46 @@ class FilteredProgbar(tf.keras.callbacks.ProgbarLogger):
     def on_predict_batch_end(self, batch, logs=None):
         return super().on_predict_batch_end(batch, self._filter_logs(logs))
 
+def utf8decode(x):
+    if isinstance(x, tf.Tensor):
+        return x.numpy().decode('utf-8')
+    if isinstance(x, bytes):
+        return x.decode('utf-8')
+    return str(x)
+
+def print_results(file, model, val_dataset):
+    vocab_letter = dataset_tf.NtcDatasetLoader.letters_mapping.get_vocabulary()
+    vocab_ntc = dataset_tf.NtcDatasetLoader.ntc_mapping.get_vocabulary()
+    vocab_cana = dataset_tf.NtcDatasetLoader.cana_mapping.get_vocabulary()
+    for i, (x, y) in enumerate(val_dataset):
+        pred_batch = model(x)
+        batch_size = x["sequence"].shape[0]
+        for i in range(batch_size):
+            sequence = x['sequence'][i].numpy()
+            ntcs_true = y['NtC'][i].numpy()
+            is_dna = x['is_dna'][i].numpy()
+            struct_len = sequence.shape[0]
+            print(f"### Structure X ({x['pdbid'][i].numpy()}  {np.sum(x['sequence'][i].numpy() != dataset_tf.NtcDatasetLoader.letters_mapping(' '))}nt {1+np.sum(x['sequence'][i].numpy() == dataset_tf.NtcDatasetLoader.letters_mapping(' '))}ch ===========", file=file)
+            ntcs_pred_dist = pred_batch['NtC'][i].numpy()
+            for j in range(struct_len - 1):
+                letter = ('d' if is_dna[j] else ' ') + vocab_letter[sequence[j]]
+                ntc_true = vocab_ntc[ntcs_true[j]]
+                ntc_pred = vocab_ntc[np.argmax(ntcs_pred_dist[j], axis=-1)]
+                ntc_sureness = ntcs_pred_dist[j][np.argmax(ntcs_pred_dist[j], axis=-1)]
+                ntc_true_sureness = ntcs_pred_dist[j][ntcs_true[j]]
+                ntc_true_order = np.sum(ntcs_pred_dist[j] > ntc_true_sureness)
+                if ntc_true == ntc_pred:
+                    warning = "  "
+                elif ntc_true == "NANT":
+                    warning = " ."
+                elif ntc_true_order < 3:
+                    warning = " *"
+                else:
+                    warning = "!!"
+                print(f"{j: 5} {letter} {ntc_true} {ntc_pred}  {int(round(ntc_sureness*100)): >2}%  {int(tf.round(ntc_true_sureness*100)): >2}%  {ntc_true_order: >2}        {warning}", file=file)
+            print(f"{struct_len-1: 5} {('d' if is_dna[-1] else ' ')}{vocab_letter[sequence[-1]]}  ...", file=file)
+            print('', file=file)
+
 def create_model(p: Hyperparams, step_count, logdir, eager=False, profile=False):
     model = ntcnetwork.Network(p)
     if p.lr_decay == "cosine":
@@ -120,6 +134,10 @@ def create_model(p: Hyperparams, step_count, logdir, eager=False, profile=False)
             tf.keras.metrics.SparseTopKCategoricalAccuracy(k=2, name="acc2"),
             tf.keras.metrics.SparseTopKCategoricalAccuracy(k=5, name="acc5"),
             NtcMetricWrapper(tfa.metrics.F1Score(name="f1", num_classes=ntcnetwork.Network.OUTPUT_NTC_SIZE, average="macro")),
+            FilteredSparseCategoricalAccuracy(
+                ignored_labels=dataset_tf.NtcDatasetLoader.ntc_mapping(["<UNK>", "NANT", "AA00", "AA08"]),
+                name="accF"
+            )
         ]
     },
     )
@@ -153,6 +171,7 @@ def model_fit(model: tf.keras.Model, train_loader: dataset_tf.NtcDatasetLoader, 
 
 def train(train_set_dir, val_set_dir, p: Hyperparams, logdir, eager=False, profile=False):
     seq_len_schedule = parse_len_schedule(p.seq_length_schedule, p.epochs)
+    print("Epoch/sequence length schedule: ", seq_len_schedule)
     train_loader = dataset_tf.NtcDatasetLoader(train_set_dir)
     step_count = get_step_count(seq_len_schedule, train_loader.cardinality, p.batch_size)
     assert step_count > 0, f"{step_count=}"
@@ -176,6 +195,10 @@ def train(train_set_dir, val_set_dir, p: Hyperparams, logdir, eager=False, profi
     # with tf.profiler.experimental.Profile(logdir):
 
     model_fit(model, train_loader, val_ds, seq_len_schedule, p.batch_size)
+
+    with open(os.path.join(logdir, "predictions.txt"), "w") as file:
+        print_results(file, model, val_ds)
+    return model
 
 class Clock:
     def __init__(self):
@@ -259,9 +282,11 @@ if __name__ == '__main__':
         )
 
         try:
-            train(args.train_set, args.val_set, hyperparameters, args.logdir, eager=args.eager, profile=args.profile)
+            model = train(args.train_set, args.val_set, hyperparameters, args.logdir, eager=args.eager, profile=args.profile)
         except KeyboardInterrupt:
             print("Keyboard interrupt")
         except Exception as e:
             tf.summary.text("crash", "```\n" + str(e) + "\n```\n", step=(tf.summary.experimental.get_step() or 0))
             raise e
+        
+
