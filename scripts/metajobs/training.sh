@@ -21,10 +21,10 @@ rm torch-venv/bin/python3.9
 ln -s $real_python torch-venv/bin/python3.9
 
 if test -z "$TRAINING_SET"; then
-	TRAINING_SET=/mnt/storage-brno12-cerit/nfs4/home/exyi/rna-csvs/train_set
+	TRAINING_SET=/storage/brno12-cerit/home/exyi/rna-csvs/train_set
 fi
 if test -z "$VAL_SET"; then
-	VAL_SET=/mnt/storage-brno12-cerit/nfs4/home/exyi/rna-csvs/rna-puzzles-test
+	VAL_SET=/storage/brno12-cerit/home/exyi/rna-csvs/rna-puzzles-test
 fi
 if test -z "$TBLOG"; then
 	TBLOG=tt
