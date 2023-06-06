@@ -159,21 +159,21 @@ def _separate_subchains(v: pd.DataFrame) -> List[Dict[str, Any]]:
 
     steps = dict()
     alt_letters = set()
-    for _, row in v.iterrows():
-        pdbid = row['pdbid']
-        chain = row['chain']
-        nt1 = row['ntix_1']
-        nt2 = row['ntix_2']
-        key = (pdbid, chain, nt1, row['ntalt_1'])
-        key2 = (pdbid, chain, nt2, row['ntalt_2'])
-        alt_letters.add(row['ntalt_1'])
-        alt_letters.add(row['ntalt_2'])
+    for row in v.itertuples():
+        pdbid = row.pdbid
+        chain = row.chain
+        nt1 = row.ntix_1
+        nt2 = row.ntix_2
+        key = (pdbid, chain, nt1, row.ntalt_1)
+        key2 = (pdbid, chain, nt2, row.ntalt_2)
+        alt_letters.add(row.ntalt_1)
+        alt_letters.add(row.ntalt_2)
         if key in steps:
-            if not row['ntalt_2']:
+            if not row.ntalt_2:
                 raise ValueError(f"Duplicate step: {key}")
             
             # on alternates, use the lower numbered nucleotide, drop the other one
-            if row['ntalt_2'] < steps[key][1]['ntalt_2']:
+            if row.ntalt_2 < steps[key][1].ntalt_2:
                 steps[key] = (key2, row)
         else:
             steps[key] = (key2, row)
@@ -185,6 +185,7 @@ def _separate_subchains(v: pd.DataFrame) -> List[Dict[str, Any]]:
         if key2 in roots:
             roots.remove(key2)
 
+    # print("Chain roots", roots)
     assert len(roots) > 0
     # remove alternative chains to avoid id conflicts
     for root in reversed(list(roots)):
@@ -198,23 +199,36 @@ def _separate_subchains(v: pd.DataFrame) -> List[Dict[str, Any]]:
                     break
 
     subchains = []
+    used_ids = set()
     for root in roots:
+        if root[:3] in used_ids:
+            print("WARNING: duplicate root", root, "->", steps[root][0], "Does this structure have a B variant which is longer than A variant?")
+            continue
         subchain = []
+        used_ids.add(root[:3])
         while root in steps:
             key2, row = steps[root]
+
+            if key2[:3] in used_ids:
+                print(f"WARNING: duplicate node {key2} -> {steps.get(key2, ['end'])[0]}, terminating current subchain len={len(subchain)}")
+                break
+            used_ids.add(key2[:3])
+
             del steps[root]
+            used_ids.add(root[:3])
             subchain.append(row)
             root = key2
         assert len(subchain) > 0
         subchains.append(subchain)
 
-    # remove all B variants, we only dropped the roots, not all members of a potentially longer chain
+    # remove all unused variants, we only dropped the roots, not all members of a potentially longer chain
     for key in list(steps):
         pdbid, chain, nt1, alt = key
         if alt:
             del steps[key]
 
     if len(steps) > 0:
+        print(f"WARNING: {len(steps)} orphaned steps")
         print("WARNING: loop or something weird detected in ", list(sorted(steps.keys())), v['step_ID'].array)
 
     # subchains.sort(key=lambda subchain: (subchain[0]['pdbid'], subchain[0]['chain'], try_parse_int(subchain[0]['ntix_1'], subchain[0]['ntix_1'])))
@@ -228,13 +242,13 @@ def _process_subchain(steps):
     * sequence_full - string array of nucleotides
     * is_dna - bool array
     """
-    sequence = [ steps[0]['nt_1'] ]
-    indices = [ steps[0]['ntix_1'] ]
+    sequence = [ steps[0].nt_1 ]
+    indices = [ steps[0].ntix_1 ]
     for s in steps:
-        assert s['ntix_1'] == indices[-1]
-        assert s['nt_1'] == sequence[-1], f"Nucleotide {s['nt_1']} != {sequence[-1]}, at position {s.get('pdbid', '?')}:{s.get('chain', '?')}:{s['ntix_1']}-{s['ntix_2']}, all steps: {', '.join([ s['step_ID'] for s in steps])}"
-        indices.append(s['ntix_2'])
-        sequence.append(s['nt_2'])
+        assert s.ntix_1 == indices[-1]
+        assert s.nt_1 == sequence[-1], f"Nucleotide {s.nt_1} != {sequence[-1]}, at position {s.pdbid}:{s.chain}:{s.ntix_1}-{s.ntix_2}, all steps: {', '.join([ s.step_ID for s in steps])}"
+        indices.append(s.ntix_2)
+        sequence.append(s.nt_2)
     
     return {
         'steps': pd.DataFrame(steps),
@@ -600,7 +614,7 @@ def read_fr3d_basepairing(file: Union[str, TextIO], pdbid: str, filter_model = N
     if len(all_models) > 0 and filter_model not in all_models:
         print(f"WARNING: model filter ({filter_model}) filtered out all basepairs in {pdbid}. All models: {dict(sorted(all_models.items()))}")
     if len(all_chains) > 0 and len(pairs["model_i"]) == 0:
-        print(f"WARNING: chain filter ({filter_chains}) filtered out all basepairs in {pdbid}. All chains: {dict(sorted(all_chains.items()))}")
+        print(f"NOTE: chain filter ({filter_chains}) filtered out all basepairs in {pdbid}. All chains: {dict(sorted(all_chains.items()))}")
 
     pairs["model_i"] = np.array(pairs["model_i"], dtype=np.int32)
     pairs["nt1_base"] = np.array(pairs["nt1_base"], dtype=np.str_)
