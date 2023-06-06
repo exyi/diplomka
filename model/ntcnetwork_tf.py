@@ -123,6 +123,26 @@ class ConvEncoder(layers.Layer):
             tf.assert_equal(x.values.shape[-2], input.values.shape[-2])
         return x
 
+@tf.function
+def rowwise_ragged_gather(x: tf.RaggedTensor, col_indices: tf.RaggedTensor):
+    """
+    Returns values from x at the given indices, processes each row independently.
+    `col_indices` is expected to have a shape of (rows, None), None is the ragged dimension.
+    `x` should be a ragged of the same number of rows, with the same row lengths. The shape should be (rows, None, features, or, whatever...).
+    """
+    tf.assert_equal(x.nrows(), col_indices.nrows())
+    tf.assert_equal(x.row_lengths(), col_indices.row_lengths())
+
+    col_indices = tf.cast(col_indices, tf.int64)
+    filtered_col_indices = tf.where(col_indices.values >= 0, col_indices.values, 0)
+    row_indices = col_indices.nested_value_rowids()[0]
+    full_indices = tf.stack([row_indices, filtered_col_indices], axis=-1)
+    full_indices = tf.RaggedTensor.from_row_splits(full_indices, col_indices.row_splits)
+
+    output = tf.gather_nd(x, full_indices).values
+    output = tf.where(tf.broadcast_to(tf.expand_dims(col_indices.values >= 0, axis=-1), shape=tf.shape(output)), output, tf.zeros_like(output))
+    return tf.RaggedTensor.from_row_splits(output, x.row_splits)
+
 class EncoderRNN(layers.Layer):
     def __init__(self,
             embedding: tf.Module,
@@ -131,6 +151,7 @@ class EncoderRNN(layers.Layer):
             num_layers,
             dropout,
             attention_heads,
+            pairing_mode="none",
             bidirectional=False,
             layer_norm=True,
             name=None
@@ -150,7 +171,6 @@ class EncoderRNN(layers.Layer):
         for layer_i in range(num_layers):
             # TODO multiple layers
             rnn = layers.LSTM(
-                input_shape=(None, embedding_size),
                 units=hidden_size,
                 return_sequences=True,
                 name=f"{name}/rnn{layer_i}"
@@ -159,6 +179,12 @@ class EncoderRNN(layers.Layer):
                 self.rnn.append(layers.Bidirectional(rnn, merge_mode="sum", name=f"{name}/birnn{layer_i}"))
             else:
                 self.rnn.append(rnn)
+
+        if pairing_mode == "input-directconn":
+            self.pairing_reducer = [
+                layers.Dense(hidden_size if i > 0 else embedding_size, name=f"{name}/pairing_reducer")
+                for i in range(num_layers)
+            ]
 
         self.layer_norm = None
         if layer_norm:
@@ -187,7 +213,7 @@ class EncoderRNN(layers.Layer):
         }
 
     # @tf.Module.with_name_scope
-    def call(self, input: tf.RaggedTensor):
+    def call(self, input: tf.RaggedTensor, pairs_with: Optional[tf.RaggedTensor]):
         if self.input_dropout > 0:
             input = tf.nn.dropout(input, rate=self.input_dropout)
         embedded = self.embedding(input)
@@ -200,6 +226,19 @@ class EncoderRNN(layers.Layer):
 
         x = embedded
         for rnn_i in range(len(self.rnn)):
+            # connect paired nucleotides
+            if pairs_with is not None:
+                bypass = x
+                assert self.pairing_reducer is not None
+                pairing_data = rowwise_ragged_gather(x, pairs_with)
+                assert pairing_data.shape == bypass.shape, f"{pairing_data.shape} != {bypass.shape}"
+                pairing_data = tf.nn.dropout(pairing_data, rate=self.dropout)
+                x = self.pairing_reducer[rnn_i](tf.nn.relu(tf.concat([pairing_data, x], axis=-1)))
+                x = tf.nn.dropout(x, rate=self.dropout)
+                tf.assert_equal(x.nrows(), input.nrows())
+                assert x.shape == bypass.shape, f"{x.shape} != {bypass.shape}"
+                x = bypass + x
+
             bypass = x
             if rnn_i > 0 and self.layer_norm is not None:
                 x = self.layer_norm[rnn_i-1](x)
@@ -221,23 +260,11 @@ class EncoderRNN(layers.Layer):
         return x
 
 class Decoder(layers.Layer):
-    def __init__(self, hidden_size, output_size, attention = 0, name=None):
+    def __init__(self, hidden_size, output_size,  name=None):
         super(Decoder, self).__init__(name=name)
         self.hidden_size = hidden_size
         self.output_size = output_size
         self.out = layers.Dense(input_shape=(None, hidden_size), units=output_size)
-
-        if attention == 0:
-            self.attn = None
-        elif attention is None:
-            # self-attention TODO
-            # self.mh_attention = layers.MultiHeadAttention(
-            #     hidden_size, num_heads=1)
-            assert False
-        else:
-            # self.attn = nn.Linear(self.hidden_size, attention)
-            # self.attn_combine = nn.Linear(self.hidden_size * 2, self.hidden_size)
-            assert False
 
         self.layers = [ self.out ]
 
@@ -264,7 +291,13 @@ class Network(tf.keras.Model):
             embedding = ConvEncoder(Network.INPUT_SIZE, channels=p.conv_channels, window_size=p.conv_window_size, kind=p.conv_kind, max_dilatation=p.conv_dilation)
         else:
             embedding = layers.Embedding(Network.INPUT_SIZE, embedding_size)
-        self.encoder = EncoderRNN(embedding, embedding_size, hidden_size, num_layers=p.rnn_layers, dropout=p.rnn_dropout, attention_heads=p.attention_heads, bidirectional=True)
+        self.encoder = EncoderRNN(embedding, embedding_size, hidden_size,
+            num_layers=p.rnn_layers,
+            dropout=p.rnn_dropout,
+            attention_heads=p.attention_heads,
+            bidirectional=True,
+            pairing_mode=p.basepairing,
+        )
         # self.encoder = EncoderBaseline(Network.INPUT_SIZE, hidden_size)
         self.ntc_decoder = Decoder(hidden_size, self.OUTPUT_NTC_SIZE)
 
@@ -345,7 +378,7 @@ class Network(tf.keras.Model):
         print("NtC loss weights: ", self.ntc_loss_weights)
 
 
-    def call(self, input: TensorDict, whatever =None):
+    def call(self, input: TensorDict, whatever = None):
         # print(input["sequence"].shape, input["is_dna"].shape)
         one_hot_seq = tf.one_hot(input["sequence"], depth=self.INPUT_SIZE_NUCLEOTIDE, dtype=self.compute_dtype)
         # tf.print("Sequence: ", input["sequence"])
@@ -356,7 +389,10 @@ class Network(tf.keras.Model):
         tf.assert_equal(in_tensor.shape[-1], Network.INPUT_SIZE)
         tf.assert_equal(in_tensor.shape[-2], None)
 
-        encoder_output: tf.RaggedTensor = self.encoder(in_tensor)
+        encoder_output: Any = self.encoder(
+            in_tensor,
+            pairs_with = input["pairs_with"] if self.p.basepairing in ["input-directconn"] else None,
+        )
         # tf.print("Input: ", in_tensor.shape, in_tensor.values.shape)
         # tf.print("Encoder output: ", encoder_output.shape, encoder_output.values.shape)
         tf.assert_equal(encoder_output.shape[-1], self.p.rnn_size)

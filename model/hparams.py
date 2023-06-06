@@ -25,7 +25,7 @@ class Hyperparams:
     clip_grad_value: float = hyperparameter(None, "Another method of gradient clipping (see ADAM clipvalue argument)")
     attention_heads: int = hyperparameter(0, "Number of attention heads. If != 0 multihead attention is inserted after each RNN layer")
     sample_weight: str = hyperparameter("flat", "Sample weight mode", choices=["flat", "log", "clip-sqrt", "sqrt", "sqrtB", "clip-linear", "linear", "almostlinear", "sqrtB-clip", "ignore-AAs"])
-
+    basepairing: str = hyperparameter("none", "What to do with basepairing information. Nothing / Input by directly connecting the basepaired nucleotides", choices=["none", "input-directconn"])
 
     def get_nondefault(self):
         default = dataclasses.asdict(Hyperparams())

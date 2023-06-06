@@ -92,7 +92,7 @@ class NtcDatasetLoader:
         if self.cardinality:
             self.dataset = self.dataset.apply(tf.data.experimental.assert_cardinality(self.cardinality))
 
-    def get_data(self, max_len = None, trim_prob: float = 0, shuffle = None, batch = None, shuffle_chains = True, max_chains = None, pairing_seq = True, pairing_matrix = False):
+    def get_data(self, max_len = None, trim_prob: float = 0, shuffle = None, batch = None, shuffle_chains = True, max_chains = None, pairing_seq = True):
         data = self.dataset
 
         # def remap_chains(tensor, separators, )
@@ -105,12 +105,6 @@ class NtcDatasetLoader:
             separator = self.letters_mapping(" ") if self.convert_to_numbers else " "
             separator_idx = tf.where(tf.equal(x["sequence"], separator))
 
-            pairs_with = None
-            if pairing_seq:
-                pairs_with = tf.zeros(shape=[length], dtype=tf.int32)
-                pairs_with = tf.tensor_scatter_nd_update(pairs_with, tf.expand_dims(x["pairing_nt1_ix"], axis=1), tf.cast(x["pairing_nt2_ix"], tf.int32))
-
-                tf.print(pairs_with, x["pairing_nt1_ix"], x["pairing_nt2_ix"])
 
             if len(separator_idx) > 0 and (shuffle_chains or (max_chains and max_chains > len(separator_idx))):
                 # TODO: implement chain shuffling
@@ -126,6 +120,19 @@ class NtcDatasetLoader:
                 s_slice = tf.random.uniform(shape=[], minval=0, maxval=length - max_len, dtype=tf.int32)
                 length = max_len
 
+            pairs_with = None
+            if pairing_seq:
+                i64 = lambda x: tf.cast(x, tf.int64)
+                pairings1 = x["pairing_nt1_ix"] - i64(s_slice)
+                pairings2 = x["pairing_nt2_ix"] - i64(s_slice)
+                valid_pairings = (pairings1 >= i64(0)) & (pairings1 < i64(length)) & \
+                                 (pairings2 >= i64(0)) & (pairings2 < i64(length))
+
+                pairings1 = tf.boolean_mask(pairings1, valid_pairings)
+                pairings2 = tf.boolean_mask(pairings2, valid_pairings)
+
+                pairs_with = tf.zeros(shape=[length], dtype=tf.int32) - 1
+                pairs_with = tf.tensor_scatter_nd_update(pairs_with, tf.expand_dims(pairings1, axis=1), tf.cast(pairings2, tf.int32))
 
             return {
                 "pdbid": x["pdbid"],
@@ -134,7 +141,7 @@ class NtcDatasetLoader:
                 "is_dna": x["is_dna"][s_slice:s_slice+length],
                 "NtC": x["NtC"][s_slice:s_slice+length-1],
                 "nearest_NtC": x["nearest_NtC"][s_slice:s_slice+length-1],
-                "pairs_with": pairs_with[s_slice:s_slice+length],
+                "pairs_with": pairs_with if pairs_with is not None else None,
                 # "CANA": x["CANA"][s_slice:s_slice+length-1],
             }
 
@@ -143,7 +150,7 @@ class NtcDatasetLoader:
         def filter_dict(d: Dict[str, Any], keys: List[str]) -> Dict[str, Any]:
             return { k: v for k, v in d.items() if k in keys }
         data = data.map(lambda x: (
-            filter_dict(x, ["is_dna", "sequence", "pdbid"]),
+            filter_dict(x, ["is_dna", "sequence", "pdbid", "pairs_with"]),
             filter_dict(x, ["NtC"]),
         ))
 
