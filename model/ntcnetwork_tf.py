@@ -10,6 +10,7 @@ import csv_loader
 import random
 from hparams import Hyperparams
 import dataset_tf as dataset
+import sample_weight
 
 TensorDict = Dict[str, tf.Tensor]
 
@@ -301,80 +302,9 @@ class Network(tf.keras.Model):
         # self.encoder = EncoderBaseline(Network.INPUT_SIZE, hidden_size)
         self.ntc_decoder = Decoder(hidden_size, self.OUTPUT_NTC_SIZE)
 
-        min_frequency = 100
-        max_frequency = max(csv_loader.ntc_frequencies.values())
-        clip_min = 0.1
-        clip_max = 5.0
-        if p.sample_weight == "flat":
-            self.ntc_loss_weights = tf.convert_to_tensor([
-                    0 if k == "[UNK]" else
-                    0.01 if k == "NANT" else
-                    1
-                    for k in dataset.NtcDatasetLoader.ntc_mapping.get_vocabulary()
-                ], dtype=self.compute_dtype)
-        elif p.sample_weight == "clip-linear":
-            self.ntc_loss_weights = tf.convert_to_tensor([
-                    0 if k == "[UNK]" else
-                    0.01 if k == "NANT" else
-                    clamp(5 / (csv_loader.ntc_frequencies[k] / 20_000), clip_min, clip_max)
-                    for k in dataset.NtcDatasetLoader.ntc_mapping.get_vocabulary()
-                ], dtype=self.compute_dtype)
-        elif p.sample_weight == "linear":
-            self.ntc_loss_weights = tf.convert_to_tensor([
-                    0 if k == "[UNK]" else
-                    0.01 if k == "NANT" else
-                    clamp(max_frequency / csv_loader.ntc_frequencies[k] * 0.03, 0.0, 7.0)
-                    for k in dataset.NtcDatasetLoader.ntc_mapping.get_vocabulary()])
-        elif p.sample_weight == "almostlinear":
-            self.ntc_loss_weights = tf.convert_to_tensor([
-                    0 if k == "[UNK]" else
-                    0.01 if k == "NANT" else
-                    clamp((max_frequency / csv_loader.ntc_frequencies[k] * 0.01) ** 0.7, 0.0, 7.0)
-                    for k in dataset.NtcDatasetLoader.ntc_mapping.get_vocabulary()])
-        elif p.sample_weight == "clip-sqrt":
-            self.ntc_loss_weights = tf.convert_to_tensor([
-                    0 if k == "[UNK]" else
-                    0.01 if k == "NANT" else
-                    clamp(5 / tf.math.sqrt(csv_loader.ntc_frequencies[k] / min_frequency), clip_min, clip_max)
-                    for k in dataset.NtcDatasetLoader.ntc_mapping.get_vocabulary()
-                ], dtype=self.compute_dtype)
-        elif p.sample_weight == "sqrtB":
-            self.ntc_loss_weights = tf.convert_to_tensor([
-                    0 if k == "[UNK]" else
-                    0.01 if k == "NANT" else
-                    clamp(math.sqrt(max_frequency / csv_loader.ntc_frequencies[k]) * 0.01, 0.0, 20.0)
-                    for k in dataset.NtcDatasetLoader.ntc_mapping.get_vocabulary()
-                ], dtype=self.compute_dtype)
-        elif p.sample_weight == "sqrtB-clip":
-            self.ntc_loss_weights = tf.convert_to_tensor([
-                    0 if k == "[UNK]" else
-                    0.01 if k == "NANT" else
-                    clamp(math.sqrt(max_frequency / csv_loader.ntc_frequencies[k]) * 0.03, 0.1, 3.0)
-                    for k in dataset.NtcDatasetLoader.ntc_mapping.get_vocabulary()
-                ], dtype=self.compute_dtype)
-
-        elif p.sample_weight == "log":
-            self.ntc_loss_weights = tf.convert_to_tensor([
-                    0 if k == "[UNK]" else
-                    0.01 if k == "NANT" else
-                    5.0 / tf.math.log(5.0 + csv_loader.ntc_frequencies[k] / min_frequency)
-                    for k in dataset.NtcDatasetLoader.ntc_mapping.get_vocabulary()
-                ], dtype=self.compute_dtype)
-            
-        elif p.sample_weight == "ignore-AAs":
-            self.ntc_loss_weights = tf.convert_to_tensor([
-                    0 if k == "[UNK]" else
-                    0.01 if k == "NANT" else
-                    0.01 if k in ["AA00", "AA08", "AA04"] else
-                    1
-                    for k in dataset.NtcDatasetLoader.ntc_mapping.get_vocabulary() ])
-
-        # weight=torch.Tensor([
-            #     0.01 if k == "NANT" else
-            #     clamp(1 / (v / 20_000), 0.2, 1)
-            #     for k, v in csv_loader.ntc_frequencies.items()
-            # ]),
-        # print("NtC loss weights: ", self.ntc_loss_weights.shape)
+        self.ntc_loss_weights = tf.convert_to_tensor(
+            sample_weight.get_ntc_weight(p.sample_weight),
+            dtype=self.compute_dtype)
         print("NtC loss weights: ", self.ntc_loss_weights)
 
 
