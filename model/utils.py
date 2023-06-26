@@ -1,6 +1,6 @@
 
 import time
-from typing import Callable, Dict, Literal, Optional, TypeVar, Union
+from typing import Any, Callable, Dict, List, Literal, Optional, TypeVar, Union
 
 module_load_time = time.time()
 
@@ -35,3 +35,6 @@ def retry_on_error(f: Callable[[], TResult], max_retries = 10, sleep_time = 0.1,
 
     assert False
 
+
+def filter_dict(d: Dict[str, Any], keys: List[str]) -> Dict[str, Any]:
+    return { k: v for k, v in d.items() if k in keys }

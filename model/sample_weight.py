@@ -1,4 +1,4 @@
-from typing import List
+from typing import Any, Callable, List
 import math
 import numpy as np
 import csv_loader
@@ -11,7 +11,9 @@ def get_ntc_weight(strategy: str, ntc_list: List[str] = csv_loader.ntcs):
     max_frequency = max(csv_loader.ntc_frequencies.values())
     clip_min = 0.1
     clip_max = 5.0
-    if strategy == "flat":
+    if strategy == "one":
+        return np.ones(len(ntc_list), dtype=np.float32)
+    elif strategy == "flat":
         return np.array([
                 0 if k == "[UNK]" else
                 0.01 if k == "NANT" else
@@ -77,3 +79,13 @@ def get_ntc_weight(strategy: str, ntc_list: List[str] = csv_loader.ntcs):
             ], dtype=np.float32)
     else:
         raise ValueError(f"Unknown NtC weights strategy: {strategy}")
+
+def ntc_based_sample_weighter(strategy: str, ntc_list, backend) -> Callable[[Any], np.ndarray]:
+    ntc_weights = get_ntc_weight(strategy, ntc_list)
+    def sample_weighter(x):
+        if isinstance(x, dict):
+            ntcs = x["NtC"]
+        else:
+            ntcs = x
+        return backend.gather(ntc_weights, ntcs)
+    return sample_weighter

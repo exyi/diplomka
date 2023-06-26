@@ -4,6 +4,7 @@ import tensorflow as tf
 import sys, os, math, json, re
 import numpy as np
 import csv_loader
+from utils import filter_dict
 
 
 
@@ -53,7 +54,8 @@ class NtcDatasetLoader:
         to_dense('pairing_is_canonical')
         to_dense('pairing_nt1_ix')
         to_dense('pairing_nt2_ix')
-        to_dense('dist_NN')
+        if "geometry" in self.features:
+            to_dense('dist_NN')
         return example
     
     @staticmethod
@@ -65,7 +67,7 @@ class NtcDatasetLoader:
         else:
             return dict()
 
-    def __init__(self, files, convert_to_numbers = True) -> None:
+    def __init__(self, files, convert_to_numbers = True, features = ["NtC", "CANA", "geometry"]) -> None:
         if isinstance(files, str):
             files = [ files ]
 
@@ -76,6 +78,7 @@ class NtcDatasetLoader:
                 raise ValueError(f"{f} is not a file")
 
         self.convert_to_numbers = convert_to_numbers
+        self.features = features
         self.file_name = files
         self.metadata = [ self.try_load_metadata(f) for f in files ]
 
@@ -92,7 +95,16 @@ class NtcDatasetLoader:
         if self.cardinality:
             self.dataset = self.dataset.apply(tf.data.experimental.assert_cardinality(self.cardinality))
 
-    def get_data(self, max_len = None, trim_prob: float = 0, shuffle = None, batch = None, shuffle_chains = True, max_chains = None, pairing_seq = True):
+        self.sample_weighter = None
+
+    def set_sample_weighter(self, weighter):
+        self.sample_weighter = weighter
+        return self
+
+    def get_data(self, max_len = None, trim_prob: float = 0, shuffle = None, batch = None, shuffle_chains = True, max_chains = None, pairing_seq = True, sample_weighter=None):
+        if sample_weighter is None:
+            sample_weighter = self.sample_weighter
+
         data = self.dataset
 
         # def remap_chains(tensor, separators, )
@@ -142,17 +154,18 @@ class NtcDatasetLoader:
                 "NtC": x["NtC"][s_slice:s_slice+length-1],
                 "nearest_NtC": x["nearest_NtC"][s_slice:s_slice+length-1],
                 "pairs_with": pairs_with if pairs_with is not None else None,
-                # "CANA": x["CANA"][s_slice:s_slice+length-1],
+                "CANA": x["CANA"][s_slice:s_slice+length-1],
             }
 
 
         data = data.map(mapping)
-        def filter_dict(d: Dict[str, Any], keys: List[str]) -> Dict[str, Any]:
-            return { k: v for k, v in d.items() if k in keys }
-        data = data.map(lambda x: (
-            filter_dict(x, ["is_dna", "sequence", "pdbid", "pairs_with"]),
-            filter_dict(x, ["NtC"]),
-        ))
+        def split_input_target(x):
+            input = filter_dict(x, ["is_dna", "sequence", "pdbid", "pairs_with"])
+            target = filter_dict(x, self.features)
+            print(target)
+            sample_weight = sample_weighter(x) if sample_weighter else tf.repeat(1.0, x["NtC"].shape[0])
+            return input, target, sample_weight
+        data = data.map(split_input_target)
 
         if shuffle:
             data = data.shuffle(shuffle)

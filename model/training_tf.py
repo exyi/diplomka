@@ -2,6 +2,8 @@
 
 import math, time, os, sys
 
+from utils import filter_dict
+
 os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "2")
 from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
@@ -14,6 +16,7 @@ from hparams import Hyperparams
 import ntcnetwork_tf as ntcnetwork
 import dataset_tf
 import csv_loader
+import sample_weight
 from metrics import FilteredSparseCategoricalAccuracy, NtcMetricWrapper
 
 def parse_len_schedule(input_str: str, num_epochs: int) -> List[Tuple[int, int]]:
@@ -75,16 +78,18 @@ def print_results(file, model, val_dataset):
     vocab_letter = dataset_tf.NtcDatasetLoader.letters_mapping.get_vocabulary()
     vocab_ntc = dataset_tf.NtcDatasetLoader.ntc_mapping.get_vocabulary()
     vocab_cana = dataset_tf.NtcDatasetLoader.cana_mapping.get_vocabulary()
-    for i, (x, y) in enumerate(val_dataset):
+    for i, (x, y, *_) in enumerate(val_dataset):
         pred_batch = model(x)
         batch_size = x["sequence"].shape[0]
         for i in range(batch_size):
             sequence = x['sequence'][i].numpy()
             ntcs_true = y['NtC'][i].numpy()
+            canas_true = y['CANA'][i].numpy() if 'CANA' in y else None
             is_dna = x['is_dna'][i].numpy()
             struct_len = sequence.shape[0]
             print(f"### Structure X ({x['pdbid'][i].numpy()}  {np.sum(x['sequence'][i].numpy() != dataset_tf.NtcDatasetLoader.letters_mapping(' '))}nt {1+np.sum(x['sequence'][i].numpy() == dataset_tf.NtcDatasetLoader.letters_mapping(' '))}ch ===========", file=file)
             ntcs_pred_dist = pred_batch['NtC'][i].numpy()
+            canas_pred_dist = pred_batch['CANA'][i].numpy() if 'CANA' in pred_batch else None
             for j in range(struct_len - 1):
                 letter = ('d' if is_dna[j] else ' ') + vocab_letter[sequence[j]]
                 ntc_true = vocab_ntc[ntcs_true[j]]
@@ -92,15 +97,28 @@ def print_results(file, model, val_dataset):
                 ntc_sureness = ntcs_pred_dist[j][np.argmax(ntcs_pred_dist[j], axis=-1)]
                 ntc_true_sureness = ntcs_pred_dist[j][ntcs_true[j]]
                 ntc_true_order = np.sum(ntcs_pred_dist[j] > ntc_true_sureness)
-                if ntc_true == ntc_pred:
-                    warning = "  "
-                elif ntc_true == "NANT":
-                    warning = " ."
-                elif ntc_true_order < 3:
-                    warning = " *"
+
+                if canas_pred_dist is not None:
+                    cana_pred = vocab_cana[np.argmax(canas_pred_dist[j], axis=-1)]
+                    cana_correct = cana_pred == vocab_cana[canas_true[j]]
+                    cana_pred = cana_pred + "-"
                 else:
+                    cana_correct = False
+                    cana_pred = ""
+
+                if ntc_true == ntc_pred:
+                    warning = "   "
+                elif ntc_true == "NANT":
+                    warning = " . "
+                elif ntc_true_order < 3:
+                    warning = " * "
+                elif cana_correct:
                     warning = "!!"
-                print(f"{j: 5} {letter} {ntc_true} {ntc_pred}  {int(round(ntc_sureness*100)): >2}%  {int(tf.round(ntc_true_sureness*100)): >2}%  {ntc_true_order: >2}        {warning}", file=file)
+                else:
+                    warning = "!!!"
+
+
+                print(f"{j: 5} {letter} {ntc_true} {cana_pred}{ntc_pred}  {int(round(ntc_sureness*100)): >2}%  {int(round(ntc_true_sureness*100)): >2}%  {ntc_true_order: >2}        {warning}", file=file)
             print(f"{struct_len-1: 5} {('d' if is_dna[-1] else ' ')}{vocab_letter[sequence[-1]]}  ...", file=file)
             print('', file=file)
 
@@ -126,9 +144,13 @@ def create_model(p: Hyperparams, step_count, logdir, eager=False, profile=False)
         import json
         json.dump(config_json, f, indent=4)
 
-    model.compile(optimizer=optimizer, loss={
-        "NtC": model.ntcloss,
-    }, metrics={
+    model.compile(optimizer=optimizer, loss=filter_dict({
+        # "NtC": model.ntcloss,
+        "NtC": model.unweighted_ntcloss, 
+        # "NtC": tf.keras.losses.SparseCategoricalCrossentropy(reduction=tf.keras.losses.Reduction.SUM_OVER_BATCH_SIZE),
+        # "CANA": tf.keras.losses.SparseCategoricalCrossentropy()
+        "CANA": model.canaloss
+    }, p.outputs), metrics=filter_dict({
         "NtC": [
             tf.keras.metrics.SparseCategoricalAccuracy(name="acc"),
             tf.keras.metrics.SparseTopKCategoricalAccuracy(k=2, name="acc2"),
@@ -138,8 +160,17 @@ def create_model(p: Hyperparams, step_count, logdir, eager=False, profile=False)
                 ignored_labels=dataset_tf.NtcDatasetLoader.ntc_mapping(["<UNK>", "NANT", "AA00", "AA08"]),
                 name="accF"
             )
+        ],
+        "CANA": [
+            tf.keras.metrics.SparseCategoricalAccuracy(name="acCANA")
         ]
-    },
+    }, p.outputs),
+     weighted_metrics=filter_dict({
+        "NtC": [
+            tf.keras.metrics.SparseCategoricalAccuracy(name="accW"),
+        ]
+     }, p.outputs),
+     from_serialized=True # don't rename my metrics when other output is added
     )
     model.run_eagerly = eager
     if profile == False:
@@ -172,15 +203,17 @@ def model_fit(model: tf.keras.Model, train_loader: dataset_tf.NtcDatasetLoader, 
 def train(train_set_dir, val_set_dir, p: Hyperparams, logdir, eager=False, profile=False):
     seq_len_schedule = parse_len_schedule(p.seq_length_schedule, p.epochs)
     print("Epoch/sequence length schedule: ", seq_len_schedule)
-    train_loader = dataset_tf.NtcDatasetLoader(train_set_dir)
+
+    sample_weighter = sample_weight.ntc_based_sample_weighter(p.sample_weight, dataset_tf.NtcDatasetLoader.ntc_mapping.get_vocabulary(), tf)
+    train_loader = dataset_tf.NtcDatasetLoader(train_set_dir, features=p.outputs).set_sample_weighter(sample_weighter)
     step_count = get_step_count(seq_len_schedule, train_loader.cardinality, p.batch_size)
     assert step_count > 0, f"{step_count=}"
-    val_ds = dataset_tf.NtcDatasetLoader(val_set_dir).get_data(batch=p.batch_size)
+    val_ds = dataset_tf.NtcDatasetLoader(val_set_dir, features=p.outputs).set_sample_weighter(sample_weighter).get_data(batch=p.batch_size, sample_weighter=sample_weighter)
     
     model = create_model(p, step_count, logdir, eager=eager, profile=profile)
     # tf.summary.trace_on(graph=True, profiler=False)
     # build the model, otherwise the .summary() call is unhappy
-    predictions = model(next(iter(train_loader.get_data(max_len=128, batch=2).map(lambda x, y: x))))
+    predictions = model(next(iter(train_loader.get_data(max_len=128, batch=2).map(lambda x, y, sw: x))))
     # tf.summary.trace_export(name="model_trace", step=0, profiler_outdir=logdir)
     # tf.summary.trace_off()
 

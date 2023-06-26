@@ -3,6 +3,8 @@ import math
 import time
 from typing import Any, Dict, List, Optional, Tuple, Union
 import tensorflow as tf
+
+from utils import filter_dict
 layers = tf.keras.layers
 import pandas as pd, numpy as np, os, sys
 import csv_loader
@@ -125,6 +127,24 @@ class ConvEncoder(layers.Layer):
         return x
 
 @tf.function
+def position_embedding(x: tf.RaggedTensor, output_dim: int):
+    dim_half = 16
+    assert output_dim >= 2 * dim_half
+    column_indices = tf.ragged.range(0, x.row_lengths())
+    column_indices = tf.cast(column_indices, tf.float32)
+    column_indices = tf.expand_dims(column_indices, axis=-1)
+    im = tf.sin(column_indices * math.pi / 2 ** (1 + tf.range(dim_half, dtype=tf.float32)))
+    re = tf.cos(column_indices * math.pi / 2 ** (1 + tf.range(dim_half, dtype=tf.float32)))
+    padding = column_indices * tf.zeros(output_dim - 2 * dim_half, dtype=tf.float32)
+    return tf.concat([im, re, padding], axis=-1)
+# @tf.function
+# def pad_and_sum(x: tf.RaggedTensor, y: tf.RaggedTensor):
+#     x_padding = x.shape[-1]
+#     y_padding = y.shape[-1]
+#     x = tf.concat([x, tf.zeros
+#     # assert x.shape[-1] <= y.shape[-1]
+
+@tf.function
 def rowwise_ragged_gather(x: tf.RaggedTensor, col_indices: tf.RaggedTensor):
     """
     Returns values from x at the given indices, processes each row independently.
@@ -226,6 +246,7 @@ class EncoderRNN(layers.Layer):
             return embedded
 
         x = embedded
+        x += position_embedding(embedded, output_dim = embedded.shape[-1])
         for rnn_i in range(len(self.rnn)):
             # connect paired nucleotides
             if pairs_with is not None:
@@ -275,6 +296,38 @@ class Decoder(layers.Layer):
         output = self.out(output)
         output = tf.nn.softmax(output)
         return output
+    
+class GeometryDecoder(layers.Layer):
+    def __init__(self, num_angles, num_distances, name=None):
+        super().__init__(name=name)
+
+        self.num_angles = num_angles
+        self.num_lengths = num_distances
+        self.dense = layers.Dense(units=(num_angles * 2 + num_distances), name=f"{self.name}/dense")
+        self.layers = [ self.dense ]
+
+    def call(self, encoder_outputs: tf.RaggedTensor) -> tf.RaggedTensor:
+        output: Any = tf.nn.relu(encoder_outputs)
+        output = self.dense(output)
+        # output = tf.concat([
+        #     tf.nn.tanh()
+        # ], axis=-1)
+        return output
+    
+    @staticmethod
+    def decode_angles(x, num_angles: int):
+        tf.assert_equal(x.shape[-1], num_angles * 2)
+        re = x[:, :, :num_angles]
+        im = x[:, :, num_angles:]
+        return tf.atan2(re, im)
+    
+    @staticmethod
+    def encode_angles(x, num_angles: int):
+        tf.assert_equal(x.shape[-1], num_angles)
+        re = tf.cos(x)
+        im = tf.sin(x)
+        return tf.concat([re, im], axis=-1)
+
 
 def clamp(v, min_v, max_v):
     return tf.minimum(max_v, tf.maximum(min_v, v))
@@ -283,8 +336,11 @@ class Network(tf.keras.Model):
     INPUT_SIZE_NUCLEOTIDE = int(dataset.NtcDatasetLoader.letters_mapping.vocabulary_size())
     INPUT_SIZE = INPUT_SIZE_NUCLEOTIDE + 1 # +1 UNK token, +1 is_dna
     OUTPUT_NTC_SIZE = int(dataset.NtcDatasetLoader.ntc_mapping.vocabulary_size())
+    OUTPUT_CANA_SIZE = int(dataset.NtcDatasetLoader.cana_mapping.vocabulary_size())
+    OUTPUT_ANGLES = ["d1", "e1", "z1", "a2", "b2", "g2", "d2", "ch1", "ch2", "mu"]
+    OUTPUT_DISTANCES = ["NN", "CC"]
     def __init__(self, p: Hyperparams):
-        super(Network, self).__init__()
+        super().__init__()
         self.p = p
         embedding_size = p.conv_channels[-1]
         hidden_size = p.rnn_size if p.rnn_layers > 0 else embedding_size
@@ -300,12 +356,55 @@ class Network(tf.keras.Model):
             pairing_mode=p.basepairing,
         )
         # self.encoder = EncoderBaseline(Network.INPUT_SIZE, hidden_size)
-        self.ntc_decoder = Decoder(hidden_size, self.OUTPUT_NTC_SIZE)
+        self.ntc_decoder = Decoder(hidden_size, self.OUTPUT_NTC_SIZE, name="ntc_decoder")
+        self.cana_decoder = Decoder(hidden_size, self.OUTPUT_CANA_SIZE, name="cana_decoder")
+        # self.geometry_decoder = GeometryDecoder(len(self.OUTPUT_ANGLES), len(self.OUTPUT_DISTANCES), name="geometry_decoder")
 
+        compute_dtype = tf.keras.mixed_precision.global_policy().compute_dtype
         self.ntc_loss_weights = tf.convert_to_tensor(
             sample_weight.get_ntc_weight(p.sample_weight),
-            dtype=self.compute_dtype)
+            dtype=compute_dtype)
         print("NtC loss weights: ", self.ntc_loss_weights)
+
+
+        # inputs = {}
+        # inputs["sequence"] = (input_sequence := tf.keras.layers.Input(shape=[None], dtype=tf.int64, ragged=True))
+        # inputs["is_dna"] = (input_is_dna := tf.keras.layers.Input(shape=[None], ragged=True))
+        # input_pairswith = tf.keras.layers.Input(shape=[None], dtype=tf.int64, ragged=True)
+        # if p.basepairing.startswith("in"):
+        #     inputs["pairswith"] = input_pairswith
+
+        # one_hot_seq = tf.one_hot(input_sequence, depth=self.INPUT_SIZE_NUCLEOTIDE, dtype=compute_dtype)
+        # in_tensor: Any = tf.concat([
+        #     one_hot_seq,
+        #     tf.cast(tf.expand_dims(input_is_dna, -1), compute_dtype)
+        # ], axis=-1)
+        # tf.assert_equal(in_tensor.shape[-1], Network.INPUT_SIZE)
+        # tf.assert_equal(in_tensor.shape[-2], None)
+
+        # encoder_output: Any = encoder(
+        #     in_tensor,
+        #     pairs_with = input["pairs_with"] if self.p.basepairing in ["input-directconn"] else None,
+        # )
+        # # tf.print("Input: ", in_tensor.shape, in_tensor.values.shape)
+        # # tf.print("Encoder output: ", encoder_output.shape, encoder_output.values.shape)
+        # tf.assert_equal(encoder_output.shape[-1], self.p.rnn_size)
+        # tf.assert_equal(encoder_output.shape[-2], None)
+        # tf.assert_equal(encoder_output.values.shape[-2], in_tensor.values.shape[-2])
+        # encoder_output = encoder_output[:, 1:, :] # there is one less NtC than nucleotides
+        # decoder_output: Any = ntc_decoder(encoder_output)
+        # assert decoder_output.shape[-1] == self.OUTPUT_NTC_SIZE
+        # assert decoder_output.shape[-2] == None
+        # tf.assert_equal(decoder_output.shape[-3], encoder_output.shape[-3])
+
+        # outputs = {
+        #     "NtC": decoder_output,
+        #     # "nearest_NtC": decoder_output,
+        #     "CANA": cana_decoder(encoder_output),
+        #     # "geometry_decoder": self.geometry_decoder(encoder_output),
+        # }
+
+        # super().__init__(inputs=inputs, outputs=outputs)
 
 
     def call(self, input: TensorDict, whatever = None):
@@ -336,11 +435,35 @@ class Network(tf.keras.Model):
 
         # tf.print("Input size: ", input["sequence"].row_lengths())
         # tf.print("Output: ", decoder_output)
-        return {
+        return filter_dict({
             "NtC": decoder_output,
             # "nearest_NtC": decoder_output,
-            # "CANA": 
-        }
+            "CANA": self.cana_decoder(encoder_output),
+            # "geometry_decoder": self.geometry_decoder(encoder_output),
+        }, self.p.outputs)
+    
+    def unweighted_ntcloss(self, target: tf.RaggedTensor, output: tf.RaggedTensor):
+        target_onehot = tf.one_hot(target.values, depth=self.OUTPUT_NTC_SIZE, dtype=self.compute_dtype)
+
+        loss = tf.losses.categorical_crossentropy(
+            target_onehot,
+            output.values,
+            label_smoothing=0.3 #self.p.label_smoothing
+        )
+
+        return tf.RaggedTensor.from_row_splits(loss, target.row_splits)
+    
+    def canaloss(self, target: tf.RaggedTensor, output: tf.RaggedTensor):
+        target_onehot = tf.one_hot(target.values, depth=self.OUTPUT_CANA_SIZE, dtype=self.compute_dtype)
+
+        loss = tf.losses.categorical_crossentropy(
+            target_onehot,
+            output.values,
+            label_smoothing=0.1 #self.p.label_smoothing
+        )
+
+        return tf.RaggedTensor.from_row_splits(loss, target.row_splits)
+
 
     def ntcloss(self, target: tf.RaggedTensor, output: tf.RaggedTensor):
         target_onehot = tf.one_hot(target.values, depth=self.OUTPUT_NTC_SIZE, dtype=self.compute_dtype)
