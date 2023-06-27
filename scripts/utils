@@ -1,0 +1,23 @@
+echo "rMSA version"
+cat rnacentral-rMSAversion.fasta | grep '^>' | wc -l
+wc -l rnacentral-rMSAversion.fasta
+echo "inactive"
+zcat rnacentral_inactive.fasta.gz | grep '^>' | wc -l
+zcat rnacentral_inactive.fasta.gz | wc -l
+zcat rnacentral_inactive.fasta.gz | grep '^>' | awk '{print $2}' | sort | uniq -c | sort -n
+echo "active"
+zcat rnacentral_active.fasta.gz | grep '^>' | wc -l
+zcat rnacentral_active.fasta.gz | wc -l
+zcat rnacentral_active.fasta.gz | grep '^>' | awk '{print $2}' | sort | uniq -c | sort -n
+
+$py $DATADIR/model/dataset_tf.py --input ./train_set --output train_set_nobp.tfrecord.gz --dna_handling keep --verbose;
+
+( $py $DATADIR/model/dataset_tf.py --input ./train_set --pairing_input $basepairs --output train_set.tfrecord.gz --dna_handling keep --verbose &&
+  $py $DATADIR/model/dataset_tf.py --input ./train_set --pairing_input $basepairs --output train_set_nodna.tfrecord.gz --dna_handling ignore --verbose &&
+  $py $DATADIR/model/dataset_tf.py --input ./train_set --pairing_input $basepairs --torsion_angles --output train_set_angles.tfrecord.gz --dna_handling keep --verbose &&
+  $py $DATADIR/model/dataset_tf.py --input ./train_set --pairing_input $basepairs --torsion_angles --output train_set_nodna_angles.tfrecord.gz --dna_handling ignore --verbose
+) 2>&1 | tee build_ds.out
+
+
+( echo 1;
+  echo 2 ) 2>&1 | tee build_ds.out
