@@ -24,9 +24,10 @@ class Hyperparams:
     clip_grad: float = hyperparameter(0.1, "Gradient clipping (see ADAM global_clipnorm argument)")
     clip_grad_value: float = hyperparameter(None, "Another method of gradient clipping (see ADAM clipvalue argument)")
     attention_heads: int = hyperparameter(0, "Number of attention heads. If != 0 multihead attention is inserted after each RNN layer")
-    sample_weight: str = hyperparameter("flat", "Sample weight mode", choices=["flat", "log", "clip-sqrt", "sqrt", "sqrtB", "clip-linear", "linear", "almostlinear", "sqrtB-clip", "ignore-AAs"])
+    sample_weight: str = hyperparameter("flat", "Sample weight mode", choices=["flat", "flat+helix", "log", "log+helix", "clip-sqrt", "sqrt", "sqrtB", "sqrtB+helix", "clip-linear", "linear", "almostlinear", "almostlinear+helix", "sqrtB-clip", "ignore-AAs"])
     basepairing: str = hyperparameter("none", "What to do with basepairing information. Nothing / Input by directly connecting the basepaired nucleotides", choices=["none", "input-directconn"])
     outputs: List[str] = hyperparameter(("NtC",), "What to predict - NtC, CANA, geometry or combination", list=True, choices=["NtC", "CANA", "geometry"])
+    external_embedding: str = hyperparameter(None, "path to external ONNX embedding model (rna-fm.onnx)")
 
     def get_nondefault(self):
         default = dataclasses.asdict(Hyperparams())

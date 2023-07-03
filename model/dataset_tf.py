@@ -4,7 +4,7 @@ import tensorflow as tf
 import sys, os, math, json, re
 import numpy as np
 import csv_loader
-from utils import filter_dict
+from utils import concat_dicts, filter_dict
 
 
 
@@ -38,6 +38,7 @@ class NtcDatasetLoader:
             example[name] = tf.sparse.to_dense(example[name])
 
         example = tf.io.parse_single_example(example, self.parsing_features)
+        tf.print(example["pdbid"], example["sequence"])
         example["sequence"] = tf.strings.unicode_split(example["sequence"], "UTF-8")
         if self.convert_to_numbers:
             example["sequence"] = self.letters_mapping(example["sequence"])
@@ -96,9 +97,14 @@ class NtcDatasetLoader:
             self.dataset = self.dataset.apply(tf.data.experimental.assert_cardinality(self.cardinality))
 
         self.sample_weighter = None
+        self.external_embedding = None
 
     def set_sample_weighter(self, weighter):
         self.sample_weighter = weighter
+        return self
+    
+    def set_external_embedding(self, embedding):
+        self.external_embedding = embedding
         return self
 
     def get_data(self, max_len = None, trim_prob: float = 0, shuffle = None, batch = None, shuffle_chains = True, max_chains = None, pairing_seq = True, sample_weighter=None):
@@ -133,6 +139,7 @@ class NtcDatasetLoader:
                 length = max_len
 
             pairs_with = None
+            pairing_is_canonical = None
             if pairing_seq:
                 i64 = lambda x: tf.cast(x, tf.int64)
                 pairings1 = x["pairing_nt1_ix"] - i64(s_slice)
@@ -146,6 +153,11 @@ class NtcDatasetLoader:
                 pairs_with = tf.zeros(shape=[length], dtype=tf.int32) - 1
                 pairs_with = tf.tensor_scatter_nd_update(pairs_with, tf.expand_dims(pairings1, axis=1), tf.cast(pairings2, tf.int32))
 
+                pairing_is_canonical = tf.zeros(shape=[length], dtype=tf.int64)
+                pairing_is_canonical = tf.tensor_scatter_nd_max(pairing_is_canonical, tf.expand_dims(pairings1, axis=1),
+                    tf.boolean_mask(tf.cast(x["pairing_is_canonical"], tf.int64), valid_pairings))
+                pairing_is_canonical = pairing_is_canonical > 0
+
             return {
                 "pdbid": x["pdbid"],
                 "sequence": x["sequence"][s_slice:s_slice+length],
@@ -154,13 +166,17 @@ class NtcDatasetLoader:
                 "NtC": x["NtC"][s_slice:s_slice+length-1],
                 "nearest_NtC": x["nearest_NtC"][s_slice:s_slice+length-1],
                 "pairs_with": pairs_with if pairs_with is not None else None,
+                "pairing_is_canonical": pairing_is_canonical,
                 "CANA": x["CANA"][s_slice:s_slice+length-1],
             }
 
 
         data = data.map(mapping)
         def split_input_target(x):
-            input = filter_dict(x, ["is_dna", "sequence", "pdbid", "pairs_with"])
+            input = filter_dict(x, [
+                "is_dna", "sequence", "pdbid", "pairs_with",
+                "external_embedding" if self.external_embedding else None,
+            ])
             target = filter_dict(x, self.features)
             print(target)
             sample_weight = sample_weighter(x) if sample_weighter else tf.repeat(1.0, x["NtC"].shape[0])
@@ -172,6 +188,18 @@ class NtcDatasetLoader:
 
         if batch:
             data = data.ragged_batch(batch)
+
+        if self.external_embedding is not None:
+            e = self.external_embedding
+            def get_ee(seq, is_dna):
+                ee = tf.RaggedTensor.from_tensor(
+                            tf.ensure_shape(tf.numpy_function(e, [ seq.row_lengths(), seq.to_tensor(), is_dna.to_tensor() ], Tout=tf.float32), [None, None, e.output_dim]),
+                            seq.row_lengths()
+                        )
+                tf.assert_equal(ee.row_lengths(), seq.row_lengths())
+                return ee
+
+            data = data.map(lambda x, y, w: (concat_dicts(x, { "external_embedding": get_ee(x["sequence"], x["is_dna"]) }), y, w))
         return data.prefetch(tf.data.AUTOTUNE)
 
 

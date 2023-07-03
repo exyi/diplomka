@@ -1,14 +1,9 @@
 #!/usr/bin/env bash
 
-#PBS -N ntcnet-tf.py
-#PBS -q gpu
-#PBS -l select=1:ncpus=6:ngpus=1:mem=16gb:scratch_local=12gb
-#PBS -l walltime=10:00:00
 #PBS -m ae
 
 set -e
 
-nvidia-smi
 
 # define a DATADIR variable: directory where the input files are taken from and where output will be copied to
 user=$(whoami)
@@ -22,6 +17,10 @@ fi
 cd "$DATADIR"
 
 source scripts/setup_tf.sh "$SCRATCH"
+
+if test $CUDA -eq 1; then
+	nvidia-smi
+fi
 
 if test -z "$TRAINING_SET"; then
 	TRAINING_SET=/storage/brno12-cerit/home/exyi/rna-csvs/train_set.tfrecord.gz
@@ -38,7 +37,9 @@ function train {
 	current_logdir="$DATADIR/metac-logs/$TBLOG-`date --utc +%y%m%d-%H%M`"
 	mkdir -p "$current_logdir"
 	hostname >> "$current_logdir/hostinfo.txt"
-	nvidia-smi >> "$current_logdir/hostinfo.txt"
+	if test $CUDA -eq 1; then
+		nvidia-smi >> "$current_logdir/hostinfo.txt"
+	fi
 	$py "$DATADIR/model/training_tf.py" --train_set "$TRAINING_SET" --val_set "$VAL_SET" --logdir "$current_logdir" $@ 2>&1 | tee "$current_logdir/stdouterr.txt"
 }
 

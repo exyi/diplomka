@@ -234,11 +234,19 @@ class EncoderRNN(layers.Layer):
         }
 
     # @tf.Module.with_name_scope
-    def call(self, input: tf.RaggedTensor, pairs_with: Optional[tf.RaggedTensor]):
+    def call(self, input: tf.RaggedTensor, pairs_with: Optional[tf.RaggedTensor], external_embedding: Optional[tf.RaggedTensor] = None):
         if self.input_dropout > 0:
             input = tf.nn.dropout(input, rate=self.input_dropout)
         embedded = self.embedding(input)
         tf.assert_equal(input.values.shape[-2], embedded.values.shape[-2])
+
+        if external_embedding is not None:
+            tf.assert_equal(input.row_lengths(), embedded.row_lengths())
+            tf.assert_equal(input.row_lengths(), external_embedding.row_lengths())
+            tf.assert_equal(tf.shape(input.values)[0], tf.shape(external_embedding.values)[0])
+            assert embedded.values.shape.ndims == 2
+            assert external_embedding.values.shape.ndims == 2
+            embedded = tf.concat([embedded, external_embedding], axis=-1)
 
         embedded = tf.nn.dropout(embedded, rate=self.dropout)
 
@@ -348,6 +356,16 @@ class Network(tf.keras.Model):
             embedding = ConvEncoder(Network.INPUT_SIZE, channels=p.conv_channels, window_size=p.conv_window_size, kind=p.conv_kind, max_dilatation=p.conv_dilation)
         else:
             embedding = layers.Embedding(Network.INPUT_SIZE, embedding_size)
+
+        if p.external_embedding:
+            import rna_fm_embedding
+            self.external_embedding = rna_fm_embedding.RnaFMOnnxTFEmbedding(p.external_embedding, dataset.NtcDatasetLoader.letters_mapping.get_vocabulary())
+            self.external_embedding_size = self.external_embedding.output_dim
+        else:
+            self.external_embedding = None
+            self.external_embedding_size = 0
+
+        embedding_size += self.external_embedding_size
         self.encoder = EncoderRNN(embedding, embedding_size, hidden_size,
             num_layers=p.rnn_layers,
             dropout=p.rnn_dropout,
@@ -362,7 +380,7 @@ class Network(tf.keras.Model):
 
         compute_dtype = tf.keras.mixed_precision.global_policy().compute_dtype
         self.ntc_loss_weights = tf.convert_to_tensor(
-            sample_weight.get_ntc_weight(p.sample_weight),
+            sample_weight.get_ntc_weight(p.sample_weight.split("+")[0]),
             dtype=compute_dtype)
         print("NtC loss weights: ", self.ntc_loss_weights)
 
@@ -418,9 +436,17 @@ class Network(tf.keras.Model):
         tf.assert_equal(in_tensor.shape[-1], Network.INPUT_SIZE)
         tf.assert_equal(in_tensor.shape[-2], None)
 
+        if "external_embedding" in input:
+            ee = input["external_embedding"]
+        elif self.external_embedding:
+            ee = self.external_embedding(input["sequence"], input["is_dna"])
+        else:
+            ee = None
+
         encoder_output: Any = self.encoder(
             in_tensor,
             pairs_with = input["pairs_with"] if self.p.basepairing in ["input-directconn"] else None,
+            external_embedding = ee,
         )
         # tf.print("Input: ", in_tensor.shape, in_tensor.values.shape)
         # tf.print("Encoder output: ", encoder_output.shape, encoder_output.values.shape)

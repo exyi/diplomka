@@ -36,5 +36,11 @@ def retry_on_error(f: Callable[[], TResult], max_retries = 10, sleep_time = 0.1,
     assert False
 
 
-def filter_dict(d: Dict[str, Any], keys: List[str]) -> Dict[str, Any]:
+def filter_dict(d: Dict[str, Any], keys: List[Optional[str]]) -> Dict[str, Any]:
     return { k: v for k, v in d.items() if k in keys }
+
+def concat_dicts(a: dict, *args: dict) -> dict:
+    d = dict(a)
+    for arg in args:
+        d.update(arg)
+    return d

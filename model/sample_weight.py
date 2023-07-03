@@ -89,3 +89,37 @@ def ntc_based_sample_weighter(strategy: str, ntc_list, backend) -> Callable[[Any
             ntcs = x
         return backend.gather(ntc_weights, ntcs)
     return sample_weighter
+
+def antihelix_weighter(ntc_list: List[str], backend, helix_weight = 0.1, not_helix_weight = 1):
+    aa00 = ntc_list.index("AA00")
+    aa08 = ntc_list.index("AA08")
+    aa04 = ntc_list.index("AA04")
+    aa03 = ntc_list.index("AA03")
+    aa09 = ntc_list.index("AA09")
+    def weighter(x):
+        ntcs = x["NtC"]
+        pairing = x["pairing_is_canonical"]
+        pairing = pairing[..., 1:] & pairing[..., :-1]
+        probably_helix = pairing & (
+            (ntcs == aa00) |
+            (ntcs == aa08) |
+            (ntcs == aa04) |
+            (ntcs == aa03) |
+            (ntcs == aa09)
+        )
+        return backend.where(probably_helix, helix_weight, not_helix_weight)
+    return weighter
+
+def combined_weighter(b, *ws):
+    def weighter(x):
+        return b.reduce_prod([w(x) for w in ws], axis=0)
+    return weighter
+
+def get_weighter(strategy, backend, ntc_list: List[str]):
+    s = strategy.split("+")
+    w = ntc_based_sample_weighter(s[0], ntc_list, backend)
+    if len(s) == 1:
+        return w
+    if s[1] == "helix":
+        w = combined_weighter(backend, w, antihelix_weighter(ntc_list, backend))
+    return w

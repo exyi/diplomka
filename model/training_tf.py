@@ -204,11 +204,12 @@ def train(train_set_dir, val_set_dir, p: Hyperparams, logdir, eager=False, profi
     seq_len_schedule = parse_len_schedule(p.seq_length_schedule, p.epochs)
     print("Epoch/sequence length schedule: ", seq_len_schedule)
 
-    sample_weighter = sample_weight.ntc_based_sample_weighter(p.sample_weight, dataset_tf.NtcDatasetLoader.ntc_mapping.get_vocabulary(), tf)
+    sample_weighter = sample_weight.get_weighter(p.sample_weight, tf, dataset_tf.NtcDatasetLoader.ntc_mapping.get_vocabulary())
     train_loader = dataset_tf.NtcDatasetLoader(train_set_dir, features=p.outputs).set_sample_weighter(sample_weighter)
     step_count = get_step_count(seq_len_schedule, train_loader.cardinality, p.batch_size)
     assert step_count > 0, f"{step_count=}"
-    val_ds = dataset_tf.NtcDatasetLoader(val_set_dir, features=p.outputs).set_sample_weighter(sample_weighter).get_data(batch=p.batch_size, sample_weighter=sample_weighter)
+    val_loader = dataset_tf.NtcDatasetLoader(val_set_dir, features=p.outputs).set_sample_weighter(sample_weighter)
+    val_ds = val_loader.get_data(batch=p.batch_size)
     
     model = create_model(p, step_count, logdir, eager=eager, profile=profile)
     # tf.summary.trace_on(graph=True, profiler=False)

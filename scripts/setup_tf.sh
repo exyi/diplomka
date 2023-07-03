@@ -18,13 +18,15 @@ fi
 
 pushd "$SCRATCH"
 
-tar -I zstd -xf /storage/brno2/home/exyi/tf-venv.tar.zst
+tar -I zstd -xf /storage/brno2/home/exyi/tf-venv2.tar.zst
 
-VENV_DIR="$SCRATCH/tf-venv"
+VENV_DIR="$SCRATCH/tf-venv2"
 real_python="$(which python3.10)"
 rm "$VENV_DIR/bin/python3.10"
 ln -s "$real_python" "$VENV_DIR/bin/python3.10"
 py="$VENV_DIR/bin/python"
+
+# export TF_XLA_FLAGS="--tf_xla_auto_jit=2 --tf_xla_cpu_global_jit"
 
 if test $CUDA -eq 1; then
 	tar -I xz -xf /storage/praha1/home/exyi/cudnnlibs/cudnn-linux-x86_64-8.9.1.23_cuda11-archive.tar.xz

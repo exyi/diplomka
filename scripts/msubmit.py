@@ -30,6 +30,7 @@ if args.val_set is not None:
 lflags = [ "select=1", f"ncpus={args.cpu}", f"scratch_local=12gb", f"mem=16gb" ]
 qsubargs = [
 	"-N", f"ntcnet-{os.path.basename(args.script)}-{args.name}",
+	"-m", "ae",
 ]
 if args.gpu > 0:
 	if args.walltime > 24:

@@ -17,6 +17,16 @@ class ModelWrapper(torch.nn.Module):
         results = self.model(batch_tokens, repr_layers=[self.repr_layers])
         return results["representations"][self.repr_layers]
 
+def export_alphabet(output_file):
+    import json
+    with open(output_file, "w") as f:
+        json.dump({
+            "tok_to_idx": alphabet.tok_to_idx,
+            "padding_idx": alphabet.padding_idx,
+            "append_eos": alphabet.append_eos,
+            "prepend_bos": alphabet.prepend_bos,
+        }, f)
+
 def export_onnx_model(seq_len, batch_size, output_file):
 
     sample_batch = torch.randint(2, 10, (batch_size, seq_len))
@@ -36,4 +46,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     export_onnx_model(args.seq_len, args.batch_size, args.output_file)
+    export_alphabet(args.output_file + ".alphabet")
 
