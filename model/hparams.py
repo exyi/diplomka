@@ -25,7 +25,7 @@ class Hyperparams:
     clip_grad_value: float = hyperparameter(None, "Another method of gradient clipping (see ADAM clipvalue argument)")
     attention_heads: int = hyperparameter(0, "Number of attention heads. If != 0 multihead attention is inserted after each RNN layer")
     sample_weight: str = hyperparameter("flat", "Sample weight mode", choices=["flat", "flat+helix", "log", "log+helix", "clip-sqrt", "sqrt", "sqrtB", "sqrtB+helix", "clip-linear", "linear", "almostlinear", "almostlinear+helix", "sqrtB-clip", "ignore-AAs"])
-    basepairing: str = hyperparameter("none", "What to do with basepairing information. Nothing / Input by directly connecting the basepaired nucleotides", choices=["none", "input-directconn"])
+    basepairing: str = hyperparameter("none", "What to do with basepairing information. Nothing / Input by directly connecting the basepaired nucleotides", choices=["none", "input-directconn", "input-conv"])
     outputs: List[str] = hyperparameter(("NtC",), "What to predict - NtC, CANA, geometry or combination", list=True, choices=["NtC", "CANA", "geometry"])
     external_embedding: str = hyperparameter(None, "path to external ONNX embedding model (rna-fm.onnx)")
     nearest_ntc_threshold: float = hyperparameter(0.5, "RMSD Threshold for accepting nearest NtC as the target label; not applied to validation data")

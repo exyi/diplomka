@@ -243,6 +243,8 @@ def train(train_set_dir, val_set_dir, p: Hyperparams, logdir, eager=False, profi
 
     model_fit(model, train_loader, val_ds, seq_len_schedule, p.batch_size)
 
+    model.save(os.path.join(logdir, "final_model.h5"))
+
     with open(os.path.join(logdir, "predictions.txt"), "w") as file:
         print_results(file, model, val_ds)
     return model
