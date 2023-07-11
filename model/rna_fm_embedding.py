@@ -100,8 +100,9 @@ class RnaFMOnnxRuntimeEmbedding:
 
 
 import tensorflow as tf
-class RnaFMOnnxTFEmbedding:
+class RnaFMOnnxTFEmbedding(tf.keras.layers.Layer):
     def __init__(self, file, our_alphabet: List[str]) -> None:
+        super().__init__(name="RnaFMOnnxTFEmbedding")
         import onnx
         import onnx_tf
         onnx_model = onnx.load(file)
@@ -115,8 +116,7 @@ class RnaFMOnnxTFEmbedding:
 
         print(f"Initialized RnaFMOnnxTFEmbedding, {self.output_dim=}, {self.alphabet_translation=}")
 
-    @tf.function
-    def __call__(self, input: tf.RaggedTensor, is_dna: tf.RaggedTensor) -> Any:
+    def call(self, input: tf.RaggedTensor, is_dna: tf.RaggedTensor) -> Any:
         batch_size = input.nrows()
         tinput: tf.RaggedTensor = tf.gather(self.alphabet_translation, input)
         print(self.alphabet)
@@ -127,7 +127,6 @@ class RnaFMOnnxTFEmbedding:
             tinput = tf.concat([tinput, tf.fill([batch_size, 1], tf.constant(self.alphabet.tok_to_idx["<eos>"], dtype=tf.int64))], axis=1)
 
         einput = tinput.to_tensor(default_value=self.alphabet.tok_to_idx["<pad>"])
-        tf.print(einput, summarize=-1)
 
         output = self.tf_module(input=einput)['output']
         output = tf.ensure_shape(output, (None, None, self.output_dim))
@@ -137,8 +136,6 @@ class RnaFMOnnxTFEmbedding:
             trimmed_out = trimmed_out[:, 1:]
         
         routput = tf.RaggedTensor.from_tensor(trimmed_out, lengths=input.row_lengths())
-        tf.print(input)
-        tf.print(routput)
         assert routput.shape[-1] == self.output_dim, f"{routput.shape}"
         return routput
 
