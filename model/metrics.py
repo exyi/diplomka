@@ -2,19 +2,29 @@ import tensorflow as tf
 import ntcnetwork_tf as ntcnetwork
 
 class NtcMetricWrapper(tf.keras.metrics.Metric):
-    def __init__(self, metric: tf.keras.metrics.Metric, argmax_output=False):
+    def __init__(self, metric: tf.keras.metrics.Metric, argmax_output=False, decoder=None, ignore_nants=False):
         super().__init__(metric.name, metric.dtype)
         self.inner_metric = metric
         self.argmax_output = argmax_output
+        self.decoder = decoder
+        self.ignore_nants = ignore_nants
 
     def update_state(self, y_true, y_pred, sample_weight=None):
-        y_pred = y_pred.values
-        y_true = y_true.values
-        y_true = tf.one_hot(y_true, ntcnetwork.Network.OUTPUT_NTC_SIZE)
-
-        if self.argmax_output:
+        if self.decoder is not None:
+            y_pred = self.decoder(y_pred)
+            y_pred = tf.one_hot(y_pred, ntcnetwork.Network.OUTPUT_NTC_SIZE)
+        elif self.argmax_output:
             y_pred = tf.argmax(y_pred, axis=-1)
             y_pred = tf.one_hot(y_pred, ntcnetwork.Network.OUTPUT_NTC_SIZE)
+
+        y_pred = y_pred.values
+        y_true = y_true.values
+        is_not_nant = (y_true != ntcnetwork.dataset.NtcDatasetLoader.ntc_mapping("NANT")) & (y_true != ntcnetwork.dataset.NtcDatasetLoader.ntc_mapping("<UNK>"))
+        y_true = tf.one_hot(y_true, ntcnetwork.Network.OUTPUT_NTC_SIZE)
+
+        if self.ignore_nants:
+            y_true = tf.boolean_mask(is_not_nant, y_true)
+            y_pred = tf.boolean_mask(is_not_nant, y_pred)
 
         self.inner_metric.update_state(y_true, y_pred, sample_weight)
 
