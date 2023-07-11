@@ -22,6 +22,7 @@ class NtcDatasetLoader:
         "NtC": tf.io.VarLenFeature(tf.string),
         "nearest_NtC": tf.io.VarLenFeature(tf.string),
         "CANA": tf.io.VarLenFeature(tf.string),
+        "rmsd": tf.io.VarLenFeature(tf.float32),
         "pairing_type": tf.io.VarLenFeature(tf.string),
         "pairing_is_canonical": tf.io.VarLenFeature(tf.int64),
         "pairing_nt1_ix": tf.io.VarLenFeature(tf.int64),
@@ -38,7 +39,6 @@ class NtcDatasetLoader:
             example[name] = tf.sparse.to_dense(example[name])
 
         example = tf.io.parse_single_example(example, self.parsing_features)
-        tf.print(example["pdbid"], example["sequence"])
         example["sequence"] = tf.strings.unicode_split(example["sequence"], "UTF-8")
         if self.convert_to_numbers:
             example["sequence"] = self.letters_mapping(example["sequence"])
@@ -50,6 +50,7 @@ class NtcDatasetLoader:
         to_dense('nearest_NtC', self.ntc_mapping)
         to_dense('is_dna')
         to_dense('sequence_full')
+        to_dense('rmsd')
         to_dense('CANA', self.cana_mapping)
         to_dense('pairing_type') # TODO mapping to numbers
         to_dense('pairing_is_canonical')
@@ -68,7 +69,7 @@ class NtcDatasetLoader:
         else:
             return dict()
 
-    def __init__(self, files, convert_to_numbers = True, features = ["NtC", "CANA", "geometry"]) -> None:
+    def __init__(self, files, convert_to_numbers = True, features = ["NtC", "CANA", "geometry"], ntc_rmsd_threshold=0.0) -> None:
         if isinstance(files, str):
             files = [ files ]
 
@@ -98,6 +99,7 @@ class NtcDatasetLoader:
 
         self.sample_weighter = None
         self.external_embedding = None
+        self.ntc_rmsd_threshold = ntc_rmsd_threshold
 
     def set_sample_weighter(self, weighter):
         self.sample_weighter = weighter
@@ -153,20 +155,33 @@ class NtcDatasetLoader:
                 pairs_with = tf.zeros(shape=[length], dtype=tf.int32) - 1
                 pairs_with = tf.tensor_scatter_nd_update(pairs_with, tf.expand_dims(pairings1, axis=1), tf.cast(pairings2, tf.int32))
 
+                pairing_type = tf.boolean_mask(tf.cast(x["pairing_is_canonical"], tf.int64), valid_pairings)
+
                 pairing_is_canonical = tf.zeros(shape=[length], dtype=tf.int64)
                 pairing_is_canonical = tf.tensor_scatter_nd_max(pairing_is_canonical, tf.expand_dims(pairings1, axis=1),
                     tf.boolean_mask(tf.cast(x["pairing_is_canonical"], tf.int64), valid_pairings))
                 pairing_is_canonical = pairing_is_canonical > 0
+
+            ntc = x["NtC"][s_slice:s_slice+length-1]
+            nearest_ntc = x["nearest_NtC"][s_slice:s_slice+length-1]
+            if self.ntc_rmsd_threshold > 0:
+                rmsd = x["rmsd"][s_slice:s_slice+length-1]
+                nant_index = self.ntc_mapping("NANT")
+                ntc_fine_nant = tf.logical_and(ntc == nant_index, rmsd < self.ntc_rmsd_threshold)
+                ntc = tf.where(ntc_fine_nant, nearest_ntc, ntc)
 
             return {
                 "pdbid": x["pdbid"],
                 "sequence": x["sequence"][s_slice:s_slice+length],
                 "sequence_full": x["sequence_full"][s_slice:s_slice+length],
                 "is_dna": x["is_dna"][s_slice:s_slice+length],
-                "NtC": x["NtC"][s_slice:s_slice+length-1],
-                "nearest_NtC": x["nearest_NtC"][s_slice:s_slice+length-1],
+                "NtC": ntc,
+                "nearest_NtC": nearest_ntc,
                 "pairs_with": pairs_with if pairs_with is not None else None,
                 "pairing_is_canonical": pairing_is_canonical,
+                "pairing_type": pairing_type if pairing_seq else None,
+                "pairing_1": pairings1 if pairing_seq else None,
+                "pairing_2": pairings2 if pairing_seq else None,
                 "CANA": x["CANA"][s_slice:s_slice+length-1],
             }
 
@@ -174,11 +189,10 @@ class NtcDatasetLoader:
         data = data.map(mapping)
         def split_input_target(x):
             input = filter_dict(x, [
-                "is_dna", "sequence", "pdbid", "pairs_with",
+                "is_dna", "sequence", "pdbid", "pairs_with", "pairing_1", "pairing_2", "pairing_type", "nearest_NtC",
                 "external_embedding" if self.external_embedding else None,
             ])
-            target = filter_dict(x, self.features)
-            print(target)
+            target = filter_dict(x, [ *self.features ])
             sample_weight = sample_weighter(x) if sample_weighter else tf.repeat(1.0, x["NtC"].shape[0])
             return input, target, sample_weight
         data = data.map(split_input_target)
@@ -373,8 +387,8 @@ def write_tfrecord_dataset(
                     "nearest_NtC": _bytes_feature(joined['nearest_NtC']),
                     "CANA": _bytes_feature(joined['CANA']),
                 }
+                features["rmsd"] = _float_feature(joined['rmsd'])
                 if angles:
-                    features["rmsd"] = _float_feature(joined['rmsd'])
                     features["confalA"] = _float_feature(joined['confalA'])
                     features["confalG"] = _float_feature(joined['confalG'])
                     features["confalH"] = _float_feature(joined['confalH'])
@@ -458,21 +472,6 @@ def write_tfrecord_dataset(
     except Exception as e:
         print(f"Error writing metadata: {e}")
 
-
-def find_pairing_files(directory):
-    if directory is None:
-        return None
-
-    result = dict()
-    for f in os.listdir(directory):
-        if re.search(r"^[a-zA-Z0-9]{4}_basepair", f):
-            pdbid = f.split("_")[0]
-            if pdbid in result:
-                print("WARNING: duplicate basepairing PDBID", pdbid, ":", f, "and", result[pdbid])
-            result[pdbid] = os.path.join(directory, f)
-    return result
-
-
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description="""
@@ -519,7 +518,7 @@ if __name__ == "__main__":
     elif args.input and args.output:
         files = [os.path.join(args.input, f) for f in os.listdir(args.input) if csv_loader.csv_extensions.search(f)]
         write_tfrecord_dataset(files, args.output,
-            pairing_files=find_pairing_files(args.pairing_input),
+            pairing_files=csv_loader.find_pairing_files(args.pairing_input),
             verbose=args.verbose, dna_handling=args.dna_handling, angles=args.torsion_angles)
     
     else:

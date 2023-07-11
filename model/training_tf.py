@@ -74,26 +74,29 @@ def utf8decode(x):
         return x.decode('utf-8')
     return str(x)
 
-def print_results(file, model, val_dataset):
+def print_results(file, model: ntcnetwork.Network, val_dataset):
     vocab_letter = dataset_tf.NtcDatasetLoader.letters_mapping.get_vocabulary()
     vocab_ntc = dataset_tf.NtcDatasetLoader.ntc_mapping.get_vocabulary()
     vocab_cana = dataset_tf.NtcDatasetLoader.cana_mapping.get_vocabulary()
     for i, (x, y, *_) in enumerate(val_dataset):
         pred_batch = model(x)
+        pred_ntc_decoded = model.crf_ntc_decode(pred_batch['NtC'])
         batch_size = x["sequence"].shape[0]
         for i in range(batch_size):
             sequence = x['sequence'][i].numpy()
             ntcs_true = y['NtC'][i].numpy()
+            nearest_ntcs_true = x['nearest_NtC'][i].numpy()
             canas_true = y['CANA'][i].numpy() if 'CANA' in y else None
             is_dna = x['is_dna'][i].numpy()
             struct_len = sequence.shape[0]
             print(f"### Structure X ({x['pdbid'][i].numpy()}  {np.sum(x['sequence'][i].numpy() != dataset_tf.NtcDatasetLoader.letters_mapping(' '))}nt {1+np.sum(x['sequence'][i].numpy() == dataset_tf.NtcDatasetLoader.letters_mapping(' '))}ch ===========", file=file)
-            ntcs_pred_dist = pred_batch['NtC'][i].numpy()
+            ntcs_pred_dist = tf.nn.softmax(pred_batch['NtC'][i]).numpy()
             canas_pred_dist = pred_batch['CANA'][i].numpy() if 'CANA' in pred_batch else None
             for j in range(struct_len - 1):
                 letter = ('d' if is_dna[j] else ' ') + vocab_letter[sequence[j]]
                 ntc_true = vocab_ntc[ntcs_true[j]]
-                ntc_pred = vocab_ntc[np.argmax(ntcs_pred_dist[j], axis=-1)]
+                ntc_nearest_true = vocab_ntc[nearest_ntcs_true[j]]
+                ntc_pred = vocab_ntc[pred_ntc_decoded[i][j]] # vocab_ntc[np.argmax(ntcs_pred_dist[j], axis=-1)]
                 ntc_sureness = ntcs_pred_dist[j][np.argmax(ntcs_pred_dist[j], axis=-1)]
                 ntc_true_sureness = ntcs_pred_dist[j][ntcs_true[j]]
                 ntc_true_order = np.sum(ntcs_pred_dist[j] > ntc_true_sureness)
@@ -103,10 +106,10 @@ def print_results(file, model, val_dataset):
                     cana_correct = cana_pred == vocab_cana[canas_true[j]]
                     cana_pred = cana_pred + "-"
                 else:
-                    cana_correct = False
+                    cana_correct = ntc_true[0:2] == ntc_pred[0:2] or ntc_true[0:2] == ntc_nearest_true[0:2]
                     cana_pred = ""
 
-                if ntc_true == ntc_pred:
+                if ntc_true == ntc_pred or ntc_nearest_true == ntc_pred:
                     warning = "   "
                 elif ntc_true == "NANT":
                     warning = " . "
@@ -117,8 +120,12 @@ def print_results(file, model, val_dataset):
                 else:
                     warning = "!!!"
 
+                if ntc_true == "NANT":
+                    ntc_true_l = "N(" + ntc_nearest_true + ")"
+                else:
+                    ntc_true_l = "  " + ntc_true + " "
 
-                print(f"{j: 5} {letter} {ntc_true} {cana_pred}{ntc_pred}  {int(round(ntc_sureness*100)): >2}%  {int(round(ntc_true_sureness*100)): >2}%  {ntc_true_order: >2}        {warning}", file=file)
+                print(f"{j: 5} {letter} {ntc_true_l} {cana_pred}{ntc_pred}  {int(round(ntc_sureness*100)): >2}%  {int(round(ntc_true_sureness*100)): >2}%  {ntc_true_order: >2}        {warning}", file=file)
             print(f"{struct_len-1: 5} {('d' if is_dna[-1] else ' ')}{vocab_letter[sequence[-1]]}  ...", file=file)
             print('', file=file)
 
@@ -138,11 +145,16 @@ def create_model(p: Hyperparams, step_count, logdir, eager=False, profile=False)
     config_json = {
         "hyperparams": dataclasses.asdict(p),
         "optimizer": optimizer.get_config(),
-        "submodules": [m.get_config() for m in all_submodules],
+        "submodules": [m.get_config() for m in all_submodules if hasattr(m, "get_config")],
     }
     with open(os.path.join(logdir, "tf_modules.json"), "w") as f:
         import json
-        json.dump(config_json, f, indent=4)
+        def serialize_weird_object(x):
+            if isinstance(x, tf.TensorShape):
+                return list(x)
+            else:
+                raise TypeError(f"Can't serialize {x}: {type(x)}")
+        json.dump(config_json, f, indent=4, default=serialize_weird_object)
 
     model.compile(optimizer=optimizer, loss=filter_dict({
         # "NtC": model.ntcloss,
@@ -156,6 +168,7 @@ def create_model(p: Hyperparams, step_count, logdir, eager=False, profile=False)
             tf.keras.metrics.SparseTopKCategoricalAccuracy(k=2, name="acc2"),
             tf.keras.metrics.SparseTopKCategoricalAccuracy(k=5, name="acc5"),
             NtcMetricWrapper(tfa.metrics.F1Score(name="f1", num_classes=ntcnetwork.Network.OUTPUT_NTC_SIZE, average="macro")),
+            NtcMetricWrapper(tfa.metrics.F1Score(name="CRFf1", num_classes=ntcnetwork.Network.OUTPUT_NTC_SIZE, average="macro"), decoder=model.crf_ntc_decode),
             FilteredSparseCategoricalAccuracy(
                 ignored_labels=dataset_tf.NtcDatasetLoader.ntc_mapping(["<UNK>", "NANT", "AA00", "AA08"]),
                 name="accF"
@@ -205,10 +218,10 @@ def train(train_set_dir, val_set_dir, p: Hyperparams, logdir, eager=False, profi
     print("Epoch/sequence length schedule: ", seq_len_schedule)
 
     sample_weighter = sample_weight.get_weighter(p.sample_weight, tf, dataset_tf.NtcDatasetLoader.ntc_mapping.get_vocabulary())
-    train_loader = dataset_tf.NtcDatasetLoader(train_set_dir, features=p.outputs).set_sample_weighter(sample_weighter)
+    train_loader = dataset_tf.NtcDatasetLoader(train_set_dir, features=p.outputs, ntc_rmsd_threshold=p.nearest_ntc_threshold).set_sample_weighter(sample_weighter)
     step_count = get_step_count(seq_len_schedule, train_loader.cardinality, p.batch_size)
     assert step_count > 0, f"{step_count=}"
-    val_loader = dataset_tf.NtcDatasetLoader(val_set_dir, features=p.outputs).set_sample_weighter(sample_weighter)
+    val_loader = dataset_tf.NtcDatasetLoader(val_set_dir, features=p.outputs, ntc_rmsd_threshold=0).set_sample_weighter(sample_weighter)
     val_ds = val_loader.get_data(batch=p.batch_size)
     
     model = create_model(p, step_count, logdir, eager=eager, profile=profile)
@@ -314,6 +327,8 @@ if __name__ == '__main__':
             {k: (v if isinstance(v, (int, float, bool, str)) else str(v)) for k, v in dataclasses.asdict(hyperparameters).items() if k in hparams_keys},
             trial_id=os.path.basename(args.logdir)
         )
+
+        tf.summary.experimental.set_step(-1)
 
         try:
             model = train(args.train_set, args.val_set, hyperparameters, args.logdir, eager=args.eager, profile=args.profile)

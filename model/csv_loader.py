@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Set, TextIO, Tuple, Union
 import pandas as pd, numpy as np
@@ -282,6 +283,10 @@ def load_csv_file(file) -> Tuple[pd.DataFrame, Dict[Tuple[str, str, Optional[int
     stepID: pd.Series[str] = table['step_ID']
     splitStepID = list(zip(*[ s.split('_') for s in stepID ]))
     table['pdbid'] = splitStepID[0]
+    table['model_i'] = [ [
+        a := re.search(r"[a-z]{4}-m(\d)+", x, re.IGNORECASE),
+        int(a.group(1)) if a else 1
+    ][-1] for x in splitStepID[0] ]
     table['chain'] = splitStepID[1]
     table['nt_1'] = [ x.split('.')[0] for x in splitStepID[2] ]
     table['ntalt_1'] = [ x.split('.')[1] if '.' in x else '' for x in splitStepID[2] ]
@@ -289,6 +294,10 @@ def load_csv_file(file) -> Tuple[pd.DataFrame, Dict[Tuple[str, str, Optional[int
     table['ntalt_2'] = [ x.split('.')[1] if '.' in x else '' for x in splitStepID[4] ]
     table['ntix_1'] = splitStepID[3]
     table['ntix_2'] = splitStepID[5]
+
+    for col in table.columns:
+        if table[col].dtype == np.float64:
+            table[col] = table[col].astype(np.float32)
 
     # some structures contain multiple variants of one nucleotide, the CSV then contain one step multiple times - for all possible conformations
     # table.drop_duplicates(subset=['pdbid', 'chain', 'ntix_1', 'ntalt_1', 'ntix_2', 'ntalt_2'], inplace=True, ignore_index=True)
@@ -544,6 +553,19 @@ class UnitID:
     def __repr__(self) -> str:
         return str(self)
 
+def find_pairing_files(directory):
+    if directory is None:
+        return None
+
+    result = dict()
+    for f in os.listdir(directory):
+        if re.search(r"^[a-zA-Z0-9]{4}_basepair", f):
+            pdbid = f.split("_")[0]
+            if pdbid in result:
+                print("WARNING: duplicate basepairing PDBID", pdbid, ":", f, "and", result[pdbid])
+            result[pdbid] = os.path.join(directory, f)
+    return result
+
 
 def read_fr3d_basepairing(file: Union[str, TextIO], pdbid: str, filter_model = None, filter_chains: Optional[Set[str]] = None) -> Dict[str, np.ndarray]:
     """
@@ -611,7 +633,7 @@ def read_fr3d_basepairing(file: Union[str, TextIO], pdbid: str, filter_model = N
         pairs["nt2_ix"].append(right.residue_id)
         pairs["pairing"].append(basepair_type)
 
-    if len(all_models) > 0 and filter_model not in all_models:
+    if filter_model is not None and len(all_models) > 0 and filter_model not in all_models:
         print(f"WARNING: model filter ({filter_model}) filtered out all basepairs in {pdbid}. All models: {dict(sorted(all_models.items()))}")
     if len(all_chains) > 0 and len(pairs["model_i"]) == 0:
         print(f"NOTE: chain filter ({filter_chains}) filtered out all basepairs in {pdbid}. All chains: {dict(sorted(all_chains.items()))}")
@@ -626,33 +648,65 @@ def read_fr3d_basepairing(file: Union[str, TextIO], pdbid: str, filter_model = N
     pairs["pairing"] = np.array(pairs["pairing"], dtype=np.str_)
     return pairs
 
-def save_parquet(structs, file):
+def save_parquet(df, file):
+    import pyarrow
+    import pyarrow.parquet as pq
+    table = pyarrow.Table.from_pandas(df, preserve_index=False)
+    # df.to_parquet(f'./table_{tmp_counter}.parquet', compression='brotli', index=False)
+    pq.write_table(table, file, compression="ZSTD", compression_level=12)
+def save_chains_parquet(structs, file):
     frame = pd.DataFrame(pd.concat(structs).groupby("name").apply(lambda x: x.to_dict(orient='records')), columns=['chains'])
     frame.to_parquet(file)
 
-def load_csvs(path):
+def load_csvs(path, pairing_path):
     """
     Dumps the csvs into parquet files for DuckDB querying
     """
+    pairing_files = find_pairing_files(pairing_path) if pairing_path else None
     structs = []
-    dirs = os.listdir(path)
+    tables = []
+    dirs: List[str] = os.listdir(path)
     tmp_counter = 0
+    row_counter = 0
     for ix, file in enumerate(dirs):
         if csv_extensions.search(file):
             print(f'Loading {ix+1:<8}/{len(dirs)}: {file}                                 ', end='')
-            structs.append(load_csv_file(os.path.join(path, file)))
+            table, dicts = load_csv_file(os.path.join(path, file))
+            pdbid = re.split("[._]", file)[0]
+            if pairing_files is not None:
+                if pdbid not in pairing_files:
+                    print(f"WARNING: no pairing file for {pdbid}")
+                else:
+                    pairing = read_fr3d_basepairing(pairing_files[pdbid], pdbid)
+                    pairing_d = {}
+                    for (model_i, chain1, ix1, chain2, ix2, ptype) in zip(pairing['model_i'], pairing['nt1_chain'], pairing['nt1_ix'], pairing['nt2_chain'], pairing['nt2_ix'], pairing['pairing']):
+                        key = (model_i, chain1, ix1)
+                        if key not in pairing_d:
+                            pairing_d[key] = []
+                        pairing_d[key].append({"chain": chain2, "ix": ix2, "type": ptype})
+                    table['pairs1'] = [ pairing_d.get((model_i, chain, ix), []) for model_i, chain, ix in zip(table['model_i'], table['chain'], table['ntix_1']) ]
+                    table['pairs2'] = [ pairing_d.get((model_i, chain, ix), []) for model_i, chain, ix in zip(table['model_i'], table['chain'], table['ntix_2']) ]
+            structs.append(dicts)
+            tables.append(table)
+            row_counter += len(table)
             print('\r', end='')
 
-        if len(structs) > 500:
-            save_parquet(structs, f'./tmp_{tmp_counter}.parquet')
+        if row_counter > 600_000:
+            # save_parquet(structs, f'./chains_{tmp_counter}.parquet')
+            print(f"Saving table_{tmp_counter}.parquet with {row_counter} rows, {len(structs)} structures")
+            save_parquet(pd.concat(tables), f'./table_{tmp_counter}.parquet')
             tmp_counter += 1
             structs.clear()
+            tables.clear()
+            row_counter = 0
 
-    save_parquet(structs, f'./tmp_{tmp_counter}.parquet')
+    # save_parquet(structs, f'./chains_{tmp_counter}.parquet')
+    save_parquet(pd.concat(tables), f'./table_{tmp_counter}.parquet')
 
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description='Parse CSVs')
     parser.add_argument('--path', type=str, help='directory containing CSVs to load', required=True)
+    parser.add_argument('--pairing', type=str, help='directory containing basepair files to load')
     args = parser.parse_args()
-    load_csvs(args.path)
+    load_csvs(args.path, args.pairing)

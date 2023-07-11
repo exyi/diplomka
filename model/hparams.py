@@ -28,6 +28,7 @@ class Hyperparams:
     basepairing: str = hyperparameter("none", "What to do with basepairing information. Nothing / Input by directly connecting the basepaired nucleotides", choices=["none", "input-directconn"])
     outputs: List[str] = hyperparameter(("NtC",), "What to predict - NtC, CANA, geometry or combination", list=True, choices=["NtC", "CANA", "geometry"])
     external_embedding: str = hyperparameter(None, "path to external ONNX embedding model (rna-fm.onnx)")
+    nearest_ntc_threshold: float = hyperparameter(0.5, "RMSD Threshold for accepting nearest NtC as the target label; not applied to validation data")
 
     def get_nondefault(self):
         default = dataclasses.asdict(Hyperparams())
