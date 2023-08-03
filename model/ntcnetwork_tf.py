@@ -429,7 +429,10 @@ class Network(tf.keras.Model):
 
         compute_dtype = tf.keras.mixed_precision.global_policy().compute_dtype
         self.ntc_loss_weights = tf.convert_to_tensor(
-            sample_weight.get_ntc_weight(p.sample_weight.split("+")[0]),
+            sample_weight.get_ntc_weight(
+                p.sample_weight.split("+")[0],
+                ntc_list=dataset.NtcDatasetLoader.ntc_mapping.get_vocabulary()
+            ),
             dtype=compute_dtype)
         print("NtC loss weights: ", self.ntc_loss_weights)
 
