@@ -184,14 +184,14 @@ def _separate_subchains(v: pd.DataFrame) -> List[Dict[str, Any]]:
     alt_letters.discard("")
 
     roots = set(steps.keys())
-    for _, (key2, _) in steps.items():
+    for _, (key2, _) in sorted(steps.items()):
         if key2 in roots:
             roots.remove(key2)
 
     # print("Chain roots", roots)
     assert len(roots) > 0
     # remove alternative chains to avoid id conflicts
-    for root in reversed(list(roots)):
+    for root in reversed(list(sorted(roots))):
         pdbid, model, chain, nt1, alt = root
         if alt and len(roots) > 1:
             for alt_alt in alt_letters:
@@ -203,7 +203,7 @@ def _separate_subchains(v: pd.DataFrame) -> List[Dict[str, Any]]:
 
     subchains = []
     used_ids = set()
-    for root in roots:
+    for root in sorted(roots):
         if root[:-1] in used_ids:
             print("WARNING: duplicate root", root, "->", steps[root][0], "Does this structure have a B variant which is longer than A variant?")
             continue
