@@ -256,21 +256,20 @@ def sequence_np(x):
     else:
         return np.array(list(x['sequence']), dtype='U1')
     
-def filter_models(chains):
-    if any([ pdb.endswith("-m1") for (pdb, _, _) in chains.keys() ]):
-        return {
-            (pdb[0:-3], chain, chainslice): v for (pdb, chain, chainslice), v in chains.items()
-                if pdb.endswith("-m1")
-        }
-    else:
-        return chains
-
+def filter_models(chains, filter = set([1])):
+    assert not any([ pdb.endswith("-m1") for (pdb, model, _, _) in chains.keys() ])
+    return {
+        (pdb, model, chain, chainslice): v for (pdb, model, chain, chainslice), v in chains.items()
+            if model in filter
+    }
+def get_models(chains):
+    return set([ model for (pdb, model, _, _) in chains.keys() ])
 def create_chain_mapping(chains) -> Dict[str, Tuple[int, int]]:
     chain_index: Dict[str, Tuple[int, int]] = dict()
     x = 0
     for k, v in chains.items():
         if isinstance(k, tuple):
-            k = k[1]
+            k = k[2]
         if k in chain_index:
             if chain_index[k][1] == x:
                 chain_index[k] = (chain_index[k][0], x + len(v['sequence']))
@@ -329,132 +328,133 @@ def write_tfrecord_dataset(
     with tf.io.TFRecordWriter(output_file, tf.io.TFRecordOptions(compression_type=compression_type)) as writer:
         for i, f in enumerate(files):
             try:
-                df, chains = csv_loader.load_csv_file(f)
+                df, raw_chains = csv_loader.load_csv_file(f)
                 del df
-                chains = filter_models(chains)
-                orig_chains = chains
-                if dna_handling == "ignore":
-                    chains = { k: v for k, v in chains.items() if np.mean(v["is_dna"] & (sequence_np(v) != 'X') & (sequence_np(v) != ' ')) < 0.1 }
+                for model in get_models(raw_chains):
+                    orig_chains = filter_models(raw_chains, filter=[model])
+                    chains = orig_chains
+                    if dna_handling == "ignore":
+                        chains = { k: v for k, v in chains.items() if np.mean(v["is_dna"] & (sequence_np(v) != 'X') & (sequence_np(v) != ' ')) < 0.1 }
 
-                if len(chains) == 0:
-                    print("Skipping (all chains filtered out)", f)
-                    continue
-
-                joined = csv_loader.get_joined_arrays(chains)
-
-                # print("Chains: ", { k: v['sequence'] for k, v in chains.items() })
-                # print("Joined: ", joined['sequence'])
-
-                chain_mapping = create_chain_mapping(chains)
-                pdbid = list(chains.keys())[0][0]
-
-                assert len(joined['chain_names']) == len(joined['indices'])
-                chain_index_pairs = list(zip(joined['chain_names'], joined['indices']))
-                index_index = { (chain, pdb_index): py_index for py_index, (chain, pdb_index) in enumerate(chain_index_pairs) if pdb_index != '' }
-                if len(index_index) != np.sum(joined['indices'] != ''):
-                    raise Exception(f"Duplicate indices in {pdbid}:\n{list(get_duplicates(chain_index_pairs))}\n{np.array(chain_index_pairs)}")
-
-                if dna_handling == "ignorepure":
-                    # print(sequence_np(joined))
-                    # print(joined['is_dna'])
-                    # print( (sequence_np(joined) == 'X') | (sequence_np(joined) == ' '))
-                    if np.mean(joined['is_dna'] | (sequence_np(joined) == 'X') | (sequence_np(joined) == ' ')) > 0.8:
-                        print("Skipping (no RNA)", f)
+                    if len(chains) == 0:
+                        print("Skipping (all chains filtered out)", f)
                         continue
 
-                pairing = None
-                if pairing_files:
-                    if pdbid in pairing_files:
-                        pairing = csv_loader.read_fr3d_basepairing(pairing_files[pdbid], pdbid, filter_model=1, filter_chains=set(chain_mapping.keys()))
-                    else:
-                        print(f"WARNING: No pairing for {pdbid}.")
+                    joined = csv_loader.get_joined_arrays(chains)
 
-                if max_len < len(joined['sequence']):
-                    max_len = len(joined['sequence'])
+                    # print("Chains: ", { k: v['sequence'] for k, v in chains.items() })
+                    # print("Joined: ", joined['sequence'])
 
-                if verbose:
-                    bp_print = f", {len(pairing['pairing'])} bp" if pairing else ""
-                    print(f"Processing {i+1:5d}/{len(files)}: {f} ({len(joined['sequence_full']): 5} nt{bp_print}, {len(chains)}/{len(orig_chains)} chains)")
+                    chain_mapping = create_chain_mapping(chains)
+                    pdbid = list(chains.keys())[0][0]
 
-                features = {
-                    "pdbid": _bytes_feature([pdbid.encode('utf-8')]),
-                    "chains": _bytes_feature(chain_mapping.keys()),
-                    "chain_index": _int64_feature([ start for start, end in chain_mapping.values() ]),
-                    "sequence": _bytes_feature([joined['sequence'].encode('utf-8')]),
-                    "sequence_full": _bytes_feature(joined['sequence_full']),
-                    "is_dna": _int64_feature(joined['is_dna'].astype('int64')),
-                    "NtC": _bytes_feature(joined['NtC']),
-                    "nearest_NtC": _bytes_feature(joined['nearest_NtC']),
-                    "CANA": _bytes_feature(joined['CANA']),
-                }
-                features["rmsd"] = _float_feature(joined['rmsd'])
-                if angles:
-                    features["confalA"] = _float_feature(joined['confalA'])
-                    features["confalG"] = _float_feature(joined['confalG'])
-                    features["confalH"] = _float_feature(joined['confalH'])
-                    features["angle_d1"] = _float_feature(joined['d1'])
-                    features["angle_e1"] = _float_feature(joined['e1'])
-                    features["angle_z1"] = _float_feature(joined['z1'])
-                    features["angle_a2"] = _float_feature(joined['a2'])
-                    features["angle_b2"] = _float_feature(joined['b2'])
-                    features["angle_g2"] = _float_feature(joined['g2'])
-                    features["angle_d2"] = _float_feature(joined['d2'])
-                    features["angle_ch1"] = _float_feature(joined['ch1'])
-                    features["angle_ch2"] = _float_feature(joined['ch2'])
-                    features["angle_mu"] = _float_feature(joined['mu'])
-                    features["dist_NN"] = _float_feature(joined['NN'])
-                    features["dist_CC"] = _float_feature(joined['CC'])
+                    assert len(joined['chain_names']) == len(joined['indices'])
+                    chain_index_pairs = list(zip(joined['chain_names'], joined['indices']))
+                    index_index = { (chain, pdb_index): py_index for py_index, (chain, pdb_index) in enumerate(chain_index_pairs) if pdb_index != '' }
+                    if len(index_index) != np.sum(joined['indices'] != ''):
+                        raise Exception(f"Duplicate indices in {pdbid}:\n{list(get_duplicates(chain_index_pairs))}\n{np.array(chain_index_pairs)}")
 
-                if pairing is not None:
-                    nt1_ix = np.array([
-                        index_index.get((chain, ix), -1)
-                        for chain, ix in zip(pairing['nt1_chain'], pairing['nt1_ix'])
-                    ])
-                    nt2_ix = np.array([
-                        index_index.get((chain, ix), -1)
-                        for chain, ix in zip(pairing['nt2_chain'], pairing['nt2_ix'])
-                    ])
-                    valid_indices = np.logical_and(nt1_ix >= 0, nt2_ix >= 0)
-                    # CSVs are missing some weird nucleotides, so we allow then to be missing
-                    allowed_invalid_indices = np.array(
-                        [ not (a in csv_loader.basic_nucleotides and b in csv_loader.basic_nucleotides) for a, b in zip(pairing['nt1_base'], pairing['nt2_base']) ],
-                        dtype=np.bool_)
-                    # the CSV are also missing nucleotide if the index is == 0 (wonder why :D)
-                    allowed_invalid_indices = np.logical_or(allowed_invalid_indices, np.logical_or(pairing['nt1_ix'] == '0', pairing['nt2_ix'] == '0'))
-                    if np.any(~valid_indices & ~allowed_invalid_indices):
-                        print("inddices = ", joined['indices'])
-                        print("chain_names = ", joined['chain_names'])
-                        print("index_index = ", index_index)
-                        print("invalid_indices = ", pairing['nt1_ix'][~valid_indices], pairing['nt2_ix'][~valid_indices])
-                        print("invalid bases = ", pairing['nt1_base'][~valid_indices], pairing['nt2_base'][~valid_indices])
-                        invalid_pairs = [
-                            f"{chain1}-{ix1} {chain2}-{ix2}"
-                            for chain1, ix1, chain2, ix2 in zip(pairing['nt1_chain'][~valid_indices], pairing['nt1_ix'][~valid_indices], pairing['nt2_chain'][~valid_indices], pairing['nt2_ix'][~valid_indices])
-                        ]
-                        raise Exception(f"Invalid indices in {pdbid}: [{', '.join(invalid_pairs)}], allowed: {allowed_invalid_indices[~valid_indices]}")
-                    features["pairing_type"] = _bytes_feature(pairing['pairing'][valid_indices])
-                    features["pairing_nt1_ix_orig"] = _bytes_feature(pairing['nt1_ix'][valid_indices])
-                    features["pairing_nt1_ix"] = _int64_feature(nt1_ix[valid_indices])
-                    features["pairing_nt2_ix_orig"] = _bytes_feature(pairing['nt2_ix'][valid_indices])
-                    features["pairing_nt2_ix"] = _int64_feature(nt2_ix[valid_indices])
-                    features["pairing_nt1_chain"] = _bytes_feature(pairing['nt1_chain'][valid_indices])
-                    features["pairing_nt2_chain"] = _bytes_feature(pairing['nt2_chain'][valid_indices])
-                    basepairs = np.array([
-                        csv_loader.map_nucleotide(a) + csv_loader.map_nucleotide(b)
-                        for a, b in zip(pairing['nt1_base'][valid_indices], pairing['nt2_base'][valid_indices])
-                    ])
-                    features["pairing_basepair"] = _bytes_feature([
-                        csv_loader.map_nucleotide(a) + csv_loader.map_nucleotide(b)
-                        for a, b in zip(pairing['nt1_base'][valid_indices], pairing['nt2_base'][valid_indices])
-                    ])
-                    features["pairing_is_canonical"] = _int64_feature(np.array([
-                        t == 'cwW' and bp in ['GC', 'CG', 'AU', 'UA', 'AT', 'TA']
-                        for bp, t in zip(basepairs, pairing['pairing'][valid_indices])
-                    ]).astype('int64'))
+                    if dna_handling == "ignorepure":
+                        # print(sequence_np(joined))
+                        # print(joined['is_dna'])
+                        # print( (sequence_np(joined) == 'X') | (sequence_np(joined) == ' '))
+                        if np.mean(joined['is_dna'] | (sequence_np(joined) == 'X') | (sequence_np(joined) == ' ')) > 0.8:
+                            print("Skipping (no RNA)", f)
+                            continue
 
-                example = tf.train.Example(features=tf.train.Features(feature=features))
-                serialized = example.SerializeToString()
-                writer.write(serialized)
+                    pairing = None
+                    if pairing_files:
+                        if pdbid in pairing_files:
+                            pairing = csv_loader.read_fr3d_basepairing(pairing_files[pdbid], pdbid, filter_model=model, filter_chains=set(chain_mapping.keys()))
+                        else:
+                            print(f"WARNING: No pairing for {pdbid}.")
+
+                    if max_len < len(joined['sequence']):
+                        max_len = len(joined['sequence'])
+
+                    if verbose:
+                        bp_print = f", {len(pairing['pairing'])} bp" if pairing else ""
+                        print(f"Processing {i+1:5d}/{len(files)}: {f} ({len(joined['sequence_full']): 5} nt{bp_print}, {len(chains)}/{len(orig_chains)} chains)")
+
+                    features = {
+                        "pdbid": _bytes_feature([pdbid.encode('utf-8')]),
+                        "chains": _bytes_feature(chain_mapping.keys()),
+                        "chain_index": _int64_feature([ start for start, end in chain_mapping.values() ]),
+                        "sequence": _bytes_feature([joined['sequence'].encode('utf-8')]),
+                        "sequence_full": _bytes_feature(joined['sequence_full']),
+                        "is_dna": _int64_feature(joined['is_dna'].astype('int64')),
+                        "NtC": _bytes_feature(joined['NtC']),
+                        "nearest_NtC": _bytes_feature(joined['nearest_NtC']),
+                        "CANA": _bytes_feature(joined['CANA']),
+                    }
+                    features["rmsd"] = _float_feature(joined['rmsd'])
+                    if angles:
+                        features["confalA"] = _float_feature(joined['confalA'])
+                        features["confalG"] = _float_feature(joined['confalG'])
+                        features["confalH"] = _float_feature(joined['confalH'])
+                        features["angle_d1"] = _float_feature(joined['d1'])
+                        features["angle_e1"] = _float_feature(joined['e1'])
+                        features["angle_z1"] = _float_feature(joined['z1'])
+                        features["angle_a2"] = _float_feature(joined['a2'])
+                        features["angle_b2"] = _float_feature(joined['b2'])
+                        features["angle_g2"] = _float_feature(joined['g2'])
+                        features["angle_d2"] = _float_feature(joined['d2'])
+                        features["angle_ch1"] = _float_feature(joined['ch1'])
+                        features["angle_ch2"] = _float_feature(joined['ch2'])
+                        features["angle_mu"] = _float_feature(joined['mu'])
+                        features["dist_NN"] = _float_feature(joined['NN'])
+                        features["dist_CC"] = _float_feature(joined['CC'])
+
+                    if pairing is not None:
+                        nt1_ix = np.array([
+                            index_index.get((chain, ix), -1)
+                            for chain, ix in zip(pairing['nt1_chain'], pairing['nt1_ix'])
+                        ])
+                        nt2_ix = np.array([
+                            index_index.get((chain, ix), -1)
+                            for chain, ix in zip(pairing['nt2_chain'], pairing['nt2_ix'])
+                        ])
+                        valid_indices = np.logical_and(nt1_ix >= 0, nt2_ix >= 0)
+                        # CSVs are missing some weird nucleotides, so we allow then to be missing
+                        allowed_invalid_indices = np.array(
+                            [ not (a in csv_loader.basic_nucleotides and b in csv_loader.basic_nucleotides) for a, b in zip(pairing['nt1_base'], pairing['nt2_base']) ],
+                            dtype=np.bool_)
+                        # the CSV are also missing nucleotide if the index is == 0 (wonder why :D)
+                        allowed_invalid_indices = np.logical_or(allowed_invalid_indices, np.logical_or(pairing['nt1_ix'] == '0', pairing['nt2_ix'] == '0'))
+                        if np.any(~valid_indices & ~allowed_invalid_indices):
+                            print("inddices = ", joined['indices'])
+                            print("chain_names = ", joined['chain_names'])
+                            print("index_index = ", index_index)
+                            print("invalid_indices = ", pairing['nt1_ix'][~valid_indices], pairing['nt2_ix'][~valid_indices])
+                            print("invalid bases = ", pairing['nt1_base'][~valid_indices], pairing['nt2_base'][~valid_indices])
+                            invalid_pairs = [
+                                f"{chain1}-{ix1} {chain2}-{ix2}"
+                                for chain1, ix1, chain2, ix2 in zip(pairing['nt1_chain'][~valid_indices], pairing['nt1_ix'][~valid_indices], pairing['nt2_chain'][~valid_indices], pairing['nt2_ix'][~valid_indices])
+                            ]
+                            raise Exception(f"Invalid indices in {pdbid}: [{', '.join(invalid_pairs)}], allowed: {allowed_invalid_indices[~valid_indices]}")
+                        features["pairing_type"] = _bytes_feature(pairing['pairing'][valid_indices])
+                        features["pairing_nt1_ix_orig"] = _bytes_feature(pairing['nt1_ix'][valid_indices])
+                        features["pairing_nt1_ix"] = _int64_feature(nt1_ix[valid_indices])
+                        features["pairing_nt2_ix_orig"] = _bytes_feature(pairing['nt2_ix'][valid_indices])
+                        features["pairing_nt2_ix"] = _int64_feature(nt2_ix[valid_indices])
+                        features["pairing_nt1_chain"] = _bytes_feature(pairing['nt1_chain'][valid_indices])
+                        features["pairing_nt2_chain"] = _bytes_feature(pairing['nt2_chain'][valid_indices])
+                        basepairs = np.array([
+                            csv_loader.map_nucleotide(a) + csv_loader.map_nucleotide(b)
+                            for a, b in zip(pairing['nt1_base'][valid_indices], pairing['nt2_base'][valid_indices])
+                        ])
+                        features["pairing_basepair"] = _bytes_feature([
+                            csv_loader.map_nucleotide(a) + csv_loader.map_nucleotide(b)
+                            for a, b in zip(pairing['nt1_base'][valid_indices], pairing['nt2_base'][valid_indices])
+                        ])
+                        features["pairing_is_canonical"] = _int64_feature(np.array([
+                            t == 'cwW' and bp in ['GC', 'CG', 'AU', 'UA', 'AT', 'TA']
+                            for bp, t in zip(basepairs, pairing['pairing'][valid_indices])
+                        ]).astype('int64'))
+
+                    example = tf.train.Example(features=tf.train.Features(feature=features))
+                    serialized = example.SerializeToString()
+                    writer.write(serialized)
             except Exception as e:
                 print(f"Error processing file {f}: {e}")
                 raise e

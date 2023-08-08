@@ -161,17 +161,19 @@ def _separate_subchains(v: pd.DataFrame) -> List[Dict[str, Any]]:
     steps = dict()
     alt_letters = set()
     for row in v.itertuples():
+        # print(row.step_ID)
         pdbid = row.pdbid
         chain = row.chain
+        model_i = row.model_i
         nt1 = row.ntix_1
         nt2 = row.ntix_2
-        key = (pdbid, chain, nt1, row.ntalt_1)
-        key2 = (pdbid, chain, nt2, row.ntalt_2)
+        key = (pdbid, model_i, chain, nt1, row.ntalt_1)
+        key2 = (pdbid, model_i, chain, nt2, row.ntalt_2)
         alt_letters.add(row.ntalt_1)
         alt_letters.add(row.ntalt_2)
         if key in steps:
             if not row.ntalt_2:
-                raise ValueError(f"Duplicate step: {key}")
+                raise ValueError(f"Duplicate step: {key}: {row.step_ID} / {steps[key][1].step_ID}")
             
             # on alternates, use the lower numbered nucleotide, drop the other one
             if row.ntalt_2 < steps[key][1].ntalt_2:
@@ -190,10 +192,10 @@ def _separate_subchains(v: pd.DataFrame) -> List[Dict[str, Any]]:
     assert len(roots) > 0
     # remove alternative chains to avoid id conflicts
     for root in reversed(list(roots)):
-        pdbid, chain, nt1, alt = root
+        pdbid, model, chain, nt1, alt = root
         if alt and len(roots) > 1:
             for alt_alt in alt_letters:
-                if alt_alt != alt and (pdbid, chain, nt1, alt_alt) in steps:
+                if alt_alt != alt and (pdbid, model, chain, nt1, alt_alt) in steps:
                     print(f"Removing alternate chain: {root}, alternative {alt_alt} exists")
                     roots.remove(root)
                     del steps[root]
@@ -202,21 +204,21 @@ def _separate_subchains(v: pd.DataFrame) -> List[Dict[str, Any]]:
     subchains = []
     used_ids = set()
     for root in roots:
-        if root[:3] in used_ids:
+        if root[:-1] in used_ids:
             print("WARNING: duplicate root", root, "->", steps[root][0], "Does this structure have a B variant which is longer than A variant?")
             continue
         subchain = []
-        used_ids.add(root[:3])
+        used_ids.add(root[:-1])
         while root in steps:
             key2, row = steps[root]
 
             if key2[:3] in used_ids:
                 print(f"WARNING: duplicate node {key2} -> {steps.get(key2, ['end'])[0]}, terminating current subchain len={len(subchain)}")
                 break
-            used_ids.add(key2[:3])
+            used_ids.add(key2[:-1])
 
             del steps[root]
-            used_ids.add(root[:3])
+            used_ids.add(root[:-1])
             subchain.append(row)
             root = key2
         assert len(subchain) > 0
@@ -224,7 +226,7 @@ def _separate_subchains(v: pd.DataFrame) -> List[Dict[str, Any]]:
 
     # remove all unused variants, we only dropped the roots, not all members of a potentially longer chain
     for key in list(steps):
-        pdbid, chain, nt1, alt = key
+        pdbid, model, chain, nt1, alt = key
         if alt:
             del steps[key]
 
@@ -233,6 +235,7 @@ def _separate_subchains(v: pd.DataFrame) -> List[Dict[str, Any]]:
         print("WARNING: loop or something weird detected in ", list(sorted(steps.keys())), v['step_ID'].array)
 
     # subchains.sort(key=lambda subchain: (subchain[0]['pdbid'], subchain[0]['chain'], try_parse_int(subchain[0]['ntix_1'], subchain[0]['ntix_1'])))
+    # print(f"Subchains of {pdbid}", [ [row.step_ID for row in s] for s in subchains ])
     return subchains
 
 def _process_subchain(steps):
@@ -250,6 +253,11 @@ def _process_subchain(steps):
         assert s.nt_1 == sequence[-1], f"Nucleotide {s.nt_1} != {sequence[-1]}, at position {s.pdbid}:{s.chain}:{s.ntix_1}-{s.ntix_2}, all steps: {', '.join([ s.step_ID for s in steps])}"
         indices.append(s.ntix_2)
         sequence.append(s.nt_2)
+
+    indices = np.array(indices)
+    if np.any(indices == ''):
+        x = np.where(indices == '')[0]
+        raise ValueError(f"Empty generated for steps {x}: {steps[x[0]].step_ID}")
     
     return {
         'steps': pd.DataFrame(steps),
@@ -259,7 +267,7 @@ def _process_subchain(steps):
         'is_dna': np.array([ 'd' == s[0].lower() for s in sequence ], dtype=np.bool_),
     }
 
-def load_csv_file(file) -> Tuple[pd.DataFrame, Dict[Tuple[str, str, Optional[int]], Dict[str, Any]]]:
+def load_csv_file(file) -> Tuple[pd.DataFrame, Dict[Tuple[str, int, str, Optional[int]], Dict[str, Any]]]:
     """
     Loads the CSV into
     * pandas dataframe including all columns from the CSV, plus
@@ -282,9 +290,10 @@ def load_csv_file(file) -> Tuple[pd.DataFrame, Dict[Tuple[str, str, Optional[int
     # split stepID into parts
     stepID: pd.Series[str] = table['step_ID']
     splitStepID = list(zip(*[ s.split('_') for s in stepID ]))
-    table['pdbid'] = splitStepID[0]
+    table['pdbid_with_model'] = splitStepID[0]
+    table['pdbid'] = [ x.split('-')[0] for x in splitStepID[0] ]
     table['model_i'] = [ [
-        a := re.search(r"[a-z]{4}-m(\d)+", x, re.IGNORECASE),
+        a := re.search(r"[a-zA-Z0-9]{4}-m(\d+)", x, re.IGNORECASE),
         int(a.group(1)) if a else 1
     ][-1] for x in splitStepID[0] ]
     table['chain'] = splitStepID[1]
@@ -304,22 +313,22 @@ def load_csv_file(file) -> Tuple[pd.DataFrame, Dict[Tuple[str, str, Optional[int
 
     # create array columns for each column in table, grouped by pdbid and chain
     # identity = lambda x: x
-    groups = dict(list(table.groupby(['pdbid', 'chain'])))
+    groups = dict(list(table.groupby(['pdbid', 'model_i', 'chain'])))
 
-    groups_dict: Dict[Tuple[str, str, Optional[int]], Dict[str, Any]] = {}
-    for (k_pdb, k_chain), v in groups.items():
+    groups_dict: Dict[Tuple[str, int, str, Optional[int]], Dict[str, Any]] = {}
+    for (k_pdb, k_model, k_chain), v in groups.items():
         subchains_raw = _separate_subchains(v)
         subchains = [ _process_subchain(s) for s in subchains_raw ]
 
         if len(subchains) > 1:
             for i, subchain in enumerate(subchains):
-                groups_dict[(k_pdb, k_chain, i)] = subchain
+                groups_dict[(k_pdb, k_model, k_chain, i)] = subchain
         else:
-            groups_dict[(k_pdb, k_chain, None)] = subchains[0]
+            groups_dict[(k_pdb, k_model, k_chain, None)] = subchains[0]
 
     return table, groups_dict
 
-def get_joined_arrays(chains: Dict[Tuple[str, str, Optional[int]], dict]):
+def get_joined_arrays(chains: Dict[Tuple[str, int, str, Optional[int]], dict]):
     """
     Joins the separated chains from load_csv_file into single arrays:
     * sequence: string - joined sequence separated by spaces
@@ -345,7 +354,7 @@ def get_joined_arrays(chains: Dict[Tuple[str, str, Optional[int]], dict]):
     sequence_full = np.concatenate(insert_spacers([ c['sequence_full'] for c in cs ], [ ' ' ]))
     is_dna = np.concatenate(insert_spacers([ c['is_dna'] for c in cs ], [ False ]))
     sequence_indices = np.concatenate(insert_spacers([ c['indices'] for c in cs ], [ "" ]))
-    chain_names = np.concatenate(insert_spacers([ np.repeat(k[1], len(c['sequence_full'])) for k, c in chains.items() ], [ ' ' ]))
+    chain_names = np.concatenate(insert_spacers([ np.repeat(k[2], len(c['sequence_full'])) for k, c in chains.items() ], [ ' ' ]))
     assert len(sequence_full) == len(is_dna) == len(sequence_indices) == len(chain_names)
 
     def join_arrays(arrays, zero_element, dtype=None):
