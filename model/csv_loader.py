@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from dataclasses import dataclass
 import dataclasses
+import itertools
 from typing import Any, Dict, List, NamedTuple, Optional, Set, TextIO, Tuple, Union
 import pandas as pd, numpy as np
 import sys, os, re
@@ -177,86 +178,106 @@ class NucleotideID:
 
     def replace(self, **kwargs) -> 'NucleotideID':
         return dataclasses.replace(self, **kwargs)
+    
+def connectivity_components(edges: List[Tuple[NucleotideID, NucleotideID]]) -> List[List[NucleotideID]]:
+    components: defaultdict[NucleotideID, int] = defaultdict(lambda: 0)
+    graph = dict() # not directed
+    for edge in edges:
+        n1, n2 = edge
+        graph[n1] = graph.get(n1, []) + [n2]
+        graph[n2] = graph.get(n2, []) + [n1]
+
+    remaining_nodes = set(graph.keys())
+    c_i = 0
+    while len(remaining_nodes)  > 0:
+
+        root = next(iter(remaining_nodes))
+        stack = [root]
+
+        while len(stack) > 0:
+            node = stack.pop()
+            if node in remaining_nodes:
+                remaining_nodes.remove(node)
+                components[node] = c_i
+                stack.extend(graph[node])
+        
+        c_i += 1
+
+    result = [ [] for _ in range(c_i) ]
+    for node, c_i in components.items():
+        result[c_i].append(node)
+    return result
+
+def toposort(edges: List[Tuple[NucleotideID, NucleotideID]]) -> List[NucleotideID]:
+    graph = dict() # directed
+    incoming_count = { n: 0 for ns in edges for n in ns }
+    for edge in edges:
+        n1, n2 = edge
+        graph[n1] = graph.get(n1, []) + [n2]
+        incoming_count[n2] += 1
+    assert len(graph) < len(incoming_count)
+
+    roots = [key for key, value in incoming_count.items() if value == 0]
+    assert len(roots) > 0, f"No roots found in toposort, graph has cycles: {edges}"
+
+    result = []
+    while len(roots) > 0:
+        n = roots.pop()
+        result.append(n)
+        for n2 in graph.get(n, []):
+            assert incoming_count[n2] > 0
+            incoming_count[n2] -= 1
+            if incoming_count[n2] == 0:
+                roots.append(n2)
+
+    assert len(result) <= len(incoming_count), f"Some nucleotides extra in toposort {len(result)} != {len(incoming_count)}: {set(result).difference(incoming_count.keys())}"
+    assert len(result) >= len(incoming_count), f"Some nucleotides missing in toposort {len(result)} != {len(incoming_count)}: {set(incoming_count.keys()).difference(result)}"
+    return result
+
+def longest_path(edges: List[Tuple[NucleotideID, NucleotideID]]) -> List[NucleotideID]:
+    topoorder = toposort(edges)
+    graph = dict() # directed
+    for edge in edges:
+        n1, n2 = edge
+        graph[n1] = graph.get(n1, []) + [n2]
+
+    length_to = { n: 0 for n in topoorder }
+    come_from: Dict[NucleotideID, Optional[NucleotideID]] = { n: None for n in topoorder }
+    for n1 in topoorder:
+        for n2 in graph.get(n1, []):
+            if length_to[n1] + 1 > length_to[n2]:
+                length_to[n2] = length_to[n1] + 1
+                come_from[n2] = n1
+    
+    result = []
+    n_last = max(length_to, key=lambda n: length_to[n])
+    while n_last is not None:
+        result.append(n_last)
+        n_last = come_from[n_last]
+    result.reverse()
+    return result
+
+def tuple_window_scan(x):
+    return zip(x, itertools.islice(x, 1, None))
 
 def _separate_subchains(v: pd.DataFrame) -> List[List[Any]]:
     """
-    Separates 
+    Separates a set of steps into continuous sequential chains
     """
 
-    steps: Dict[NucleotideID, Tuple[NucleotideID, Any]] = dict()
-    alt_letters = set()
-    for row in v.itertuples():
-        # print(row.step_ID)
-        chain_id: ChainID = row.chain_id
-        nt1 = row.ntix_1
-        nt2 = row.ntix_2
-        key = NucleotideID(chain_id, nt1, row.ntalt_1)
-        key2 = NucleotideID(chain_id, nt2, row.ntalt_2)
-        alt_letters.add(row.ntalt_1)
-        alt_letters.add(row.ntalt_2)
-        if key in steps:
-            if not row.ntalt_2:
-                raise ValueError(f"Duplicate step: {key}: {row.step_ID} / {steps[key][1].step_ID}")
-            
-            # on alternates, use the lower numbered nucleotide, drop the other one
-            if row.ntalt_2 < steps[key][1].ntalt_2:
-                steps[key] = (key2, row)
-        else:
-            steps[key] = (key2, row)
-
-    alt_letters.discard("")
-
-    roots = set(steps.keys())
-    for _, (key2, _) in sorted(steps.items()):
-        if key2 in roots:
-            roots.remove(key2)
-
-    # print("Chain roots", roots)
-    assert len(roots) > 0
-    # remove alternative chains to avoid id conflicts
-    for root in reversed(list(sorted(roots))):
-        if root.ntalt and len(roots) > 1:
-            for alt_alt in alt_letters:
-                if alt_alt != root.ntalt and root.replace(ntalt=alt_alt) in steps:
-                    print(f"Removing alternate chain: {root}, alternative {alt_alt} exists")
-                    roots.remove(root)
-                    del steps[root]
-                    break
-
+    chain_edges = [ (NucleotideID(row.chain_id, row.ntix_1, row.ntalt_1), NucleotideID(row.chain_id, row.ntix_2, row.ntalt_2)) for row in v.itertuples() ]
+    tuple_index = { (n1, n2): tpl for tpl, (n1, n2) in zip(v.itertuples(), chain_edges) }
+    graph_components = connectivity_components(chain_edges)
     subchains: List[List[Any]] = []
-    used_ids: Set[NucleotideID] = set()
-    for root in sorted(roots):
-        if root.replace(ntalt='') in used_ids:
-            print("WARNING: duplicate root", root, "->", steps[root][0], "Does this structure have a B variant which is longer than A variant?")
-            continue
-        subchain = []
-        used_ids.add(root.replace(ntalt=''))
-        while root in steps:
-            key2, row = steps[root]
+    for component in graph_components:
+        component_s = set(component)
+        chain = longest_path([ edge for edge in chain_edges if edge[0] in component_s and edge[1] in component_s ])
+        subchains.append([ tuple_index[edge] for edge in tuple_window_scan(chain) ])
 
-            if key2.replace(ntalt='') in used_ids:
-                print(f"WARNING: duplicate node {key2} -> {steps.get(key2, ['end'])[0]}, terminating current subchain len={len(subchain)}")
-                break
-            used_ids.add(key2.replace(ntalt=''))
+        component_s.difference_update(chain)
 
-            del steps[root]
-            used_ids.add(root.replace(ntalt=''))
-            subchain.append(row)
-            root = key2
-        assert len(subchain) > 0
-        subchains.append(subchain)
-
-    # remove all unused variants, we only dropped the roots, not all members of a potentially longer chain
-    for key in list(steps):
-        if key.ntalt:
-            del steps[key]
-
-    if len(steps) > 0:
-        print(f"WARNING: {len(steps)} orphaned steps")
-        print("WARNING: loop or something weird detected in ", list(sorted(steps.keys())), v['step_ID'].array)
-
-    # subchains.sort(key=lambda subchain: (subchain[0]['pdbid'], subchain[0]['chain'], try_parse_int(subchain[0]['ntix_1'], subchain[0]['ntix_1'])))
-    # print(f"Subchains of {pdbid}", [ [row.step_ID for row in s] for s in subchains ])
+        if len(component_s) > 0:
+            print(f"WARNING: Removing {len(component_s)} nucleotides from chain {chain[0].chain_id}: {', '.join([ str(c) for c in sorted(component_s) ])}")
     return subchains
 
 def _process_subchain(steps: List[Any]):
