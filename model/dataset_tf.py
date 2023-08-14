@@ -256,20 +256,22 @@ def sequence_np(x):
     else:
         return np.array(list(x['sequence']), dtype='U1')
     
-def filter_models(chains, filter = set([1])):
-    assert not any([ pdb.endswith("-m1") for (pdb, model, _, _) in chains.keys() ])
+def filter_models(chains: csv_loader.PdbChainsDict, filter = set([1])):
+    assert not any([ cid.pdbid.endswith("-m1") for (cid, _) in chains.keys() ])
     return {
-        (pdb, model, chain, chainslice): v for (pdb, model, chain, chainslice), v in chains.items()
-            if model in filter
+        (cid, chainslice): v for (cid, chainslice), v in chains.items()
+            if cid.model_i in filter
     }
-def get_models(chains):
-    return set([ model for (pdb, model, _, _) in chains.keys() ])
-def create_chain_mapping(chains) -> Dict[str, Tuple[int, int]]:
+def get_models(chains: csv_loader.PdbChainsDict):
+    return set([ cid.model_i for (cid, _) in chains.keys() ])
+def create_chain_mapping(chains: csv_loader.PdbChainsDict) -> Dict[str, Tuple[int, int]]:
     chain_index: Dict[str, Tuple[int, int]] = dict()
     x = 0
     for k, v in chains.items():
         if isinstance(k, tuple):
-            k = k[2]
+            k = k[0]
+        if isinstance(k, csv_loader.ChainID):
+            k = k.chain
         if k in chain_index:
             if chain_index[k][1] == x:
                 chain_index[k] = (chain_index[k][0], x + len(v['sequence']))
@@ -346,7 +348,7 @@ def write_tfrecord_dataset(
                     # print("Joined: ", joined['sequence'])
 
                     chain_mapping = create_chain_mapping(chains)
-                    pdbid = list(chains.keys())[0][0]
+                    pdbid = list(chains.keys())[0][0].pdbid
 
                     assert len(joined['chain_names']) == len(joined['indices'])
                     chain_index_pairs = list(zip(joined['chain_names'], joined['indices']))
