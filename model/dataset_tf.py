@@ -457,10 +457,10 @@ def write_tfrecord_dataset(
                     example = tf.train.Example(features=tf.train.Features(feature=features))
                     serialized = example.SerializeToString()
                     writer.write(serialized)
+                    count += 1
             except Exception as e:
                 print(f"Error processing file {f}: {e}")
                 raise e
-            count += 1
     try:
         metadata = {
             "count": count,
