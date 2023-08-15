@@ -10,7 +10,9 @@ parser.add_argument("--gpu_mem", help="minimal gpu memory", default="2gb", type=
 parser.add_argument("--gpu_cap", help="minimal gpu capability (cuda61, cuda75, ...)", default=None, type=str)
 parser.add_argument("--fp16", help="use fp16", action="store_true")
 parser.add_argument("--walltime", help="walltime in hours", default=8, type=float)
-parser.add_argument("--cpu", help="cpu count", default=6, type=int)
+parser.add_argument("--cluster", help="", default=None, type=str)
+parser.add_argument("--cpu", help="cpu count", default=2, type=int)
+parser.add_argument("--mem", help="CPU RAM", default=10, type=int)
 parser.add_argument("--training_set", help="training set to use", default=None, type=str)
 parser.add_argument("--val_set", help="validation set to use", default=None, type=str)
 parser.add_argument("--script", help="script to run", default="scripts/metajobs/training.tf.sh", type=str)
@@ -27,7 +29,9 @@ if args.training_set is not None:
 	variables["TRAINING_SET"] = os.path.join("/storage/brno12-cerit/home/exyi/rna-csvs/", args.training_set)
 if args.val_set is not None:
 	variables["VAL_SET"] = os.path.join("/storage/brno12-cerit/home/exyi/rna-csvs/", args.val_set)
-lflags = [ "select=1", f"ncpus={args.cpu}", f"scratch_local=12gb", f"mem=16gb" ]
+lflags = [ "select=1", f"ncpus={args.cpu}", f"scratch_local=12gb", f"mem={args.mem}gb" ]
+if args.cluster is not None:
+	lflags += [ f"cluster={args.cluster}" ]
 qsubargs = [
 	"-N", f"ntcnet-{os.path.basename(args.script)}-{args.name}",
 	"-m", "ae",
