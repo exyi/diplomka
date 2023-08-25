@@ -35,6 +35,14 @@ def retry_on_error(f: Callable[[], TResult], max_retries = 10, sleep_time = 0.1,
 
     assert False
 
+default_logdir = None
+def get_logdir() -> str:
+    if default_logdir is not None:
+        return default_logdir
+    raise Exception("No logdir set")
+def set_logdir(logdir: str) -> None:
+    global default_logdir
+    default_logdir = logdir
 
 def filter_dict(d: Dict[str, Any], keys: Sequence[Optional[str]]) -> Dict[str, Any]:
     return { k: v for k, v in d.items() if k in keys }
