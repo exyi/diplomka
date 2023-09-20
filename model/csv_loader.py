@@ -401,7 +401,7 @@ def get_joined_arrays(chains: PdbChainsDict):
     sequence_full = np.concatenate(insert_spacers([ c['sequence_full'] for c in cs ], [ ' ' ]))
     is_dna = np.concatenate(insert_spacers([ c['is_dna'] for c in cs ], [ False ]))
     sequence_indices = np.concatenate(insert_spacers([ c['indices'] for c in cs ], [ "" ]))
-    chain_names = np.concatenate(insert_spacers([ np.repeat(k[0].chain, len(c['sequence_full'])) for k, c in chains.items() ], [ ' ' ]))
+    chain_names = np.concatenate(insert_spacers([ np.repeat(k[0].chain + ("" if k[1] is None else str(k[1])), len(c['sequence_full'])) for k, c in chains.items() ], [ ' ' ]))
     assert len(sequence_full) == len(is_dna) == len(sequence_indices) == len(chain_names)
 
     def join_arrays(arrays, zero_element, dtype=None):

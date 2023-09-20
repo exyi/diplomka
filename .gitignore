@@ -1,5 +1,5 @@
 __pycache__
 /data
-/tb-logs
-/tf-logs
-/metac-logs
+/*-logs
+/pairclusters/out*
+/pairclusters/plots
