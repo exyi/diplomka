@@ -16,6 +16,7 @@ from hparams import Hyperparams
 import ntcnetwork_tf as ntcnetwork
 import dataset_tf
 import csv_loader
+import utils
 import sample_weight
 from metrics import FilteredSparseCategoricalAccuracy, NtcMetricWrapper
 
@@ -129,7 +130,7 @@ def print_results(file, model: ntcnetwork.Network, val_dataset):
             print(f"{struct_len-1: 5} {('d' if is_dna[-1] else ' ')}{vocab_letter[sequence[-1]]}  ...", file=file)
             print('', file=file)
 
-def create_model(p: Hyperparams, step_count, logdir, eager=False, profile=False):
+def create_model(p: Hyperparams, step_count, logdir, profile=False):
     model = ntcnetwork.Network(p)
     if p.lr_decay == "cosine":
         learning_rate: Any = tf.optimizers.schedules.CosineDecay(
@@ -142,6 +143,12 @@ def create_model(p: Hyperparams, step_count, logdir, eager=False, profile=False)
     optimizer = tf.optimizers.Adam(learning_rate, global_clipnorm=p.clip_grad, clipvalue=p.clip_grad_value)
 
     all_submodules: List[tf.Module] = model.submodules
+    module_names = set()
+    for x in all_submodules:
+        print(x.name)
+        if x.name in module_names:
+            raise ValueError(f"Duplicate module name {x.name} of type {x.__class__}")
+        module_names.add(x.name)
     config_json = {
         "hyperparams": dataclasses.asdict(p),
         "optimizer": optimizer.get_config(),
@@ -185,7 +192,6 @@ def create_model(p: Hyperparams, step_count, logdir, eager=False, profile=False)
      }, p.outputs),
      from_serialized=True # don't rename my metrics when other output is added
     )
-    model.run_eagerly = eager
     if profile == False:
         profile_batch: Any = 0
     elif profile == True or profile == None:
@@ -213,7 +219,7 @@ def model_fit(model: tf.keras.Model, train_loader: dataset_tf.NtcDatasetLoader, 
         )
         e += epochs
 
-def train(train_set_dir, val_set_dir, p: Hyperparams, logdir, eager=False, profile=False):
+def train(train_set_dir, val_set_dir, load_model, p: Hyperparams, logdir, eager=False, profile=False):
     seq_len_schedule = parse_len_schedule(p.seq_length_schedule, p.epochs)
     print("Epoch/sequence length schedule: ", seq_len_schedule)
 
@@ -224,7 +230,15 @@ def train(train_set_dir, val_set_dir, p: Hyperparams, logdir, eager=False, profi
     val_loader = dataset_tf.NtcDatasetLoader(val_set_dir, features=p.outputs, ntc_rmsd_threshold=0).set_sample_weighter(sample_weighter)
     val_ds = val_loader.get_data(batch=p.batch_size)
     
-    model = create_model(p, step_count, logdir, eager=eager, profile=profile)
+    if load_model:
+        model = tf.keras.models.load_model(load_model, custom_objects={
+            "Network": ntcnetwork.Network,
+            "unweighted_ntcloss": ntcnetwork.Network.unweighted_ntcloss,
+            "NtcMetricWrapper": NtcMetricWrapper,
+        })
+    else:
+        model = create_model(p, step_count, logdir, profile=profile)
+    model.run_eagerly = eager
     # tf.summary.trace_on(graph=True, profiler=False)
     # build the model, otherwise the .summary() call is unhappy
     predictions = model(next(iter(train_loader.get_data(max_len=128, batch=2).map(lambda x, y, sw: x))))
@@ -243,10 +257,11 @@ def train(train_set_dir, val_set_dir, p: Hyperparams, logdir, eager=False, profi
 
     model_fit(model, train_loader, val_ds, seq_len_schedule, p.batch_size)
 
-    model.save(os.path.join(logdir, "final_model.h5"))
-
     with open(os.path.join(logdir, "predictions.txt"), "w") as file:
         print_results(file, model, val_ds)
+
+    model.save(os.path.join(logdir, "final_model.h5"))
+
     return model
 
 class Clock:
@@ -263,7 +278,8 @@ class Clock:
 
 if __name__ == '__main__':
     import argparse
-    parser = argparse.ArgumentParser(description='Train NtC network using PyTorch ignite')
+    parser = argparse.ArgumentParser(description='Train NtC network using Tensorflow')
+    parser.add_argument('--load_model', type=str, help='Start from the specified model. Other provided hyperparameters might be ignored if they affect the model architecture, not the training process')
     parser.add_argument('--train_set', type=str, help='Path to directory training data CSVs')
     parser.add_argument('--val_set', type=str, help='Path to directory validation data CSVs')
     parser.add_argument('--logdir', type=str, default="tb-logs", help='Path for saving Tensorboard logs and other outputs')
@@ -303,6 +319,7 @@ if __name__ == '__main__':
 
     hyperparameters = Hyperparams(**{ k: v for k, v in vars(args).items() if k in Hyperparams.__dataclass_fields__ })
 
+    utils.set_logdir(args.logdir)
     tb_writer = tf.summary.create_file_writer(args.logdir)
     with tb_writer.as_default():
         print(f"logdir: {args.logdir}")
@@ -333,7 +350,7 @@ if __name__ == '__main__':
         tf.summary.experimental.set_step(-1)
 
         try:
-            model = train(args.train_set, args.val_set, hyperparameters, args.logdir, eager=args.eager, profile=args.profile)
+            model = train(args.train_set, args.val_set, args.load_model, hyperparameters, args.logdir, eager=args.eager, profile=args.profile)
         except KeyboardInterrupt:
             print("Keyboard interrupt")
         except Exception as e:

@@ -1,11 +1,12 @@
 from collections import namedtuple
 import math
 import time
+import dataclasses
 from typing import Any, Dict, List, Optional, Tuple, Union
 import tensorflow as tf
 import tensorflow_addons as tfa
 
-from utils import filter_dict
+from utils import filter_dict, get_logdir
 layers = tf.keras.layers
 import pandas as pd, numpy as np, os, sys
 import csv_loader
@@ -17,6 +18,7 @@ import sample_weight
 
 TensorDict = Dict[str, tf.Tensor]
 
+@tf.keras.saving.register_keras_serializable(package="ntcnetwork")
 class ResnetBlock(layers.Layer):
     def __init__(self, in_channels, out_channels = None, window_size = 3, stride=1, dilation = 1, name=None) -> None:
         super(ResnetBlock, self).__init__(name=name)
@@ -87,6 +89,7 @@ def ragged_reshape(tensor: tf.RaggedTensor, new_shape: Tuple[int, ...]):
     x = tf.reshape(x, (tf.shape(x)[0], *new_shape))
     return tf.RaggedTensor.from_row_splits(x, tensor.row_splits)
 
+@tf.keras.saving.register_keras_serializable(package="ntcnetwork")
 class ConvEncoder(layers.Layer):
     def __init__(self, input_size, channels = [64, 64], window_size = 3, max_dilatation = 1, kind = "resnet", name=None) -> None:
         """
@@ -184,6 +187,7 @@ def pairing_to_matrix(size, pairing_1: tf.RaggedTensor, pairing_2: tf.RaggedTens
         indices,
         pairing_type.values,
         shape=(batch_size, size, size, type_dim))
+    matrix = tf.concat([matrix, swapaxes(matrix, 1, 2) ], axis=-1)
     return matrix
 
 @tf.function
@@ -194,6 +198,7 @@ def broadcast_sequence_to_matrix(sequence: tf.RaggedTensor, size: int):
     seq_broadcast_cols = tf.broadcast_to(tf.expand_dims(t, axis=2), shape=(batch_size, size, size, sequence.shape[-1]))
     return tf.concat([ seq_broadcast_rows, seq_broadcast_cols], axis=-1)
 
+@tf.keras.saving.register_keras_serializable(package="ntcnetwork")
 class EncodePairing(layers.Layer):
     def __init__(self, name=None):
         super().__init__(name=name)
@@ -210,10 +215,29 @@ class EncodePairing(layers.Layer):
         # tf.summary.image("pairing_matrix", tf.nn.sigmoid(matrix[..., 0:1]), max_outputs=30)
         # tf.summary.image("pairing_matrix_", tf.nn.sigmoid(matrix[..., 1:2]), max_outputs=30)
         matrix_w_seq = tf.concat([ matrix, broadcast_sequence_to_matrix(sequence, size) ], axis=-1)
-        return self.convolutions(matrix_w_seq)
+        return tf.concat([
+            self.convolutions(matrix_w_seq),
+            matrix,
+        ], axis=-1)
+    
+class Counter():
+    def __init__(self):
+        self.count = 0
+    def inc(self):
+        self.count += 1
+        return self.count
+global_step_id = Counter()
 
+def just_save_image(filename, x):
+    step_id = global_step_id.inc()
+    # tf.summary.image(filename, x, max_outputs=30, step=step_id)
+    x = tf.maximum(0, tf.minimum(1, x)) * 255
+    x = tf.cast(x, tf.uint8)
+    for image in x:
+        file = tf.image.encode_png(image)
+        tf.io.write_file(get_logdir() + "/" + filename + "_" + str(global_step_id.inc()) + ".png", file)
 
-
+@tf.keras.saving.register_keras_serializable(package="ntcnetwork")
 class MatrixSequenceMerger(layers.Layer):
     def __init__(self, output_size, name=None):
         super().__init__(name=name)
@@ -222,7 +246,7 @@ class MatrixSequenceMerger(layers.Layer):
         self.output_mapping = layers.Dense(output_size)
 
     def call(self, sequence, matrix):
-        # tf.py_function(lambda x: [tf.summary.image("pairing_matrix_conv", x, max_outputs=30), x][-1], [matrix[..., 0:3]], [tf.float32])
+        # tf.py_function(lambda x: [just_save_image("pairing_matrix_conv", x), x][-1], [matrix[..., 0:3]], [tf.float32])
 
         ragged_lengths = None
         if isinstance(sequence, tf.RaggedTensor):
@@ -233,8 +257,13 @@ class MatrixSequenceMerger(layers.Layer):
         sequence_len = tf.shape(sequence)[1]
         tf.assert_equal(tf.shape(matrix)[:-1], (batch_size, sequence_len, sequence_len))
         pseudoattn = self.pseudoattn_head(matrix)
-        # tf.py_function(lambda x: [tf.summary.image("pseudoattn", x, max_outputs=30), x][-1], [pseudoattn], [tf.float32])
-        pseudoattn = tf.nn.softmax(tf.squeeze(pseudoattn, axis=-1), axis=-1)
+        # convert to RaggedTensor and back for masking the invalid parts of the matrix
+        pseudoattn = tf.squeeze(pseudoattn, axis=-1)
+        # pseudoattn = tf.RaggedTensor.from_tensor(, ragged_lengths, ragged_rank=2)
+        pseudoattn = tf.nn.softmax(pseudoattn, axis=-1)
+        # pseudoattn = pseudoattn.to_tensor(default_value=0, shape=(batch_size, sequence_len, sequence_len))
+        # tf.py_function(lambda x: [just_save_image("pseudoattn", x), x][-1], [tf.expand_dims(pseudoattn / tf.broadcast_to(tf.expand_dims(tf.reduce_max(pseudoattn, axis=-1), axis=-1), tf.shape(pseudoattn)), axis=-1)], [tf.float32])
+        # tf.print(tf.reduce_max(pseudoattn, axis=-1))
         # tf.print(pseudoattn)
         # attn_shape = (batch_size, sequence_len, sequence_len, sequence.shape[-1])
         # attn_mapped_sequence = tf.reduce_sum(
@@ -249,6 +278,7 @@ class MatrixSequenceMerger(layers.Layer):
         bazmek = self.output_mapping(output)
         return bazmek
 
+@tf.keras.saving.register_keras_serializable(package="ntcnetwork")
 class EncoderRNN(layers.Layer):
     def __init__(self,
             embedding_size,
@@ -285,7 +315,7 @@ class EncoderRNN(layers.Layer):
 
         if pairing_mode == "input-directconn":
             self.pairing_reducer = [
-                layers.Dense(hidden_size if i > 0 else embedding_size, name=f"{name}/pairing_reducer")
+                layers.Dense(hidden_size if i > 0 else embedding_size, name=f"{name}/pairing_reducer_{i}")
                 for i in range(num_layers)
             ]
 
@@ -300,7 +330,10 @@ class EncoderRNN(layers.Layer):
             for layer_i in range(num_layers):
                 self.attn_query.append(layers.Dense(hidden_size, name=f"{name}/attn_query{layer_i}"))
                 self.attn_value.append(layers.Dense(hidden_size, name=f"{name}/attn_value{layer_i}"))
-                self.attn.append(layers.MultiHeadAttention(num_heads=attention_heads, key_dim=self.hidden_size//attention_heads, dropout=dropout, name=f"{name}/attn{layer_i}"))
+                a = layers.MultiHeadAttention(num_heads=attention_heads, key_dim=self.hidden_size//attention_heads, dropout=dropout, name=f"{name}/attn{layer_i}")
+                # a.build([None, None, self.hidden_size])
+                # a._key_dense.name = a.name + "/key"
+                self.attn.append(a)
 
         self.layers = [ *self.rnn, *(self.layer_norm or []), *self.attn_query, *self.attn_value, *self.attn ]
     def get_config(self):
@@ -354,6 +387,7 @@ class EncoderRNN(layers.Layer):
                 x = bypass + x
         return x
 
+@tf.keras.saving.register_keras_serializable(package="ntcnetwork")
 class Decoder(layers.Layer):
     def __init__(self, hidden_size, output_size,  name=None):
         super(Decoder, self).__init__(name=name)
@@ -369,6 +403,7 @@ class Decoder(layers.Layer):
         output = self.out(output)
         return output
     
+@tf.keras.saving.register_keras_serializable(package="ntcnetwork")
 class GeometryDecoder(layers.Layer):
     def __init__(self, num_angles, num_distances, name=None):
         super().__init__(name=name)
@@ -404,6 +439,7 @@ class GeometryDecoder(layers.Layer):
 def clamp(v, min_v, max_v):
     return tf.minimum(max_v, tf.maximum(min_v, v))
 
+@tf.keras.saving.register_keras_serializable(package="ntcnetwork")
 class Network(tf.keras.Model):
     INPUT_SIZE_NUCLEOTIDE = int(dataset.NtcDatasetLoader.letters_mapping.vocabulary_size())
     INPUT_SIZE = INPUT_SIZE_NUCLEOTIDE + 1 # +1 UNK token, +1 is_dna
@@ -413,6 +449,8 @@ class Network(tf.keras.Model):
     OUTPUT_DISTANCES = ["NN", "CC"]
     def __init__(self, p: Hyperparams):
         super().__init__()
+        if isinstance(p, dict):
+            p = Hyperparams(**p)
         self.p = p
         self.input_dropout = 0.1
         import crf_transition_matrix
@@ -437,12 +475,12 @@ class Network(tf.keras.Model):
         print("NtC loss weights: ", self.ntc_loss_weights)
 
         inputs = {}
-        inputs["sequence"] = (input_sequence := tf.keras.layers.Input(shape=[None], dtype=tf.int64, ragged=True))
-        inputs["is_dna"] = (input_is_dna := tf.keras.layers.Input(shape=[None], ragged=True))
-        input_pairswith = tf.keras.layers.Input(shape=[None], dtype=tf.int64, ragged=True)
-        input_pairing1 = tf.keras.layers.Input(shape=[None], dtype=tf.int64, ragged=True)
-        input_pairing2 = tf.keras.layers.Input(shape=[None], dtype=tf.int64, ragged=True)
-        input_pairing_type = tf.keras.layers.Input(shape=[None], dtype=tf.int64, ragged=True)
+        inputs["sequence"] = (input_sequence := tf.keras.layers.Input(shape=[None], dtype=tf.int64, ragged=True, name="input/sequence"))
+        inputs["is_dna"] = (input_is_dna := tf.keras.layers.Input(shape=[None], ragged=True, name="input/is_dna"))
+        input_pairswith = tf.keras.layers.Input(shape=[None], dtype=tf.int64, ragged=True, name="input/pairs_with")
+        input_pairing1 = tf.keras.layers.Input(shape=[None], dtype=tf.int64, ragged=True, name="input/pairing1")
+        input_pairing2 = tf.keras.layers.Input(shape=[None], dtype=tf.int64, ragged=True, name="input/pairing2")
+        input_pairing_type = tf.keras.layers.Input(shape=[None], dtype=tf.int64, ragged=True, name="input/pairing_type")
         if p.basepairing.startswith("in"):
             inputs["pairs_with"] = input_pairswith
             inputs["pairing_1"] = input_pairing1
@@ -476,11 +514,14 @@ class Network(tf.keras.Model):
             pass # handled in encoder
         elif self.p.basepairing in ["input-conv"]:
             pairing_type = tf.one_hot(input_pairing_type, depth=2, dtype=compute_dtype)
-            pairing_type = tf.nn.dropout(pairing_type, rate=0.4)
+            # pairing_type = tf.nn.dropout(pairing_type, rate=0.4)
             matrix = EncodePairing()(in_tensor, input_pairing1, input_pairing2, pairing_type)
-            embedding += MatrixSequenceMerger(embedding.shape[-1])(embedding, matrix)
+            pairing_embedding = MatrixSequenceMerger(embedding.shape[-1])(embedding, matrix)
+            embedding += pairing_embedding
+            # embedding = tf.concat([embedding, pairing_embedding], axis=-1)
+        assert embedding.shape[-1] is not None
 
-        encoder = EncoderRNN(embedding_size, hidden_size,
+        encoder = EncoderRNN(embedding.shape[-1], hidden_size,
             num_layers=p.rnn_layers,
             dropout=p.rnn_dropout,
             attention_heads=p.attention_heads,
@@ -551,6 +592,13 @@ class Network(tf.keras.Model):
     #         "CANA": self.cana_decoder(encoder_output),
     #         # "geometry_decoder": self.geometry_decoder(encoder_output),
     #     }, self.p.outputs)
+
+    def get_config(self):
+        config = super().get_config()
+        config.update({
+            "p": dataclasses.asdict(self.p)
+        })
+        return config
 
     def predict_step(self, data):
         logits: Any = super().predict_step(data)
