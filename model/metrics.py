@@ -2,8 +2,8 @@ import tensorflow as tf
 import ntcnetwork_tf as ntcnetwork
 
 class NtcMetricWrapper(tf.keras.metrics.Metric):
-    def __init__(self, metric: tf.keras.metrics.Metric, argmax_output=False, decoder=None, ignore_nants=False):
-        super().__init__(metric.name, metric.dtype)
+    def __init__(self, metric: tf.keras.metrics.Metric, argmax_output=False, decoder=None, ignore_nants=True, name=None, dtype=None):
+        super().__init__(name or metric.name, dtype or metric.dtype)
         self.inner_metric = metric
         self.argmax_output = argmax_output
         self.decoder = decoder
@@ -23,8 +23,9 @@ class NtcMetricWrapper(tf.keras.metrics.Metric):
         y_true = tf.one_hot(y_true, ntcnetwork.Network.OUTPUT_NTC_SIZE)
 
         if self.ignore_nants:
-            y_true = tf.boolean_mask(is_not_nant, y_true)
-            y_pred = tf.boolean_mask(is_not_nant, y_pred)
+            # y_true = tf.boolean_mask(tf.broadcast_to(tf.expand_dims(is_not_nant, axis=-1), tf.shape(y_true)), y_true)
+            y_true = tf.boolean_mask(y_true, is_not_nant, axis=0)
+            y_pred = tf.boolean_mask(y_pred, is_not_nant, axis=0)
 
         self.inner_metric.update_state(y_true, y_pred, sample_weight)
 
@@ -40,7 +41,10 @@ class NtcMetricWrapper(tf.keras.metrics.Metric):
     def reset_state(self):
         self.inner_metric.reset_state()
     def get_config(self):
-        return self.inner_metric.get_config()
+        return {
+            **super().get_config(),
+            "metric": tf.keras.metrics.serialize(self.inner_metric),
+        }
 
 class FilteredSparseCategoricalAccuracy(tf.keras.metrics.MeanMetricWrapper):
     def __init__(self, ignored_labels, name=None, dtype=None, **kwargs):

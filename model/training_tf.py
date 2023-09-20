@@ -171,9 +171,9 @@ def create_model(p: Hyperparams, step_count, logdir, profile=False):
         "CANA": model.canaloss
     }, p.outputs), metrics=filter_dict({
         "NtC": [
-            tf.keras.metrics.SparseCategoricalAccuracy(name="acc"),
-            tf.keras.metrics.SparseTopKCategoricalAccuracy(k=2, name="acc2"),
-            tf.keras.metrics.SparseTopKCategoricalAccuracy(k=5, name="acc5"),
+            NtcMetricWrapper(tf.keras.metrics.CategoricalAccuracy(name="acc")),
+            NtcMetricWrapper(tf.keras.metrics.TopKCategoricalAccuracy(k=2, name="acc2")),
+            NtcMetricWrapper(tf.keras.metrics.TopKCategoricalAccuracy(k=5, name="acc5")),
             NtcMetricWrapper(tfa.metrics.F1Score(name="f1", num_classes=ntcnetwork.Network.OUTPUT_NTC_SIZE, average="macro")),
             NtcMetricWrapper(tfa.metrics.F1Score(name="CRFf1", num_classes=ntcnetwork.Network.OUTPUT_NTC_SIZE, average="macro"), decoder=model.crf_ntc_decode),
             FilteredSparseCategoricalAccuracy(
