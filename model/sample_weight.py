@@ -1,7 +1,7 @@
 from typing import Any, Callable, List
 import math
 import numpy as np
-import csv_loader
+from model import csv_loader
 
 def clamp(v, min_v, max_v):
     return np.minimum(max_v, np.maximum(min_v, v))

@@ -4,17 +4,18 @@ import time
 import dataclasses
 from typing import Any, Dict, List, Optional, Tuple, Union
 import tensorflow as tf
-import tensorflow_addons as tfa
-
-from utils import filter_dict, get_logdir
 layers = tf.keras.layers
 import pandas as pd, numpy as np, os, sys
-import csv_loader
-# import torchtext
+# import tensorflow_addons as tfa
 import random
-from hparams import Hyperparams
-import dataset_tf as dataset
-import sample_weight
+
+from model.utils import filter_dict, get_logdir
+from model import csv_loader, sample_weight
+from model.hyperparameters import Hyperparams
+import model.dataset_tf as dataset
+
+if os.environ.get("NTCNET_INTERNAL_NO_HEAVY_IMPORTS", "") == "1":
+    raise Exception("This module is not supposed to be imported before args are parsed")
 
 TensorDict = Dict[str, tf.Tensor]
 
@@ -453,7 +454,7 @@ class Network(tf.keras.Model):
             p = Hyperparams(**p)
         self.p = p
         self.input_dropout = 0.1
-        import crf_transition_matrix
+        from model import crf_transition_matrix
         self.ntc_trans_matrix = crf_transition_matrix.load_saved_matrix(dataset.NtcDatasetLoader.ntc_mapping.get_vocabulary())
         # convert to logits
         self.ntc_trans_matrix = tf.math.log(self.ntc_trans_matrix)
@@ -502,7 +503,7 @@ class Network(tf.keras.Model):
             embedding = layers.Embedding(Network.INPUT_SIZE, embedding_size)(in_tensor)
 
         if p.external_embedding:
-            import rna_fm_embedding
+            import model.tf.rna_fm_embedding as rna_fm_embedding
             external_embedding = rna_fm_embedding.RnaFMOnnxTFEmbedding(p.external_embedding, dataset.NtcDatasetLoader.letters_mapping.get_vocabulary())
             ee = external_embedding(input_sequence, input_is_dna)
             embedding = tf.concat([embedding, ee], axis=-1)
@@ -600,18 +601,18 @@ class Network(tf.keras.Model):
         })
         return config
 
-    def predict_step(self, data):
-        logits: Any = super().predict_step(data)
-        logits["NtC"] = self.crf_ntc_decode(logits["NtC"])
-        return logits
+    # def predict_step(self, data):
+    #     logits: Any = super().predict_step(data)
+    #     logits["NtC"] = self.crf_ntc_decode(logits["NtC"])
+    #     return logits
 
-    def crf_ntc_decode(self, output: tf.RaggedTensor):
-        result = tfa.text.crf_decode(output.to_tensor(), transition_params=self.ntc_trans_matrix, sequence_length=output.row_lengths())
-        return tf.RaggedTensor.from_tensor(result[0], output.row_lengths())
+    # def crf_ntc_decode(self, output: tf.RaggedTensor):
+    #     result = tfa.text.crf_decode(output.to_tensor(), transition_params=self.ntc_trans_matrix, sequence_length=output.row_lengths())
+    #     return tf.RaggedTensor.from_tensor(result[0], output.row_lengths())
 
-    def crf_ntcloss(self, target: tf.RaggedTensor, output: tf.RaggedTensor):
-        ll = tfa.text.crf_log_likelihood(output.to_tensor(), target.to_tensor(), output.row_lengths(), transition_params=self.ntc_trans_matrix)
-        return tf.RaggedTensor.from_tensor(ll, output.row_lengths())
+    # def crf_ntcloss(self, target: tf.RaggedTensor, output: tf.RaggedTensor):
+    #     ll = tfa.text.crf_log_likelihood(output.to_tensor(), target.to_tensor(), output.row_lengths(), transition_params=self.ntc_trans_matrix)
+    #     return tf.RaggedTensor.from_tensor(ll, output.row_lengths())
     
     def unweighted_ntcloss(self, target: tf.RaggedTensor, output: tf.RaggedTensor):
         target_onehot = tf.one_hot(target.values, depth=self.OUTPUT_NTC_SIZE, dtype=self.compute_dtype)

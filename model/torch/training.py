@@ -9,11 +9,11 @@ import dataclasses
 from dataclasses import dataclass, field
 # import torchtext
 import random
-from hparams import Hyperparams
+from model import hyperparameters
+from model.hyperparameters import Hyperparams
 
-import ntcnetwork
-import dataset_torch as dataset_torch
-from torchutils import count_parameters, device
+from . import ntcnetwork, dataset_torch, torchutils
+from .torchutils import count_parameters, device
 
 import ignite.metrics as metrics
 import ignite.engine
@@ -172,39 +172,24 @@ def setup_tensorboard_logger(trainer: ignite.engine.Engine, optimizer: optim.Opt
     )
     return tb_logger
 
-if __name__ == '__main__':
-    import argparse
-    parser = argparse.ArgumentParser(description='Train NtC network using PyTorch ignite')
+def init_argparser(parser):
     parser.add_argument('--train_set', type=str, help='Path to directory training data CSVs')
     parser.add_argument('--val_set', type=str, help='Path to directory validation data CSVs')
     parser.add_argument('--logdir', type=str, default="tb-logs", help='Path for saving Tensorboard logs and other outputs')
+    hyperparameters.add_parser_args(parser, Hyperparams)
 
-    for k, w in Hyperparams.__dataclass_fields__.items():
-        p_config = {}
-        if w.metadata.get("list", False):
-            p_config["nargs"] = "+"
-            p_config["type"] = w.type.__args__[0]
-        elif dataclasses.MISSING != w.type:
-            p_config["type"] = w.type
-        else: 
-            p_config["type"] = type(w.default)
-        if dataclasses.MISSING != w.default:
-            p_config["default"] = w.default
-        else:
-            p_config["required"] = True
-        
-        if "help" in w.metadata:
-            p_config["help"] = w.metadata["help"]
+def main(argv: list[str]):
+    import argparse
+    parser = argparse.ArgumentParser(description='Train NtC network using PyTorch ignite')
+    init_argparser(parser)
+    args = parser.parse_args(argv)
 
-        if "choices" in w.metadata:
-            p_config["choices"] = w.metadata["choices"]
-        
-        parser.add_argument(f'--{k}', **p_config)
+    p = Hyperparams.from_args(args)
 
-    args = parser.parse_args()
-
-    hyperparameters = Hyperparams(**{ k: v for k, v in vars(args).items() if k in Hyperparams.__dataclass_fields__ })
-    
     print(f"device: {device}    logdir: {args.logdir}")
-    print(hyperparameters)
-    train(args.train_set, args.val_set, hyperparameters, args.logdir)
+    print(p)
+    train(args.train_set, args.val_set, p, args.logdir)
+
+if __name__ == '__main__':
+    print("Use the launch.py script using `torch-train` command.")
+    exit(1)

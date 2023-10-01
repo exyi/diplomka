@@ -2,8 +2,8 @@ import os
 from typing import Dict, List, Optional, Tuple
 from torch.utils.data import Dataset, DataLoader
 import torch
-import csv_loader
-from torchutils import TensorDict
+from model import csv_loader
+from model.torch.torchutils import TensorDict
 
 class StructuresDataset(Dataset):
     def __init__(self, dir: str, files: Optional[List[str]] = None):

@@ -1,7 +1,8 @@
 import os
+
+from model.tf import rna_fm_embedding
 os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "2")
-import rna_fm_embedding
-import dataset_tf
+from model import dataset_tf
 import tensorflow as tf
 
 onnxfile = "/home/exyi/tmp/rna-fm-venv/rna-fm.onnx"

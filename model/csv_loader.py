@@ -7,7 +7,7 @@ import pandas as pd, numpy as np
 import sys, os, re
 from collections import defaultdict
 
-from utils import retry_on_error
+from model.utils import retry_on_error
 
 csv_extensions = re.compile(r"\.csv(\.(zst|gz|xz|bz2))?$")
 

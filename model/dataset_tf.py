@@ -3,10 +3,8 @@ from typing import Any, Dict, List, Optional, Tuple
 import tensorflow as tf
 import sys, os, math, json, re
 import numpy as np
-import csv_loader
-from utils import concat_dicts, filter_dict
-
-
+from model import csv_loader
+from model.utils import concat_dicts, filter_dict
 
 class NtcDatasetLoader:
     LETTERS = csv_loader.basic_nucleotides
@@ -92,7 +90,7 @@ class NtcDatasetLoader:
             compression_type = "GZIP"
         else:
             compression_type = None
-        self.dataset = tf.data.TFRecordDataset(files, compression_type=compression_type).map(self.parse)
+        self.dataset: tf.data.Dataset = tf.data.TFRecordDataset(files, compression_type=compression_type).map(self.parse)
 
         if self.cardinality:
             self.dataset = self.dataset.apply(tf.data.experimental.assert_cardinality(self.cardinality))
@@ -141,7 +139,7 @@ class NtcDatasetLoader:
                 length = max_len
 
             pairs_with = None
-            pairing_is_canonical = None
+            pairing_is_canonical: Any = None
             if pairing_seq:
                 i64 = lambda x: tf.cast(x, tf.int64)
                 pairings1 = x["pairing_nt1_ix"] - i64(s_slice)

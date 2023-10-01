@@ -1,5 +1,5 @@
 import tensorflow as tf
-import ntcnetwork_tf as ntcnetwork
+import model.tf.ntcnetwork as ntcnetwork
 
 class NtcMetricWrapper(tf.keras.metrics.Metric):
     def __init__(self, metric: tf.keras.metrics.Metric, argmax_output=False, decoder=None, ignore_nants=True, name=None, dtype=None):

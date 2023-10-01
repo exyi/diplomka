@@ -2,9 +2,9 @@
 
 import sys, os, random, argparse, math
 from typing import List
-import csv_loader
 import numpy as np
 import Bio.Align
+from model import csv_loader
 
 def filter(
     iterator,

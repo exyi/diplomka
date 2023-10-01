@@ -1,24 +1,25 @@
-#!/usr/bin/env python3
-
 import math, time, os, sys
-
-from utils import filter_dict
 
 os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "2")
 from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
-import tensorflow as tf, tensorflow_addons as tfa
-import tensorboard.plugins.hparams.api as hparams
+import tensorflow as tf
+from packaging.version import Version
+tensorflow_2_13 = Version(tf.__version__).release >= Version("2.13").release
+if not tensorflow_2_13:
+    import tensorflow_addons as tfa
+else:
+    tfa=None
 import dataclasses
 import random
 
-from hparams import Hyperparams
-import ntcnetwork_tf as ntcnetwork
-import dataset_tf
-import csv_loader
-import utils
-import sample_weight
-from metrics import FilteredSparseCategoricalAccuracy, NtcMetricWrapper
+from . import ntcnetwork
+
+from model.utils import filter_dict
+from model import hyperparameters, utils, sample_weight, dataset_tf, csv_loader
+from model.hyperparameters import Hyperparams
+from .metrics import FilteredSparseCategoricalAccuracy, NtcMetricWrapper
+import argparse
 
 def parse_len_schedule(input_str: str, num_epochs: int) -> List[Tuple[int, int]]:
     splits = [ s.split('*') for s in input_str.split(";") ]
@@ -144,11 +145,11 @@ def create_model(p: Hyperparams, step_count, logdir, profile=False):
 
     all_submodules: List[tf.Module] = model.submodules
     module_names = set()
-    for x in all_submodules:
-        print(x.name)
-        if x.name in module_names:
-            raise ValueError(f"Duplicate module name {x.name} of type {x.__class__}")
-        module_names.add(x.name)
+    # for x in all_submodules:
+    #     print(x.name)
+    #     if x.name in module_names:
+    #         raise ValueError(f"Duplicate module name {x.name} of type {x.__class__}")
+    #     module_names.add(x.name)
     config_json = {
         "hyperparams": dataclasses.asdict(p),
         "optimizer": optimizer.get_config(),
@@ -165,7 +166,7 @@ def create_model(p: Hyperparams, step_count, logdir, profile=False):
 
     model.compile(optimizer=optimizer, loss=filter_dict({
         # "NtC": model.ntcloss,
-        "NtC": model.unweighted_ntcloss, 
+        "NtC": model.ntcloss, 
         # "NtC": tf.keras.losses.SparseCategoricalCrossentropy(reduction=tf.keras.losses.Reduction.SUM_OVER_BATCH_SIZE),
         # "CANA": tf.keras.losses.SparseCategoricalCrossentropy()
         "CANA": model.canaloss
@@ -174,8 +175,16 @@ def create_model(p: Hyperparams, step_count, logdir, profile=False):
             NtcMetricWrapper(tf.keras.metrics.CategoricalAccuracy(name="acc")),
             NtcMetricWrapper(tf.keras.metrics.TopKCategoricalAccuracy(k=2, name="acc2")),
             NtcMetricWrapper(tf.keras.metrics.TopKCategoricalAccuracy(k=5, name="acc5")),
-            NtcMetricWrapper(tfa.metrics.F1Score(name="f1", num_classes=ntcnetwork.Network.OUTPUT_NTC_SIZE, average="macro")),
-            NtcMetricWrapper(tfa.metrics.F1Score(name="CRFf1", num_classes=ntcnetwork.Network.OUTPUT_NTC_SIZE, average="macro"), decoder=model.crf_ntc_decode),
+            NtcMetricWrapper(
+                tf.metrics.F1Score(name="f1", average="macro")
+                if tensorflow_2_13 else
+                tfa.metrics.F1Score(name="f1", num_classes=ntcnetwork.Network.OUTPUT_NTC_SIZE, average="macro"),
+            ),
+            # NtcMetricWrapper(
+            #     tf.metrics.F1Score(name="CRFf1", average="macro")
+            #     if tensorflow_2_13 else
+            #     tfa.metrics.F1Score(name="CRFf1", num_classes=ntcnetwork.Network.OUTPUT_NTC_SIZE, average="macro"),
+            # decoder=model.crf_ntc_decode),
             FilteredSparseCategoricalAccuracy(
                 ignored_labels=dataset_tf.NtcDatasetLoader.ntc_mapping(["<UNK>", "NANT", "AA00", "AA08"]),
                 name="accF"
@@ -233,7 +242,7 @@ def train(train_set_dir, val_set_dir, load_model, p: Hyperparams, logdir, eager=
     if load_model:
         model = tf.keras.models.load_model(load_model, custom_objects={
             "Network": ntcnetwork.Network,
-            "unweighted_ntcloss": ntcnetwork.Network.unweighted_ntcloss,
+            "unweighted_ntcloss": ntcnetwork.Network.ntcloss,
             "NtcMetricWrapper": NtcMetricWrapper,
         })
     else:
@@ -275,59 +284,25 @@ class Clock:
         self.last_time = now
         return elapsed
 
-
-if __name__ == '__main__':
-    import argparse
-    parser = argparse.ArgumentParser(description='Train NtC network using Tensorflow')
-    parser.add_argument('--load_model', type=str, help='Start from the specified model. Other provided hyperparameters might be ignored if they affect the model architecture, not the training process')
-    parser.add_argument('--train_set', type=str, help='Path to directory training data CSVs')
-    parser.add_argument('--val_set', type=str, help='Path to directory validation data CSVs')
-    parser.add_argument('--logdir', type=str, default="tb-logs", help='Path for saving Tensorboard logs and other outputs')
-    parser.add_argument('--eager', action="store_true", help='Run in eager mode', default=False)
-    parser.add_argument('--profile', type=str, help='Run tensorflow profiler. The value specified for which batches the profiler should be run (for example 10,20 for 10..20)', default=False)
-    parser.add_argument('--fp16', action="store_true", help='Run in (mixed) Float16 mode. By default, float32 is used', default=False)
-    parser.add_argument('--bfp16', action="store_true", help='Run in (mixed) BFloat16 mode', default=False)
-
-    for k, w in Hyperparams.__dataclass_fields__.items():
-        p_config = {}
-        if w.metadata.get("list", False):
-            p_config["nargs"] = "+"
-            p_config["type"] = w.type.__args__[0]
-        elif dataclasses.MISSING != w.type:
-            p_config["type"] = w.type
-        else: 
-            p_config["type"] = type(w.default)
-        if dataclasses.MISSING != w.default:
-            p_config["default"] = w.default
-        else:
-            p_config["required"] = True
-        
-        if "help" in w.metadata:
-            p_config["help"] = w.metadata["help"]
-
-        if "choices" in w.metadata:
-            p_config["choices"] = w.metadata["choices"]
-        
-        parser.add_argument(f'--{k}', **p_config)
-
-    args = parser.parse_args()
+def main_args(args):
+    import tensorboard.plugins.hparams.api as hparams
 
     if args.fp16:
         tf.keras.mixed_precision.set_global_policy(tf.keras.mixed_precision.Policy("mixed_float16"))
     elif args.bfp16:
         tf.keras.mixed_precision.set_global_policy(tf.keras.mixed_precision.Policy("mixed_bfloat16"))
 
-    hyperparameters = Hyperparams(**{ k: v for k, v in vars(args).items() if k in Hyperparams.__dataclass_fields__ })
+    p = Hyperparams.from_args(args)
 
     utils.set_logdir(args.logdir)
     tb_writer = tf.summary.create_file_writer(args.logdir)
     with tb_writer.as_default():
         print(f"logdir: {args.logdir}")
         print(f"devices: {[ x.name for x in tf.config.list_physical_devices() ]}")
-        print(hyperparameters)
-        print(hyperparameters.get_nondefault())
+        print(p)
+        print(p.get_nondefault())
         tf.summary.trace_off()
-        tf.summary.text("model/hyperparams", "```python\n" + str(hyperparameters) + "\n\n" + str(hyperparameters.get_nondefault()) + "\n```\n", step=0)
+        tf.summary.text("model/hyperparams", "```python\n" + str(p) + "\n\n" + str(p.get_nondefault()) + "\n```\n", step=0)
 
         ## log hparams
         # tensorboard.plugins.hparams.api.hparams(
@@ -343,18 +318,18 @@ if __name__ == '__main__':
             ]
         )
         hparams.hparams(
-            {k: (v if isinstance(v, (int, float, bool, str)) else str(v)) for k, v in dataclasses.asdict(hyperparameters).items() if k in hparams_keys},
+            {k: (v if isinstance(v, (int, float, bool, str)) else str(v)) for k, v in dataclasses.asdict(p).items() if k in hparams_keys},
             trial_id=os.path.basename(args.logdir)
         )
 
         tf.summary.experimental.set_step(-1)
 
         try:
-            model = train(args.train_set, args.val_set, args.load_model, hyperparameters, args.logdir, eager=args.eager, profile=args.profile)
+            model = train(args.train_set, args.val_set, args.load_model, p, args.logdir, eager=args.eager, profile=args.profile)
         except KeyboardInterrupt:
             print("Keyboard interrupt")
         except Exception as e:
             tf.summary.text("crash", "```\n" + str(e) + "\n```\n", step=(tf.summary.experimental.get_step() or 0))
             raise e
-        
+
 

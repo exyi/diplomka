@@ -33,5 +33,32 @@ class Hyperparams:
     def get_nondefault(self):
         default = dataclasses.asdict(Hyperparams())
         return {k: v for k, v in dataclasses.asdict(self).items() if default[k] != v}
+    
+    @staticmethod
+    def from_args(args):
+        return Hyperparams(**{ k: v for k, v in vars(args).items() if k in Hyperparams.__dataclass_fields__ })
 
+
+def add_parser_args(parser, dataclass = Hyperparams):
+    for k, w in dataclass.__dataclass_fields__.items():
+        p_config = {}
+        if w.metadata.get("list", False):
+            p_config["nargs"] = "+"
+            p_config["type"] = w.type.__args__[0]
+        elif dataclasses.MISSING != w.type:
+            p_config["type"] = w.type
+        else: 
+            p_config["type"] = type(w.default)
+        if dataclasses.MISSING != w.default:
+            p_config["default"] = w.default
+        else:
+            p_config["required"] = True
+        
+        if "help" in w.metadata:
+            p_config["help"] = w.metadata["help"]
+
+        if "choices" in w.metadata:
+            p_config["choices"] = w.metadata["choices"]
+        
+        parser.add_argument(f'--{k}', **p_config)
 
