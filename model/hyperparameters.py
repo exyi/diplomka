@@ -11,7 +11,7 @@ class Hyperparams:
     seq_length_schedule: str = hyperparameter("x*512", "Maximum length of a sequence to train on, longer sequences will be randomly truncated. Format is `((x|\\d+)\\*\\d+;)*`")
     learning_rate: float = hyperparameter(0.001, "ADAM Learning rate")
     lr_decay: str = hyperparameter("cosine", "Learning rate decay")
-    max_batch_size: int = hyperparameter(32, "Maximum batch size, limits batch_size adjustion when seq_length low")
+    max_batch_size: int = hyperparameter(None, "Maximum batch size, limits batch_size adjustion when seq_length low")
     batch_size: int = hyperparameter(64, "Training batch size given minimal seq_length. When seq_len is increased, batch size is decreased accordingly.")
     epochs: int = hyperparameter(30, "Number of epochs to train")
     conv_channels: List[int] = hyperparameter((64, 64, 128, 128), "Number of channels in each convolutional layer", list=True)

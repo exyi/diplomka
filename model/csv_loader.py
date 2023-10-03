@@ -19,7 +19,7 @@ nucleotide_mapping = defaultdict(lambda: 'X', {
     '5MC': 'C', '2MG': 'G'
 })
 
-basic_nucleotides = np.array([ "A", "T", "U", "G", "C", "X", " " ])
+basic_nucleotides = np.array([ "X", "A", "T", "U", "G", "C", " " ])
 ntc_frequencies = {
     "NANT": 2738272,
     "AA00": 2880801,

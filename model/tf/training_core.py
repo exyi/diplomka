@@ -16,22 +16,9 @@ import random
 from . import ntcnetwork
 
 from model.utils import filter_dict
-from model import hyperparameters, utils, sample_weight, dataset_tf, csv_loader
+from model import hyperparameters, utils, sample_weight, dataset_tf, csv_loader, epochschedule
 from model.hyperparameters import Hyperparams
 from .metrics import FilteredSparseCategoricalAccuracy, NtcMetricWrapper
-import argparse
-
-def parse_len_schedule(input_str: str, num_epochs: int) -> List[Tuple[int, int]]:
-    splits = [ s.split('*') for s in input_str.split(";") ]
-    non_x_sum = sum([ int(epochs) for epochs, _ in splits if epochs != "x" ])
-    x_count = sum([ 1 for epochs, _ in splits if epochs == "x" ])
-    x_min = (num_epochs - non_x_sum) // x_count
-    x_mod = (num_epochs - non_x_sum) % x_count
-    if x_min < 0:
-        raise ValueError(f"Can't fit {num_epochs} epochs into {input_str}")
-    x = [ x_min + (1 if i < x_mod else 0) for i in range(x_count) ]
-    x.reverse()
-    return [ ((int(epochs) if epochs != "x" else x.pop()), int(max_len)) for epochs, max_len in splits ]
 
 def get_step_count(seq_len_schedule: List[Tuple[int, int]], ds_cardinality, base_batch_size: int) -> int:
     base_seq_len = min([ seq_len for _, seq_len in seq_len_schedule ])
@@ -214,11 +201,10 @@ def create_model(p: Hyperparams, step_count, logdir, profile=False):
     ]
     return model
 
-def model_fit(model: tf.keras.Model, train_loader: dataset_tf.NtcDatasetLoader, val_ds, seq_len_schedule: List[Tuple[int, int]], base_batch_size: int):
-    base_seq_len = min([ seq_len for _, seq_len in seq_len_schedule ])
+def model_fit(model: tf.keras.Model, train_loader: dataset_tf.NtcDatasetLoader, val_ds, seq_len_schedule: List[Tuple[int, int]], batch_size_schedule: List[Tuple[int, int]]):
     e = 0
-    for epochs, seq_len in seq_len_schedule:
-        batch_size = math.ceil(base_batch_size * base_seq_len / seq_len)
+    for (epochs, seq_len), (epochs_, batch_size) in zip(seq_len_schedule, batch_size_schedule):
+        assert epochs == epochs_
         model.fit(
             train_loader.get_data(batch=batch_size, max_len=seq_len, shuffle=15000),
             validation_data=val_ds,
@@ -229,12 +215,13 @@ def model_fit(model: tf.keras.Model, train_loader: dataset_tf.NtcDatasetLoader, 
         e += epochs
 
 def train(train_set_dir, val_set_dir, load_model, p: Hyperparams, logdir, eager=False, profile=False):
-    seq_len_schedule = parse_len_schedule(p.seq_length_schedule, p.epochs)
+    seq_len_schedule = epochschedule.parse_epoch_schedule(p.seq_length_schedule, p.epochs, tt=int)
+    batch_size_schedule = epochschedule.get_batch_size_from_maxlen(seq_len_schedule, p.batch_size, p.max_batch_size)
     print("Epoch/sequence length schedule: ", seq_len_schedule)
 
     sample_weighter = sample_weight.get_weighter(p.sample_weight, tf, dataset_tf.NtcDatasetLoader.ntc_mapping.get_vocabulary())
     train_loader = dataset_tf.NtcDatasetLoader(train_set_dir, features=p.outputs, ntc_rmsd_threshold=p.nearest_ntc_threshold).set_sample_weighter(sample_weighter)
-    step_count = get_step_count(seq_len_schedule, train_loader.cardinality, p.batch_size)
+    step_count = epochschedule.get_step_count(batch_size_schedule, train_loader.cardinality)
     assert step_count > 0, f"{step_count=}"
     val_loader = dataset_tf.NtcDatasetLoader(val_set_dir, features=p.outputs, ntc_rmsd_threshold=0).set_sample_weighter(sample_weighter)
     val_ds = val_loader.get_data(batch=p.batch_size)
@@ -264,7 +251,7 @@ def train(train_set_dir, val_set_dir, load_model, p: Hyperparams, logdir, eager=
 
     # with tf.profiler.experimental.Profile(logdir):
 
-    model_fit(model, train_loader, val_ds, seq_len_schedule, p.batch_size)
+    model_fit(model, train_loader, val_ds, seq_len_schedule, batch_size_schedule)
 
     with open(os.path.join(logdir, "predictions.txt"), "w") as file:
         print_results(file, model, val_ds)
@@ -294,7 +281,7 @@ def main_args(args):
 
     p = Hyperparams.from_args(args)
 
-    utils.set_logdir(args.logdir)
+    assert utils.get_logdir() == args.logdir
     tb_writer = tf.summary.create_file_writer(args.logdir)
     with tb_writer.as_default():
         print(f"logdir: {args.logdir}")

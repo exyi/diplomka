@@ -9,9 +9,14 @@ from model.utils import concat_dicts, filter_dict
 class NtcDatasetLoader:
     LETTERS = csv_loader.basic_nucleotides
     NTCS = csv_loader.ntcs
-    letters_mapping = tf.keras.layers.StringLookup(vocabulary=csv_loader.basic_nucleotides, oov_token="X")
-    ntc_mapping = tf.keras.layers.StringLookup(vocabulary=csv_loader.ntcs)
+    CANAS = csv_loader.CANAs
+    letters_mapping = tf.keras.layers.StringLookup(vocabulary=csv_loader.basic_nucleotides[1:], oov_token="X")
+    assert list(letters_mapping.get_vocabulary()) == list(csv_loader.basic_nucleotides)
+    ntc_mapping = tf.keras.layers.StringLookup(vocabulary=csv_loader.ntcs[1:], oov_token="NANT")
+    assert list(ntc_mapping.get_vocabulary()) == list(csv_loader.ntcs)
     cana_mapping = tf.keras.layers.StringLookup(vocabulary=csv_loader.CANAs[1:], oov_token="NAN")
+    assert list(cana_mapping.get_vocabulary()) == list(csv_loader.CANAs)
+
     parsing_features = {
         "pdbid": tf.io.FixedLenFeature([], tf.string),
         "sequence": tf.io.FixedLenFeature([], tf.string),
@@ -79,21 +84,12 @@ class NtcDatasetLoader:
 
         self.convert_to_numbers = convert_to_numbers
         self.features = features
-        self.file_name = files
+        self.files = files
         self.metadata = [ self.try_load_metadata(f) for f in files ]
 
         self.cardinality = sum([ m.get("count", float('nan')) for m in self.metadata ])
         if math.isnan(self.cardinality):
             self.cardinality = None
-
-        if files[0].endswith(".gz"):
-            compression_type = "GZIP"
-        else:
-            compression_type = None
-        self.dataset: tf.data.Dataset = tf.data.TFRecordDataset(files, compression_type=compression_type).map(self.parse)
-
-        if self.cardinality:
-            self.dataset = self.dataset.apply(tf.data.experimental.assert_cardinality(self.cardinality))
 
         self.sample_weighter = None
         self.external_embedding = None
@@ -106,12 +102,27 @@ class NtcDatasetLoader:
     def set_external_embedding(self, embedding):
         self.external_embedding = embedding
         return self
+    
+    def get_base_dataset(self) -> tf.data.Dataset:
+        if self.files[0].endswith(".gz"):
+            compression_type = "GZIP"
+        else:
+            compression_type = None
+        dataset = tf.data.TFRecordDataset(self.files, compression_type=compression_type).map(self.parse)
 
-    def get_data(self, max_len = None, trim_prob: float = 0, shuffle = None, batch = None, shuffle_chains = True, max_chains = None, pairing_seq = True, sample_weighter=None):
+        if self.cardinality:
+            dataset = dataset.apply(tf.data.experimental.assert_cardinality(self.cardinality))
+        return dataset
+
+
+    def get_data(self, max_len = None, trim_prob: float = 0, shuffle = None, batch = None, shuffle_chains = True, max_chains = None, pairing_seq = True, sample_weighter=None) -> tf.data.Dataset:
+
         if sample_weighter is None:
             sample_weighter = self.sample_weighter
+        if sample_weighter is None:
+            sample_weighter = lambda x: tf.repeat(1.0, len(x["NtC"]))
 
-        data = self.dataset
+        data = self.get_base_dataset()
 
         # def remap_chains(tensor, separators, )
 
@@ -191,7 +202,7 @@ class NtcDatasetLoader:
                 "external_embedding" if self.external_embedding else None,
             ])
             target = filter_dict(x, [ *self.features ])
-            sample_weight = sample_weighter(x) if sample_weighter else tf.repeat(1.0, x["NtC"].shape[0])
+            sample_weight = sample_weighter(x)
             return input, target, sample_weight
         data = data.map(split_input_target)
 
@@ -213,9 +224,6 @@ class NtcDatasetLoader:
 
             data = data.map(lambda x, y, w: (concat_dicts(x, { "external_embedding": get_ee(x["sequence"], x["is_dna"]) }), y, w))
         return data.prefetch(tf.data.AUTOTUNE)
-
-
-
 
 
 
@@ -498,17 +506,17 @@ if __name__ == "__main__":
 
     if args.testload:
         loader = NtcDatasetLoader(args.testload)
-        for i, example in enumerate(loader.dataset):
+        for i, example in enumerate(loader.get_base_dataset()):
             print(example)
             if i > 10:
                 break
     elif args.list:
         loader = NtcDatasetLoader(args.list)
         if args.verbose:
-            print(f"# Cardinality = {loader.dataset.cardinality()}")
-            print(f"# count =       {sum(1 for _ in loader.dataset)}")
+            print(f"# Cardinality = {loader.cardinality}")
+            print(f"# count =       {sum(1 for _ in loader.get_base_dataset())}")
             print(f"PDBID   LENGTH #CHAINS PAIRS SEQUENCE")
-        for i, example in enumerate(loader.dataset):
+        for i, example in enumerate(loader.get_base_dataset()):
             seq: str = "".join(csv_loader.basic_nucleotides[example['sequence'].numpy() - 1])
             seqs = seq.split(' ')
             print_seq = (" " + seq) if args.verbose else ""

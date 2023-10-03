@@ -9,10 +9,10 @@ import dataclasses
 from dataclasses import dataclass, field
 # import torchtext
 import random
-from model import hyperparameters
+from model import hyperparameters, epochschedule
 from model.hyperparameters import Hyperparams
 
-from . import ntcnetwork, dataset_torch, torchutils
+from . import ntcnetwork, torchutils, dataset_wrapper
 from .torchutils import count_parameters, device
 
 import ignite.metrics as metrics
@@ -20,7 +20,8 @@ import ignite.engine
 import ignite.handlers
 import ignite.handlers.param_scheduler
 from ignite.engine import Events
-import ignite.contrib.handlers
+import ignite.handlers.early_stopping
+import ignite.contrib.handlers.tensorboard_logger as tensorboard_logger
 import itertools
 
 def print_model(model: nn.Module):
@@ -35,11 +36,17 @@ def print_model(model: nn.Module):
         
     print(model)
 
+def _output_field_transform(field):
+    def transform(x):
+        return (x[0][field], x[1][field])
+    
+    return transform
+
 def train(train_set_dir, val_set_dir, p: Hyperparams, logdir):
-    train_loader = DataLoader(
-        dataset_torch.StructuresDataset(train_set_dir), batch_size=p.batch_size, shuffle=True, collate_fn=dataset_torch.StructuresDataset.collate_fn, num_workers=4)
-    batch_count = len(train_loader)
-    val_loader = DataLoader(dataset_torch.StructuresDataset(val_set_dir), batch_size=64, shuffle=False, collate_fn=dataset_torch.StructuresDataset.collate_fn, num_workers=4)
+    ds = dataset_wrapper.make_test_val(train_set_dir, val_set_dir, p)
+    seq_len_schedule = epochschedule.parse_epoch_schedule(p.seq_length_schedule, p.epochs, tt=int)
+    batch_size_schedule = epochschedule.get_batch_size_from_maxlen(seq_len_schedule, p.batch_size, p.max_batch_size)
+    batch_count = epochschedule.get_step_count(batch_size_schedule, ds.train_size)
 
     model = ntcnetwork.Network(p).to(device)
     print_model(model)
@@ -54,17 +61,23 @@ def train(train_set_dir, val_set_dir, p: Hyperparams, logdir):
         @trainer.on(Events.ITERATION_COMPLETED)
         def lr_decay():
             torch_lr_scheduler.step()
+    elif p.lr_decay != "none" and p.lr_decay is not None:
+        raise ValueError(f"Unknown lr_decay method {p.lr_decay}")
 
-    recall_metric = metrics.Recall(output_transform=lambda x: (x[0]["NtC"], x[1]["NtC"]), average=False)
-    precision_metric = metrics.Precision(output_transform=lambda x: (x[0]["NtC"], x[1]["NtC"]), average=False)
+    output_ntc = _output_field_transform("NtC")
+    recall_metric = metrics.Recall(output_transform=output_ntc, average=False)
+    precision_metric = metrics.Precision(output_transform=output_ntc, average=False)
     val_metrics: Dict[str, metrics.Metric] = {
-        "accuracy": metrics.Accuracy(output_transform=lambda x: (x[0]["NtC"], x[1]["NtC"])),
-        "f1": (precision_metric * recall_metric * 2 / (precision_metric + recall_metric)).nanmean(),
-        "miou": metrics.mIoU(metrics.ConfusionMatrix(len(ntcnetwork.Network.NTC_LABELS), output_transform=lambda x: (x[0]["NtC"], x[1]["NtC"]))),
+        "accuracy": metrics.Accuracy(output_transform=output_ntc),
+        "f1": metrics.Fbeta(1, output_transform=output_ntc),
+        # "miou": metrics.mIoU(metrics.ConfusionMatrix(len(ntcnetwork.Network.NTC_LABELS), output_transform=output_ntc)),
         "loss": metrics.Loss(model.loss)
     }
     train_evaluator = ignite.engine.create_supervised_evaluator(model, metrics=val_metrics, device=device)
     val_evaluator = ignite.engine.create_supervised_evaluator(model, metrics=val_metrics, device=device)
+
+    metrics.Accuracy(output_transform=output_ntc).attach(trainer, "accuracy")
+    metrics.Fbeta(beta=1.0, output_transform=output_ntc).attach(trainer, "f1")
 
     logger_clock = Clock()
     epoch_clock = Clock()
@@ -78,51 +91,58 @@ def train(train_set_dir, val_set_dir, p: Hyperparams, logdir):
         res_epoch = epoch_clock.measure()
         print(f"Epoch[{trainer.state.epoch}] Residual time: {res_epoch/60:3.1f}m residual step time: {res_step/60:3.1f}m    ")
 
-    @trainer.on(Events.EPOCH_COMPLETED)
-    def log_training_results(trainer):
-        epoch_time = epoch_clock.measure()
-        eval_clock = Clock()
-        train_evaluator.run(itertools.islice(train_loader, 6)) # limit to few batches, otherwise it takes longer than training (??)
-        eval_time = eval_clock.measure()
-        metrics = train_evaluator.state.metrics
-        print(f"evalT - Epoch[{trainer.state.epoch}] accuracy: {metrics['accuracy']:.2f} F1: {metrics['f1']:.2f} loss: {metrics['loss']:.2f} Train Time: {epoch_time/60:3.1f}m Eval Time: {eval_time/60:3.2f}m    ")
+    # @trainer.on(Events.EPOCH_COMPLETED)
+    # def log_training_results(trainer):
+    #     epoch_time = epoch_clock.measure()
+    #     eval_clock = Clock()
+    #     train_evaluator.run(itertools.islice(train_loader, 6)) # limit to few batches, otherwise it takes longer than training (??)
+    #     eval_time = eval_clock.measure()
+    #     metrics = train_evaluator.state.metrics
+    #     print(f"evalT - Epoch[{trainer.state.epoch}] accuracy: {metrics['accuracy']:.2f} F1: {metrics['f1']:.2f} loss: {metrics['loss']:.2f} Train Time: {epoch_time/60:3.1f}m Eval Time: {eval_time/60:3.2f}m    ")
 
 
     @trainer.on(Events.EPOCH_COMPLETED)
     def log_validation_results(trainer):
         eval_clock = Clock()
-        val_evaluator.run(val_loader)
+        val_evaluator.run(ds.get_validation_ds())
         eval_time = eval_clock.measure()
         metrics = val_evaluator.state.metrics
         print(f"evalV - Epoch[{trainer.state.epoch}] accuracy: {metrics['accuracy']:.2f} F1: {metrics['f1']:.2f} loss: {metrics['loss']:.2f} Eval Time: {eval_time/60:3.2f}m")
 
+    early_stopper = ignite.handlers.early_stopping.EarlyStopping(patience=8, score_function=lambda engine: -engine.state.metrics["loss"], trainer=trainer)
+    val_evaluator.add_event_handler(Events.COMPLETED, early_stopper)
+
     tb_log = setup_tensorboard_logger(trainer, optimizer, train_evaluator, val_evaluator, logdir)
     if tb_log is not None:
-        from torch.utils.tensorboard._pytorch_graph import graph
-        tb_log.writer._get_file_writer().add_graph(graph(model, next(iter(val_loader)), use_strict_trace=False))
+        tblog_architecture(tb_log, model, ds, p)
 
-        hparams = dict(vars(p))
-        for k, v in hparams.items():
-            if not (isinstance(v, str) or isinstance(v, int) or isinstance(v, float) or isinstance(v, bool)):
-                hparams[k] = str(v)
+    for seq_len, batch_size in zip(epochschedule.schedule_to_list(seq_len_schedule), epochschedule.schedule_to_list(batch_size_schedule)):
+        print(f"Epoch[{trainer.state.epoch}] seq_len: {seq_len} batch_size: {batch_size}")
+        trainer.run(data=ds.get_train_ds(seq_len, batch_size))
 
-        import tensorboardX.summary
-        hmetrics = {
-            "model/total_params": 0,
-            "training/loss": 0,
-            "training/step_time": 0,
-            "validation/miou": 0,
-            "validation/f1": 0
-        }
-        a, b, c = tensorboardX.summary.hparams(hparams, hmetrics)
-        tb_log.writer._get_file_writer().add_summary(a)
-        tb_log.writer._get_file_writer().add_summary(b)
-        tb_log.writer._get_file_writer().add_summary(c)
-        tb_log.writer.add_scalar("model/total_params", count_parameters(model))
-        tb_log.writer.add_text("model/structure", str(model))
+def tblog_architecture(tb_log: tensorboard_logger.TensorboardLogger, model: nn.Module, ds: dataset_wrapper.Datasets, p: Hyperparams):
+    from torch.utils.tensorboard._pytorch_graph import graph
+    tb_log.writer._get_file_writer().add_graph(graph(model, next(iter(ds.get_validation_ds())), use_strict_trace=False))
 
-    trainer.run(train_loader, max_epochs=p.epochs)
+    hparams = dict(vars(p))
+    for k, v in hparams.items():
+        if not (isinstance(v, str) or isinstance(v, int) or isinstance(v, float) or isinstance(v, bool)):
+            hparams[k] = str(v)
 
+    import tensorboardX.summary
+    hmetrics = {
+        "model/total_params": 0,
+        "training/loss": 0,
+        "training/step_time": 0,
+        "validation/miou": 0,
+        "validation/f1": 0
+    }
+    a, b, c = tensorboardX.summary.hparams(hparams, hmetrics)
+    tb_log.writer._get_file_writer().add_summary(a)
+    tb_log.writer._get_file_writer().add_summary(b)
+    tb_log.writer._get_file_writer().add_summary(c)
+    tb_log.writer.add_scalar("model/total_params", count_parameters(model))
+    tb_log.writer.add_text("model/structure", str(model))
 
 class Clock:
     def __init__(self):
@@ -136,9 +156,9 @@ class Clock:
         return elapsed
 
 
-def setup_tensorboard_logger(trainer: ignite.engine.Engine, optimizer: optim.Optimizer, train_evaluator, val_evaluator, logdir) -> ignite.contrib.handlers.TensorboardLogger:
+def setup_tensorboard_logger(trainer: ignite.engine.Engine, optimizer: optim.Optimizer, train_evaluator, val_evaluator, logdir) -> tensorboard_logger.TensorboardLogger:
     # Define a Tensorboard logger
-    tb_logger = ignite.contrib.handlers.TensorboardLogger(log_dir=logdir)
+    tb_logger = tensorboard_logger.TensorboardLogger(log_dir=logdir)
 
     clock_step = Clock()
     clock_epoch = Clock()
@@ -158,7 +178,7 @@ def setup_tensorboard_logger(trainer: ignite.engine.Engine, optimizer: optim.Opt
             event_name=Events.EPOCH_COMPLETED,
             tag=tag,
             metric_names="all",
-            global_step_transform=ignite.contrib.handlers.global_step_from_engine(trainer),
+            global_step_transform=tensorboard_logger.global_step_from_engine(trainer),
         )
 
     tb_logger.attach_output_handler(
@@ -173,8 +193,8 @@ def setup_tensorboard_logger(trainer: ignite.engine.Engine, optimizer: optim.Opt
     return tb_logger
 
 def init_argparser(parser):
-    parser.add_argument('--train_set', type=str, help='Path to directory training data CSVs')
-    parser.add_argument('--val_set', type=str, help='Path to directory validation data CSVs')
+    parser.add_argument('--train_set', type=str, help='Path to tfrecord file with training data. The *.tfrecord.meta.json must be in the same directory')
+    parser.add_argument('--val_set', type=str, help='Path to tfrecord file with validation data. The *.tfrecord.meta.json must be in the same directory')
     parser.add_argument('--logdir', type=str, default="tb-logs", help='Path for saving Tensorboard logs and other outputs')
     hyperparameters.add_parser_args(parser, Hyperparams)
 

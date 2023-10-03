@@ -15,6 +15,10 @@ torch.add_argument('torch_args', nargs=argparse.REMAINDER)
 def main(argv):
     args = parser.parse_args(argv)
 
+    if hasattr(args, "logdir") and args.logdir is not None:
+        import model.utils
+        model.utils.set_logdir(args.logdir)
+
     os.environ["NTCNET_INTERNAL_NO_HEAVY_IMPORTS"] = ""
     if args.command == "tf-train":
         training_tf.main_args(args)
