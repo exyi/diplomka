@@ -81,11 +81,10 @@ class Network(nn.Module):
     def forward(self, input: TensorDict, whatever =None):
         # print(input["sequence"].shape, input["is_dna"].shape)
         in_tensor = torch.cat([
-            F.one_hot(input["sequence"], num_classes=len(csv_loader.basic_nucleotides)),
-            torch.unsqueeze(input["is_dna"], -1)
-        ], dim=-1).to(device)
-        in_tensor = in_tensor.type(torch.float32)
-        lengths = to_cpu(input.get("lengths", None))
+            F.one_hot(torch.nested.to_padded_tensor(input["sequence"], padding=0), num_classes=len(csv_loader.basic_nucleotides)),
+            torch.unsqueeze(torch.nested.to_padded_tensor(input["is_dna"], padding=0), -1)
+        ], dim=-1).type(torch.float32).to(device)
+        lengths:torch.LongTensor = to_cpu(input.get("lengths", None)) # type:ignore
         encoder_output = self.encoder(in_tensor, lengths)
         encoder_output = encoder_output[:, 1:, :] # there is one less NtC than nucleotides
         decoder_output = self.ntc_decoder(encoder_output, lengths)
