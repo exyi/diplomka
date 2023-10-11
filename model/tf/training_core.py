@@ -152,8 +152,8 @@ def create_model(p: Hyperparams, step_count, logdir, profile=False):
         json.dump(config_json, f, indent=4, default=serialize_weird_object)
 
     model.compile(optimizer=optimizer, loss=filter_dict({
-        # "NtC": model.ntcloss,
-        "NtC": model.ntcloss, 
+        "NtC": model.ntcloss,
+        # "NtC": model.unweighted_ntcloss, 
         # "NtC": tf.keras.losses.SparseCategoricalCrossentropy(reduction=tf.keras.losses.Reduction.SUM_OVER_BATCH_SIZE),
         # "CANA": tf.keras.losses.SparseCategoricalCrossentropy()
         "CANA": model.canaloss
@@ -219,7 +219,7 @@ def train(train_set_dir, val_set_dir, load_model, p: Hyperparams, logdir, eager=
     batch_size_schedule = epochschedule.get_batch_size_from_maxlen(seq_len_schedule, p.batch_size, p.max_batch_size)
     print("Epoch/sequence length schedule: ", seq_len_schedule)
 
-    sample_weighter = sample_weight.get_weighter(p.sample_weight, tf, dataset_tf.NtcDatasetLoader.ntc_mapping.get_vocabulary())
+    sample_weighter = None # sample_weight.get_weighter(p.sample_weight, tf, dataset_tf.NtcDatasetLoader.ntc_mapping.get_vocabulary())
     train_loader = dataset_tf.NtcDatasetLoader(train_set_dir, features=p.outputs, ntc_rmsd_threshold=p.nearest_ntc_threshold).set_sample_weighter(sample_weighter)
     step_count = epochschedule.get_step_count(batch_size_schedule, train_loader.cardinality)
     assert step_count > 0, f"{step_count=}"

@@ -5,7 +5,6 @@ def init_argparser(parser):
     parser.add_argument('--load_model', type=str, help='Start from the specified model. Other provided hyperparameters might be ignored if they affect the model architecture, not the training process')
     parser.add_argument('--train_set', type=str, help='Path to tfrecord file with training data. The *.tfrecord.meta.json must be in the same directory')
     parser.add_argument('--val_set', type=str, help='Path to tfrecord file with validation data. The *.tfrecord.meta.json must be in the same directory')
-    parser.add_argument('--logdir', type=str, default="tb-logs", help='Path for saving Tensorboard logs and other outputs')
     parser.add_argument('--eager', action="store_true", help='Run in eager mode', default=False)
     parser.add_argument('--profile', type=str, help='Run tensorflow profiler. The value specified for which batches the profiler should be run (for example 10,20 for 10..20)', default=False)
     parser.add_argument('--fp16', action="store_true", help='Run in (mixed) Float16 mode. By default, float32 is used', default=False)

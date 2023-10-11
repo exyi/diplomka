@@ -21,15 +21,15 @@ def to_torch(x) -> Any | torch.Tensor:
     return torch.tensor(x)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-def to_device(x) -> Any | torch.Tensor:
+def to_device(x, d=device) -> Any | torch.Tensor:
     if x is None:
         return None
     if isinstance(x, torch.Tensor):
-        return x.to(device)
+        return x.to(d)
     if isinstance(x, dict):
-        return { k: to_device(v) for k, v in x.items() }
+        return { k: to_device(v, d) for k, v in x.items() }
     
-    return to_device(to_torch(x))
+    return to_device(to_torch(x), d)
 def to_cpu(x) -> Any | torch.Tensor:
     if x is None:
         return None
@@ -38,6 +38,11 @@ def to_cpu(x) -> Any | torch.Tensor:
     if isinstance(x, dict):
         return { k: to_cpu(v) for k, v in x.items() }
     return to_torch(x)
+
+def pad_nested(x: torch.Tensor, padding = 0) -> torch.Tensor:
+    if x.is_nested:
+        return torch.nested.to_padded_tensor(x, padding)
+    return x
 
 TensorDict = Dict[str, torch.Tensor]
 
@@ -112,11 +117,11 @@ class ResnetBlock(MaybeScriptModule):
         # TODO: L2 regularization of conv layers
 
     def forward(self, input: torch.Tensor):
-        x = input
-        x = self.bn1(x)
+        x: torch.Tensor = input
+        x = self.bn1(x.contiguous())
         x = F.relu(x)
         x = self.conv1(x)
-        x = self.bn2(x)
+        x = self.bn2(x.contiguous())
         x = self.conv2(x)
         x = F.relu(x)
         x = self.conv2(x)

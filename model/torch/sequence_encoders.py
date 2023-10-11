@@ -84,47 +84,98 @@ class EncoderBaseline(nn.Module):
 
 class EncoderRNN(nn.Module):
     def __init__(self,
-            embedding: nn.Module,
             embedding_size,
             hidden_size,
             num_layers,
             dropout,
-            bidirectional=False
+            attention_heads,
+            pairing_mode="none",
+            layer_norm=False,
+            bidirectional=False # TODO
         ):
         super(EncoderRNN, self).__init__()
 
-        self.embedding_size = embedding_size
         self.hidden_size = hidden_size
         self.bidirectional = bidirectional
-        self.embedded_dropout = nn.Dropout(0.1)
-        self.embed_dropout = nn.Dropout(0.2)
-
-        self.embedding = embedding
         self.embedded_dropout = nn.Dropout(dropout)
-        if num_layers > 0:
-            self.rnn = nn.LSTM(embedding_size, hidden_size, bidirectional=bidirectional, num_layers=num_layers, dropout=dropout)
-            self.rnn.flatten_parameters()
-        else:
-            self.rnn = None
-        self.output_dropout = nn.Dropout(dropout)
+        self.rnn_dropout = nn.Dropout(dropout)
 
-    def forward(self, input: torch.Tensor, lengths: Optional[torch.LongTensor] = None):
-        if self.embedded_dropout.p > 0:
-            input = self.embedded_dropout(input)
-        embedded = self.embedding(input)
-        embedded = self.embedded_dropout(embedded)
+        self.rnn = nn.ModuleList()
+        for layer_i in range(num_layers):
+            rnn = nn.LSTM(
+                embedding_size if layer_i == 0 else hidden_size,
+                hidden_size, bidirectional=bidirectional, num_layers=1
+            ).to(device)
+            rnn.flatten_parameters()
+            self.rnn.append(rnn)
 
-        if self.rnn is None:
-            return embedded
+        if pairing_mode == "input-directconn":
+            self.pairing_reducer = [
+                nn.Linear(
+                    2 * (hidden_size if i > 0 else embedding_size),
+                    hidden_size if i > 0 else embedding_size
+                )
+                for i in range(num_layers)
+            ]
 
+        self.layer_norm = None
+        if layer_norm:
+            self.layer_norm = nn.ModuleList()
+            for layer_i in range(num_layers):
+                self.layer_norm.append(nn.LayerNorm(embedding_size if layer_i == 0 else hidden_size))
+
+        self.attn_query, self.attn_value, self.attn = nn.ModuleList(), nn.ModuleList(), nn.ModuleList()
+        if attention_heads > 0:
+            for layer_i in range(num_layers):
+                self.attn_query.append(nn.Linear(hidden_size, hidden_size))
+                self.attn_value.append(nn.Linear(hidden_size, hidden_size))
+                a = nn.MultiheadAttention(hidden_size, num_heads=attention_heads, dropout=dropout, batch_first=True, device=device)
+                self.attn.append(a)
+
+    def call_rnn(self, i, input, lengths):
         if lengths is not None:
-            packed = torch.nn.utils.rnn.pack_padded_sequence(embedded, lengths, batch_first=True)
-            output_packed, _ = self.rnn(packed)
+            packed = torch.nn.utils.rnn.pack_padded_sequence(input, lengths, batch_first=True)
+            output_packed, _ = self.rnn[i](packed)
             output, _ = torch.nn.utils.rnn.pad_packed_sequence(output_packed, batch_first=True)
         else:
-            output, _ = self.rnn(embedded)
+            output, _ = self.rnn[i](input)
         if self.bidirectional:
             output = output[:, :, :self.hidden_size] + output[:, :, self.hidden_size:]
-        output = self.output_dropout(output)
+
         return output
+
+
+    def forward(self, embedded: torch.Tensor, lengths: Optional[torch.LongTensor] = None):
+        return embedded
+        embedded = self.embedded_dropout(embedded)
+
+        if len(self.rnn)==0:
+            return embedded
+        
+        x = embedded
+        
+        for layer_i in range(len(self.rnn)):
+            bypass = x
+            # TODO position embedding
+            # TODO pairs with
+            if self.layer_norm is not None:
+                x = self.layer_norm[layer_i](x)
+            # x = self.call_rnn(layer_i, x, lengths)
+            x = self.rnn_dropout(x)
+
+            if layer_i > 0:
+                x = x + bypass
+
+            if len(self.attn_query) > layer_i:
+                bypass = x
+                if self.layer_norm is not None:
+                    x = self.layer_norm[layer_i](x)
+
+                query = F.relu(self.attn_query[layer_i](x))
+                value = F.relu(self.attn_value[layer_i](x))
+                x = self.attn[layer_i](query, query, value)
+                x = self.rnn_dropout(x)
+                x = bypass + x
+
+        return x
 

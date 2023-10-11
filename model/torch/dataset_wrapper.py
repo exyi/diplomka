@@ -1,12 +1,12 @@
 from typing import Any, Callable, Optional
 import torch, torch.utils.data, torch.utils.data.datapipes, torch.utils.data.datapipes.datapipe
-import torchdata
-import torchdata.dataloader2
-import torchdata.datapipes as torchpipes
+# import torchdata
+# import torchdata.dataloader2
+# import torchdata.datapipes as torchpipes
 import numpy as np
 
 from model import dataset_tf, hyperparameters, sample_weight
-from .torchutils import TensorDict
+from .torchutils import TensorDict, pad_nested
 
 class IteratorWrapper(torch.utils.data.datapipes.datapipe.IterDataPipe):
     def __init__(self, len, mkiterator):
@@ -56,23 +56,24 @@ def collate_fn(batch: list[tuple[TensorDict, TensorDict, float]]):
     for key in batch[0][0].keys():
         example = batch[0][0][key]
         if isinstance(example, np.ndarray):
-            result_in[key] = torch.nested.nested_tensor([ t[0][key] for t in batch ])
+            result_in[key] = pad_nested(torch.nested.nested_tensor([ t[0][key] for t in batch ]))
     result_out = dict()
     for key in batch[0][1].keys():
-        result_out[key] = torch.nested.nested_tensor([ t[1][key] for t in batch ])
+        result_out[key] = pad_nested(torch.nested.nested_tensor([ t[1][key] for t in batch ]))
     result_in["lengths"] = lengths
     result_out["lengths"] = lengths
-    result_out["sample_weight"] = torch.nested.nested_tensor([t[2] for t in batch])
+    result_out["sample_weight"] = pad_nested(torch.nested.nested_tensor([t[2] for t in batch]))
     return result_in, result_out
 
 def make_loader1(pipe: torch.utils.data.datapipes.datapipe.IterDataPipe):
     loader = torch.utils.data.DataLoader(pipe, num_workers=0, collate_fn=lambda x: x[0])
     return loader
 
-def make_loader2(pipe: torch.utils.data.datapipes.datapipe.IterDataPipe):
-    loader = torchdata.dataloader2.DataLoader2(pipe, reading_service=torchdata.dataloader2.MultiProcessingReadingService(num_workers=0))
+## TODO: fix out of process dataset loading
+# def make_loader2(pipe: torch.utils.data.datapipes.datapipe.IterDataPipe):
+#     loader = torchdata.dataloader2.DataLoader2(pipe, reading_service=torchdata.dataloader2.MultiProcessingReadingService(num_workers=0))
 
-    return loader
+#     return loader
 
 class Datasets:
     def __init__(self, validation_ds: torch.utils.data.DataLoader, val_size, train_data: NtcDatasetWrapper, train_size) -> None:
