@@ -3,5 +3,7 @@
         "ntcs",
         "subchain",
         "subchains"
-    ]
+    ],
+    "deno.enable": true,
+    "deno.unstable": true
 }
