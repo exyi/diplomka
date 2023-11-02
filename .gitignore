@@ -3,3 +3,4 @@ __pycache__
 /*-logs
 /pairclusters/out*
 /pairclusters/plots
+/pairclusters/*.cif
