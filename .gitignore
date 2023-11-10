@@ -4,3 +4,4 @@ __pycache__
 /pairclusters/out*
 /pairclusters/plots
 /pairclusters/*.cif
+node_modules
