@@ -32,7 +32,7 @@ class Decoder(nn.Module):
 
     def forward(self, encoder_outputs, lengths: torch.LongTensor):
         output = F.relu(encoder_outputs)
-        output = self.out(output).softmax(dim=1)
+        output = self.out(output)
         return output
 
 class Network(nn.Module):
@@ -45,14 +45,13 @@ class Network(nn.Module):
         super(Network, self).__init__()
         self.p = p
 
-        self.input_dropout = nn.Dropout(0.1) # TODO hparam
+        self.input_dropout = nn.Dropout(0.2) # TODO hparam
         embedding_size = p.conv_channels[-1]
         hidden_size = p.rnn_size if p.rnn_layers > 0 else embedding_size
         if len(p.conv_channels) > 1 or p.conv_window_size > 1:
-            0/0
             embedding = ConvEncoder(Network.INPUT_SIZE, channels=p.conv_channels, window_size=p.conv_window_size, kind=p.conv_kind)
         else:
-            print("dummy embedding")
+            print("dummy embedding (no convolution layer)")
             embedding = nn.Linear(Network.INPUT_SIZE, embedding_size)
 
         if p.external_embedding is not None:
@@ -76,20 +75,15 @@ class Network(nn.Module):
         self.cana_decoder = Decoder(hidden_size, len(csv_loader.CANAs))
 
         self.ntc_weights = torch.Tensor(sample_weight.get_ntc_weight(p.sample_weight.split("+")[0], Network.NTC_LABELS))
-        # print("NtC loss weights: ", self.ntc_weights)
+        print("NtC loss weights: ", self.ntc_weights)
         self.ntc_loss = nn.CrossEntropyLoss(
             weight=self.ntc_weights,
             label_smoothing=0.1,
             reduction="none"
         )
 
-        self.bazmek = nn.Linear(1, 97)
-    
     def forward(self, input: TensorDict, whatever = None):
         # print(input["sequence"].shape, input["is_dna"].shape)
-        # return {
-        #     "NtC": self.bazmek(torch.ones_like(input["is_dna"][:, 1:], dtype=torch.float32).unsqueeze(-1)).transpose(1, 2)
-        # }
 
         in_tensor = torch.cat([
             F.one_hot(pad_nested(input["sequence"], padding=0), num_classes=len(csv_loader.basic_nucleotides)),
@@ -97,28 +91,40 @@ class Network(nn.Module):
         ], dim=-1).type(torch.float32).to(device)
         lengths:torch.LongTensor = to_cpu(input.get("lengths", None)) # type:ignore
 
-        # in_tensor = self.input_dropout(in_tensor)
-        # print(in_tensor.shape, in_tensor.mean())
-        embedding = self.embedding(in_tensor)
-        # encoder_output = self.encoder(embedding, lengths)
-        encoder_output = embedding
-        encoder_output = encoder_output[:, 1:, :] # there is one less NtC than nucleotides
+        if lengths is not None:
+            mask = torch.arange(in_tensor.shape[1], device=device) < to_device(input["lengths"]).unsqueeze(-1)
+        else:
+            mask = torch.ones(in_tensor.shape[0], device=device, dtype=torch.bool)
 
-        outputs: TensorDict = { "lengths": lengths }
+        # print(input["sequence"])
+        # print(in_tensor)
+        # print(input["sequence"].shape, in_tensor.shape)
+        # in_tensor = F.dropout(in_tensor, p=0.2)
+        in_tensor = self.input_dropout(in_tensor)
+        # print(in_tensor.shape, in_tensor.mean())
+        # embedding = torch.concat([ in_tensor, torch.zeros((*in_tensor.shape[:-1], self.embedding.out_features - in_tensor.shape[-1]), device=device) ], dim=-1)
+        embedding = self.embedding(in_tensor)
+        # print(embedding)
+        # encoder_output = embedding
+        encoder_output = self.encoder(embedding, lengths)
+        encoder_output = encoder_output[:, 1:, :] # there is one less NtC than nucleotides
+        # print(f"{encoder_output.shape=} {in_tensor.shape=} {embedding.shape=}")
+
+        outputs: TensorDict = { "lengths": lengths, "mask": mask }
         if "NtC" in self.p.outputs:
             decoder_output = self.ntc_decoder(encoder_output, lengths)
-            outputs["NtC"] = torch.swapaxes(decoder_output, -1, -2)
+            outputs["NtC"] = decoder_output # torch.swapaxes(decoder_output, -1, -2)
             # assert outputs["NtC"].shape[-1] == len(csv_loader.ntcs)
         if "CANA" in self.p.outputs:
             decoder_output = self.cana_decoder(encoder_output, lengths)
-            outputs["CANA"] = torch.swapaxes(decoder_output, -1, -2)
+            outputs["CANA"] = decoder_output # torch.swapaxes(decoder_output, -1, -2)
             # TODO: geometry decoder
         return outputs
 
     def loss(self, output: TensorDict, target):
         target_ntc = pad_nested(to_device(target["NtC"], d=output["NtC"].device))
         assert target_ntc.shape[0] == output["NtC"].shape[0], f"{target_ntc.shape=} {output['NtC'].shape=}"
-        loss: torch.Tensor = self.ntc_loss(output["NtC"], target_ntc)
+        loss: torch.Tensor = self.ntc_loss(output["NtC"].reshape(-1, output["NtC"].shape[-1]), target_ntc.reshape(-1))
 
         # sample_weight = target.get("sample_weight", None)
         # if sample_weight is not None:
@@ -127,12 +133,25 @@ class Network(nn.Module):
         #     loss = loss * pad_nested(sample_weight.to(device))
         
         total_count = loss.shape.numel()
-        if target.get("lengths", None) is not None:
+
+        if output.get("mask", None) is not None:
+            mask = output["mask"]
+            if tuple(mask.shape) == (target["NtC"].shape[0], target["NtC"].shape[1] + 1):
+                mask = mask[:, 1:]
+            elif mask.shape != target["NtC"].shape:
+                raise Exception(f"Mask shape mismatch: {mask.shape=} {target['NtC'].shape=}")
+
+            mask = mask.to(loss.device).reshape(-1)
+            total_count = mask.sum()
+            loss = loss * mask
+        elif target.get("lengths", None) is not None:
             assert loss.shape == target_ntc.shape, f"{loss.shape=} {target_ntc.shape=}"
             lengths = target["lengths"].to(loss.device)
             mask = torch.arange(target_ntc.shape[1], device=device) < lengths.unsqueeze(-1)
             total_count = mask.sum()
             loss = loss * mask
+        else:
+            assert len(output["NtC"].shape) == 1
 
         # print(loss)
         loss = loss.sum() / total_count

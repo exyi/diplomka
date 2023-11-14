@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 
 import math, random, time, os, sys
+import numbers
+
+import numpy as np
 
 if os.environ.get("NTCNET_INTERNAL_NO_HEAVY_IMPORTS", "") == "1":
     raise Exception("This module is not supposed to be imported before args are parsed")
 
-from typing import Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
 import torch, torch.nn as nn, torch.nn.functional as F, torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
 import dataclasses
@@ -19,6 +22,7 @@ from .torchutils import TensorDict, count_parameters, device
 
 import ignite.metrics as metrics
 import ignite.engine
+import ignite.utils
 import ignite.handlers
 import ignite.handlers.param_scheduler
 from ignite.engine import Events
@@ -26,6 +30,20 @@ import ignite.handlers.early_stopping
 import ignite.contrib.handlers.tqdm_logger
 import ignite.contrib.handlers.tensorboard_logger as tensorboard_logger
 import itertools
+import matplotlib.pyplot as plt
+import matplotlib.colors
+
+import traceback
+import warnings
+import sys
+
+def warn_with_traceback(message: warnings.WarningMessage, category, filename, lineno, file=None, line=None):
+    log = file if hasattr(file,'write') else sys.stderr
+    if "can not log metrics value type" in str(message):
+        traceback.print_stack(file=log)
+    log.write(warnings.formatwarning(message, category, filename, lineno, line))
+
+warnings.showwarning = warn_with_traceback
 
 def print_model(model: nn.Module):
     for name, module in model.named_modules():
@@ -76,7 +94,7 @@ def _output_field_transform(field, len_offset: int, filter: Optional[Callable[[T
         if filter is not None:
             mask = mask & filter(output.get("x", {}), output.get("y", {})).to(yf_pred.device)
         yf = maskout_for_metrics(yf, mask)
-        yf_pred = maskout_for_metrics(yf_pred, mask, broadcast_dims=[False, True, False])
+        yf_pred = maskout_for_metrics(yf_pred, mask, broadcast_dims=[False, False, True])
 
         return (yf_pred, yf)
     
@@ -87,17 +105,39 @@ global_epoch = -1
 def testtheshit(ds: dataset_wrapper.Datasets, optimizer: torch.optim.Optimizer, model: ntcnetwork.Network):
     accuracy = metrics.Accuracy()
     data = ds.get_train_ds(512, 12)
-    batch1X, batch1Y = next(iter(data))
-    x, y = torchutils.to_device(batch1X), torchutils.to_device(batch1Y)
+    dataiter = iter(data)
+    batch1X, batch1Y = next(dataiter)
+    batch2X, batch2Y = next(dataiter)
+    print(batch1Y["NtC"])
+    most_frequent = torch.mode(torch.concat([batch1Y["NtC"].view(-1), batch2Y["NtC"].view(-1)])).values.item()
+    optimal_acc = ((batch1Y["NtC"] == most_frequent).float().mean().item() + (batch2Y["NtC"] == most_frequent).float().mean().item()) / 2
+    print("most frequent", most_frequent)
+    batch1X, batch1Y = torchutils.to_device(batch1X), torchutils.to_device(batch1Y)
+    batch2X, batch2Y = torchutils.to_device(batch2X), torchutils.to_device(batch2Y)
+    # x, y = torchutils.to_device(batch1X), torchutils.to_device(batch1Y)
     for name, param in model.named_parameters():
         if "weight" in name and param.dim() > 1:
             nn.init.xavier_uniform_(param)
+    model.train()
+
+    # closs = torch.nn.CrossEntropyLoss()
+    linmodel = nn.Linear(10, 97).to(device)
+    linmodel.train()
+    optimizer = optim.Adam(model.parameters(), lr=0.001)
     for i in range(1000000):
+        if random.randint(0, 1) == 0:
+            x, y = batch1X, batch1Y
+        else:
+            x, y = batch2X, batch2Y
         optimizer.zero_grad()
-        model.train()
         y_pred = model(x)
+        # y_pred = {"NtC": linmodel(F.dropout(F.one_hot(x["sequence"], num_classes=10).type(torch.float32), p=0.5))[:, :-1, :]}
+        # print(y_pred["NtC"].shape, y["NtC"].shape)
         loss = model.loss(y_pred, y)
+        # loss = closs(y_pred["NtC"].contiguous().view(-1, 97), y["NtC"].view(-1))
         loss.backward()
+        torch.nn.utils.clip_grad.clip_grad_value_(model.parameters(), 1.0)
+        optimizer.step()
 
         max_grads = [
             (n, p.grad.abs().mean().item())
@@ -105,19 +145,43 @@ def testtheshit(ds: dataset_wrapper.Datasets, optimizer: torch.optim.Optimizer, 
             if p.grad is not None
         ]
         no_grad = [ name + ": " + str(p.shape) for name, p in model.named_parameters() if p.grad is None ]
-        torch.nn.utils.clip_grad.clip_grad_value_(model.parameters(), 1.0)
 
-        accuracy.update((y_pred["NtC"], y["NtC"]))
+        accuracy.update((y_pred["NtC"].contiguous().view(-1, 97), y["NtC"].view(-1)))
+        pred_ntclist = torch.argmax(y_pred["NtC"], dim=1)
+        print(pred_ntclist)
+        most_frequent_pred = torch.mode(pred_ntclist.view(-1)).values.item()
+        most_frequent_frequence = (pred_ntclist == most_frequent_pred).float().mean().item()
+        most_frequence_data_frequence = (y["NtC"] == most_frequent_pred).float().mean().item()
         
-        print(f"i={i}, loss = {loss.item()}, lr = {optimizer.param_groups[0]['lr']}, acc = {accuracy.compute()}")
+        print(f"i={i}, loss = {loss.item()}, lr = {optimizer.param_groups[0]['lr']}, acc = {accuracy.compute()} / {optimal_acc:.2f}  (pred={most_frequent_pred} in {most_frequent_frequence:.5f} -> {most_frequence_data_frequence:.5f})")
         if i % 100 == 0:
             print(max_grads)
         # print("no grad: ", *no_grad)
 
-        optimizer.step()
 
     exit(1)
 
+def create_trainer(p: Hyperparams, model: ntcnetwork.Network, optimizer: torch.optim.Optimizer, loss_fn):
+    # trainer = ignite.engine.create_supervised_trainer(
+    #     model, optimizer, model.loss, device,
+    #     output_transform=lambda x, y, y_pred, loss: { "loss": loss.item(), "y": y, "y_pred": y_pred, "x": x }
+    # )
+    def update(engine: ignite.engine.Engine, batch: Sequence[torch.Tensor]) -> Union[Any, Tuple[torch.Tensor]]:
+        x, y = batch
+        x, y = ignite.utils.convert_tensor(x, device=device, non_blocking=True), ignite.utils.convert_tensor(y, device=device, non_blocking=True)
+        optimizer.zero_grad()
+        model.train()
+        y_pred = model(x)
+        loss = loss_fn(y_pred, y)
+        loss.backward()
+        if p.clip_grad is not None:
+            torch.nn.utils.clip_grad.clip_grad_norm_(model.parameters(), p.clip_grad)
+        if p.clip_grad_value is not None:
+            torch.nn.utils.clip_grad.clip_grad_value_(model.parameters(), p.clip_grad_value)
+        optimizer.step()
+        return { "loss": loss.item(), "y": y, "y_pred": y_pred, "x": x }
+
+    return ignite.engine.Engine(update)
 
 
 def train(train_set_dir, val_set_dir, p: Hyperparams, logdir):
@@ -130,17 +194,14 @@ def train(train_set_dir, val_set_dir, p: Hyperparams, logdir):
     print_model(model)
 
     optimizer = optim.Adam(model.parameters(), lr=p.learning_rate)
-    optimizer.step()
+    # optimizer.step()
 
-    testtheshit(ds, optimizer, model)
-    trainer = ignite.engine.create_supervised_trainer(
-        model, optimizer, model.loss, device,
-        output_transform=lambda x, y, y_pred, loss: { "loss": loss.item(), "y": y, "y_pred": y_pred, "x": x }
-    )
+    # testtheshit(ds, optimizer, model)
+    trainer = create_trainer(p, model, optimizer, model.loss)
 
     print("expected batch count", batch_count)
     if p.lr_decay == "cosine":
-        torch_lr_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=batch_count * p.epochs)
+        torch_lr_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=batch_count)
         # scheduler = ignite.handlers.param_scheduler.LRScheduler(torch_lr_scheduler)
         # trainer.add_event_handler(Events.ITERATION_STARTED, scheduler)
         @trainer.on(Events.ITERATION_COMPLETED)
@@ -156,6 +217,7 @@ def train(train_set_dir, val_set_dir, p: Hyperparams, logdir):
         "accuracy": metrics.Accuracy(output_transform=output_ntc),
         "f1": metrics.Fbeta(1, output_transform=output_ntc),
         "f1_unfiltered": metrics.Fbeta(1, output_transform=_output_field_transform("NtC", len_offset=1)),
+        "confusion": metrics.ConfusionMatrix(len(ntcnetwork.Network.NTC_LABELS), output_transform=_output_field_transform("NtC", len_offset=1)),
         # "miou": metrics.mIoU(metrics.ConfusionMatrix(len(ntcnetwork.Network.NTC_LABELS), output_transform=output_ntc)),
         "loss": metrics.Loss(model.loss)
     }
@@ -188,8 +250,8 @@ def train(train_set_dir, val_set_dir, p: Hyperparams, logdir):
         # train_evaluator.run(itertools.islice(train_loader, 6)) # limit to few batches, otherwise it takes longer than training (??)
         eval_time = eval_clock.measure()
         metrics = trainer.state.metrics
+        print(metrics)
         print(f"evalT - Epoch[{global_epoch}] accuracy: {metrics['accuracy']:.2f} F1: {metrics['f1']:.2f} training loss: {trainer.state.output['loss']:.2f} Train Time: {epoch_time/60:3.1f}m Eval Time: {eval_time/60:3.2f}m    ")
-
 
     @trainer.on(Events.EPOCH_COMPLETED)
     def log_validation_results(trainer):
@@ -199,8 +261,8 @@ def train(train_set_dir, val_set_dir, p: Hyperparams, logdir):
         metrics = val_evaluator.state.metrics
         print(f"evalV - Epoch[{global_epoch}] accuracy: {metrics['accuracy']:.2f} F1: {metrics['f1']:.2f} loss: {metrics['loss']:.2f} Eval Time: {eval_time/60:3.2f}m")
 
-    early_stopper = ignite.handlers.early_stopping.EarlyStopping(patience=8, score_function=lambda engine: -engine.state.metrics["loss"], trainer=trainer)
-    val_evaluator.add_event_handler(Events.COMPLETED, early_stopper)
+    # early_stopper = ignite.handlers.early_stopping.EarlyStopping(patience=8, score_function=lambda engine: -engine.state.metrics["loss"], trainer=trainer)
+    # val_evaluator.add_event_handler(Events.COMPLETED, early_stopper)
 
     tb_log = setup_tensorboard_logger(trainer, optimizer, train_evaluator, val_evaluator, logdir)
     if tb_log is not None:
@@ -224,8 +286,8 @@ def train(train_set_dir, val_set_dir, p: Hyperparams, logdir):
         # print("training result", result)
 
 def tblog_architecture(tb_log: tensorboard_logger.TensorboardLogger, model: nn.Module, ds: dataset_wrapper.Datasets, p: Hyperparams):
-    # from torch.utils.tensorboard._pytorch_graph import graph
-    # tb_log.writer._get_file_writer().add_graph(graph(model, next(iter(ds.get_validation_ds())), use_strict_trace=False))
+    from torch.utils.tensorboard._pytorch_graph import graph
+    tb_log.writer._get_file_writer().add_graph(graph(model, next(iter(ds.get_validation_ds())), use_strict_trace=False))
 
     hparams = dict(vars(p))
     for k, v in hparams.items():
@@ -237,15 +299,17 @@ def tblog_architecture(tb_log: tensorboard_logger.TensorboardLogger, model: nn.M
         "model/total_params": 0,
         "training/loss": 0,
         "training/step_time": 0,
-        "validation/miou": 0,
-        "validation/f1": 0
+        "training/f1": 0,
+        "valset/accuracy": 0,
+        "valset/miou": 0,
+        "valset/f1": 0
     }
     a, b, c = tensorboardX.summary.hparams(hparams, hmetrics)
     tb_log.writer._get_file_writer().add_summary(a)
     tb_log.writer._get_file_writer().add_summary(b)
     tb_log.writer._get_file_writer().add_summary(c)
     tb_log.writer.add_scalar("model/total_params", count_parameters(model))
-    tb_log.writer.add_text("model/structure", str(model))
+    tb_log.writer.add_text("model/structure", "```\n" + str(model) + "\n```\n")
 
 class Clock:
     def __init__(self):
@@ -257,42 +321,71 @@ class Clock:
         elapsed = now - self.last_time
         self.last_time = now
         return elapsed
-
+    
+    def elapsed(self):
+        return time.time() - self.start_time
 
 def setup_tensorboard_logger(trainer: ignite.engine.Engine, optimizer: optim.Optimizer, train_evaluator, val_evaluator, logdir) -> tensorboard_logger.TensorboardLogger:
     # Define a Tensorboard logger
     tb_logger = tensorboard_logger.TensorboardLogger(log_dir=logdir)
 
+    clock_start = Clock()
+    count_step = 0
     clock_step = Clock()
+    count_epoch = 0
     clock_epoch = Clock()
 
-    # Attach handler to plot trainer's loss every 100 iterations
-    tb_logger.attach_output_handler(
-        trainer,
-        event_name=Events.ITERATION_COMPLETED(every=100),
-        tag="training",
-        output_transform=lambda loss: {"batch_loss": loss, "step_time": clock_step.measure()},
-    )
+    batch_loss = []
 
-    # Attach handler for plotting both evaluators' metrics after every epoch completes
-    for tag, evaluator in [("training", train_evaluator), ("validation", val_evaluator)]:
-        tb_logger.attach_output_handler(
-            evaluator,
-            event_name=Events.EPOCH_COMPLETED,
-            tag=tag,
-            metric_names="all",
-            global_step_transform=tensorboard_logger.global_step_from_engine(trainer),
-        )
+    def write_scalar(category, name, value, step = None):
+        if step is None:
+            step = count_epoch
+        tb_logger.writer.add_scalar(category + "/" + name, float(value), step, walltime=clock_start.elapsed())
 
-    tb_logger.attach_output_handler(
-        trainer,
-        event_name=Events.EPOCH_COMPLETED,
-        tag="training",
-        output_transform=lambda loss: {
-            "learning_rate": optimizer.param_groups[0]["lr"],
-            "epoch_time": clock_epoch.measure()
-        },
-    )
+    def write_metrics(category, metrics, step = None):
+        for name, value in metrics.items():
+            if isinstance(value, numbers.Number):
+                write_scalar(category, name, value, step)
+            else:
+                if name not in ["confusion", "y", "y_pred"]:
+                    print(f"WARNING: metric {name} at {step} is not a number: {value}")
+
+    def after_batch(_):
+        nonlocal count_step
+        count_step += 1
+
+        if trainer.state.output is not None:
+            batch_loss.append(trainer.state.output["loss"]) #type:ignore
+
+    trainer.add_event_handler(Events.ITERATION_COMPLETED, after_batch)
+
+    def after_epoch(_):
+        nonlocal count_epoch
+        count_epoch += 1
+        write_scalar("training", "loss", np.mean(batch_loss))
+        batch_loss.clear()
+        write_scalar("training", "runtime", clock_epoch.measure())
+        write_scalar("training", "learning_rate", optimizer.param_groups[0]["lr"])
+        write_metrics("training", trainer.state.metrics)
+
+    trainer.add_event_handler(Events.EPOCH_COMPLETED, after_epoch)
+
+    def after_trainset(_):
+        write_metrics("trainset", train_evaluator.state.metrics)
+    trainer.add_event_handler(Events.EPOCH_COMPLETED, after_trainset)
+    def after_valset(_):
+        write_metrics("valset", val_evaluator.state.metrics)
+
+        confmatrix: torch.Tensor = val_evaluator.state.metrics["confusion"]
+        figure, ax = plt.subplots()
+        im = ax.imshow(confmatrix.numpy(), norm=matplotlib.colors.LogNorm())
+        plt.colorbar(im, ax=ax)
+        tb_logger.writer.add_figure("valset/confusion", figure, count_epoch, walltime=clock_start.elapsed())
+        plt.close(figure)
+        tb_logger.writer.add_histogram("valset/log_predictions", np.log10(1 + np.sum(confmatrix.numpy(), axis=0)), count_epoch, walltime=clock_start.elapsed())
+        tb_logger.writer.add_histogram("valset/log_labels", np.log10(1 + np.sum(confmatrix.numpy(), axis=1)), count_epoch, walltime=clock_start.elapsed())
+    trainer.add_event_handler(Events.EPOCH_COMPLETED, after_valset)
+
     return tb_logger
 
 if __name__ == '__main__':

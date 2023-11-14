@@ -146,7 +146,6 @@ class EncoderRNN(nn.Module):
 
 
     def forward(self, embedded: torch.Tensor, lengths: Optional[torch.LongTensor] = None):
-        return embedded
         embedded = self.embedded_dropout(embedded)
 
         if len(self.rnn)==0:
@@ -160,7 +159,7 @@ class EncoderRNN(nn.Module):
             # TODO pairs with
             if self.layer_norm is not None:
                 x = self.layer_norm[layer_i](x)
-            # x = self.call_rnn(layer_i, x, lengths)
+            x = self.call_rnn(layer_i, x, lengths)
             x = self.rnn_dropout(x)
 
             if layer_i > 0:

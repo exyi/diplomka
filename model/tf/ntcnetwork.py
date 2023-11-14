@@ -544,7 +544,7 @@ class Network(tf.keras.Model):
 
         outputs = filter_dict({
             "NtC": decoder_output,
-            "CANA": tf.nn.softmax(cana_decoder(encoder_output)),
+            "CANA": cana_decoder(encoder_output),
             # "geometry_decoder": self.geometry_decoder(encoder_output),
         }, self.p.outputs)
 
