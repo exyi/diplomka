@@ -44,7 +44,7 @@
 
 #         return labels, strs, tokens
 
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
 import os, sys, json, dataclasses, numpy as np
 from dataclasses import dataclass
 

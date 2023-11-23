@@ -8,7 +8,7 @@ import model.tf.training as training_tf
 import model.torch.training_args as training_torch
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--logdir', type=str, default="tb-logs", help='Path for saving Tensorboard logs and other outputs')
+parser.add_argument('--logdir', type=str, default=None, help='Path for saving Tensorboard logs and other outputs')
 parser.add_argument('--logname', type=str, default=None, help='Name of subdirectory to create in logdir')
 
 subparsers = parser.add_subparsers(dest="command")
@@ -25,6 +25,11 @@ def main(argv):
     args = parser.parse_args(argv)
 
     logdir = args.logdir
+    if logdir is None:
+        if args.command == 'torch-train':
+            logdir = "pt-logs"
+        else:
+            logdir = "tf-logs"
     subdir = os.path.exists(logdir) or bool(args.logname)
     if subdir:
         timestamp = time.strftime("%Y-%m-%d_%H-%M-%S")

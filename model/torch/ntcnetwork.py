@@ -13,27 +13,45 @@ from .torchutils import MaybeScriptModule, TensorDict, to_cpu, to_device, to_tor
 from .sequence_encoders import ConvEncoder, EncoderBaseline, EncoderRNN
 
 class Decoder(nn.Module):
-    def __init__(self, hidden_size, output_size, attention_span = 0):
+    def __init__(self, hidden_size, output_size):
         super(Decoder, self).__init__()
         self.hidden_size = hidden_size
         self.output_size = output_size
         self.out = nn.Linear(hidden_size, output_size)
 
-        if attention_span == 0:
-            self.attn = None
-        elif attention_span is None:
-            # self-attention TODO
-            self.mh_attention = nn.MultiheadAttention(
-                hidden_size, num_heads=1)
-            assert False
-        else:
-            self.attn = nn.Linear(self.hidden_size, attention_span)
-            self.attn_combine = nn.Linear(self.hidden_size * 2, self.hidden_size)
-
     def forward(self, encoder_outputs, lengths: torch.LongTensor):
         output = F.relu(encoder_outputs)
         output = self.out(output)
         return output
+    
+class GeometryDecoder(nn.Module):
+    def __init__(self, hidden_size, num_angles, num_distances, name=None):
+        super().__init__(name=name)
+
+        self.num_angles = num_angles
+        self.num_lengths = num_distances
+        self.dense = nn.Linear(in_features=hidden_size, out_features=(num_angles * 2 + num_distances))
+        self.layers = [ self.dense ]
+
+    def call(self, encoder_outputs: torch.Tensor, lengths: torch.LongTensor) -> torch.Tensor:
+        output = F.relu(encoder_outputs)
+        output = self.dense(output)
+        return output
+    
+    @staticmethod
+    def decode_angles(x, num_angles: int):
+        assert x.shape[-1] == num_angles * 2
+        re = x[:, :, :num_angles]
+        im = x[:, :, num_angles:]
+        return torch.atan2(re, im)
+    
+    @staticmethod
+    def encode_angles(x, num_angles: int):
+        assert x.shape[-1] == num_angles
+        re = torch.cos(x)
+        im = torch.sin(x)
+        return torch.cat([re, im], dim=-1)
+
 
 class Network(nn.Module):
     NUCLEOTIDE_LABELS = csv_loader.basic_nucleotides
@@ -49,14 +67,17 @@ class Network(nn.Module):
         embedding_size = p.conv_channels[-1]
         hidden_size = p.rnn_size if p.rnn_layers > 0 else embedding_size
         if len(p.conv_channels) > 1 or p.conv_window_size > 1:
-            embedding = ConvEncoder(Network.INPUT_SIZE, channels=p.conv_channels, window_size=p.conv_window_size, kind=p.conv_kind)
+            embedding = ConvEncoder(Network.INPUT_SIZE, channels=p.conv_channels, window_size=p.conv_window_size, max_dilatation=p.conv_dilation, kind=p.conv_kind)
         else:
             print("dummy embedding (no convolution layer)")
             embedding = nn.Linear(Network.INPUT_SIZE, embedding_size)
 
+        self.external_embedding = None
         if p.external_embedding is not None:
             if p.external_embedding == "rnafm":
-                raise Exception("TODO")
+                from.import rna_fm_embedding
+                self.external_embedding = rna_fm_embedding.og_rnafm_embedding()(["<UNK>", *csv_loader.basic_nucleotides])
+                embedding_size += self.external_embedding.SIZE
             else:
                 raise Exception("Unknown external embedding: " + p.external_embedding)
 
@@ -104,6 +125,10 @@ class Network(nn.Module):
         # print(in_tensor.shape, in_tensor.mean())
         # embedding = torch.concat([ in_tensor, torch.zeros((*in_tensor.shape[:-1], self.embedding.out_features - in_tensor.shape[-1]), device=device) ], dim=-1)
         embedding = self.embedding(in_tensor)
+
+        if self.external_embedding is not None:
+            eemb = self.external_embedding(input["sequence"], lengths)
+            embedding = torch.cat([ embedding, eemb ], dim=-1)
         # print(embedding)
         # encoder_output = embedding
         encoder_output = self.encoder(embedding, lengths)

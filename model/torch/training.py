@@ -123,7 +123,7 @@ def testtheshit(ds: dataset_wrapper.Datasets, optimizer: torch.optim.Optimizer, 
     # closs = torch.nn.CrossEntropyLoss()
     linmodel = nn.Linear(10, 97).to(device)
     linmodel.train()
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
+    optimizer = optim.Adam([ p for p in model.parameters() if p.requires_grad ], lr=0.001)
     for i in range(1000000):
         if random.randint(0, 1) == 0:
             x, y = batch1X, batch1Y
@@ -179,6 +179,13 @@ def create_trainer(p: Hyperparams, model: ntcnetwork.Network, optimizer: torch.o
         if p.clip_grad_value is not None:
             torch.nn.utils.clip_grad.clip_grad_value_(model.parameters(), p.clip_grad_value)
         optimizer.step()
+
+        # nz_grad = sum([
+        #     p.grad.not_equal(0).sum()
+        #     for n, p in model.named_parameters()
+        #     if p.grad is not None
+        # ])
+        # print(f"Non-zero gradients: {nz_grad:,}")
         return { "loss": loss.item(), "y": y, "y_pred": y_pred, "x": x }
 
     return ignite.engine.Engine(update)

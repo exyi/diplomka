@@ -1,7 +1,7 @@
 from typing import Optional
 import math
 import torch, torch.nn as nn, torch.nn.functional as F
-from .torchutils import TensorDict, clamp, device, make_conv, ResnetBlock
+from .torchutils import TensorDict, clamp, device, make_conv, ResnetBlock, MaybeScriptModule
 
 
 # @torch.jit.script
@@ -40,7 +40,7 @@ class PositionalEncoding(nn.Module):
         x = x + self.pe[:x.size(0)]
         return self.dropout(x)
 
-class ConvEncoder(nn.Module):
+class ConvEncoder(MaybeScriptModule):
     def __init__(self, input_size, channels = [64, 64], window_size = 3, kind: str = "resnet", max_dilatation = 1) -> None:
         """
         set of convolutional layers

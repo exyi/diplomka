@@ -496,6 +496,7 @@ if __name__ == "__main__":
     """)
     parser.add_argument('--testload', type=str, help='TFRecord file to load and print')
     parser.add_argument('--list', type=str, help='TFRecord file to load and print')
+    parser.add_argument('--stats', type=str, help='TFRecord file to load and print')
     parser.add_argument('--input', type=str, help='Input directory with CSV files')
     parser.add_argument('--pairing_input', type=str, help='Input directory with FR3D pairing files')
     parser.add_argument('--torsion_angles', action='store_true', help='Include torsion angles', default=False)
@@ -522,6 +523,26 @@ if __name__ == "__main__":
             print_seq = (" " + seq) if args.verbose else ""
             pairs_num = str(len(example["pairing_type"].numpy())) if 'pairing_type' in example else "-"
             print(f"{bytes(example['pdbid'].numpy()).decode('utf-8'):<8} {sum(len(x) for x in seqs):8d} {len(seqs):2d} {pairs_num:>7}{print_seq}")
+
+    elif args.stats:
+        loader = NtcDatasetLoader(args.stats)
+        print(f"# Cardinality = {loader.cardinality}")
+        float_data = {}
+        for i, example in enumerate(loader.get_base_dataset()):
+            for k, v in example.items():
+                if v.dtype in [tf.float32, tf.float64]:
+                    v = v.numpy()
+                    if k not in float_data:
+                        float_data[k] = []
+                    float_data[k].append(v)
+        
+        for k, v in float_data.items():
+            v = np.concatenate(v)
+            if len(v) > 0:
+                print(f"{k}: count={len(v)} mean={np.mean(v)} std={np.std(v)} min={np.min(v)} max={np.max(v)} zerocount={np.sum(v == 0)}")
+            else:
+                print(f"{k}: count={len(v)}")
+
 
     elif args.input and args.output:
         files = [os.path.join(args.input, f) for f in os.listdir(args.input) if csv_loader.csv_extensions.search(f)]

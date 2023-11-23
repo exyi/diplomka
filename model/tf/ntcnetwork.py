@@ -19,7 +19,7 @@ if os.environ.get("NTCNET_INTERNAL_NO_HEAVY_IMPORTS", "") == "1":
 
 TensorDict = Dict[str, tf.Tensor]
 
-@tf.keras.saving.register_keras_serializable(package="ntcnetwork")
+# @tf.keras.saving.register_keras_serializable(package="ntcnetwork")
 class ResnetBlock(layers.Layer):
     def __init__(self, in_channels, out_channels = None, window_size = 3, stride=1, dilation = 1, name=None) -> None:
         super(ResnetBlock, self).__init__(name=name)
@@ -90,7 +90,7 @@ def ragged_reshape(tensor: tf.RaggedTensor, new_shape: Tuple[int, ...]):
     x = tf.reshape(x, (tf.shape(x)[0], *new_shape))
     return tf.RaggedTensor.from_row_splits(x, tensor.row_splits)
 
-@tf.keras.saving.register_keras_serializable(package="ntcnetwork")
+# @tf.keras.saving.register_keras_serializable(package="ntcnetwork")
 class ConvEncoder(layers.Layer):
     def __init__(self, input_size, channels = [64, 64], window_size = 3, max_dilatation = 1, kind = "resnet", name=None) -> None:
         """
@@ -199,7 +199,7 @@ def broadcast_sequence_to_matrix(sequence: tf.RaggedTensor, size: int):
     seq_broadcast_cols = tf.broadcast_to(tf.expand_dims(t, axis=2), shape=(batch_size, size, size, sequence.shape[-1]))
     return tf.concat([ seq_broadcast_rows, seq_broadcast_cols], axis=-1)
 
-@tf.keras.saving.register_keras_serializable(package="ntcnetwork")
+# @tf.keras.saving.register_keras_serializable(package="ntcnetwork")
 class EncodePairing(layers.Layer):
     def __init__(self, name=None):
         super().__init__(name=name)
@@ -238,7 +238,7 @@ def just_save_image(filename, x):
         file = tf.image.encode_png(image)
         tf.io.write_file(get_logdir() + "/" + filename + "_" + str(global_step_id.inc()) + ".png", file)
 
-@tf.keras.saving.register_keras_serializable(package="ntcnetwork")
+# @tf.keras.saving.register_keras_serializable(package="ntcnetwork")
 class MatrixSequenceMerger(layers.Layer):
     def __init__(self, output_size, name=None):
         super().__init__(name=name)
@@ -279,7 +279,7 @@ class MatrixSequenceMerger(layers.Layer):
         bazmek = self.output_mapping(output)
         return bazmek
 
-@tf.keras.saving.register_keras_serializable(package="ntcnetwork")
+# @tf.keras.saving.register_keras_serializable(package="ntcnetwork")
 class EncoderRNN(layers.Layer):
     def __init__(self,
             embedding_size,
@@ -388,7 +388,7 @@ class EncoderRNN(layers.Layer):
                 x = bypass + x
         return x
 
-@tf.keras.saving.register_keras_serializable(package="ntcnetwork")
+# @tf.keras.saving.register_keras_serializable(package="ntcnetwork")
 class Decoder(layers.Layer):
     def __init__(self, hidden_size, output_size,  name=None):
         super(Decoder, self).__init__(name=name)
@@ -404,7 +404,7 @@ class Decoder(layers.Layer):
         output = self.out(output)
         return output
     
-@tf.keras.saving.register_keras_serializable(package="ntcnetwork")
+# @tf.keras.saving.register_keras_serializable(package="ntcnetwork")
 class GeometryDecoder(layers.Layer):
     def __init__(self, num_angles, num_distances, name=None):
         super().__init__(name=name)
@@ -440,7 +440,7 @@ class GeometryDecoder(layers.Layer):
 def clamp(v, min_v, max_v):
     return tf.minimum(max_v, tf.maximum(min_v, v))
 
-@tf.keras.saving.register_keras_serializable(package="ntcnetwork")
+# @tf.keras.saving.register_keras_serializable(package="ntcnetwork")
 class Network(tf.keras.Model):
     INPUT_SIZE_NUCLEOTIDE = int(dataset.NtcDatasetLoader.letters_mapping.vocabulary_size())
     INPUT_SIZE = INPUT_SIZE_NUCLEOTIDE + 1 # +1 UNK token, +1 is_dna
