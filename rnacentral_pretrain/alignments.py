@@ -1,6 +1,8 @@
+import hashlib
 import os, math, sys, argparse, re, subprocess, tempfile, dataclasses, inspect, time, itertools, json
 import concurrent.futures as f
 from typing import Any, Optional
+import typing
 import numpy as np
 import polars as pl
 import asyncio as aio
@@ -17,6 +19,19 @@ class InputRNA:
 @dataclasses.dataclass
 class AlignerOptions:
     viennaRNA: bool = False
+    needle: bool = False
+    xmers: tuple[int, ...] = tuple()
+    write_batches: Optional[str] = None
+
+def write_seq_struct_fasta(batch: list[InputRNA], file: typing.TextIO):
+    for rna in batch:
+        file.write(f'>{rna.id}\n{rna.sequence}\n{rna.structure}\n')
+
+def al_locarna_distance(a: InputRNA, b: InputRNA, cpu_affinity: Optional[list[int]]) -> Optional[float]:
+    """
+    broken POS
+    """
+    raise NotImplementedError()
 
 def al_vienna_distance(a: InputRNA, b: InputRNA, cpu_affinity: Optional[list[int]]) -> Optional[float]:
     """
@@ -50,6 +65,88 @@ def al_vienna_distance(a: InputRNA, b: InputRNA, cpu_affinity: Optional[list[int
         return None
     return float(m.group(1))
 
+def get_pairs(len: int):
+    pairs = []
+    for i in range(len):
+        for j in range(i):
+            pairs.append((i, j))
+    return pairs
+
+
+def al_needle_distance(batch: list[InputRNA], cpu_affinity: Optional[list[int]]) -> dict[str, list[float]]:
+    """
+    Use needleall to score all pairs of sequences in the batch.
+    Secondary structure is ignored.
+    """
+    with tempfile.TemporaryDirectory(prefix="rna_alignments") as dir:
+        with open(os.path.join(dir, 'input.fasta'), 'w') as f:
+            for i, rna in enumerate(batch):
+                f.write(f'>my_sequence_grgr_{i}\n{rna.sequence}\n')
+
+        p = subprocess.Popen(['needleall', '-asequence', 'input.fasta', '-bsequence', 'input.fasta', '-gapopen', '5', '-gapextend', '0.3', '-aformat', 'srspair', '-minscore', '-10', '-datafile', 'EDNAFULL', '-outfile', 'output.needleall'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=dir)
+        if cpu_affinity is not None:
+            os.sched_setaffinity(p.pid, cpu_affinity)
+        stdout, stderr = p.communicate()
+        if p.returncode != 0:
+            print(stderr.decode())
+            raise RuntimeError(f'needleall failed for {batch[0].id} and {batch[1].id}')
+        if not os.path.exists(os.path.join(dir, 'output.needleall')):
+            print(stderr.decode())
+            print(stdout.decode())
+            raise RuntimeError(f'needleall failed for {batch[0].id} and {batch[1].id}')
+        score = np.zeros((len(batch), len(batch)))
+        length = -np.ones((len(batch), len(batch)))
+        identity = np.zeros((len(batch), len(batch)))
+        similarity = np.zeros((len(batch), len(batch)))
+        gaps = np.zeros((len(batch), len(batch)))
+
+        i, j = None, None
+        with open(os.path.join(dir, 'output.needleall')) as f:
+            for line in f.readlines():
+                if m:=re.match(r'# 1: my_sequence_grgr_(\d+)', line):
+                    i = int(m.group(1))
+                elif m:=re.match(r'# 2: my_sequence_grgr_(\d+)', line):
+                    j = int(m.group(1))
+                elif m:=re.match(r'# Length: +(\d+)', line):
+                    assert length[i, j] == -1
+                    length[i, j] = int(m.group(1))
+                elif m:=re.match(r'# Identity: +(\d+)/(\d+) +\((\d+([.]\d+)?)%\)', line):
+                    assert identity[i, j] == 0
+                    identity[i, j] = float(m.group(3)) / 100
+                elif m:=re.match(r'# Similarity: +(\d+)/(\d+) +\((\d+([.]\d+)?)%\)', line):
+                    assert similarity[i, j] == 0
+                    similarity[i, j] = float(m.group(3)) / 100
+                elif m:=re.match(r'# Gaps: +(\d+)/(\d+) +\((\d+([.]\d+)?)%\)', line):
+                    assert gaps[i, j] == 0
+                    gaps[i, j] = float(m.group(3)) / 100
+                elif m:=re.match(r'# Score: +(\d+([.]\d+)?)', line):
+                    assert score[i, j] == 0
+                    score[i, j] = float(m.group(1))
+
+        pairs = get_pairs(len(batch))
+        assert np.all(np.array([ float(length[i, j]) for i, j in pairs ]) >= 0), f'length={length}'
+        return {
+            "needle_length": [ float(length[i, j]) for i, j in pairs ],
+            "needle_identity": [ float(identity[i, j]) for i, j in pairs ],
+            "needle_similarity": [ float(similarity[i, j]) for i, j in pairs ],
+            "needle_gaps": [ float(gaps[i, j]) for i, j in pairs ],
+            "needle_score": [ float(score[i, j]) for i, j in pairs ],
+        }
+    
+def common_xmers(batch: list[InputRNA], x = 6) -> dict[str, list[float]]:
+    """
+    Calculates number of common x-mers between all pairs of sequences in the batch.
+    MAFFT uses something similar with x=6
+    """
+    xmers = [
+        set(rna.sequence[i:i+x] for i in range(len(rna.sequence) - x + 1))
+        for rna in batch
+    ]
+    pairs = get_pairs(len(batch))
+    return {
+        f'common_{x}mers': [ len(xmers[i] & xmers[j]) for i, j in pairs ]
+    }
+
 def load_epoch(input, epoch_size, max_length):
     s_time = time.time()
     df = pl.scan_parquet(input)
@@ -78,30 +175,55 @@ async def analyze_batch(batch: pl.DataFrame, opt: AlignerOptions):
         for upi, seq, ss in batch.select('upi', 'seq', 'ss').iter_rows()
     ]
 
-    pairs = []
-    for i in range(len(sequences)):
-        for j in range(i):
-            pairs.append((i, j))
+    pairs = get_pairs(len(sequences))
     result: dict[str, list[Any]] = { }
+    big_results: list[f.Future[dict[str, list[float]]]] = []
 
     if opt.viennaRNA:
         result["vienna_distance"] = [ threadpool.submit(al_vienna_distance, sequences[i], sequences[j], None) for i, j in pairs ]
+    if opt.needle:
+        big_results.append(
+            threadpool.submit(al_needle_distance, sequences, None)
+        )
+    for x in opt.xmers:
+        big_results.append(
+            threadpool.submit(common_xmers, sequences, x)
+        )
+    if opt.write_batches:
+        os.makedirs(opt.write_batches, exist_ok=True)
+        batch_id_sha = hashlib.sha256('||'.join([ s.id for s in sequences ]).encode()).hexdigest()[0:16]
+        with open(os.path.join(opt.write_batches, f'batch_{batch_id_sha}.fasta'), 'w') as file:
+            write_seq_struct_fasta(sequences, file)
+
 
     futures = list(itertools.chain.from_iterable(result.values()))
     for future in futures:
         await aio.wrap_future(future)
+    for future in big_results:
+        await aio.wrap_future(future)
+
+    T = typing.TypeVar('T')
+    def unwrap_future(future: typing.Union[T, f.Future[T]], assert_done = False) -> T:
+        if isinstance(future, f.Future):
+            if assert_done:
+                assert future.done(), f"future is not done: {future}"
+            return future.result()
+        return future
 
     def get_matrix(list: list[Any]):
-        assert all(x.done() for x in list), f"not all futures are done: {list}"
         m = [ [ None ] * i for i in range(len(sequences)) ]
         for x, (i, j) in zip(list, pairs):
-            m[max(i, j)][min(i, j)] = x.result()
+            m[max(i, j)][min(i, j)] = unwrap_future(x, assert_done=True)
         return m
     return {
         "ids": [ s.id for s in sequences ],
         **{
             k: get_matrix(v)
             for k, v in result.items()
+        },
+        **{
+            k: get_matrix(v)
+            for k, v in itertools.chain(*[ unwrap_future(r).items() for r in big_results ])
         }
     }
 
@@ -148,7 +270,7 @@ def main(args):
     assert threadpool is None
     threadpool = f.ThreadPoolExecutor(threads)
 
-    opt = AlignerOptions(viennaRNA=args.al_vienna_distance)
+    opt = AlignerOptions(viennaRNA=args.al_vienna_distance, needle=args.al_needle, xmers=tuple(args.al_common_xmers or []), write_batches=args.write_batches)
 
     while True:
         df = load_epoch(args.input, args.epoch_size, args.max_length)
@@ -164,6 +286,10 @@ def main_v(argv):
     parser.add_argument('--threads', type=int, default=1, help='Number of threads to use')
 
     parser.add_argument('--al_vienna_distance', action='store_true', help=inspect.getdoc(al_vienna_distance))
+    parser.add_argument('--al_needle', action='store_true', help=inspect.getdoc(al_needle_distance))
+    parser.add_argument('--al_common_xmers', type=int, nargs="+", help=inspect.getdoc(common_xmers))
+
+    parser.add_argument('--write_batches', type=str, help='Write batches to the specified directory')
     args = parser.parse_args(argv)
     main(args)
 

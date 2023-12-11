@@ -5,3 +5,4 @@ __pycache__
 /pairclusters/plots
 /pairclusters/*.cif
 node_modules
+/rnacentral_pretrain/batches-sample/
