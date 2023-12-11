@@ -20,6 +20,7 @@ def to_torch(x) -> Any | torch.Tensor:
         return torch.from_numpy(x.numpy())
     return torch.tensor(x)
 
+# device = torch.device("cpu")
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 def to_device(x, d=device) -> Any | torch.Tensor:
     if x is None:

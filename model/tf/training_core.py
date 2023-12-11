@@ -281,6 +281,9 @@ def main_args(args):
 
     p = Hyperparams.from_args(args)
 
+    if p.finetune:
+        raise NotImplementedError("Finetuning is not implemented yet in TF")
+
     assert utils.get_logdir() == args.logdir
     tb_writer = tf.summary.create_file_writer(args.logdir)
     with tb_writer.as_default():

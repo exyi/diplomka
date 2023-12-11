@@ -8,12 +8,15 @@ def parse_epoch_schedule(input_str: str, num_epochs: int, tt: type[TPr] = int) -
     splits = [ s.split('*') for s in input_str.split(";") ]
     non_x_sum = sum([ int(epochs) for epochs, _ in splits if epochs != "x" ])
     x_count = sum([ 1 for epochs, _ in splits if epochs == "x" ])
-    x_min = (num_epochs - non_x_sum) // x_count
-    x_mod = (num_epochs - non_x_sum) % x_count
-    if x_min < 0:
-        raise ValueError(f"Can't fit {num_epochs} epochs into {input_str}")
-    x = [ x_min + (1 if i < x_mod else 0) for i in range(x_count) ]
-    x.reverse()
+    if x_count == 0:
+        x = []
+    else:
+        x_min = (num_epochs - non_x_sum) // x_count
+        x_mod = (num_epochs - non_x_sum) % x_count
+        if x_min <= 0:
+            raise ValueError(f"Can't fit {num_epochs} epochs into {input_str}")
+        x = [ x_min + (1 if i < x_mod else 0) for i in range(x_count) ]
+        x.reverse()
     return [ ((int(epochs) if epochs != "x" else x.pop()), tt(value)) for epochs, value in splits ]
 
 T = TypeVar('T')

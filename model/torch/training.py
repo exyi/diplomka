@@ -53,7 +53,7 @@ def print_model(model: nn.Module):
             name = "…" + name[len(name)-29:]
         parameters = count_parameters(module)
         if parameters > 0:
-            print(f"#Parameters {name:30s}: {parameters}")
+            print(f"#Parameters {name:30s}: {parameters:,}")
         
     print(model)
 
@@ -88,13 +88,19 @@ def _output_field_transform(field, len_offset: int, filter: Optional[Callable[[T
         assert "y" in output and "y_pred" in output, f"Expected dict with keys 'y' and 'y_pred', got {output.keys()}, {output}"
         y, y_pred = output["y"], output["y_pred"]
         lengths = y["lengths"]
-        yf = y[field]
-        yf_pred = y_pred[field]
+        yf = (yf_unfiltered := y[field])
+        yf_pred = (yf_pred_unfiltered := y_pred[field])
         mask = lengths_mask(lengths - len_offset, yf.shape[1]).to(yf_pred.device)
         if filter is not None:
             mask = mask & filter(output.get("x", {}), output.get("y", {})).to(yf_pred.device)
         yf = maskout_for_metrics(yf, mask)
         yf_pred = maskout_for_metrics(yf_pred, mask, broadcast_dims=[False, False, True])
+
+        # print(yf_pred.shape, yf.shape, yf_unfiltered.shape, output["x"]["lengths"])
+
+        if yf.shape[0] == 0:
+            # this crashes some metrics, keep first element filtered-out element instead of returning an empty tensor
+            return (yf_pred_unfiltered.view(-1, yf_pred.shape[1])[:2, :], yf_unfiltered.view(-1)[:2]) 
 
         return (yf_pred, yf)
     
@@ -180,18 +186,20 @@ def create_trainer(p: Hyperparams, model: ntcnetwork.Network, optimizer: torch.o
             torch.nn.utils.clip_grad.clip_grad_value_(model.parameters(), p.clip_grad_value)
         optimizer.step()
 
-        # nz_grad = sum([
-        #     p.grad.not_equal(0).sum()
-        #     for n, p in model.named_parameters()
-        #     if p.grad is not None
-        # ])
-        # print(f"Non-zero gradients: {nz_grad:,}")
+        nz_grad = sum([
+            p.grad.not_equal(0).sum()
+            for n, p in model.named_parameters()
+            if p.grad is not None
+        ])
+        print(f"Non-zero gradients: {nz_grad:,}")
         return { "loss": loss.item(), "y": y, "y_pred": y_pred, "x": x }
 
     return ignite.engine.Engine(update)
 
 
 def train(train_set_dir, val_set_dir, p: Hyperparams, logdir):
+    if p.finetune and not p.external_embedding:
+        raise ValueError("Cannot finetune without external_embedding")
     ds = dataset_wrapper.make_test_val(train_set_dir, val_set_dir, p)
     seq_len_schedule = epochschedule.parse_epoch_schedule(p.seq_length_schedule, p.epochs, tt=int)
     batch_size_schedule = epochschedule.get_batch_size_from_maxlen(seq_len_schedule, p.batch_size, p.max_batch_size)
@@ -218,8 +226,8 @@ def train(train_set_dir, val_set_dir, p: Hyperparams, logdir):
         raise ValueError(f"Unknown lr_decay method {p.lr_decay}")
 
     output_ntc = _output_field_transform("NtC", len_offset=1, filter=_NANT_filter)
-    recall_metric = metrics.Recall(output_transform=output_ntc, average=False)
-    precision_metric = metrics.Precision(output_transform=output_ntc, average=False)
+    # recall_metric = metrics.Recall(output_transform=output_ntc, average=False)
+    # precision_metric = metrics.Precision(output_transform=output_ntc, average=False)
     val_metrics: Dict[str, metrics.Metric] = {
         "accuracy": metrics.Accuracy(output_transform=output_ntc),
         "f1": metrics.Fbeta(1, output_transform=output_ntc),
@@ -283,14 +291,41 @@ def train(train_set_dir, val_set_dir, p: Hyperparams, logdir):
     #     trainer.set_data(ds.get_train_ds(seq_len, batch_size))
     # trainer.add_event_handler(Events.EPOCH_STARTED, lambda _: replace_dataloader())
     # replace_dataloader()
+    global global_epoch
     for epoch, (seq_len, batch_size) in enumerate(param_schedule):
-        global global_epoch
         global_epoch = epoch
         result = trainer.run(max_epochs=1, data=ds.get_train_ds(seq_len, batch_size))
         if trainer.should_terminate:
             print("Should terminate -> exiting")
             break
         # print("training result", result)
+
+    if p.finetune:
+        import gc
+        gc.collect()
+        torch.cuda.empty_cache()
+
+        print(f"Starting finetuning: {p.finetune}")
+        assert model.external_embedding is not None
+        model.external_embedding.enable_training_()
+        seq_len, batch_size = param_schedule[-1]
+        args = p.finetune.split(",")
+        ft_epochs = int(args[1])
+        ft_lr = p.learning_rate / float(args[0])
+        ft_batch_size = batch_size if len(args) < 3 else int(args[2])
+        ft_batch_count = math.ceil(ds.train_size // ft_batch_size) * ft_epochs
+        normal_epochs = p.epochs
+        assert normal_epochs == global_epoch + 1
+        # torch_lr_scheduler.
+        torch_lr_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=ft_batch_count + 1)
+        torch_lr_scheduler.step()
+        for ft_epoch in range(ft_epochs):
+            global_epoch = normal_epochs + ft_epoch
+            result = trainer.run(max_epochs=1, data=ds.get_train_ds(seq_len, ft_batch_size))
+            if trainer.should_terminate:
+                print("Should terminate -> exiting")
+                break
+
 
 def tblog_architecture(tb_log: tensorboard_logger.TensorboardLogger, model: nn.Module, ds: dataset_wrapper.Datasets, p: Hyperparams):
     from torch.utils.tensorboard._pytorch_graph import graph
