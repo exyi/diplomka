@@ -18,6 +18,12 @@ def main_argv(argv: list[str]):
 def main_args(args):
     p = hyperparameters.Hyperparams.from_args(args)
 
+    import tensorflow as tf
+    tf.config.set_visible_devices([], 'GPU')
+    visible_devices = tf.config.get_visible_devices()
+    for device in visible_devices:
+        assert device.device_type != 'GPU'
+
     from . import training, torchutils
     print(f"device: {torchutils.device}    logdir: {args.logdir}")
     print(p)

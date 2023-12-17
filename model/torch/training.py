@@ -191,7 +191,8 @@ def create_trainer(p: Hyperparams, model: ntcnetwork.Network, optimizer: torch.o
             for n, p in model.named_parameters()
             if p.grad is not None
         ])
-        print(f"Non-zero gradients: {nz_grad:,}")
+        # if nz_grad > 20_000_000:
+        # print(f"Non-zero gradients: {nz_grad:,}")
         return { "loss": loss.item(), "y": y, "y_pred": y_pred, "x": x }
 
     return ignite.engine.Engine(update)
@@ -312,13 +313,17 @@ def train(train_set_dir, val_set_dir, p: Hyperparams, logdir):
         args = p.finetune.split(",")
         ft_epochs = int(args[1])
         ft_lr = p.learning_rate / float(args[0])
+        for paragr in optimizer.param_groups:
+            paragr["lr"] = ft_lr
         ft_batch_size = batch_size if len(args) < 3 else int(args[2])
         ft_batch_count = math.ceil(ds.train_size // ft_batch_size) * ft_epochs
         normal_epochs = p.epochs
         assert normal_epochs == global_epoch + 1
-        # torch_lr_scheduler.
         torch_lr_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=ft_batch_count + 1)
         torch_lr_scheduler.step()
+        assert torch_lr_scheduler.get_last_lr()[0] >= ft_lr * 0.9
+
+        print(f"Finetuning with LR={optimizer.param_groups[0]['lr']}, batch_size={ft_batch_size}, epochs={ft_epochs}, batch_count={ft_batch_count}")
         for ft_epoch in range(ft_epochs):
             global_epoch = normal_epochs + ft_epoch
             result = trainer.run(max_epochs=1, data=ds.get_train_ds(seq_len, ft_batch_size))

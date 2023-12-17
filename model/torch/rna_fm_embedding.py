@@ -52,13 +52,18 @@ def og_rnafm_embedding():
             # self.model = torch.jit.trace(model, torch.zeros(8, 514, dtype=torch.long, device=device))
             self.translation_table = torch.tensor(alphabet_translation_table(alphabet_def, our_alphabet))
             self.str_batch_converter = alphabet.get_batch_converter()
-            self._allow_grad = True
-            #self.requires_grad_(self._allow_grad)
+            self._allow_grad = False
+            self.model.half()
+            self.requires_grad_(self._allow_grad)
 
         def enable_training_(self, x=True):
             self._allow_grad = x
             self.requires_grad_(self._allow_grad)
             self.train()
+            if x:
+                self.model.float()
+            else:
+                self.model.half()
 
         def forward(self, batch: Union[list[str], torch.Tensor], lengths: torch.LongTensor):
             if self._allow_grad:
@@ -89,14 +94,14 @@ def og_rnafm_embedding():
 
         def forward_core(self, batch: Union[list[str], torch.Tensor], lengths: torch.LongTensor):
             batch_t = self.convert_batch(batch, lengths)
-            print(batch_t.shape)
+            # print(batch_t.shape)
             embedding = self.call_model(batch_t)
 
             if alphabet.append_eos:
                 embedding = embedding[:, :-1, :]
             if alphabet.prepend_bos:
                 embedding = embedding[:, 1:, :]
-            return embedding
+            return embedding.float()
         
         def call_model(self, batch_t: torch.Tensor) -> torch.Tensor:
             max_len = 1024 - 8
