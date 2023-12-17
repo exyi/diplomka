@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test</title>
+    <link rel="stylesheet" type="text/css" media="all" href="./vendor/cm-web-fonts/fonts.css">
+    <style>
+        body {
+            margin-left: var(--body-margin-x);
+            margin-right: var(--body-margin-x);
+            margin-top: var(--body-margin-y);
+            margin-bottom: var(--body-margin-y);
+            --font-cm: "Computer Modern Serif", serif;
+            font-family: var(--font-cm);
+            font-size: 12pt;
+            --font-head2: bold 12pt var(--font-cm);
+
+            --a4-width: 210mm;
+            --a4-height: 297mm;
+        }
+        @media print {
+            @page {
+                margin: 0.98in;
+                size: var(--a4-width) var(--a4-height);
+                /* @bottom-left {
+                    content: counter(page) ' of ' counter(pages);
+                } */
+            }
+            body {
+                --full-width: 100vw;
+                --full-height: 99vh;
+                --body-margin-x: 0px;
+                --body-margin-y: 0px;
+            }
+        }
+
+        @media screen {
+            body {
+                --body-margin-x: calc(max(0.98in, (100vw - var(--a4-width))/2));
+                --body-margin-y: 0;
+
+                --full-width: calc(100vw - 2 * var(--body-margin-x));
+                --full-height: calc(100vh - 2 * var(--body-margin-y));
+
+                max-width: 1200px;
+            }
+            .full-page, #titlchrepage1, #titlepage2 {
+                margin-top: var(--body-margin-y);
+                margin-bottom: var(--body-margin-y);
+            }
+        }
+        
+        .font-head2 {
+            font: var(--font-head2);
+        }
+
+        #titlchrepage1, #titlepage2 {
+            text-align: center;
+            /* margin-top: 2cm; */
+            height: var(--full-height);
+            width: var(--full-width);
+            page-break-after: always;
+
+            display: flex;
+            flex-direction: column;
+        }
+        #titlchrepage1 > *, #titlepage2 > * {
+            flex-grow: 1;
+        }
+
+        .full-page {
+            height: var(--full-height);
+            width: var(--full-width);
+            page-break-before: always;
+            page-break-after: always;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .flex-columns {
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+        }
+
+        .flex-columns > * {
+            flex-grow: 1;
+            padding: 0.1cm;
+        }
+
+        figure {
+            max-width: 100%;
+            text-align: cen;
+        }
+        figure > img {
+            max-width: 100%;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="titlepage1" style="display: none;">
+        <p id="title-faculty1" class="font-head2">Charles University in Prague</p>
+        <p id="title-faculty1" class="font-head2">Faculty of Science</p>
+        <p>Bioinformatika</p>
+
+        <p>Stanislav Lukeš</p>
+    </div>
+    <div id="titlepage2">
+        <figure style="width: 100%;">
+            <img src="./prf-uk-znak-en.svg" alt="Charles University, Faculty of Science">
+        </figure>
+        <p style="font-size: 20pt; font-variant: small-caps; font-weight: bold;">Master's Thesis</p>
+        <p style="font-size: 20pt;">Stanislav Lukeš</p>
+        <h1 style="font-size: 24pt;">Analysis of Nucleic Acid Base Pairing or Something</h1>
+
+        <p>
+            Department of I don't know what
+        </p>
+
+        <div class="flex-columns">
+            <div style="text-align: right;">
+                <p>Supervizor of the thesis:</p>
+                <p>Study programme:</p>
+                <p>Study branch:</p>
+            </div>
+            <div style="text-align: left;">
+                <p>Bohdan</p>
+                <p>Bioinformatics</p>
+                <p>Placeholder TODO</p>
+            </div>
+        </div>
+        <div style="flex-grow: 0;">
+            Prague, 2024
+        </div>
+    </div>
+
+    <div class="full-page">
+        <h2>Acknowledgement</h3>
+        <p>I'd like to thank my dear ChatGPT for being so much helpful.</p>
+    </div>
+    <div class="full-page">
+        <h2>Abstract (English)</h3>
+        <p>lorem ipsum</p>
+        <div style="flex-grow: 1;"></div>
+        <h2>Abstrakt (česky)</h3>
+        <p>lorem ipsum</p>
+        <div style="flex-grow: 1;"></div>
+    </div>
+
+
+    <p>
+        Vyrobeno sázecím systémem HTML/CSS, žádný praštěný L<span style="position: relative; top: -4px;">A</span>T<span style="position: relative; top: 4px">E</span>X
+    </p>
+</body>
