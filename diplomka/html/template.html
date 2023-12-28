@@ -5,6 +5,12 @@
     <title>Test</title>
     <link rel="stylesheet" type="text/css" media="all" href="../html/vendor/cm-web-fonts/fonts.css">
     <style>
+        /* pandoc styles */
+        $styles.html()$
+        /* */
+        .something-to-make-vscode-shutup-about-syntax-errors {}
+    </style>
+    <style>
         body {
             margin-left: var(--body-margin-x);
             margin-right: var(--body-margin-x);
@@ -17,32 +23,49 @@
 
             --a4-width: 210mm;
             --a4-height: 297mm;
+
+            /* --full-width: calc(var(--a4-width) - 2 * var(--body-margin-x));
+            --full-height: calc(var(--a4-height) - 2 * 0.98in); */
         }
         @media print {
             @page {
                 margin: 0.98in;
-                size: var(--a4-width) var(--a4-height);
+                size: 210mm 297mm;
                 /* @bottom-left {
                     content: counter(page) ' of ' counter(pages);
                 } */
+
+                @bottom-center {
+                    content: counter(page);
+                    /* border-top:2px solid #434190; */
+                    font-size:8pt;
+                }
+
             }
             body {
-                --full-width: 100vw;
-                --full-height: 99vh;
+                /* --full-width: 100vw;
+                --full-height: 99vh; */
                 --body-margin-x: 0px;
                 --body-margin-y: 0px;
+            }
+
+            a {
+                text-decoration: none;
+                color: black;
             }
         }
 
         @media screen {
             body {
-                --body-margin-x: calc(max(0.98in, (100vw - var(--a4-width))/2));
-                --body-margin-y: 0;
+                /* --body-margin-x: calc(max(0.98in, (100vw - var(--a4-width))/2));
+                --body-margin-y: 0; */
+                --body-margin-x: 0px;
+                --body-margin-y: 0px;
 
-                --full-width: calc(100vw - 2 * var(--body-margin-x));
-                --full-height: calc(100vh - 2 * var(--body-margin-y));
+                /* --full-width: calc(100vw - 2 * var(--body-margin-x));
+                --full-height: calc(100vh - 2 * var(--body-margin-y)); */
 
-                max-width: 1200px;
+                /* max-width: 1200px; */
             }
             .full-page, #titlchrepage1, #titlepage2 {
                 margin-top: var(--body-margin-y);
@@ -54,27 +77,24 @@
             font: var(--font-head2);
         }
 
-        #titlchrepage1, #titlepage2 {
+        #titlepage1:not(.hide), #titlepage2:not(.hide) {
             text-align: center;
             /* margin-top: 2cm; */
-            height: var(--full-height);
-            width: var(--full-width);
-            page-break-after: always;
-
             display: flex;
             flex-direction: column;
         }
-        #titlchrepage1 > *, #titlepage2 > * {
+        #titlepage1 > *, #titlepage2 > * {
             flex-grow: 1;
         }
 
-        .full-page {
-            height: var(--full-height);
-            width: var(--full-width);
+        .full-page:not(.hide) {
+            height: 99%;
+            width: 100%;
             page-break-before: always;
             page-break-after: always;
             display: flex;
             flex-direction: column;
+            break-inside: avoid;
         }
 
         .flex-columns {
@@ -89,29 +109,123 @@
         }
 
         figure {
-            max-width: 100%;
+            max-width: calc(100% - 80px);
+            margin: 40px;
+            padding: 0;
             text-align: center;
         }
         figure > img {
-            max-width: 100%;
+            max-width: calc(100% - 80px);
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            page-break-after: avoid;
+        }
+
+        #TOC {
+            page-break-after: always;
+            page-break-after: always;
+            line-height: 1.5;
+        }
+
+        #TOC > ul > li > a {
+            font-weight: bold;
+        }
+        #TOC > ul {
+            padding-left: 0;
+        }
+        #TOC ul {
+            list-style-type: none;
+            /* padding-left: 0; */
+        }
+
+        #TOC a {
+            display: flex;
+            flex-direction: row;
+            align-items: end;
+            width: 100%;
+            /* margin-bottom: 0.5em; */
+        }
+        #TOC a > * {
+            padding-right: 5px;
+        }
+        #TOC a > .dot-leader {
+            flex-grow: 1;
+            vertical-align: bottom;
+            flex-shrink: 100000;
+        }
+        /* #TOC a > .pagenumber {
+        } */
+
+        .dot-leader {
+            height: 1em; /* very important */
+            overflow: hidden; /* very important */
+            word-wrap: break-word; /* where magic happens */
+            font-weight: normal;
+            color: #999;
+            letter-spacing: 5px;
+        }
+
+        .dot-leader:after {
+            content: '...........................................................';
+        }
+
+        /* #TOC a::after {
+            content: target-counter(attr(href), page);
+            overflow: hidden;
+            float: right;
+            display: block;
+        } */
+
+        .pagenumber::after {
+            content: target-counter(attr(data-pagehref), page)
+        }
+
+        .hide {
+            display: none;
+        }
+
+        .katex-error {
+            color: red;
+            text-decoration: underline;
+        }
+        .katex-error::after {
+            content: "Katex error" attr(title);
         }
 
     </style>
+
+    <!-- Pandoc math stuff -->
+    $if(math)$
+        $if(mathjax)$
+            <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        $endif$
+        $math$
+    $endif$
+
+    <!-- Pandoc header includes: -->
+    $for(header-includes)$
+        $header-includes$
+    $endfor$
+
 </head>
 <body>
-    <div id="titlepage1" style="display: none;">
+    <!-- Pandoc include-before: -->
+    $for(include-before)$
+        $include-before$
+    $endfor$
+    <!-- Template content: -->
+    <div id="titlepage1" class="full-page hide">
         <p id="title-faculty1" class="font-head2">Charles University in Prague</p>
         <p id="title-faculty1" class="font-head2">Faculty of Science</p>
         <p>Bioinformatika</p>
 
-        <p>Stanislav Lukeš</p>
+        <p>$author$</p>
     </div>
-    <div id="titlepage2">
-        <figure style="width: 100%;">
-            <img src="../html/prf-uk-znak-en.svg" alt="Charles University, Faculty of Science">
-        </figure>
+    <div id="titlepage2" class="full-page">
+        <img src="../html/prf-uk-znak-en.svg" style="max-width: 100%;" alt="Charles University, Faculty of Science">
         <p style="font-size: 20pt; font-variant: small-caps; font-weight: bold;">Master's Thesis</p>
-        <p style="font-size: 20pt;">Stanislav Lukeš</p>
+        <p style="font-size: 20pt;">$author$</p>
         <h1 style="font-size: 24pt;">$title$</h1>
 
         <p>
@@ -125,7 +239,7 @@
                 <p>Study branch:</p>
             </div>
             <div style="text-align: left;">
-                <p>Bohdan</p>
+                <p>$supervizor$</p>
                 <p>Bioinformatics</p>
                 <p>Placeholder TODO</p>
             </div>
@@ -141,20 +255,18 @@
     </div>
     <div class="full-page">
         <h2>Abstract (English)</h3>
-        <p>lorem ipsum</p>
+        <p>$abstract$</p>
         <div style="flex-grow: 1;"></div>
         <h2>Abstrakt (česky)</h3>
-        <p>lorem ipsum</p>
+        <p>$abstract-cs$</p>
         <div style="flex-grow: 1;"></div>
     </div>
     $if(toc)$
-        <nav id="$idprefix$TOC" role="doc-toc">
-        $if(toc-title)$
-            <h2 id="$idprefix$toc-title">$toc-title$</h2>
-        $endif$
+    <nav id="TOC" role="doc-toc">
+        <h2 id="$idprefix$toc-title">Table of contents</h2>
 
         $table-of-contents$
-        </nav>
+    </nav>
     $endif$
 
     $body$
@@ -167,4 +279,40 @@
     $for(include-after)$
         $include-after$
     $endfor$
+
+
+    <script>
+        (function() {
+            const toc = document.getElementById("TOC");
+            for (const item of toc.querySelectorAll("a")) {
+                let text = ''
+                for (const textnode of item.childNodes) {
+                    if (textnode.nodeType === Node.TEXT_NODE) {
+                        text += textnode.textContent;
+                        item.removeChild(textnode);
+                    }
+                }
+
+                const label = document.createElement("span");
+                label.classList.add("label");
+                label.textContent = text;
+                item.appendChild(label);
+
+                const dotsleader = document.createElement("span");
+                dotsleader.classList.add("dot-leader");
+                item.appendChild(dotsleader);
+
+                const pagenumber = document.createElement("span");
+                pagenumber.classList.add("pagenumber");
+                pagenumber.setAttribute("data-pagehref", item.getAttribute("href"));
+                item.appendChild(pagenumber);
+            }
+        })()
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const scripttag = document.createElement("script");
+            scripttag.setAttribute("src", "https://unpkg.com/pagedjs/dist/paged.polyfill.js");
+            document.head.appendChild(scripttag);
+        })
+    </script>
 </body>

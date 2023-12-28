@@ -50,6 +50,9 @@ As far as we are away, all publications today use the Leontis-Westhof system.
 In our opinion, the main disadvantage of the Saenger system is the need to remember the 28 classes.
 The Leontis-Westhof system is also more general, of the 156 (??) possible classes we can observe 122 in high quality X-ray structures deposited in PDB. 
 
-Being more general mainly means including pairs which some might not want to call "base pairs".
+Being more general, the L-W system includes pairs which some might not want to call "base pairs".
 A number of described base pairs only bind with a single hydrogen bonds or requires binding to ribose O2', restricting the class to RNA.
-However, a 2-bonded legit base pairs are missing in the Saenger system, for example the cWw GG.
+However, a few of doubly bonded legitimate base pairs are missing in the Saenger system, for example the cWw GG.
+
+
+

@@ -57,6 +57,10 @@ def run(name, *cmd, check=True, justexit=True, capture_output=False, allow_not_f
             raise Exception(f"{name} failed [{p.returncode}]")
     return RunResult(p.returncode, p, out, err)
 
+def start_server(directory, port):
+    p = subprocess.Popen([ "python3", "-m", "http.server", port, "--bind", "127.0.0.1" ], cwd=directory, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    return p
+
 def convert_pdfa(infile, outfile):
     run("Convert to PDF/A with GhostScript", "gs", "-dPDFA", "-dBATCH", "-dNOPAUSE", "-sColorConversionStrategy=UseDeviceIndependentColor", "-sDEVICE=pdfwrite", "-dPDFACompatibilityPolicy=2", f"-sOutputFile={outfile}", infile, capture_output=True)
     validate_pdfa(outfile)
@@ -78,9 +82,17 @@ def validate_pdfa(file):
     else:
         eprint("PDF/A validation is sus")
 
-def build_pdf(infile, outfile="out/thesis-{}.pdf"):
+def build_pdf(infile, outfile="out/thesis-{}.pdf", httpserver=True):
     os.makedirs("out", exist_ok=True)
-    run("Typeset PDF with Chromium", "chromium", "--headless", "--disable-gpu", "--no-pdf-header-footer", "--virtual-time-budget=10000", "--print-to-pdf=" + outfile.format('chr'), infile)
+    if httpserver:
+        server = start_server(".", "12388")
+        inurl = f'http://localhost:12388/{infile}'
+    else:
+        inurl = infile
+        server = None
+    run("Typeset PDF with Chromium", "chromium", "--headless", "--disable-gpu", "--no-pdf-header-footer", "--generate-pdf-document-outline", "--virtual-time-budget=100000", "--run-all-compositor-stages-before-draw", "--print-to-pdf=" + outfile.format('chr'), inurl)
+    if server is not None:
+        server.terminate()
     try:
         pdfa = convert_pdfa(outfile.format('chr'), outfile.format('pdfa'))
     except Exception as e:
@@ -138,8 +150,8 @@ def pandoc_render(files, output_file):
            "--template=html/template.html",
            "--standalone",
         #    "--shift-heading-level-by=1",
-            "--lua-filter=html/shift-headings.lua",
-           "--toc", "--toc-depth=3",
+           "--lua-filter=html/shift-headings.lua",
+           "--toc", "--toc-depth=4",
            "--number-sections", "--section-divs", "--katex"]
     for file in files:
         cmd.append(file)
@@ -154,7 +166,7 @@ def main(argv):
     files = pandoc_parse("text", "out/parsed")
     pandoc_render(files, "out/thesis.html")
 
-    build_pdf("./html/thesis.html")
+    build_pdf("out/thesis.html")
 
 if __name__ == '__main__':
     main(sys.argv[1:])
