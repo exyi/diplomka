@@ -4,3 +4,21 @@
 
 * Energetics of hydrogen bonds in peptides https://www.pnas.org/doi/10.1073/pnas.2133366100
     - asi tam odsud ukrást hodnotu ~1.5 kcal/mol?
+
+
+### osnova
+
+co je NA, co je par, saenger a LW nazvoslovi
+pary byly poskytnuty od freda, autor je Craig
+ensembl byl poskytnut jirkou
+
+publikace se muze prekryvat, to je jedno
+ - chteji pridat CIF kategorii, rigorozni definici
+ - chteji konzervativni definici
+
+je ok psát o implementaci?
+ - B: určitě rozepsat
+ - pymol skript
+ - preskakuju non-std residua
+web?
+ - B: samozrejme

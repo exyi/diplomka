@@ -1,5 +1,7 @@
-title: 'Analysis of Nucleic Acid Base Pairing or Something'
+# title: 'Analysis of Nucleic Acid Base Pairing or Something'
+title: 'Methods of determination of base pairs in nucleic acids'
 author: 'Stanislav Lukeš'
+supervizor: 'prof. Ing. Bohdan Schneider, CSc.'
 abstract: |-
     In this thesis we analyze nucleic acid base pairing or something.
     We also analyze something else.
@@ -16,3 +18,5 @@ abstract-cs: |-
     Nakonec dospějeme k závěru, že jsme udělali nějaké věci.
     Také dospějeme k závěru, že jsme udělali nějaké jiné věci.
     Také dospějeme k závěru, že jsme udělali nějaké další věci.
+acknowledgement: |-
+    Něco něco něco.
