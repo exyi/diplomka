@@ -1,0 +1,17 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python Debugger: pairs.py with arguments",
+            "type": "debugpy",
+            "cwd": "${workspaceFolder}/pairclusters",
+            "request": "launch",
+            "program": "pairs.py",
+            "console": "integratedTerminal",
+            "args": [ "/mnt/Aldabrachelys/test/pdb/fr3d_6e88eb7d_bpdet/5Z8F_basepair_detail.txt", "-o", "NUL", "--pdbcache", "/mnt/Aldabrachelys/test/pdb/s" ]
+        }
+    ]
+}
