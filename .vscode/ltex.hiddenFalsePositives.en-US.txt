@@ -1,0 +1,1 @@
+{"rule":"PASSIVE_VOICE","sentence":"^\\QSince many different non-canonical base pairs exists, a systematic way naming scheme is needed.\\E$"}

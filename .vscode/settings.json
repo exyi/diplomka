@@ -1,8 +1,14 @@
 {
     "cSpell.words": [
+        "Basepair",
+        "basepairs",
+        "Hoogsteen",
         "ntcs",
+        "Saenger",
+        "Seanger",
         "subchain",
-        "subchains"
+        "subchains",
+        "Westhof"
     ],
     "deno.enable": true,
     "deno.unstable": true
