@@ -11,7 +11,7 @@
             "request": "launch",
             "program": "pairs.py",
             "console": "integratedTerminal",
-            "args": [ "/mnt/Aldabrachelys/test/pdb/fr3d_6e88eb7d_bpdet/5Z8F_basepair_detail.txt", "-o", "NUL", "--pdbcache", "/mnt/Aldabrachelys/test/pdb/s" ]
+            "args": [ "/mnt/Aldabrachelys/test/pdb/fr3d_6e88eb7d_bpdet/5Z8F_basepair_detail.txt", "-o", "/dev/null", "--pdbcache", "/mnt/Aldabrachelys/test/pdb/s" ]
         }
     ]
 }
