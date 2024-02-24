@@ -1,0 +1,94 @@
+<svg viewBox="-3.5 -3.5 10 10" width="400" height="400" xmlns="http://www.w3.org/2000/svg">
+
+<path d="M-10 0 L20 0" fill="none" stroke="#888" stroke-width="0.04" />
+<path d="M0 -10 L0 20" fill="none" stroke="#888" stroke-width="0.04" />
+
+<g>
+    <circle r="0.5" data-base="adenine"	data-atomix="1"	data-atom-name="C1′"	cx="-2.479"	cy="5.346" />
+    <circle r="0.5" data-base="adenine"	data-atomix="2"	data-atom-name="N9"	cx="-1.291"	cy="4.498" />
+    <circle r="0.5" data-base="adenine"	data-atomix="3"	data-atom-name="C8"	cx="0.024"	cy="4.897" />
+    <circle r="0.5" data-base="adenine"	data-atomix="4"	data-atom-name="N7"	cx="0.877"	cy="3.902" />
+    <circle r="0.5" data-base="adenine"	data-atomix="5"	data-atom-name="C5"	cx="0.071"	cy="2.771" />
+    <circle r="0.5" data-base="adenine"	data-atomix="6"	data-atom-name="C6"	cx="0.369"	cy="1.398" />
+    <circle r="0.5" data-base="adenine"	data-atomix="7"	data-atom-name="N6"	cx="1.611"	cy="0.909" />
+    <circle r="0.5" data-base="adenine"	data-atomix="8"	data-atom-name="N1"	cx="-0.668"	cy="0.532" />
+    <circle r="0.5" data-base="adenine"	data-atomix="9"	data-atom-name="C2"	cx="-1.912"	cy="1.023" />
+    <circle r="0.5" data-base="adenine"	data-atomix="10"	data-atom-name="N3"	cx="-2.320"	cy="2.290" />
+    <circle r="0.5" data-base="adenine"	data-atomix="11"	data-atom-name="C4"	cx="-1.267"	cy="3.124" />
+</g>
+<g>
+    <circle r="0.5" data-base="cytosine"	data-atomix="1"	data-atom-name="C1′"	cx="-2.477"	cy="5.402" />
+    <circle r="0.5" data-base="cytosine"	data-atomix="2"	data-atom-name="N1"	cx="-1.285"	cy="4.542" />
+    <circle r="0.5" data-base="cytosine"	data-atomix="3"	data-atom-name="C2"	cx="-1.472"	cy="3.158" />
+    <circle r="0.5" data-base="cytosine"	data-atomix="4"	data-atom-name="O2"	cx="-2.628"	cy="2.709" />
+    <circle r="0.5" data-base="cytosine"	data-atomix="5"	data-atom-name="N3"	cx="-0.391"	cy="2.344" />
+    <circle r="0.5" data-base="cytosine"	data-atomix="6"	data-atom-name="C4"	cx="0.837"	cy="2.868" />
+    <circle r="0.5" data-base="cytosine"	data-atomix="7"	data-atom-name="N4"	cx="1.875"	cy="2.027" />
+    <circle r="0.5" data-base="cytosine"	data-atomix="8"	data-atom-name="C5"	cx="1.056"	cy="4.275" />
+    <circle r="0.5" data-base="cytosine"	data-atomix="9"	data-atom-name="C6"	cx="-0.023"	cy="5.068" />
+</g>
+<g>
+    <circle r="0.5" data-base="guanine"	data-atomix="1"	data-atom-name="C1′"	cx="-2.477"	cy="5.399" />
+    <circle r="0.5" data-base="guanine"	data-atomix="2"	data-atom-name="N9"	cx="-1.289"	cy="4.551" />
+    <circle r="0.5" data-base="guanine"	data-atomix="3"	data-atom-name="C8"	cx="0.023"	cy="4.962" />
+    <circle r="0.5" data-base="guanine"	data-atomix="4"	data-atom-name="N7"	cx="0.870"	cy="3.969" />
+    <circle r="0.5" data-base="guanine"	data-atomix="5"	data-atom-name="C5"	cx="0.071"	cy="2.833" />
+    <circle r="0.5" data-base="guanine"	data-atomix="6"	data-atom-name="C6"	cx="0.424"	cy="1.460" />
+    <circle r="0.5" data-base="guanine"	data-atomix="7"	data-atom-name="O6"	cx="1.554"	cy="0.955" />
+    <circle r="0.5" data-base="guanine"	data-atomix="8"	data-atom-name="N1"	cx="-0.700"	cy="0.641" />
+    <circle r="0.5" data-base="guanine"	data-atomix="9"	data-atom-name="C2"	cx="-1.999"	cy="1.087" />
+    <circle r="0.5" data-base="guanine"	data-atomix="10"	data-atom-name="N2"	cx="-2.949"	cy="0.139" />
+    <circle r="0.5" data-base="guanine"	data-atomix="11"	data-atom-name="N3"	cx="-2.342"	cy="2.364" />
+    <circle r="0.5" data-base="guanine"	data-atomix="12"	data-atom-name="C4"	cx="-1.265"	cy="3.177" />
+</g>
+<g>
+    <circle r="0.5" data-base="thymine"	data-atomix="1"	data-atom-name="C1′"	cx="-2.481"	cy="5.354" />
+    <circle r="0.5" data-base="thymine"	data-atomix="2"	data-atom-name="N1"	cx="-1.284"	cy="4.500" />
+    <circle r="0.5" data-base="thymine"	data-atomix="3"	data-atom-name="C2"	cx="-1.462"	cy="3.135" />
+    <circle r="0.5" data-base="thymine"	data-atomix="4"	data-atom-name="O2"	cx="-2.562"	cy="2.608" />
+    <circle r="0.5" data-base="thymine"	data-atomix="5"	data-atom-name="N3"	cx="-0.298"	cy="2.407" />
+    <circle r="0.5" data-base="thymine"	data-atomix="6"	data-atom-name="C4"	cx="0.994"	cy="2.897" />
+    <circle r="0.5" data-base="thymine"	data-atomix="7"	data-atom-name="O4"	cx="1.944"	cy="2.119" />
+    <circle r="0.5" data-base="thymine"	data-atomix="8"	data-atom-name="C5"	cx="1.106"	cy="4.338" />
+    <circle r="0.5" data-base="thymine"	data-atomix="9"	data-atom-name="C5M"	cx="2.466"	cy="4.961" />
+    <circle r="0.5" data-base="thymine"	data-atomix="10"	data-atom-name="C6"	cx="-0.024"	cy="5.057" />
+</g>
+<g>
+    <circle r="0.5" data-base="uracil"	data-atomix="1"	data-atom-name="C1′"	cx="-2.481"	cy="5.354" />
+    <circle r="0.5" data-base="uracil"	data-atomix="2"	data-atom-name="N1"	cx="-1.284"	cy="4.500" />
+    <circle r="0.5" data-base="uracil"	data-atomix="3"	data-atom-name="C2"	cx="-1.462"	cy="3.131" />
+    <circle r="0.5" data-base="uracil"	data-atomix="4"	data-atom-name="O2"	cx="-2.563"	cy="2.608" />
+    <circle r="0.5" data-base="uracil"	data-atomix="5"	data-atom-name="N3"	cx="-0.302"	cy="2.397" />
+    <circle r="0.5" data-base="uracil"	data-atomix="6"	data-atom-name="C4"	cx="0.989"	cy="2.884" />
+    <circle r="0.5" data-base="uracil"	data-atomix="7"	data-atom-name="O4"	cx="1.935"	cy="2.094" />
+    <circle r="0.5" data-base="uracil"	data-atomix="8"	data-atom-name="C5"	cx="1.089"	cy="4.311" />
+    <circle r="0.5" data-base="uracil"	data-atomix="9"	data-atom-name="C6"	cx="-0.024"	cy="5.053" />
+</g>
+
+<style>
+    circle {
+        fill: none;
+        stroke: #000;
+        stroke-width: 0.04;
+    }
+</style>
+
+<script>
+    var circles = document.querySelectorAll('circle');
+    for (const c of circles) {
+        if (location.hash.replace(/^#/, '') !== c.getAttribute('data-base')) {
+            c.style.display = 'none';
+            continue;
+        }
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', c.getAttribute('cx'));
+        text.setAttribute('y', c.getAttribute('cy'));
+        text.setAttribute('font-size', '0.3');
+        text.setAttribute('text-anchor', 'middle');
+        text.setAttribute('alignment-baseline', 'middle');
+        text.textContent = c.getAttribute('data-atom-name');
+        c.parentNode.append(c, text);
+    }
+</script>
+
+</svg>
