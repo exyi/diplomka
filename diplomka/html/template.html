@@ -17,6 +17,7 @@
             margin-top: var(--body-margin-y);
             margin-bottom: var(--body-margin-y);
             --font-cm: "Computer Modern Serif", serif;
+            --font-mono: 'Courier New', Courier, monospace;
             font-family: var(--font-cm);
             font-size: 12pt;
             --font-head2: bold 12pt var(--font-cm);
@@ -72,6 +73,35 @@
                 margin-bottom: var(--body-margin-y);
             }
         }
+
+        .link-footnote {
+            float: footnote;
+            font-size: 0.75rem;
+            font-family: serif;
+            font-weight: lighter;
+        }
+
+        /* define the position of the footnote on the page (only bottom is possible for now) */
+
+        @page {
+            @footnote {
+                float: bottom;
+            }
+        }
+        ::footnote-call {
+            content: counter(footnote);
+            vertical-align: super;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        ::footnote-marker {
+            content: counter(footnote-marker) ". ";
+        }
+
+        /* a {
+            font-style: italic;
+        } */
         
         .font-head2 {
             font: var(--font-head2);
@@ -192,6 +222,7 @@
         .katex-error::after {
             content: "Katex error" attr(title);
         }
+
 
     </style>
 

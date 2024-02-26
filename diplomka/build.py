@@ -1,15 +1,182 @@
 #!/usr/bin/env python3
 
 import subprocess, os, re, sys, json, dataclasses, argparse, shutil, typing as ty
+import requests
+import pandocfilters
 
 @dataclasses.dataclass
 class Options:
     verbose: bool = False
+    skip_pdf: bool = False
 
 options = Options()
 
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
+    
+
+
+@dataclasses.dataclass
+class CitationInfo:
+    doi: ty.Optional[str]
+    published_date_parts: list[int]
+    title: str
+    authors: list[list[str]]
+    journal: ty.Optional[str]
+    url: ty.Optional[str]
+    id: ty.Optional[str] = None
+    seq: ty.Optional[int] = None
+def get_doi_from_url(url: str) -> ty.Optional[str]:
+    m = re.match(r"https?://doi.org/(.+)", url)
+    if m is not None:
+        return m.group(1)
+    else:
+        return None
+def download_cit_info(doi: str) -> CitationInfo:
+    response = requests.get(f"https://api.crossref.org/works/{doi}")
+    response.raise_for_status()
+    data = response.json()["message"]
+    return CitationInfo(
+        doi=doi,
+        published_date_parts=list(map(int, (data.get("published") or data["published-print"])["date-parts"][0])),
+        title=data["title"][0],
+        authors=[[author["given"], author["family"]] for author in data["author"]],
+        journal=data.get("container-title"),
+        url=None
+    )
+
+def load_citations(file):
+    map = dict()
+    with open(file) as f:
+        data = json.load(f)
+        for id in data:
+            map[id] = CitationInfo(**data[id])
+    return map
+
+def get_citations_somehow(url_list: list[str]) -> dict[str, CitationInfo]:
+    auto = load_citations("cit-auto.json")
+    manual = load_citations("cit.json")
+
+    missing_urls = [url for url in url_list if url not in auto and url not in manual]
+    missing_dois = [doi for url in missing_urls if (doi := get_doi_from_url(url)) is not None]
+    if missing_dois:
+        for url in missing_urls:
+            doi = get_doi_from_url(url)
+            if doi:
+                auto[url] = download_cit_info(doi)
+        write_new = { k: dataclasses.asdict(v) for k, v in sorted(auto.items()) }
+        try:
+            with open("cit-auto.json.new", "w") as f:
+                json.dump(write_new, f, indent=4)
+            os.rename("cit-auto.json.new", "cit-auto.json")
+        finally:
+            if os.path.exists("cit-auto.json.new"):
+                os.remove("cit-auto.json.new")
+    return {**auto, **manual}
+
+def assign_citation_ids(citations: dict[str, CitationInfo]):
+    assigned_ids = dict()
+    for url, cit in citations.items():
+        if cit.id is not None:
+            assigned_ids[cit.id] = cit
+
+    for url, cit in citations.items():
+        if len(cit.authors) > 3:
+            preferred_id = f"{cit.authors[0][1][0]}{cit.published_date_parts[0] % 100:02d}"
+        else:
+            preferred_id = f"{''.join(author[1][0] for author in cit.authors)}{cit.published_date_parts[0] % 100:02d}"
+        if preferred_id in assigned_ids:
+            for i in range(ord('b'), ord('z')+1):
+                if f'{preferred_id}{chr(i)}' not in assigned_ids:
+                    preferred_id = f'{preferred_id}{chr(i)}'
+                    break
+            assert False, f"fuck: {preferred_id} | {list(assign_citation_ids.keys())}"
+        cit.id = preferred_id
+        assigned_ids[preferred_id] = cit
+
+    ss = sorted(citations.values(), key=lambda c: tuple(c.published_date_parts + [ 3000, 3000, 3000 ])[0:3])
+    for i, s in enumerate(ss):
+        s.seq = i
+    return assigned_ids
+
+def get_str_content(pandoc_json: dict) -> list[str]:
+    result = []
+    def core(key, val, fmt, meta):
+        if key == "Str":
+            result.append(val)
+    pandocfilters.walk(pandoc_json, core, "", {})
+    return result
+
+def collect_links(out: dict[str, list[str]]):
+    def core(key, val, fmt, meta):
+        if key == "Link":
+            attr, content, [url, wtf] = val
+            assert not wtf, wtf
+            if url.startswith("http:") or url.startswith("https:"):
+                data = " ".join(get_str_content(content))
+                out[url] = out.get(url, []) + [ data ]
+
+    return core
+
+def convert_links(citations: dict[str, CitationInfo]):
+    def core(key, val, fmt, meta):
+        if key == "Link":
+            attr, content, [url, wtf] = val
+            assert not wtf, wtf
+            if ['data-footnote-link', 'true'] in attr[2]:
+                pass
+            elif url in citations:
+                new_content = [
+                    *content,
+                    pandocfilters.Span(
+                        ['', ["citation-ref"], [ ["data-citation-id", str(citations[url].id)], ["data-citation-seq", str(citations[url].seq)] ] ],
+                        [pandocfilters.Space(),  pandocfilters.Str(f"[{citations[url].id}]")]),
+                ]
+                return pandocfilters.Link(attr, new_content,[ url, ''])
+            elif url.startswith("http:") or url.startswith("https:"):
+                footnote = pandocfilters.Span(
+                    # ['', [], []],
+                    ['', ["link-footnote"], []],
+                    [
+                        # pandocfilters.Link( ['', [], [ ['data-footnote-link', 'true'], ['href', url]]], [pandocfilters.Str(f"{url}")], [ url, '' ]),
+                        pandocfilters.RawInline('html', f"<a href='{url}'>{url}</a>")
+                    ]
+                )
+                new_content = [ *content, footnote ]
+                link = pandocfilters.Link([ attr[0], attr[1], attr[2] + [ ['data-footnote-link', 'true'] ]], content, [url, ''])
+                # return link
+                return pandocfilters.Span(
+                    ['', [], []],
+                    # ['', ["link-footnote"], []],
+                    [link, footnote]
+                )
+    return core
+
+
+def process_links(files: list[str]):
+    links: dict[str, list[str]] = dict()
+    phase1 = [
+        collect_links(links)
+    ]
+    for file in files:
+        with open(file) as f:
+            pandocfilters.applyJSONFilters(phase1, f.read(), "")
+    
+    citations = get_citations_somehow(list(links.keys()))
+    cit_map = assign_citation_ids(citations)
+    for l in links.items():
+        cit = citations.get(l[0])
+        if cit:
+            print(f" {cit.seq+1: 3d} {cit.id:5s}: {cit.title} ({cit.doi})")
+
+    phase2 = [convert_links(citations)]
+    for file in files:
+        with open(file) as f:
+            altered = pandocfilters.applyJSONFilters(phase2, f.read(), "")
+        with open(file, "w") as f:
+            f.write(altered)
+
+    # TODO: generate bibliography
 
 @dataclasses.dataclass
 class RunResult:
@@ -143,6 +310,7 @@ def pandoc_parse(input_dir, output_dir):
 def pandoc_render(files, output_file):
     cmd = ["pandoc",
            "--from=json", "--to=html",
+           "-F", "pandoc-crossref",
         #    "--embed-resources",
            "--resource-path=text:html:images",
            "--output=" + output_file,
@@ -160,13 +328,17 @@ def pandoc_render(files, output_file):
 def main(argv):
     parser = argparse.ArgumentParser(description='Build the thesis')
     parser.add_argument('--verbose', action='store_true', help='Verbose output')
+    parser.add_argument('--skip-pdf', action='store_true', help='Verbose output')
     args = parser.parse_args(argv)
     options.verbose = args.verbose
+    options.skip_pdf = args.skip_pdf
 
     files = pandoc_parse("text", "out/parsed")
+    process_links(files)
     pandoc_render(files, "out/thesis.html")
 
-    build_pdf("out/thesis.html")
+    if not options.skip_pdf:
+        build_pdf("out/thesis.html")
 
 if __name__ == '__main__':
     main(sys.argv[1:])

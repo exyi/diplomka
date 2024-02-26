@@ -2,6 +2,8 @@
 title: 'Methods of determination of base pairs in nucleic acids'
 author: 'Stanislav Lukeš'
 supervizor: 'prof. Ing. Bohdan Schneider, CSc.'
+numberSections: true
+linkReferences: true
 abstract: |-
     In this thesis we analyze nucleic acid base pairing or something.
     We also analyze something else.

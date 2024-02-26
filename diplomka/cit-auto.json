@@ -1,0 +1,127 @@
+{
+    "https://doi.org/10.1006/jmbi.2001.4987": {
+        "doi": "10.1006/jmbi.2001.4987",
+        "published_date_parts": [
+            2001,
+            10
+        ],
+        "title": "A standard reference frame for the description of nucleic acid base-pair geometry",
+        "authors": [
+            [
+                "Wilma K",
+                "Olson"
+            ],
+            [
+                "Manju",
+                "Bansal"
+            ],
+            [
+                "Stephen K",
+                "Burley"
+            ],
+            [
+                "Richard E",
+                "Dickerson"
+            ],
+            [
+                "Mark",
+                "Gerstein"
+            ],
+            [
+                "Stephen C",
+                "Harvey"
+            ],
+            [
+                "Udo",
+                "Heinemann"
+            ],
+            [
+                "Xiang-Jun",
+                "Lu"
+            ],
+            [
+                "Stephen",
+                "Neidle"
+            ],
+            [
+                "Zippora",
+                "Shakked"
+            ],
+            [
+                "Heinz",
+                "Sklenar"
+            ],
+            [
+                "Masashi",
+                "Suzuki"
+            ],
+            [
+                "Chang-Shung",
+                "Tung"
+            ],
+            [
+                "Eric",
+                "Westhof"
+            ],
+            [
+                "Cynthia",
+                "Wolberger"
+            ],
+            [
+                "Helen M",
+                "Berman"
+            ]
+        ],
+        "journal": [
+            "Journal of Molecular Biology"
+        ],
+        "url": null,
+        "id": null,
+        "seq": null
+    },
+    "https://doi.org/10.1038/nprot.2008.104": {
+        "doi": "10.1038/nprot.2008.104",
+        "published_date_parts": [
+            2008,
+            7
+        ],
+        "title": "3DNA: a versatile, integrated software system for the analysis, rebuilding and visualization of three-dimensional nucleic-acid structures",
+        "authors": [
+            [
+                "Xiang-Jun",
+                "Lu"
+            ],
+            [
+                "Wilma K",
+                "Olson"
+            ]
+        ],
+        "journal": [
+            "Nature Protocols"
+        ],
+        "url": null,
+        "id": null,
+        "seq": null
+    },
+    "https://doi.org/10.1093/nar/gkg680": {
+        "doi": "10.1093/nar/gkg680",
+        "published_date_parts": [
+            2003,
+            9,
+            1
+        ],
+        "title": "3DNA: a software package for the analysis, rebuilding and visualization of three-dimensional nucleic acid structures",
+        "authors": [
+            [
+                "X.-J.",
+                "Lu"
+            ]
+        ],
+        "journal": [
+            "Nucleic Acids Research"
+        ],
+        "url": null,
+        "id": null,
+        "seq": null
+    }
+}
