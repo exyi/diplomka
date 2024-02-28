@@ -1,7 +1,7 @@
 ## Standard basepair parameters
 
 We have a set of standard basepair parameters originally defined for helices of canonical pairs.
-The parameters are usually calculated using the software tool DSSR, more details in [x](./2-oview-6-software.md#x3dna-dssr).
+The parameters can be calculated using the software tool DSSR or Curves+, more details in [x](./2-oview-6-software.md#x3dna-dssr).
 Usually, the basepair parameters are defined with the following figure, presented in the TODO DSSR paper.
 However, we will need a more rigorous definition to assess the parameters and potentially calculate them.
 
@@ -10,7 +10,7 @@ However, we will need a more rigorous definition to assess the parameters and po
 ### The standard reference frame
 
 The DSSR papers <https://doi.org/10.1093/nar/gkg680> and <https://doi.org/10.1038/nprot.2008.104> do not contain almost any details on the parameters, but [the DSSR webpage shows quite detailed calculation in a blog post](https://x3dna.org/highlights/details-on-the-simple-base-pair-parameters).
-Most notably the post mentions [an older paper defining a standard reference frame for basepairs](https://doi.org/10.1006/jmbi.2001.4987).
+Most notably the post mentions [the reference frame defined at the "Tsukuba convention".](https://doi.org/10.1006/jmbi.2001.4987).
 
 The reference frame essentially defines a coordinate system for each of the five common nucleotides.
 The paper includes a table of coordinates for each base heavy atom.

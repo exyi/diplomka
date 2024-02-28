@@ -10,9 +10,9 @@ To get the number of symmetric combinations, we count the number of elements in 
 This equals $12 + 11 + \cdots + 1 = 78$.
 Each base-edge couple can pair in **cis** or in **trans**, multiplying by the additional 2 options, gives us 156 options.
 
-It is not hard to see that not all "possible" pairs can make sense.
-For example, the Hoogsteen edge of uracil is a single atom -- a doubly-bonded oxygen.
-Thus, **cHH UU** simply isn't an energy favorable base interaction.
+It is not hard to see that not all theoretically possible pairs can make sense chemically.
+For instance, the Hoogsteen edge of a cytosine consists of single NH<sub>2</sub> group, which can only act as hydrogen bond donor.
+Thus, **cHH CC** basepair, which only involves this edge, cannot provide a stabilizing base interaction.
 
 <!-- The conformation is different for each of the four nucleotides.
 We have the following choices:
@@ -62,9 +62,9 @@ This property isn't explicitly mentioned in the LW2001 paper (TODO verify again)
 
 It is definitely not a mistake.
 Leontis with Westhof also propose a glyph symbols for each base pair family.
-We can show Watson-Crick edge as a circle (○), Hoogsteen edge as square (□) and sugar edge as an triangle (▷).
-If the basepair is **cis**, it is filled (●, ■, ▶), if **trans**, it is empty (○, □, ▷).
-The basepair families are then ⎼○⎼ (or ○⎼○) for **tWW**, ●-▶ for **cWS** and ⎼▶⎼ **cSS**.
+We can show Watson-Crick edge as a circle (`○`), Hoogsteen edge as square (`□`) and sugar edge as an triangle (`▷`).
+If the basepair is **cis**, it is filled (`●`, `■`, `▶`), if **trans**, it is empty (`○`, `□`, `▷`).
+The basepair families are then `⎼○⎼` (or `○⎼○`) for **tWW**, `●⎼▶` for **cWS** and `⎼▶⎼` **cSS**.
 Note that only the sugar edge has an asymmetric glyph symbol.
 
 ![In trans Sugar/Sugar, C-A is defined while A-C is left undefined. By contrast, in W/W and H/H the C-A and A-C show the same pair (turned upside down)](../img/tSS-CA-vs-AC.png)

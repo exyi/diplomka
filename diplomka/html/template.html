@@ -102,6 +102,10 @@
         /* a {
             font-style: italic;
         } */
+
+        body {
+            padding: 0 !important;
+        }
         
         .font-head2 {
             font: var(--font-head2);
@@ -115,6 +119,10 @@
         }
         #titlepage1 > *, #titlepage2 > * {
             flex-grow: 1;
+        }
+
+        .pagedjs_page:is([data-page-number="1"], [data-page-number="2"], [data-page-number="3"]) .pagedjs_margin-content {
+            display: none;
         }
 
         .full-page:not(.hide) {
@@ -143,9 +151,23 @@
             margin: 40px;
             padding: 0;
             text-align: center;
+            break-inside: avoid;
         }
         figure > img {
             max-width: calc(100% - 80px);
+            margin: 1rem;
+        }
+        figure figcaption {
+            text-align: center; text-align-last: center;
+        }
+
+        section.level2 {
+            page-break-before: always;
+        }
+
+        section {
+            text-align: justify;
+            text-align-last: left;
         }
 
         h1, h2, h3, h4, h5, h6 {
@@ -255,13 +277,13 @@
     </div>
     <div id="titlepage2" class="full-page">
         <img src="../html/prf-uk-znak-en.svg" style="max-width: 100%;" alt="Charles University, Faculty of Science">
-        <p style="font-size: 20pt; font-variant: small-caps; font-weight: bold;">Master's Thesis</p>
+        <p style="font-size: 20pt; font-variant: small-caps; font-weight: bold;">Diploma Thesis</p>
         <p style="font-size: 20pt;">$author$</p>
         <h1 style="font-size: 24pt;">$title$</h1>
 
-        <p>
+        <!-- <p>
             Department of I don't know what
-        </p>
+        </p> -->
 
         <div class="flex-columns">
             <div style="text-align: right;">
@@ -272,7 +294,7 @@
             <div style="text-align: left;">
                 <p>$supervizor$</p>
                 <p>Bioinformatics</p>
-                <p>Placeholder TODO</p>
+                <p>N-BINF</p>
             </div>
         </div>
         <div style="flex-grow: 0;">
@@ -280,16 +302,18 @@
         </div>
     </div>
 
+    $if(acknowledgement)$
     <div class="full-page">
         <h2>Acknowledgement</h3>
-        <p>$acknowledgement$</p>
+        <p style="text-align: justify;">$acknowledgement$</p>
     </div>
+    $endif$
     <div class="full-page">
         <h2>Abstract (English)</h3>
-        <p>$abstract$</p>
+        <p style="text-align: justify;">$abstract$</p>
         <div style="flex-grow: 1;"></div>
         <h2>Abstrakt (česky)</h3>
-        <p>$abstract-cs$</p>
+        <p style="text-align: justify;">$abstract-cs$</p>
         <div style="flex-grow: 1;"></div>
     </div>
     $if(toc)$
@@ -303,9 +327,9 @@
     $body$
 
 
-    <p>
+    <!-- <p>
         Vyrobeno sázecím systémem HTML/CSS, žádný praštěný L<span style="position: relative; top: -4px;">A</span>T<span style="position: relative; top: 4px">E</span>X
-    </p>
+    </p> -->
 
     $for(include-after)$
         $include-after$

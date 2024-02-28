@@ -1,5 +1,5 @@
 # title: 'Analysis of Nucleic Acid Base Pairing or Something'
-title: 'Methods of determination of base pairs in nucleic acids'
+title: 'Methods of&nbsp;determination of&nbsp;base&nbsp;pairs in&nbsp;nucleic acids'
 author: 'Stanislav Lukeš'
 supervizor: 'prof. Ing. Bohdan Schneider, CSc.'
 numberSections: true
@@ -12,13 +12,8 @@ abstract: |-
     In the end we conclude that we've done some stuff.
     We also conclude that we've done some other stuff.
     We also conclude that we've done some more stuff.
+    (TODO)
 abstract-cs: |-
-    V této práci analyzujeme párování nukleových kyselin nebo něco.
-    Také analyzujeme něco jiného.
-    Děláme i jiné věci.
-    Děláme i nějaké další věci.
-    Nakonec dospějeme k závěru, že jsme udělali nějaké věci.
-    Také dospějeme k závěru, že jsme udělali nějaké jiné věci.
-    Také dospějeme k závěru, že jsme udělali nějaké další věci.
-acknowledgement: |-
-    Něco něco něco.
+    Ehhh
+# acknowledgement: |-
+#     Něco něco něco.

@@ -1,17 +1,19 @@
 ## Basepair type terminology
 
-### Saenger system {.unnumbered}
+### Saenger system
 
 Since many different non-canonical base pairs exists, a systematic way naming scheme is needed.
-The first naming scheme we know about was described by W. Saenger in the Principles of Nucleic Acid Structure book published in 1984 [TODO cite].
-Seanger identified possible base pairs with at least 2 hydrogen bonds and sorts them into 28 distinct classes.
-The classes are identified only be an ordinal number, but ordered the classes.
+The first naming scheme we know about was described by [W. Saenger in the Principles of Nucleic Acid Structure book published in 1984](https://doi.org/10.1007/978-1-4612-5190-3).
+W. Seanger identified possible base pairs with at least 2 hydrogen bonds and sorted them into 28 distinct classes.
 
-![Seanger's system of base pair types](../img/saenger-system-merged.png)
+The classes are identified by a single ordinal number, and are sorted into five higher-level according to geometrical symmetry, and the pairing bases.
 
-### System of three edges {.unnumbered}
 
-A more systematic approach was proposed (by N. B. Leontis and E. Westhof in a paper published in 2001)[https://pubmed.ncbi.nlm.nih.gov/11345429].
+![Seanger's system of base pair types, [from the](https://doi.org/10.1007/978-1-4612-5190-3) book, page 120](../img/saenger-system-merged.png)
+
+### System of three edges
+
+A more systematic approach was proposed [by N. B. Leontis and E. Westhof in a paper published in 2001](https://doi.org/10.1017/s1355838201002515).
 The authors identified that each of the two nucleotides interacts with one of its three edges.
 The “front edge” is called **“Watson-Crick”**, since this is the only edge involved in the canonical base pairing.
 The two side edges are called **“Hoogsteen”** and **“Sugar”** -- the former is involved in the Hoogsteen pairs and the latter covalently bonds with the ribose sugar.
@@ -28,23 +30,25 @@ There exist basepairs where both angles can be above 90°, albeit only slightly 
 
 The **cis** and **trans** prefixes only indicate which way the bases face each other, it does not indicate if the pairing helix is parallel or antiparallel, although it correlates.
 Canonical basepairs are **cis** Watson-Crick G-C and A-T with antiparallel strands.
-For example, **trans** Watson-Crick G-G also form antiparallel strands (see the [`4pmi`](https://www.rcsb.org/structure/4pmi) PDB structure).
-The ["Strand Orientation" NAKB table](https://www.nakb.org/basics/basepairs.html#LW/) is ~~wrong~~ only indicating the typical case. 
+For instance, **trans** Watson-Crick G-G also occurs in antiparallel strands (see the [`4pmi`](https://www.rcsb.org/structure/4pmi) PDB structure).
+The [“Strand Orientation” table at NAKB](https://www.nakb.org/basics/basepairs.html#LW/) is thus not entirely correct, it is only indicating the typical case. 
 
 <!-- **Cis** basepairs have the pairing edge arrows oriented in parallel, while **trans** basepairs have edges in opposing direction.
 
 However, to pair in **cis**, the bases must be flipped -->
 
 Note that “Sugar” is a name of the purine or pyrimidine edge -- it does not necessarily mean that the pairing base is interacting with the ribose sugar, although it is frequently the case.
-In RNA, we often find the ribose O2' oxygen interacting in base pairing.
-Since it is an OH group, it can act either as H-bond donor or acceptor.
+In RNA, we often find the ribose O2' oxygen interacting with the other base, or even the other O2' oxygen.
+Since it is an OH group, it can act either as both an H-bond donor and an acceptor.
 
 TODO Show example image of tSS GG + something that needs the O2'
+
+![](../img/tSS-GG-DNA-6n4g-A_2-B_2-no-oxygens.png)
 
 <!-- A frequent misconception is that "Sugar" means the base binds to the ribose oxygen.
 Although this is frequently the case that the base pair **includes** a hydrogen bond to the O2' atom, it is definitely not necessary.
 The Sugar edge is primarily meant as one of purine/pyrimidine faces and most of the defined base pairs including the Sugar edge bind to an atom on the base, often the N3 purine atom.
-The corner atoms are included in the definition of both edges -- for example, the N2 guanine atom is shared between the Sugar and Watson-Crick edges. ???
+The corner atoms are included in the definition of both edges -- for instance, the N2 guanine atom is shared between the Sugar and Watson-Crick edges. ???
 
 TODO tSS GG
 
@@ -59,20 +63,25 @@ The names are commonly shortened to 3-letter codes -- `c` or `t` for cis or tran
 Since the pairing conformation depends on the pairing bases as well, we include the `A`, `T`, `U`, `G`, or `C` letters to identify the sequence.
 For example, we can say that the image above shows the `cWW GC` and `tWW GC` pairs.
 
-### Comparison {.unnumbered}
+### M-N whatever and various adhoc terminology
 
-The Leontis-Westhof system is more general, we can observe 122 of the LW base pairs in high quality X-ray structures deposited in PDB.
-The Saenger system only includes the basepairs with at least two H-bonds between two polar base atoms.
-While it could be argued that the other pair types are not “real basepairs”, the Saenger system also, for example, misses the **tWS CG** basepair which satisfies the condition.
+TODO
+
+### Comparison
+
+The Leontis-Westhof system is more general, we can observe 122 of the LW base pairs in high quality X-ray structures deposited in the PDB.
+The Saenger system is more restrictive, as it only includes the basepairs that have at least two hydrogen bonds between two polar base atoms.
+Although one could argue that the other pair types do not form “real” basepairs, it is noteworthy that the Saenger system also overlooks certain base pairs that meet the criteria.
+For instance, the **tWS CG** basepair which satisfies the condition is not included in the scheme.
 
 ![**tWS GC**: two polar base-to-base H-bonds, but not accounted for in the Saenger system](../img/tWS-CG-1jj2-9_46-9_4.png)
 
-As far as we are aware, all publications today use the newer Leontis-Westhof system.
-It is more general and maybe more importantly it is systematic -- we don't need to remember 28 numbers to be able to identify the basepair type when viewing a molecular structure.
+<!-- We have not seen a recent publication using the Saenger's scheme, but the neither the Leontis-Westhof system is universally adopted.
+It is more general and maybe more importantly it is systematic -- we don't need to remember 28 numbers to be able to identify the basepair type when viewing a molecular structure. -->
 
 <!-- Being more general, the L-W system includes pairs which some might not want to call "base pairs".
 A number of described base pairs only bind with a single hydrogen bonds or requires binding to ribose O2', restricting the class to RNA.
-However, a few of doubly bonded legitimate base pairs are missing in the Saenger system, for example the XX. -->
+However, a few of doubly bonded legitimate base pairs are missing in the Saenger system, for instance the XX. -->
 
 
 

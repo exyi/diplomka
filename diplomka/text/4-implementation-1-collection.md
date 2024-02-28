@@ -10,23 +10,25 @@ For each mmCIF file, FR3D generates a `PDBID_basepair.txt` or a `PDBID_basepair_
 The text file contains a line for each determined basepair, formatted as UnitID space Family space UnitID.
 
 The UnitID is a unique identified for nucleotides and other residues.
-It is a structure PDB ID, Model Number, Chain ID, Nucleotide Number, and optionally Atom Name (not used in FR3D), Alternate ID, Insertion ID, and Symmetry Operation, separated by vertical bar character (`|`). (Detailed definition is at BGSU website)[https://www.bgsu.edu/research/rna/help/rna-3d-hub-help/unit-ids.html]
+It is a structure PDB ID, Model Number, Chain ID, Nucleotide Number, and optionally Atom Name (not used in FR3D), Alternate ID, Insertion ID, and Symmetry Operation, separated by vertical bar character (`|`). [Detailed definition is at BGSU website](https://www.bgsu.edu/research/rna/help/rna-3d-hub-help/unit-ids.html)
 
 Alternatively, the input file can be a table (CSV/Parquet) with columns `pdbid`, `model`, `chain1`, `res1`, `nr1`, `ins1`, `alt1`, `chain2`, `res2`, `nr2`, `ins2`, `alt2`.
 Other columns are allowed and preserved on the output.
-This data format is supported for compatibility with other scripts used at IBT (TODO and contacts??).
-TODO `--pair-type` option, rename to family?
+This data format provides compatibility with other software tools used at IBT.
+<!-- TODO `--pair-type` option, rename to family? -->
 
 ### Produced information
 
-The script loads all PDB structures from the input table using BioPython library (TODO swap for gemmi?, citation) and computes the following:
+The script loads all PDB structures from the input table using the [BioPython library](https://doi.org/10.1093/bioinformatics/btp163) and computes the following:
 
 * Distance between heavy atoms of defined H-bonds
 * Donor and acceptor angles
-* Coplanarity
-* If called with `--metadata` switch, adds Deposition Date, Structure Determination Method and Resolution to the output.
+* Various metrics of coplanarity
+* If the basepair is a dinucleotide
+* If it is part of a parallel or antiparallel chain
+* Adds Deposition Date, Structure Determination Method and Resolution to the output.
 
-#### Deduplication
+### Deduplication
 
 FR3D reports all pairs twice, in both orientation.
 For example, if a `cWH G-C` pair is reported, a corresponding `cHW C-G` is also reported.
@@ -46,7 +48,7 @@ We have 3 rules to remove the duplicate entries.
     * We exclude the pair with longer H-bonds, if it is different.
     * If the H-bonds are also the same, we keep the pair with lower UnitID of the first nucleotide.
 
-#### X3DNA DSSR integration
+### X3DNA DSSR integration
 
 Optionally, if `--dssr-binary` option is specified, basepair parameters columns are added.
 However, as far as we know, it is not possible to force DSSR to compute basepair parameters for our selection of basepairs, it will determine the basepairing by itself and report the values.

@@ -1,2 +1,2 @@
-## Data collection script
+## Web gallery of basepairs
 
