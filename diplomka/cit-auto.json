@@ -79,6 +79,74 @@
         "id": null,
         "seq": null
     },
+    "https://doi.org/10.1007/978-1-4612-5190-3": {
+        "doi": "10.1007/978-1-4612-5190-3",
+        "published_date_parts": [
+            1984
+        ],
+        "title": "Principles of Nucleic Acid Structure",
+        "authors": [
+            [
+                "Wolfram",
+                "Saenger"
+            ]
+        ],
+        "journal": [
+            "Springer Advanced Texts in Chemistry"
+        ],
+        "url": null,
+        "id": null,
+        "seq": null
+    },
+    "https://doi.org/10.1017/s1355838201002515": {
+        "doi": "10.1017/s1355838201002515",
+        "published_date_parts": [
+            2001,
+            4
+        ],
+        "title": "Geometric nomenclature and classification of RNA base pairs",
+        "authors": [
+            [
+                "NEOCLES B.",
+                "LEONTIS"
+            ],
+            [
+                "ERIC",
+                "WESTHOF"
+            ]
+        ],
+        "journal": [
+            "RNA"
+        ],
+        "url": null,
+        "id": null,
+        "seq": null
+    },
+    "https://doi.org/10.1038/171737a0": {
+        "doi": "10.1038/171737a0",
+        "published_date_parts": [
+            1953,
+            4,
+            25
+        ],
+        "title": "Molecular Structure of Nucleic Acids: A Structure for Deoxyribose Nucleic Acid",
+        "authors": [
+            [
+                "J. D.",
+                "WATSON"
+            ],
+            [
+                "F. H. C.",
+                "CRICK"
+            ]
+        ],
+        "journal": [
+            "Nature"
+        ],
+        "url": null,
+        "id": null,
+        "seq": null
+    },
     "https://doi.org/10.1038/nprot.2008.104": {
         "doi": "10.1038/nprot.2008.104",
         "published_date_parts": [
@@ -103,6 +171,67 @@
         "id": null,
         "seq": null
     },
+    "https://doi.org/10.1093/bioinformatics/btp163": {
+        "doi": "10.1093/bioinformatics/btp163",
+        "published_date_parts": [
+            2009,
+            3,
+            20
+        ],
+        "title": "Biopython: freely available Python tools for computational molecular biology and bioinformatics",
+        "authors": [
+            [
+                "Peter J. A.",
+                "Cock"
+            ],
+            [
+                "Tiago",
+                "Antao"
+            ],
+            [
+                "Jeffrey T.",
+                "Chang"
+            ],
+            [
+                "Brad A.",
+                "Chapman"
+            ],
+            [
+                "Cymon J.",
+                "Cox"
+            ],
+            [
+                "Andrew",
+                "Dalke"
+            ],
+            [
+                "Iddo",
+                "Friedberg"
+            ],
+            [
+                "Thomas",
+                "Hamelryck"
+            ],
+            [
+                "Frank",
+                "Kauff"
+            ],
+            [
+                "Bartek",
+                "Wilczynski"
+            ],
+            [
+                "Michiel J. L.",
+                "de Hoon"
+            ]
+        ],
+        "journal": [
+            "Bioinformatics"
+        ],
+        "url": null,
+        "id": null,
+        "seq": null
+    },
     "https://doi.org/10.1093/nar/gkg680": {
         "doi": "10.1093/nar/gkg680",
         "published_date_parts": [
@@ -119,6 +248,84 @@
         ],
         "journal": [
             "Nucleic Acids Research"
+        ],
+        "url": null,
+        "id": null,
+        "seq": null
+    },
+    "https://doi.org/10.1093/nar/gkv716": {
+        "doi": "10.1093/nar/gkv716",
+        "published_date_parts": [
+            2015,
+            7,
+            15
+        ],
+        "title": "DSSR: an integrated software tool for dissecting the spatial structure of RNA",
+        "authors": [
+            [
+                "Xiang-Jun",
+                "Lu"
+            ],
+            [
+                "Harmen J.",
+                "Bussemaker"
+            ],
+            [
+                "Wilma K.",
+                "Olson"
+            ]
+        ],
+        "journal": [
+            "Nucleic Acids Research"
+        ],
+        "url": null,
+        "id": null,
+        "seq": null
+    },
+    "https://doi.org/10.1107/S2059798321007610": {
+        "doi": "10.1107/S2059798321007610",
+        "published_date_parts": [
+            2021,
+            8,
+            24
+        ],
+        "title": "New restraints and validation approaches for nucleic acid structures in <i>PDB-REDO</i>",
+        "authors": [
+            [
+                "Ida",
+                "de Vries"
+            ],
+            [
+                "Tim",
+                "Kwakman"
+            ],
+            [
+                "Xiang-Jun",
+                "Lu"
+            ],
+            [
+                "Maarten L.",
+                "Hekkelman"
+            ],
+            [
+                "Mandar",
+                "Deshpande"
+            ],
+            [
+                "Sameer",
+                "Velankar"
+            ],
+            [
+                "Anastassis",
+                "Perrakis"
+            ],
+            [
+                "Robbie P.",
+                "Joosten"
+            ]
+        ],
+        "journal": [
+            "Acta Crystallographica Section D Structural Biology"
         ],
         "url": null,
         "id": null,

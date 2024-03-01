@@ -147,15 +147,17 @@
         }
 
         figure {
-            max-width: calc(100% - 80px);
-            margin: 40px;
+            max-width: calc(100%);
+            /* margin: 40px; */
+            margin-inline-start: 0;
+            margin-inline-end: 0;
             padding: 0;
             text-align: center;
             break-inside: avoid;
         }
         figure > img {
-            max-width: calc(100% - 80px);
-            margin: 1rem;
+            max-width: calc(100%);
+            /* margin: 1rem; */
         }
         figure figcaption {
             text-align: center; text-align-last: center;
@@ -327,9 +329,9 @@
     $body$
 
 
-    <!-- <p>
+    <p style="display: none;">
         Vyrobeno sázecím systémem HTML/CSS, žádný praštěný L<span style="position: relative; top: -4px;">A</span>T<span style="position: relative; top: 4px">E</span>X
-    </p> -->
+    </p>
 
     $for(include-after)$
         $include-after$
