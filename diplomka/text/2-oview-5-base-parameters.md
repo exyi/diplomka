@@ -1,30 +1,32 @@
 ## Standard basepair parameters {#sec:std-base-parameters}
 
-We have a set of standard basepair parameters originally defined for helices of canonical pairs.
-The parameters can be calculated using the software tool DSSR or Curves+, more details in [x](./2-oview-6-software.md#x3dna-dssr).
-Usually, the basepair parameters are defined with the following figure, presented in the TODO DSSR paper.
-However, we will need a more rigorous definition to assess the parameters and potentially calculate them.
+There is a set of standard basepair parameters primarily defined for helices of canonical basepairs.
+The parameters can be calculated using the software tools DSSR or Curves+, more details in @sec:software-DSSR.
+Usually, the basepair parameters presented using the following figure:
 
-![TODO cite accordning to https://x3dna.org/highlights/schematic-diagrams-of-base-pair-parameters](../img/dssr-six-bp-pars.png)
+<!-- ![TODO cite accordning to https://x3dna.org/highlights/schematic-diagrams-of-base-pair-parameters](../img/dssr-six-bp-pars.png) -->
+![Three angular and three translational basepair parameters, [image from Wikimedia, authored by D. Bhattacharyya, A. Mitra](https://commons.wikimedia.org/wiki/File:Non-canonical_base_pairing_Fig5.png)](../img/wiki-basepair-parameters.png)
+
+However, the exact definition of these parameters is still slightly ambiguous.
+The discrepancies have been resolved for the Watson-Crick / Watson-Crick pairs (<https://doi.org/10.1006/jmbi.1998.2390>, <https://doi.org/10.1006/jmbi.2001.4987>), but 
 
 ### The standard reference frame
 
-The DSSR papers <https://doi.org/10.1093/nar/gkg680> and <https://doi.org/10.1038/nprot.2008.104> do not contain almost any details on the parameters, but [the DSSR webpage shows quite detailed calculation in a blog post](https://x3dna.org/highlights/details-on-the-simple-base-pair-parameters).
-Most notably the post mentions [the reference frame defined at the "Tsukuba convention".](https://doi.org/10.1006/jmbi.2001.4987).
+[A standard reference frame was defined at “Tsukuba convention”](https://doi.org/10.1006/jmbi.2001.4987).
+The reference frame essentially defines a coordinate system for each of the five common nucleotides -- the Tsukuba convention paper includes a table of coordinates for each base heavy atom.
+We can fit it onto an observed molecule and then apply translation and rotation to align the reference frame.
+The reference frame **X** axis is defined to be parallel the Watson-Crick edge, **Y** axis run alongside the rest of the base.
+Since all bases are planar under ideal conditions, this enables us to have the **Z** nearly equal to **0**.
 
-The reference frame essentially defines a coordinate system for each of the five common nucleotides.
-The paper includes a table of coordinates for each base heavy atom.
-We can fit it onto the observed molecule and then translate and rotate the coordinate system to the reference frame coordinates.
-The **X** axis is defined to be parallel the Watson-Crick edge, **Y** axis run alongside the rest of the base.
-Since all bases are planar under ideal conditions, this enables us to have the **Z** equal to **0**.
+As the authors state, the clearly optimized the coordinate system for the canonical Watson-Crick basepairs.
+If we place a purine with a pyrimidine and flip one along the **Y** axis, we get a canonical basepair.
+Without the **Y**-flip, all bases overlap in the same region, with the N1/N9—C1' bond approximately aligned.
 
-As the authors have stated, the coordinate system is clearly optimized for the canonical Watson-Crick basepairs.
-All bases overlap in the same region of the coordinate space, but if we place a purine with a pyrimidine and flip one along the **Y** axis, we get a canonical basepair.
-
-![Guanine references and uracil reference with negated Y coordinates form "perfect" GC canonical pair. The white small cross shows the origin **(0, 0, 0)**.](../img/reference-frame-GC-pair.png)
+![Guanine references and uracil reference with negated Y coordinates form a “perfect” GC canonical pair. The white small cross shows the origin **(0, 0, 0)**.](../img/reference-frame-GC-pair.png)
 
 This property allows us to easily judge an observed basepair by comparing the position and orientation of their reference frame -- the frame origins and axes to be specific.
-As [the above mentioned x3dna.org post](https://x3dna.org/highlights/details-on-the-simple-base-pair-parameters) shows, we get the translational parameters from projecting one origin into the other reference frame coordinate system.
+The DSSR papers <https://doi.org/10.1093/nar/gkg680> and <https://doi.org/10.1038/nprot.2008.104> do not contain details on the parameters calculation, but [the DSSR webpage shows quite detailed description in a blog post](https://x3dna.org/highlights/details-on-the-simple-base-pair-parameters).
+As x3dna.org post shows, we get the translational parameters from projecting one origin into the other reference frame coordinate system.
 **Shear** is the **X** coordinate, **Stretch** is **Y**, **stagger** is **Z**.
 The angular parameters are calculated by comparison of axes, we directly quote the article:
 
