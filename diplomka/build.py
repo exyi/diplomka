@@ -150,6 +150,13 @@ def convert_links(citations: dict[str, CitationInfo]):
                     # ['', ["link-footnote"], []],
                     [link, footnote]
                 )
+            elif (m := re.match(r"(./)?(?P<filename>[-a-z0-9]+)[.](md)#(?P<hash>.*)", url, re.IGNORECASE)) is not None:
+                # internal link - remove the filename, since it gets smashed into one file
+                new_url = f"#{m.group('hash')}"
+                # new_url = f"{m.group('filename')}.json#{m.group('hash')}"
+                return pandocfilters.Link(attr, content, [new_url, ''])
+            else:
+                pass
     return core
 
 

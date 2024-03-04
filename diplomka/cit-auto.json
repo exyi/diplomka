@@ -253,6 +253,43 @@
         "id": null,
         "seq": null
     },
+    "https://doi.org/10.1093/nar/gkp608": {
+        "doi": "10.1093/nar/gkp608",
+        "published_date_parts": [
+            2009,
+            7,
+            22
+        ],
+        "title": "Conformational analysis of nucleic acids revisited: Curves+",
+        "authors": [
+            [
+                "R.",
+                "Lavery"
+            ],
+            [
+                "M.",
+                "Moakher"
+            ],
+            [
+                "J. H.",
+                "Maddocks"
+            ],
+            [
+                "D.",
+                "Petkeviciute"
+            ],
+            [
+                "K.",
+                "Zakrzewska"
+            ]
+        ],
+        "journal": [
+            "Nucleic Acids Research"
+        ],
+        "url": null,
+        "id": null,
+        "seq": null
+    },
     "https://doi.org/10.1093/nar/gkv716": {
         "doi": "10.1093/nar/gkv716",
         "published_date_parts": [

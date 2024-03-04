@@ -1,4 +1,4 @@
-## Standard basepair parameters
+## Standard basepair parameters {#sec:std-base-parameters}
 
 We have a set of standard basepair parameters originally defined for helices of canonical pairs.
 The parameters can be calculated using the software tool DSSR or Curves+, more details in [x](./2-oview-6-software.md#x3dna-dssr).

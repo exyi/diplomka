@@ -12,3 +12,7 @@ However, the canonical Watson-Crick G-C and A-T basepairs only account for about
 * 
 ... At the time of writing we have more than 7 thousand RNA structures in PDB, and almost 2 thousand of them are pure nucleic acid, without any protein
 ... 
+
+"Only" 61.4% of all found basepairs are canonical Watson-Crick (in all PDB structures < 3.5 Å)
+
+[see output format yeye](./4-implementation-1-collection.md#output-format)

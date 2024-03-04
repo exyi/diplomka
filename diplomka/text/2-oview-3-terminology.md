@@ -19,18 +19,19 @@ The “front edge” is called **“Watson-Crick”**, since this is the only ed
 The two side edges are called **“Hoogsteen”** and **“Sugar”** -- the former is involved in the Hoogsteen pairs and the latter covalently bonds with the ribose sugar.
 The base pairs are named by the two interacting edges, and their relative orientation (cis, trans).
 
-![The three edges of a pyrimidine (U) and a purine (G)](../img/purine-pyrimidine-edges.svg)
+![The three edges of a pyrimidine (U) and a purine (G)](../img/purine-pyrimidine-edges.svg){#fig:LW-3-edges-UG}
 
 A pair of edges still leaves two possible conformations -- either the indicated edge arrows point in opposite directions, or they are parallel if we flip one of the bases.
 Usually, this results in a different set of hydrogen bonds, and it will require different shape of the nucleic acid backbone.
 The Leontis-Westhof naming system calls one conformation **cis** and the other **trans**, based on the direction of the N-C1' bonds.
 Generally, **cis** pairs have the N-C1' bonds pointing in a similar direction, while **trans** pairs orient them in the same direction.
 However, there isn't any specific 90° limit on their angle, we instead label **cis** the conformation which is more acute angle than the **trans** conformation.
-There exist basepairs where both angles can be above 90°, albeit only slightly in case the **cis** conformation.
+There exist basepairs where both angles can be above 90°, for instance the **cHH AG** is only slightly further away from 180° than the **tHH AG** (TODO image).
 
 The **cis** and **trans** prefixes only indicate which way the bases face each other, it does not indicate if the pairing helix is parallel or antiparallel, although it correlates.
 Canonical basepairs are **cis** Watson-Crick G-C and A-T with antiparallel strands.
 For instance, **trans** Watson-Crick G-G also occurs in antiparallel strands (see the [`4pmi`](https://www.rcsb.org/structure/4pmi) PDB structure).
+Some basepair types can occur in both parallel and antiparallel strand, depending on the sugar-base conformation being **syn** or **anti**.
 The [“Strand Orientation” table at NAKB](https://www.nakb.org/basics/basepairs.html#LW/) is thus not entirely correct, it is only indicating the typical case. 
 
 <!-- **Cis** basepairs have the pairing edge arrows oriented in parallel, while **trans** basepairs have edges in opposing direction.
@@ -63,9 +64,30 @@ The names are commonly shortened to 3-letter codes -- `c` or `t` for cis or tran
 Since the pairing conformation depends on the pairing bases as well, we include the `A`, `T`, `U`, `G`, or `C` letters to identify the sequence.
 For example, we can say that the image above shows the `cWW GC` and `tWW GC` pairs.
 
-### M-N whatever and various adhoc terminology
+### M-N/M+N DSSR labels
 
-TODO
+The software tool X3DNA DSSR (see also @sec:software-DSSR) uses a custom scheme for distinguishing the **cis** and **trans** relative orientations.
+Instead of following the angle between the C1'-N bonds, [DSSR considers whether the bases are flipped with respect to its **Z** axis](https://x3dna.org/articles/specification-of-base-pairs-in-3dna).
+If the bases are flipped, DSSR labels the basepair as `M-N`, otherwise as `M+N`.
+`M` and `N` are placeholders for the real base, for example `G-C` and `A-U` are the canonical pairs.
+In terms of the three edges discussed above, we can say that the basepair is `M-N` if edge arrows indicated in @fig:LW-3-edges-UG point in the same direction; if they are opposite, the basepair is `M+N`.
+DSSR however does not consider edges, the basepairs are defined solely by the relative positions of the base coordinate systems, see @sec:std-base-parameters for more details.
+
+The following block is an example DSSR output -- we can see the the `-`/`+` and trivial basepair names in the last two columns (small `u` indicates a modified base).
+
+```
+12   23  # o  26 A.U12    A.A23  U-A  WC
+13   22  # o  27 A.C13    A.G22  C-G  WC
+14    8  # o  28 A.A14    A.U8   A-U  rHoogsteen
+15   48  # o  29 A.G15    A.C48  G+C  rWC
+16   59  # o  30 A.H2U16  A.U59  u+U  --
+```
+
+### Trivial basepair names
+
+Some basepairs have trivial (popular) names which generally predate any attempts to systematize the terminology by decades.
+Apart from the Watson-Crick canonical pairs, the important are the Hoogsteen = **cWH UA**, and Reverse Hoogsteen = **tWH UA** or **tWH UC**.
+For a complete translation table between the trivial, Leontis-Westhof, and Saenger names see the table 2 in <https://doi.org/10.1017/s1355838201002515>.
 
 ### Comparison
 

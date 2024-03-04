@@ -7,7 +7,7 @@ The differences are mostly constrained to non-typical basepairs and extreme form
 In this section, we'll list and briefly overview the available tools for basepair assignment.
 
 
-### FR3D
+### FR3D {#sec:software-FR3D}
 
 We have already mentioned the FR3D program, since it is the main software we'll use for the analysis.
 FR3D stands for “Find RNA 3D” and is commonly pronounced “Fred”.
@@ -27,7 +27,7 @@ The main advantages of FR3D are:
 
 Unfortunately, FR3D does not support writing out basepair parameters
 
-### X3DNA DSSR
+### X3DNA DSSR {#sec:software-DSSR}
 
 X3DNA-DSSR is currently the most commonly used tool for the nucleic acid structure analysis.
 X3DNA was first [published over twenty years ago](https://doi.org/10.1093/nar/gkg680), 3DNA stands for “3D Nucleic-acid Analysis”.
@@ -46,18 +46,19 @@ To obtain the parameter values, we have to run DSSR with the `--analyze` flag.
 It then writes out multiple files with the list of found pairs and their parameters.
 One of the files also includes the translation vector and the orthonormal basis of the standard reference frame.
 
-One of the DSSR limitations is that DSSR only writes out the basepair parameters for the pairs DSSR find in the structure.
-For instance, we cannot use to complete this information to basepairs found by FR3D.
-DSSR also has a `--json` which switches the output format to a machine-readable JSON, but this option unfortunately does not work with `--analyze`.
+A limitation of DSSR is that it exclusively reports basepair parameters for the pairs identified within the input structure.
+In other words, it cannot provide it as complementary information to basepairs identified by alternative methods, such as FR3D.
 
 
-### RNAview
+### RNAview {#sec:software-RNAview}
 
 Similarly to FR3D, RNAview identifies basepairs the molecular structure and uses the naming Leontis-Westhof system.
 
-https://github.com/rcsb/RNAView
+<https://github.com/rcsb/RNAView>
 
 
-### Curves+
+### Curves+ {#sec:software-Curves}
 
-https://doi.org/10.1093/nar/gkp608
+Curves is the second software tool which can calculate the 
+
+<https://doi.org/10.1093/nar/gkp608>
