@@ -7,14 +7,16 @@ Usually, the basepair parameters presented using the following figure:
 <!-- ![TODO cite accordning to https://x3dna.org/highlights/schematic-diagrams-of-base-pair-parameters](../img/dssr-six-bp-pars.png) -->
 ![Three angular and three translational basepair parameters, [image from Wikimedia, authored by D. Bhattacharyya, A. Mitra](https://commons.wikimedia.org/wiki/File:Non-canonical_base_pairing_Fig5.png)](../img/wiki-basepair-parameters.png)
 
-However, the exact definition of these parameters is still slightly ambiguous.
-The discrepancies have been resolved for the Watson-Crick / Watson-Crick pairs (<https://doi.org/10.1006/jmbi.1998.2390>, <https://doi.org/10.1006/jmbi.2001.4987>), but 
+The exact definition of these parameters is still slightly ambiguous, despite efforts to standardize the definitions <https://doi.org/10.1006/jmbi.1998.2390>.
+Specifically in <https://doi.org/10.1006/jmbi.1998.2390>, Lu and Olson claim right in the abstract: "The choice of mathematics has only a limited effect on the computed parameters, even in highly deformed duplexes. The results are much more sensitive to the choice of reference frame".
+The rest of the papers backs the premise, and we agree that it is the case for canonical basepairs (and all pure Watson-Crick edge pairs).
+<!-- The discrepancies have been resolved for the Watson-Crick / Watson-Crick pairs (<https://doi.org/10.1006/jmbi.1998.2390>, <https://doi.org/10.1006/jmbi.2001.4987>), but  -->
 
 ### The standard reference frame
 
-[A standard reference frame was defined at “Tsukuba convention”](https://doi.org/10.1006/jmbi.2001.4987).
-The reference frame essentially defines a coordinate system for each of the five common nucleotides -- the Tsukuba convention paper includes a table of coordinates for each base heavy atom.
-We can fit it onto an observed molecule and then apply translation and rotation to align the reference frame.
+[A standard reference frame was defined at “Tsukuba convention”](https://doi.org/10.1006/jmbi.2001.4987), few years after the <https://doi.org/10.1006/jmbi.1998.2390> publication.
+The reference frame essentially defines a coordinate system for each of the five common nucleotides -- the Tsukuba convention paper includes a table of coordinates for each heavy atom in each base.
+We can fit it onto an observed molecule using Kabsch algorithm and then apply translation and rotation to align the reference frame.
 The reference frame **X** axis is defined to be parallel the Watson-Crick edge, **Y** axis run alongside the rest of the base.
 Since all bases are planar under ideal conditions, this enables us to have the **Z** nearly equal to **0**.
 
@@ -36,16 +38,16 @@ The angular parameters are calculated by comparison of axes, we directly quote t
 
 We are always using one reference frame as the coordinate system for the other, which can lead to issues if the coordinate systems have significant relative rotation.
 If we had a very degenerate basepair and the reference frames was rotated 90° along the **X**, we cannot expect parameters origin **A** coordinates in system **B** be equal to coordinates of origin **B** in system **A**.
-In this extreme case, **X** coordinate of **A** in **B** will be equal to the coordinate **Z** of **B** in **A**, effectively swapping **stagger** with **stretch**.
+In this extreme case, **X** coordinate of **A** in **B** will be equal to the coordinate **Z** of **B** in **A**, effectively interchanging **stagger** with **stretch**.
 However, in reasonable practical cases, this different should be small.
 It could also be easily remedied by averaging the two possible results, or defining that purine is always the base base.
 We do not know how DSSR handles this problem.
 
 ### Non-canonical basepairs
 
-DSSR applies this standard reference frame to all types of basepairs.
-This means that the value of some basepair parameters is somewhat distorted, it can still be used, but caution is needed in interpretation.
-As an example, we'll show a nearly perfect trans Hoogsteen/Watson-Crick basepair from [1EHZ](https://www.rcsb.org/structure/1EHZ) structure.
+When the standard reference frame is applied to all types of basepairs, the meaning basepair parameters is somewhat distorted.
+The values can still be useful, but we need to be cautious in their intuitive interpretation.
+As an example, we'll show a nearly perfect trans Hoogsteen/Watson-Crick basepair from the [1EHZ](https://www.rcsb.org/structure/1EHZ) structure.
 In the figure bellow, we can see that Watson-Crick edges of the two nucleotides are at an angle slight bellow 90° -- implying that the **opening** should be above 90°.
 Indeed, DSSR reports **opening** of 103°.
 
@@ -73,7 +75,13 @@ Since these pairs are approximately rotated **90°**, **propeller** and **buckle
 | Roll |	8.6317 TODO |
 | Twist |	-64.0947° |
 
-Notably, this example demonstrates that the base parameters indeed aren't symmetrical when pushed to such extremes.
-In this instance, the uracil is being judged relative to the adenine reference frame.
-If it was the other way, we'd observe positive **stretch**, the adenine origin is in positive Y coordinates in the uracil reference frame.
-It could be interesting to observe how does DSSR decide the orientation on symmetrically defined pairs, such as **cSS G-G**.
+Notably, this example demonstrates that the base parameters as calculated by DSSR indeed aren't symmetrical when pushed to such extremes.
+In this instance, the uracil is examined relative to the adenine reference frame.
+If it was the other way, we'd observe a positive **stretch**, as the adenine origin is in positive Y coordinates in the uracil reference frame.
+It could be interesting to observe how does DSSR decide which nucleotide is the primary in each basepair.
+
+On the other hand, the [Curves+ paper](https://doi.org/10.1093/nar/gkp608) explicitly addresses the issue of symmetry, Lavery et. al. write: "To do this as symmetrically as possible, we choose an average frame that is obtained by rotation and translation of the first base reference system but now through the half angle $θ_A/2$, about the same axis vector $U_A$, and with the half translation $λ_A/2$".
+This exact approach will cause other issues if applied to non-canonical basepairs -- notably we would see the "average reference frame" being perpendicular to the basepair plane, if one of the pairs is rotated 180° around the Y axis, such as in trans Watson-Crick basepairs.
+In this case, **opening** and **buckle** would have interchanged meaning.
+
+TODO img?

@@ -52,13 +52,13 @@ In other words, it cannot provide it as complementary information to basepairs i
 
 ### RNAview {#sec:software-RNAview}
 
-Similarly to FR3D, RNAview identifies basepairs the molecular structure and uses the naming Leontis-Westhof system.
+Similarly to FR3D, RNAview identifies basepairs the molecular structure and uses the naming Leontis-Westhof system.TODO
 
 <https://github.com/rcsb/RNAView>
 
 
 ### Curves+ {#sec:software-Curves}
 
-Curves is the second software tool which can calculate the 
+Curves is the second software tool which can calculate the TODO
 
 <https://doi.org/10.1093/nar/gkp608>

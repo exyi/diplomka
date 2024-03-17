@@ -1,4 +1,28 @@
 {
+    "https://doi.org/10.1006/jmbi.1998.2390": {
+        "doi": "10.1006/jmbi.1998.2390",
+        "published_date_parts": [
+            1999,
+            1
+        ],
+        "title": "Resolving the discrepancies among nucleic acid conformational analyses 1 1Edited by I. Tinoco",
+        "authors": [
+            [
+                "Xiang-Jun",
+                "Lu"
+            ],
+            [
+                "Wilma K",
+                "Olson"
+            ]
+        ],
+        "journal": [
+            "Journal of Molecular Biology"
+        ],
+        "url": null,
+        "id": null,
+        "seq": null
+    },
     "https://doi.org/10.1006/jmbi.2001.4987": {
         "doi": "10.1006/jmbi.2001.4987",
         "published_date_parts": [

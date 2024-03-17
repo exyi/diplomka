@@ -90,7 +90,8 @@ def assign_citation_ids(citations: dict[str, CitationInfo]):
                 if f'{preferred_id}{chr(i)}' not in assigned_ids:
                     preferred_id = f'{preferred_id}{chr(i)}'
                     break
-            assert False, f"fuck: {preferred_id} | {list(assign_citation_ids.keys())}"
+                if i == 'z':
+                    assert False, f"cannot assign any: {preferred_id} | {list(assigned_ids.keys())}"
         cit.id = preferred_id
         assigned_ids[preferred_id] = cit
 

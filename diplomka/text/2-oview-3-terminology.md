@@ -30,7 +30,7 @@ There exist basepairs where both angles can be above 90°, for instance the **cH
 
 The **cis** and **trans** prefixes only indicate which way the bases face each other, it does not indicate if the pairing helix is parallel or antiparallel, although it correlates.
 Canonical basepairs are **cis** Watson-Crick G-C and A-T with antiparallel strands.
-For instance, **trans** Watson-Crick G-G also occurs in antiparallel strands (see the [`4pmi`](https://www.rcsb.org/structure/4pmi) PDB structure).
+For instance, **trans** Watson-Crick G-G pairs also occur in antiparallel strands (see the [`4pmi`](https://www.rcsb.org/structure/4pmi) PDB structure).
 Some basepair types can occur in both parallel and antiparallel strand, depending on the sugar-base conformation being **syn** or **anti**.
 The [“Strand Orientation” table at NAKB](https://www.nakb.org/basics/basepairs.html#LW/) is thus not entirely correct, it is only indicating the typical case. 
 
