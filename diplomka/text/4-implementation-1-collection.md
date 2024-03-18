@@ -1,8 +1,8 @@
-## Data collection script
+## Data Collection Script
 
 The script `pair.py` calculates the distances between H-bonding atoms and other geometric parameters from mmCIF files downloaded from PDB.
 
-### Input format
+### Input Format
 
 It does not determine which nucleotides are base-pairing by itself, this information must be provided as input.
 Since we calculate the list of pairs using the fr3d-python package, the input format is identical to FR3D output.
@@ -17,7 +17,7 @@ Other columns are allowed and preserved on the output.
 This data format provides compatibility with other software tools used at IBT.
 <!-- TODO `--pair-type` option, rename to family? -->
 
-### Produced information
+### Produced Information
 
 The script loads all PDB structures from the input table using the [BioPython library](https://doi.org/10.1093/bioinformatics/btp163) and computes the following:
 
@@ -106,14 +106,14 @@ Since the outputs contain a lot of values, the files are significantly larger th
 DSSR provides a machine-readable JSON output format using the `--json` option, but this option does nothing alongside the `--analyze` option.
 Since DDSR only calculates the base parameters when the `--analyze` is specified, we have to parse the values from the loosely formatted text files.
 
-### Output format
+### Output Format
 
 The output is a single table with a row for each basepair and a column for each computed parameter.
 We'll leave detailed schema description for Appendix — Data Schemas TODO.
 The `pairs.py` script outputs two files — a CSV table and an equivalent Parquet table.
 In further processing, we currently exclusively use the Parquet file, but the CSV format arguably offers easier integration with any other scripts.
 
-#### Parquet format
+#### Parquet Format
 
 [Apache Parquet](https://en.wikipedia.org/wiki/Apache_Parquet) is a modern binary format for tabular data, comparable to CSV.
 Usually, it is praised for being fast to process, but the main reason for choosing the format in this work is the typed schema.

@@ -297,7 +297,7 @@ def pandoc_parse(input_dir, output_dir):
 
     out_files = []
     for file in sorted(os.listdir(input_dir), key=human_sort_keys):
-        cmd = ["pandoc", "--to=json", "--output=" + os.path.join(output_dir, file + ".json")]
+        cmd = ["pandoc", "--to=json", "--output=" + os.path.join(output_dir, file + ".json"), "--strip-comments"]
         format = None
 
         if file in ['metadata.yaml']:
@@ -314,6 +314,12 @@ def pandoc_parse(input_dir, output_dir):
         run(f"Parse {file} with Pandoc", *cmd)
         out_files.append(os.path.join(output_dir, file + ".json"))
     return out_files
+
+def reexport_pandoc_for_review(files, output_file):
+    """
+    Single markdown file for AI review using llamacpp-review.mjs
+    """
+    run(f"Pandoc reexport for review", "pandoc", "--to=markdown", "--output=" + output_file, *files)
 
 def pandoc_render(files, output_file):
     cmd = ["pandoc",
@@ -342,6 +348,7 @@ def main(argv):
     options.skip_pdf = args.skip_pdf
 
     files = pandoc_parse("text", "out/parsed")
+    reexport_pandoc_for_review(files, "out/for_review.md")
     process_links(files)
     pandoc_render(files, "out/thesis.html")
 

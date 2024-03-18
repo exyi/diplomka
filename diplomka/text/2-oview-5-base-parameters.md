@@ -1,4 +1,4 @@
-## Standard basepair parameters {#sec:std-base-parameters}
+## Standard Bwsepair Parameters {#sec:std-base-parameters}
 
 There is a set of standard basepair parameters primarily defined for helices of canonical basepairs.
 The parameters can be calculated using the software tools DSSR or Curves+, more details in @sec:software-DSSR.
@@ -12,7 +12,7 @@ Specifically in <https://doi.org/10.1006/jmbi.1998.2390>, Lu and Olson claim rig
 The rest of the papers backs the premise, and we agree that it is the case for canonical basepairs (and all pure Watson-Crick edge pairs).
 <!-- The discrepancies have been resolved for the Watson-Crick / Watson-Crick pairs (<https://doi.org/10.1006/jmbi.1998.2390>, <https://doi.org/10.1006/jmbi.2001.4987>), but  -->
 
-### The standard reference frame
+### The Standard Reference Frame
 
 [A standard reference frame was defined at “Tsukuba convention”](https://doi.org/10.1006/jmbi.2001.4987), few years after the <https://doi.org/10.1006/jmbi.1998.2390> publication.
 The reference frame essentially defines a coordinate system for each of the five common nucleotides -- the Tsukuba convention paper includes a table of coordinates for each heavy atom in each base.
@@ -43,7 +43,7 @@ However, in reasonable practical cases, this different should be small.
 It could also be easily remedied by averaging the two possible results, or defining that purine is always the base base.
 We do not know how DSSR handles this problem.
 
-### Non-canonical basepairs
+### Non-canonical Basepairs
 
 When the standard reference frame is applied to all types of basepairs, the meaning basepair parameters is somewhat distorted.
 The values can still be useful, but we need to be cautious in their intuitive interpretation.

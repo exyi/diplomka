@@ -1,21 +1,21 @@
-## Data selection
+## Data Selection
 
 In order to get useful statistics, we need a large enough data sample.
 However, we also have to make sure that the data has a high enough quality, most importantly try to remove any biases.
 It is not such a problem if the data is noisy, as the statistics can deal with variance provided enough observations.
 
-Even if we do not have thousands of datapoints, we can characterize the uncertainty arising from the noise using confidence intervals.
-However, we will get overconfident intervals, unless the observations are independent of each other.
+Even when working with small sample sizes, the uncertainty arising from the noise can be characterized using confidence intervals.
+However, the interval will be "overconfident", unless the observations are independent of each other.
 
 
-![Canonical GC pairs with and without our filtering. Without the filter, we see a large effect from 2.89 Å hydrogen-bond restraints used in model refining.](../img/hbonds-hist-filter-comparison-GConly.svg)
+![Canonical GC pairs with the filtering (left) and without it (right). Without the filter, the plot illustrates a large effect from 2.89 Å hydrogen-bond restraints used in model refining.](../img/hbonds-hist-filter-comparison-GConly.svg)
 
-Since multiple entries in the PDB often share a common refined with only a varying ligand, we have to remove redundant structures to avoid bias.
-We will also filter out nucleotides which do not satisfy MolProbity and DNATCO criteria.
-Nucleotides with a bad RSCC (electron density fit) are also removed.
+Since multiple entries in the PDB often share a common refined structure with only varying ligands.
+To avoid the bias, we remove all redundant structures.
+Moreover, nucleotides not satisfying MolProbity MolProbity and DNATCO criteria are filtered out, as well as nucleotides with poor RSCC (electron density fit).
 
-The filtration methodology was prepared by Jiří Černý laboratory, and we only utilized their prepared lists of passing nucleotides.
-Given the filter is rather selective, we accepted all basepairs with at least of the two nucleotides passing the filter.
+The filtration methodology was prepared by Jiří Černý's laboratory, and we only utilized their prepared lists of passing nucleotides.
+Given the filter is rather selective, any basepair with at least one passing nucleotide is accepted.
 
 TODO jirkův filtr popis:
 

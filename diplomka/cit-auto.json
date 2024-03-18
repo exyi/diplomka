@@ -256,6 +256,27 @@
         "id": null,
         "seq": null
     },
+    "https://doi.org/10.1093/nar/gkf481": {
+        "doi": "10.1093/nar/gkf481",
+        "published_date_parts": [
+            2002,
+            8,
+            15
+        ],
+        "title": "The non-Watson-Crick base pairs and their associated isostericity matrices",
+        "authors": [
+            [
+                "N. B.",
+                "Leontis"
+            ]
+        ],
+        "journal": [
+            "Nucleic Acids Research"
+        ],
+        "url": null,
+        "id": null,
+        "seq": null
+    },
     "https://doi.org/10.1093/nar/gkg680": {
         "doi": "10.1093/nar/gkg680",
         "published_date_parts": [
