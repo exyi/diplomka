@@ -2,9 +2,9 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="210mm"
-   height="297mm"
-   viewBox="0 0 210 297"
+   width="194.50592mm"
+   height="124.10413mm"
+   viewBox="0 0 194.50592 124.10413"
    version="1.1"
    id="svg1"
    xml:space="preserve"
@@ -25,8 +25,8 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
      inkscape:zoom="1.3244129"
-     inkscape:cx="371.86288"
-     inkscape:cy="285.40948"
+     inkscape:cx="351.47649"
+     inkscape:cy="286.16453"
      inkscape:window-width="1916"
      inkscape:window-height="1036"
      inkscape:window-x="0"
@@ -50,7 +50,7 @@
          d="m 1,0 -3,3 h -2 l 3,-3 -3,-3 h 2 z"
          id="path6" /></marker><filter
        inkscape:label="Opacity"
-       style="color-interpolation-filters:sRGB;"
+       style="color-interpolation-filters:sRGB"
        id="filter1"
        x="0"
        y="0"
@@ -63,7 +63,10 @@
          operator="arithmetic"
          k2="0.526089"
          result="fbSourceGraphic"
-         id="feComposite1" /><feColorMatrix
+         id="feComposite1"
+         k1="0"
+         k3="0"
+         k4="0" /><feColorMatrix
          result="fbSourceGraphicAlpha"
          in="fbSourceGraphic"
          values="0 0 0 -1 0 0 0 0 -1 0 0 0 0 -1 0 0 0 0 1 0"
@@ -76,10 +79,14 @@
          in2="colormatrix"
          operator="arithmetic"
          k2="0.526089"
-         result="composite" /></filter></defs><g
+         result="composite"
+         k1="0"
+         k3="0"
+         k4="0" /></filter></defs><g
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
-     id="layer1"><image
+     id="layer1"
+     transform="translate(-5.4813649,0.11549954)"><image
        width="193.12251"
        height="91.443504"
        preserveAspectRatio="none"
@@ -90,11 +97,11 @@
        style="stroke-width:5.48011;filter:url(#filter1)"
        transform="rotate(0.88114759,102.73432,57.561828)" /><path
        style="fill:none;stroke:#000000;stroke-width:0.4;stroke-opacity:1"
-       d="m 102.73433,123.87249 0,-123.98798727"
+       d="M 102.73433,123.87249 V -0.11549727"
        id="path3"
        sodipodi:nodetypes="cc" /><path
        style="fill:none;stroke:#000000;stroke-width:0.4;stroke-opacity:1"
-       d="m 19.966721,57.561829 177.912399,0"
+       d="M 19.966721,57.561829 H 197.87912"
        id="path4"
        sodipodi:nodetypes="cc" /><path
        style="fill:none;stroke:#000000;stroke-width:0.4;stroke-opacity:1;marker-end:url(#ArrowWideHeavy)"
@@ -202,7 +209,7 @@
          style="stroke-width:0.4"
          x="91.595276"
          y="51.233906">C6/8</tspan></text><path
-       style="fill:none;stroke:#000000;stroke-width:0.4;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-dasharray:none"
+       style="fill:none;stroke:#000000;stroke-width:0.4;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
        d="M 102.73433,57.561828 55.440144,123.87249"
        id="path1"
        sodipodi:nodetypes="cc" /></g></svg>
