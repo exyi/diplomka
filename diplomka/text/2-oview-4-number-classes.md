@@ -69,7 +69,7 @@ If the basepair is **cis**, it is represented with filled symbols (`●`, `■`,
 
 ![In trans Sugar/Sugar, C-A is defined while A-C is left undefined. In contrast, in W/W and H/H the C-A and A-C show the same pair (turned upside down)](../img/tSS-CA-vs-AC.png)
 
-A detailed discussion of software tools appears in a subsequent section; however, it is worth noting here how FR3D distinguishes the two **cSS** cases by lowering the second `S` letter.
+A detailed discussion of software tools appears in a subsequent section; however, it is worth noting here how FR3D disambiguates the two **cSS** cases by lowering the second `S` letter.
 FR3D reports all basepair in both orientations -- A **cSs AC** pair is also reported as the corresponding **csS CA** pair, both meaning **cSS AC** in the Leontis-Westhof terminology.
 
 <!-- ■⎼▶
