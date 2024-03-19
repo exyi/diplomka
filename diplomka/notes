@@ -26,3 +26,12 @@ web?
 ### blbost
 
 Interesting pair: 6W6L 1 D 40  D 104  both parallel and antiparallel
+
+
+```sql
+copy(
+select * from '/mnt/Aldabrachelys/test/vsecky-pary.parquet'
+    where (pdbid || '_' || chain1 || '_' || res1 || '_' || nr1::text) in (select column0 from '~/tmp/basepaircsv/hbonds/*.csv')
+    or (pdbid || '_' || chain2 || '_' || res2 || '_' || nr2::text) in (select column0 from '~/tmp/basepaircsv/hbonds/*.csv'))
+to '/mnt/Aldabrachelys/test/vsecky-pary-refset.parquet' (format parquet);
+```
