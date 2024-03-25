@@ -49,11 +49,26 @@ A limitation of DSSR is that it exclusively reports basepair parameters for the 
 In other words, it cannot provide them as complementary information to basepairs identified by alternative methods, such as FR3D.
 
 
-### RNAview {#sec:software-RNAview}
+### RNAView {#sec:software-RNAview}
 
-Similarly to FR3D, RNAview identifies basepairs the molecular structure and uses the naming Leontis-Westhof system.TODO
+Similarly to FR3D, [RNAView](https://doi.org/10.1093/nar/gkg529) identifies basepairs the molecular structure and uses the naming Leontis-Westhof system.
+First published in 2003, it has received a recent activity in development; notably it has got a support for mmCIF files few months ago.
+[The current version is published on GitHub](https://github.com/rcsb/RNAView).
 
-<https://github.com/rcsb/RNAView>
+Somewhat uniquely, the [Yang et al. (2002)](https://doi.org/10.1093/nar/gkg529) details the used basepair determination algorithm.
+In short, they consider three basic rules:
+
+1. The angle between base planes must be bellow 65°.
+2. The vertical distance between the planes (at the point of contact) must be bellow 2.5 Å.
+3. Two hydrogen bonds must exist, one of which is allowed to involve a carbon atom.
+
+However, RNAView unfortunately does not perform very well in practice, although we find it inspiring that such simplicity is feasible.
+While the algorithm may at first feel to be not strict enough, RNAView in fact has more problems identifying good basepairs than misidentifying bad ones.
+For instance, in the tHS AC class, RNAView frequently misidentifies pairs as another family or misses them entirely -- we can see that [on prof. Zirbel's annotation comparison](http://rna.bgsu.edu/experiments/annotations/compare_v7_tHS_A,C_3.0A.html).
+
+TODO kde jsou ty naše porovnání??
+
+![RNAView misidentifies a clear trans Hoogsteen/Sugar A-C basepair as trans Watson/Sugar basepair.](../img/rnaView-tHS-AC-misidentified.png){#fig:rnaView-tHS-AC-misidentified}
 
 
 ### Curves+ {#sec:software-Curves}

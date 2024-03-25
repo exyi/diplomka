@@ -113,7 +113,7 @@ We'll leave detailed schema description for Appendix — Data Schemas TODO.
 The `pairs.py` script outputs two files — a CSV table and an equivalent Parquet table.
 In further processing, we currently exclusively use the Parquet file, but the CSV format arguably offers easier integration with any other scripts.
 
-#### Parquet Format
+#### Parquet
 
 [Apache Parquet](https://en.wikipedia.org/wiki/Apache_Parquet) is a modern binary format for tabular data, comparable to CSV.
 Usually, it is praised for being fast to process, but the main reason for choosing the format in this work is the typed schema.

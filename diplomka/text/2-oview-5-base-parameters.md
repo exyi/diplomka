@@ -80,7 +80,7 @@ In this instance, the uracil is examined relative to the adenine reference frame
 If it was the other way, we'd observe a positive **stretch**, as the adenine origin is in positive Y coordinates in the uracil reference frame.
 It could be interesting to observe how does DSSR decide which nucleotide is the primary in each basepair.
 
-On the other hand, the [Curves+ paper](https://doi.org/10.1093/nar/gkp608) explicitly addresses the issue of symmetry, Lavery et. al. write: "To do this as symmetrically as possible, we choose an average frame that is obtained by rotation and translation of the first base reference system but now through the half angle $θ_A/2$, about the same axis vector $U_A$, and with the half translation $λ_A/2$".
+On the other hand, the [Curves+ paper](https://doi.org/10.1093/nar/gkp608) explicitly addresses the issue of symmetry, Lavery et al. write: "To do this as symmetrically as possible, we choose an average frame that is obtained by rotation and translation of the first base reference system but now through the half angle $θ_A/2$, about the same axis vector $U_A$, and with the half translation $λ_A/2$".
 This exact approach will cause other issues if applied to non-canonical basepairs -- notably we would see the "average reference frame" being perpendicular to the basepair plane, if one of the pairs is rotated 180° around the Y axis, such as in trans Watson-Crick basepairs.
 In this case, **opening** and **buckle** would have interchanged meaning.
 

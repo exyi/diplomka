@@ -34,4 +34,19 @@ select * from '/mnt/Aldabrachelys/test/vsecky-pary.parquet'
     where (pdbid || '_' || chain1 || '_' || res1 || '_' || nr1::text) in (select column0 from '~/tmp/basepaircsv/hbonds/*.csv')
     or (pdbid || '_' || chain2 || '_' || res2 || '_' || nr2::text) in (select column0 from '~/tmp/basepaircsv/hbonds/*.csv'))
 to '/mnt/Aldabrachelys/test/vsecky-pary-refset.parquet' (format parquet);
+
+
+copy(
+    select pdbid, model, chain1, res1, nr1, ins1, alt1, chain2, res2, nr2, ins2, alt2,
+           tripletx, triplety, tripletz, pdbsymstr, gemmisymstr, gemmi_shortest
+    from '/mnt/Aldabrachelys/test/vsecky-pary-refset.parquet'
+)
+to '/mnt/Aldabrachelys/test/vsecky-pary-refsetID.parquet' (format parquet);
+
+copy(
+    select pdbid, model, chain2 as chain1, res2 as res1, nr2 as nr1, ins2 as ins1, alt2 as alt1, chain1 as chain2, res1 as res2, nr1 as nr2, ins1 as ins2, alt1 as alt2,
+           tripletx, triplety, tripletz, pdbsymstr, gemmisymstr, gemmi_shortest
+    from '/mnt/Aldabrachelys/test/vsecky-pary-refset.parquet'
+)
+to '/mnt/Aldabrachelys/test/vsecky-pary-refsetIDinv.parquet' (format parquet);
 ```

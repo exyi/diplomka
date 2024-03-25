@@ -2,9 +2,9 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="210mm"
-   height="297mm"
-   viewBox="0 0 210 297"
+   width="209.35182mm"
+   height="125.8822mm"
+   viewBox="0 0 209.35182 125.8822"
    version="1.1"
    id="svg1"
    xml:space="preserve"
@@ -24,19 +24,20 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
-     inkscape:zoom="2.0018933"
-     inkscape:cx="224.28768"
-     inkscape:cy="385.13541"
-     inkscape:window-width="2560"
-     inkscape:window-height="1366"
+     inkscape:zoom="0.80729325"
+     inkscape:cx="276.23172"
+     inkscape:cy="232.87696"
+     inkscape:window-width="1916"
+     inkscape:window-height="1036"
      inkscape:window-x="0"
-     inkscape:window-y="0"
+     inkscape:window-y="20"
      inkscape:window-maximized="1"
      inkscape:current-layer="layer1" /><defs
      id="defs1" /><g
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
-     id="layer1"><g
+     id="layer1"
+     transform="translate(2.977712,-38.987397)"><g
        id="g1"
        transform="matrix(1.2063707,0.0129843,-0.0129843,1.2063707,-1.357115,-14.524754)"
        style="stroke-width:0.828884"><image
@@ -69,7 +70,7 @@
        d="M 5.4162139,107.37856 84.584746,147.8889"
        id="path3"
        sodipodi:nodetypes="cc" /><path
-       style="fill:none;stroke:#000000;stroke-width:0.4;stroke-dasharray:2.40000006,2.40000006;stroke-dashoffset:0;stroke-opacity:1"
+       style="fill:none;stroke:#000000;stroke-width:0.4;stroke-dasharray:2.4, 2.4;stroke-dashoffset:0;stroke-opacity:1"
        d="M 84.477813,94.905742 130.9462,40.357403"
        id="path4"
        sodipodi:nodetypes="cc" /><path
@@ -92,7 +93,7 @@
        id="text6"><tspan
          sodipodi:role="line"
          id="tspan6"
-         style="stroke-width:0.4;stroke:none;fill:#000000;fill-opacity:1"
+         style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.4"
          x="118.14228"
          y="60.417454" /></text><text
        xml:space="preserve"
