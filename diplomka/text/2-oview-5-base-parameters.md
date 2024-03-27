@@ -40,7 +40,7 @@ We are always using one reference frame as the coordinate system for the other, 
 If we had a very degenerate basepair and the reference frames was rotated 90° along the **X**, we cannot expect parameters origin **A** coordinates in system **B** be equal to coordinates of origin **B** in system **A**.
 In this extreme case, **X** coordinate of **A** in **B** will be equal to the coordinate **Z** of **B** in **A**, effectively interchanging **stagger** with **stretch**.
 However, in reasonable practical cases, this different should be small.
-It could also be easily remedied by averaging the two possible results, or defining that purine is always the base base.
+It could also be easily remedied by averaging the two possible results, or defining that purine is always the base nucleobase.
 We do not know how DSSR handles this problem.
 
 ### Non-canonical Basepairs

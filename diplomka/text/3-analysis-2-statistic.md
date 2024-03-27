@@ -108,5 +108,34 @@ TODO: The 3., biased distributions
 The median will serve as the primary point of reference in the analysis.
 However, if the KDE mode deviates noticeably from the median, it may signify a more intricate distribution, necessitating further exploration.
 It may be a bimodal distribution or one with a long tail on one side.
-The KDE will have a bandwidth factor of 1.5 (TODO actually do so).
-Both median and the KDE mode will thus be included in our output tables.
+The KDE will have a bandwidth factor of 1.5.
+Both median and the KDE mode will thus be included in the attached tables.
+
+
+### Circular mean
+
+A significant number of the measured parameters are angle in the range -180° ... 180°.
+The arithmetic average does not take into account that -180 is equal to 180, producing useless results if the distribution spans this boundary.
+This is easily worked around by computing the mean of points on a unit circle in two dimensions, as described in detail on [Wikipedia](https://en.wikipedia.org/wiki/Circular_mean) and illustrated in figure @fig:.
+The procedure is very simple to implement using complex numbers in NumPy:
+
+```python
+import numpy as np
+
+mean = np.angle(np.mean(np.exp(1j * np.radians(observations))), deg=True)
+```
+
+![Histograms of a distribution including the -180/180 point and its circular mean and the naïve arithmetic mean. On left, the distribution is shown using polar coordinates, on right using standard cartesian coordinates. (left roll of tSS AG, explained in sec. TODO)](../img/angular-stats-polar-vs-cartesian-means.svg)
+
+The kernel density estimate can be also computed in the two dimensions or in one dimension with the datapoints duplicated onto a 720° range.
+Although both methods seem to work well, computing two dimensional KDE when all points are on unit circle severely violates the assumption of normal distribution.
+We thus choose to compute the one dimensional KDE on range of -360...360 and then use only the -180...180 range.
+
+Unfortunatelly, other basic statistics like the median, maximum, or minimum cannot be well-defined, because we have no notion of comparison in modular (circular) arithmetics.
+However, we can exploit the fact, that the distributions of our interest do not span the entire range of 360°.
+In order to be a useful discriminator, any measured basepair parameter must be constrained to a relatively small range.
+If we can assume this, we can use the circular mean to center the entire distribution on zero and then proceed as for if the variable was linear.
+
+This trick is crucial for reporting the range of observed values, or comuting a confidence interval of any other statistic.
+Please note that the interval upper bound may be numerically lower than the lower bound.
+For instance, an interval $[160°, -170°]$ means the same as $[160°, 180°] \cup [-180°, -170°]$.

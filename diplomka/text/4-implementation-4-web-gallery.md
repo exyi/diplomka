@@ -1,6 +1,8 @@
 ## Web Gallery of Basepairs
 
-We'd like to present a web application presenting a large portion of our results.
+In section TODO, have introduced a web application for browsing various sets of basepairs (available at https://basepairs.datmos.org/).
+In this section, we would like to uncover some inner working, software design choices and explain advanced usage options.
+
 
 
 
