@@ -76,6 +76,8 @@ FR3D reports all basepair in both orientations -- A **cSs AC** pair is also repo
 □⎼▷
 ○⎼● -->
 
+### Symmetric false friends - cWW AA vs tWW AA
+
 ### Alternatives
 
 TODO

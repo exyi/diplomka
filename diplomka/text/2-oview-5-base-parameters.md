@@ -57,7 +57,7 @@ This means that the reference frames overlap, but uracil is on the side of the a
 Generally, we should expect negative **strech** on pairs involving the Hoogsteen or Sugar edge.
 Since these pairs are approximately rotated **90°**, **propeller** and **buckle** have interchanged meaning.
 
-![The [1EHZ](https://www.rcsb.org/structure/1EHZ) A.8 A.14 **tHW** pair with the fitted reference basepair.](../img/1ehz-A8-A14-dssrexample-reframe-fit.svg){#fig:1ehz-A8-A14-dssrexample-reframe-fit}
+![The [1EHZ](https://www.rcsb.org/structure/1EHZ) A.8 A.14 **tWH UA** pair with the fitted reference basepair.](../img/1ehz-A8-A14-dssrexample-reframe-fit.svg){#fig:1ehz-A8-A14-dssrexample-reframe-fit}
 
 | Parameter | Value |
 |-----|-----|
