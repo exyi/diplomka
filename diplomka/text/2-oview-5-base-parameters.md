@@ -1,4 +1,4 @@
-## Standard Bwsepair Parameters {#sec:std-base-parameters}
+## Standard Basepair Parameters {#sec:std-base-parameters}
 
 There is a set of standard basepair parameters primarily defined for helices of canonical basepairs.
 The parameters can be calculated using the software tools DSSR or Curves+, more details in @sec:software-DSSR.

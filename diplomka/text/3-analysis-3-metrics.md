@@ -1,4 +1,4 @@
-## Basepair metrics
+## Basepair Metrics
 
 The objective of this work is to find and compare decent measures of basepairing, so we shall finally specify what we are looking for.
 The main qualities of the metrics are:
@@ -14,9 +14,13 @@ The main qualities of the metrics are:
 It is important that humans can easily understand why a computer cannot Interpretability is important for 
 
 
-### Number of parameters
+### The Number of Parameters
 
-The relative position of two bases can be completely described by six numbers — three for translation of a reference frame, three for their relative rotation (using three Euler angles).
-However, such description 
+The relative position of two bases can be completely described by six numbers — the standard basepair parameters (@sec:std-base-parameters) are one such description.
+However, using such parameters may not lead to the simplest description of all basepair types.
+First, aiming for simplicity, we would rather avoid more complex constraints than one dimensional numeric ranges.
+<!-- Generalizing the constraints into two or more dimensions is similar to inventing additional parameters by linearly combining the existing parameters, except that the new parameter is easier to share across the ~120 basepair types. -->
+Second, having different constraints on all basepair types is about a hundred-times more rules than having a shared 
+
 
 TODO demo image
