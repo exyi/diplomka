@@ -11,21 +11,32 @@ In this section, we will list and briefly overview the available tools used for 
 
 We have previously introduced FR3D, which will serve as our primary analysis tool.
 FR3D stands for “Find RNA 3D” and is commonly pronounced “Fred”.
-[Initially, the software was developed to identify motifs comprised of multiple nucleotides, which we will not cover this in this work.](https://www.bgsu.edu/research/rna/software/fr3d.html)
+[Initially, the software was developed to identify motifs comprised of multiple nucleotides](https://www.bgsu.edu/research/rna/software/fr3d.html).
+We will not cover that extensively, but it is relevant, because [the motif atlas](http://dx.doi.org/10.1261/rna.039438.113) published by the FR3D authors relies on the determined basepairs as its source data.
+
 First version of FR3D was written in Matlab, but it was later rewritten to Python.
-We are using the Python version, downloaded from [github.com/BGSU-RNA/fr3d-python](https://github.com/BGSU-RNA/fr3d-python).
+We are using the Python version, downloaded from [github.com/BGSU-RNA/fr3d-python](https://github.com/BGSU-RNA/fr3d-python){.link-no-footnote}.
 It appears that the Matlab version is not as actively maintained anymore.
 
 
-The primary advantages of FR3D include:
+The primary advantages of FR3D for our use include:
 
 <!-- * It is freely available including the source code. -->
 * TODO: convince Craig to actually license it?.
 * Ease of use in execution and output processing.
 * Ability to annotate almost all basepair families.
+* Basepair determination quality.
 * Active maintenance, allowing us to potential influence its algorithms.
 
-Unfortunately, FR3D does not support writing out basepair parameters.
+FR3D does not calculate the standard basepair parameters discussed in @sec:std-base-parameters, and it does not support writing out its own calculated parameters.
+Because of that, we have to modify FR3D or use other software to calculate them.
+FR3D determines the basepairs based on a set of custom rules, distinct for each type of basepairs.
+The rules are not described in literature or documentation, but the rules are conveniently placed in a single source file: [`classifiers/class_limits.py`](https://github.com/BGSU-RNA/fr3d-python/blob/6f0a75ed547c7862d804a8a70ad73e04de89955f/fr3d/classifiers/class_limits.py#L340){.link-no-footnote}.
+
+Thanks to the large list of handcrafted rules, FR3D is able to rule out many edge cases while also including the non-standard basepairs.
+It has been validated on a [representative set of PDB structures](http://dx.doi.org/10.1007/978-3-642-25740-7_13) by the authors and compared against other base determination software.
+The cross-validation experiments are currently available online at http://rna.bgsu.edu/experiments/annotations/compare_v7_cWW_A,G_3.0A.html; the URL may be changed to any basepair type.
+
 
 ### X3DNA DSSR {#sec:software-DSSR}
 
@@ -38,6 +49,8 @@ DSSR is a commercial product that is not available for free for academic use at 
 However, an older version, 1.9.9, is free for academic use to ensure reproducibility of the literature relying on DSSR analysis.
 The free version was later withdrawn citing the lack of governmental funding as the reason.
 On the other hand, the source code of [3DNA was made public in 2016](https://x3dna.org/highlights/3dna-c-source-code-is-available), although users are required to register on the X3DNA forum.
+
+We do not know what are the base determination rules
 
 #### Basepair Parameters
 
@@ -73,6 +86,15 @@ TODO kde jsou ty naše porovnání??
 
 ### Curves+ {#sec:software-Curves}
 
-Curves is the second software tool which can calculate the TODO
+[Curves](https://doi.org/10.1093/nar/gkp608) is an older software written in FORTRAN, but it has been recently (2016) updated, with the updated version named **Curves+**.
+Despite that, we did not find a working web server nor documentation on how to use the program.
+We have the FORTRAN source code and the binary executable, but it also appears to have disappeared from the internet.
 
-<https://doi.org/10.1093/nar/gkp608>
+Curves+ is the second software tool which can calculate the standard basepair parameters (@sec:std-base-parameters), and [the paper](https://doi.org/10.1093/nar/gkp608) details how to achieve symmetry of the parameters.
+The values computed by Curves+ should be equal, regardless if it encounters one base first, or the other.
+The trick is to get an average of the two reference and then consider the relative position of the bases from the average.
+The rotations or translations of the two bases can then simply by added, getting the total rotation between them.
+
+
+<!-- The original Curves was the subject of discussion in the ["Resolving the discrepancies among nucleic acid conformational analyses"](https://doi.org/10.1006/jmbi.1998.2390), since it used different reference frame and different formulas for the parameters.
+However, Curves+ resolves the issue, allowing the standard reference frame -->

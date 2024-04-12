@@ -27,14 +27,33 @@ web?
 
 Interesting pair: 6W6L 1 D 40  D 104  both parallel and antiparallel
 
+### Citace
+
+NAKB, DNATCO aspoň
+
 
 ```sql
+CREATE OR REPLACE TEMP MACRO sanitize_alt(a) AS nullif(nullif(nullif(trim(a), chr(0)), '?'), '');
+CREATE OR REPLACE TEMP MACRO format_altdot(a) AS coalesce('.' || sanitize_alt(a), '');
+
+
+copy(
+    select * replace (
+        lower(pdbid) as pdbid,
+        sanitize_alt(alt1) AS alt1,
+        sanitize_alt(ins1) as ins1,
+        sanitize_alt(alt2) as alt2,
+        sanitize_alt(ins2) as ins2
+    )
+    from '/mnt/Aldabrachelys/test/vsecky-pary-raw.parquet'
+)
+to '/mnt/Aldabrachelys/test/vsecky-pary.parquet' (format parquet);
+
 copy(
 select * from '/mnt/Aldabrachelys/test/vsecky-pary.parquet'
-    where (pdbid || '_' || chain1 || '_' || res1 || '_' || nr1::text) in (select column0 from '~/tmp/basepaircsv/hbonds/*.csv')
-    or (pdbid || '_' || chain2 || '_' || res2 || '_' || nr2::text) in (select column0 from '~/tmp/basepaircsv/hbonds/*.csv'))
+    where lower(pdbid || '_' || chain1 || '_' || res1 || format_altdot(alt1) || '_' || nr1::text || format_altdot(ins1)) in (select lower(column0) from '~/tmp/basepaircsv/hbonds/*.csv')
+    or lower(pdbid || '_' || chain2 || '_' || res2 || format_altdot(alt2) || '_' || nr2::text || format_altdot(ins2)) in (select lower(column0) from '~/tmp/basepaircsv/hbonds/*.csv'))
 to '/mnt/Aldabrachelys/test/vsecky-pary-refset.parquet' (format parquet);
-
 
 copy(
     select pdbid, model, chain1, res1, nr1, ins1, alt1, chain2, res2, nr2, ins2, alt2,
@@ -56,10 +75,10 @@ to '/mnt/Aldabrachelys/test/vsecky-pary-refsetIDinv.parquet' (format parquet);
 
 
 copy(
-    select pdbid, model, chain1, res1, nr1, ins1, alt1, chain2, res2, nr2, ins2, alt2, symmetry_operation1, symmetry_operation2
+    select lower(pdbid) as pdbid, model, chain1, res1, nr1, ins1, alt1, chain2, res2, nr2, ins2, alt2, symmetry_operation1, symmetry_operation2
     from '/mnt/Aldabrachelys/test/pdb/analyzed-bonds/fr3d-exportonly.csv.parquet'
-    where (pdbid || '_' || chain1 || '_' || res1 || '_' || nr1::text) in (select column0 from '~/tmp/basepaircsv/hbonds/*.csv')
-       or (pdbid || '_' || chain2 || '_' || res2 || '_' || nr2::text) in (select column0 from '~/tmp/basepaircsv/hbonds/*.csv')
+    where lower(pdbid || '_' || chain1 || '_' || res1 || format_altdot(alt1) || '_' || nr1::text || format_altdot(ins1)) in (select lower(column0) from '~/tmp/basepaircsv/hbonds/*.csv')
+       or lower(pdbid || '_' || chain2 || '_' || res2 || format_altdot(alt2) || '_' || nr2::text || format_altdot(ins2)) in (select lower(column0) from '~/tmp/basepaircsv/hbonds/*.csv')
 )
-to '/mnt/Aldabrachelys/test/pdb/analyzed-bonds/fr3d-exportonly-refset-ID.parquet'
+to '/mnt/Aldabrachelys/test/pdb/analyzed-bonds/fr3d-exportonly-refset-ID.parquet';
 ```
