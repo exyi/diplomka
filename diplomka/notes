@@ -81,4 +81,9 @@ copy(
        or lower(pdbid || '_' || chain2 || '_' || res2 || format_altdot(alt2) || '_' || nr2::text || format_altdot(ins2)) in (select lower(column0) from '~/tmp/basepaircsv/hbonds/*.csv')
 )
 to '/mnt/Aldabrachelys/test/pdb/analyzed-bonds/fr3d-exportonly-refset-ID.parquet';
+
+
+
+
+copy (select * from '/home/exyi/code/rna-ml/pairclusters/out/plots-reexport0413/*-filtered.parquet') to '/mnt/Aldabrachelys/test/pymol-vids/work/all-approved-detailed.parquet' (format parquet);
 ```
