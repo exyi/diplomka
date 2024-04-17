@@ -277,6 +277,27 @@
         "id": null,
         "seq": null
     },
+    "https://doi.org/10.1093/nar/gkg529": {
+        "doi": "10.1093/nar/gkg529",
+        "published_date_parts": [
+            2003,
+            7,
+            1
+        ],
+        "title": "Tools for the automatic identification and classification of RNA base pairs",
+        "authors": [
+            [
+                "H.",
+                "Yang"
+            ]
+        ],
+        "journal": [
+            "Nucleic Acids Research"
+        ],
+        "url": null,
+        "id": null,
+        "seq": null
+    },
     "https://doi.org/10.1093/nar/gkg680": {
         "doi": "10.1093/nar/gkg680",
         "published_date_parts": [
