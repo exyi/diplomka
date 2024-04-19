@@ -87,3 +87,22 @@ to '/mnt/Aldabrachelys/test/pdb/analyzed-bonds/fr3d-exportonly-refset-ID.parquet
 
 copy (select * from '/home/exyi/code/rna-ml/pairclusters/out/plots-reexport0413/*-filtered.parquet') to '/mnt/Aldabrachelys/test/pymol-vids/work/all-approved-detailed.parquet' (format parquet);
 ```
+
+
+
+WebTODO
+
+* rozsirit hranice
+* O2' vazby zrušit
+* chytřejší vazby
+* proc se nespocital cWH C-C
+* NULLy v jednom z fieldů?
+* cWB, cHHa, cWWa, tWWa
+* cWW AA symetrické páry
+
+fetch 3vjr
+select pair, 3vjr and (chain B and resi 33 or chain D and resi 33)
+show sticks, %pair
+orient %pair
+hide everything, not %pair
+
