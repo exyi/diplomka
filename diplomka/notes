@@ -92,12 +92,9 @@ copy (select * from '/home/exyi/code/rna-ml/pairclusters/out/plots-reexport0413/
 
 WebTODO
 
-* rozsirit hranice
-* O2' vazby zrušit
-* chytřejší vazby
-* proc se nespocital cWH C-C
+* proc se nespocital cWH C-C !!!
 * NULLy v jednom z fieldů?
-* cWB, cHHa, cWWa, tWWa
+    * často protože DNA a jeden z těch edgů je v DNA jednoprvkový    
 * cWW AA symetrické páry
 
 fetch 3vjr
