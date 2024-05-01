@@ -83,13 +83,13 @@ _pdbx_struct_oper_list.vector[3]
 0.0000000000 38.4400000000 0.0000000000 0.0000000000 -1.0000000000 0.0000000000
 ``` -->
 
-Technically, the implementation is still slightly tricky, because the BioPython library does not parse the `pdbx_struct_oper_list` category.
-Gemmi, other Python library with similar API, has a very good support for crystallographic symmetry.
-However, it exposes the information in terms of the space groups, instead of the PDB symmetry operation codes.
+Technically, the implementation is still slightly tricky, because the **BioPython** library does not parse the `pdbx_struct_oper_list` category.
+Another Python library with similar API -- **Gemmi**, has a very good support for crystallographic symmetry.
+It, however, exposes the information in terms of space groups, instead of the PDB symmetry operation codes.
 Since **FR3D** uses the PDB codes in its output, we need to use them to map the basepairs into atomic coordinates.
+We thus use another library -- **mmcif**, which simply parses the CIF without any additional abstraction.
 
-PyMOL has a direct support for assembling the biological unit, the [structure only has to be loaded after setting `assembly` flag to 1](https://pymolwiki.org/index.php/Assembly).
-After that, we need to [separate the asymetrical units using the `split_states` command](https://pymolwiki.org/index.php/Split_states) in order to select only one of the two symmetrical basepairs (see @sec:impl-basepair-img for more details on PyMOL usage).
+PyMOL has a direct support for assembling the biological unit, the [structure only has to be loaded after setting `assembly` flag to 1](https://pymolwiki.org/index.php/Assembly) (see @sec:impl-basepair-img-asy for more details on PyMOL usage).
 
 ### X3DNA DSSR integration
 

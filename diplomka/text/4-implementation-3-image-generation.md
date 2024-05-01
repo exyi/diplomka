@@ -104,7 +104,7 @@ clip slab, 12, %pair
 color 0xeeeeee, %{pdbid} and not %pair and not resname HOH
 ```
 
-### Image output
+### Image output{#sec:impl-basepair-img-img}
 
 The resulting PNG image is simply saved using the `png` command.
 
@@ -126,7 +126,7 @@ To run the conversion, the `gen-images.sh` script generates the `build.ninja` fi
 -rw-r--r-- 1 exyi exyi  33K Mar 30 18:24 img/1duh/A_56-A_53-rotX-720.avif
 -rw-r--r-- 1 exyi exyi 325K Mar 29 14:05 img/1duh/A_56-A_53-rotX.png -->
 
-### Movie output
+### Movie output{#sec:impl-basepair-img-movie}
 
 The script also generate a movie of the rotating basepair, if the `--movie` option is specified.
 The scene is set up using the following commands.
@@ -147,3 +147,26 @@ mpng "output-directory/", width=640, height=480
 
 PyMOL produces a directory of numbered PNG images, one for each frame of the animation.
 For the web application, we encode the movie into webm/VP9 codec, preserving the alpha (transparency) channel.
+
+### Asymmetrical units{#sec:impl-basepair-img-asy}
+
+PyMOL directly supports loading the biological assembly of a structure, [when the `assembly` option is set, as described on wiki](https://pymolwiki.org/index.php/Assembly).
+The assembly can be later split into the individual asymmetrical units using the `split_states` command, creating new objects with a numeric suffix.
+For instance, if we want to load the `6ros` structure:
+
+```
+set assembly = 1
+fetch 6ros
+split_states %6ros
+```
+
+This gives us three objects -- `6ros`, `6ros_0001`, and `6ros_0002`.
+We delete the first one (`6ros`), use `6ros_0002` if any symmetry operation is specified a given basepair and use the `6ros_0001` otherwise.
+We are not aware of a way to map the new objects onto the PDB symmetry codes, although it can be presumed that PyMOL keeps the ordering of the source CIF file.
+Fortunately, this is rarely an issue, since only a few nucleic acid structures have more than two repetitions in the assembly and the order doesn't matter if we have are two states.
+<!-- Since ignorance is bliss, we simply use the second object when no symmetry operation is specified -->
+
+
+Some structures, like [`4lnt`](https://www.rcsb.org/structure/4lnt) have multiple biological assemblies.
+If the `assembly` option is non-empty, only the selected assembly is loaded into PyMOL.
+Since we usually do not know which assembly a given basepair originates from, we only set `assembly=1` when necessary -- when a basepair with symmetry operation exists.
