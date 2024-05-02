@@ -32,6 +32,20 @@ Interesting pair: 6W6L 1 D 40  D 104  both parallel and antiparallel
 NAKB, DNATCO aspoň
 
 
+WebTODO
+
+* proc se nespocital cWH C-C !!!
+* NULLy v jednom z fieldů?
+    * často protože DNA a jeden z těch edgů je v DNA jednoprvkový    
+* cWW AA symetrické páry
+
+fetch 3vjr
+select pair, 3vjr and (chain B and resi 33 or chain D and resi 33)
+show sticks, %pair
+orient %pair
+hide everything, not %pair
+
+
 ```sql
 CREATE OR REPLACE TEMP MACRO sanitize_alt(a) AS nullif(nullif(nullif(trim(a), chr(0)), '?'), '');
 CREATE OR REPLACE TEMP MACRO format_altdot(a) AS coalesce('.' || sanitize_alt(a), '');
@@ -90,16 +104,7 @@ copy (select * from '/home/exyi/code/rna-ml/pairclusters/out/plots-reexport0413/
 
 
 
-WebTODO
 
-* proc se nespocital cWH C-C !!!
-* NULLy v jednom z fieldů?
-    * často protože DNA a jeden z těch edgů je v DNA jednoprvkový    
-* cWW AA symetrické páry
-
-fetch 3vjr
-select pair, 3vjr and (chain B and resi 33 or chain D and resi 33)
-show sticks, %pair
-orient %pair
-hide everything, not %pair
-
+```
+find . -type f -name '*.parquet' -printf "%CF %CH:%CM\t%s\t%P\n" | sort -k 4 | awk -F\t 'BEGIN { print "<html><title>List of tables directory</title><body><h1>List of tables/</h1><table><tr><th> Last changed</th><th>Size (MiB)</th><th>Size (rows)</th><th>File</th></tr>" } { "duckdb -list -noheader -s \'select count(*) as rows from read_parquet(\"" $3 "\")\'" | getline count; printf "<tr><td>%s</td>\t<td>%.2g MiB</td>\t<td>%d rows</td>\t<td><a href=\"./%s\" download>%s</a></td></tr>\n", $1, $2/1024/1024, count, $3, $3} END { print "</table></body></html>" }' > index.html
+```
