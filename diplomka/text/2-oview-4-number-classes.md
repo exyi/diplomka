@@ -5,13 +5,13 @@
 As presented in the previous chapter, the L-W scheme theoretically distinguishes 156 distinct base pair conformations, when treating uracil as equivalent to thymine (TODO this is maybe interesting).
 On each side of the pair, there are three options for the edge and four options for the nucleotide, resulting in a total of twelve unique combinations.
 We can create a $12 \times 12$ matrix of base-edge combinations.
-Assuming symmetry between pairs, such as **cWH AG** being equivalent to its flipped counterpart **cHW GA**, we count the number of elements in the lower triangular matrix, ignoring all entries above the diagonal.
+Assuming symmetry between pairs, such as **cWH A-G** being equivalent to its flipped counterpart **cHW G-A**, we count the number of elements in the lower triangular matrix, ignoring all entries above the diagonal.
 This results in $12 + 11 + \cdots + 1 = 78$ unique combinations.
 Given that each base-edge couple can pair in either **cis** or in **trans** conformation, we multiply this by an additional two options, resulting in a total of 156 possibilities.
 
 It is evident that not all theoretically possible pairs can make sense chemically.
 For instance, the Hoogsteen edge of a cytosine consists of single NH<sub>2</sub> group, which can only act as hydrogen bond donor.
-Thus, **cHH CC** basepair, involving only this edge, cannot provide a stabilizing base interaction.
+Thus, **cHH C-C** basepair, involving only this edge, cannot provide a stabilizing base interaction.
 
 <!-- The conformation is different for each of the four nucleotides.
 We have the following choices:
@@ -52,8 +52,8 @@ $$2 \cdot \left( 16 \cdot 3 + 10 \cdot 3 \right) = 156$$ -->
 ### Sugar-Sugar Symmetry
 
 Unfortunately, the assumption of symmetry we made earlier is generally invalid.
-Many Sugar-Sugar basepairs are not defined asymetrically, such as **cSS AC** which isn't a flipped version of **cSS CA**.
-All six “symmetrical” pairs are defined differently in **cis** Sugar/Sugar, and only one in **trans** Sugar/Sugar (GA/AG). <!--TODO Ref-->
+Many Sugar-Sugar basepairs are not defined asymetrically, such as **cSS A-C** which isn't a flipped version of **cSS C-A**.
+All six “symmetrical” pairs are defined differently in **cis** Sugar/Sugar, and only one in **trans** Sugar/Sugar (G-A/A-G). <!--TODO Ref-->
 
 This property isn't explicitly mentioned in [Leontis, Westhof 2001](https://doi.org/10.1017/s1355838201002515) (TODO verify again), however the tables of examples in [Leontis 2002](https://doi.org/10.1093/nar/gkf481) clearly show different base pairing for the two cases.
 
@@ -70,13 +70,13 @@ If the basepair is **cis**, it is represented with filled symbols (`●`, `■`,
 ![In trans Sugar/Sugar, C-A is defined while A-C is left undefined. In contrast, in W/W and H/H the C-A and A-C show the same pair (turned upside down)](../img/tSS-CA-vs-AC.png)
 
 A detailed discussion of software tools appears in a subsequent section; however, it is worth noting here how FR3D disambiguates the two **cSS** cases by lowering the second `S` letter.
-FR3D reports all basepair in both orientations -- A **cSs AC** pair is also reported as the corresponding **csS CA** pair, both meaning **cSS AC** in the Leontis-Westhof terminology.
+FR3D reports all basepair in both orientations -- A **cSs A-C** pair is also reported as the corresponding **csS C-A** pair, both meaning **cSS A-C** in the Leontis-Westhof terminology.
 
 <!-- ■⎼▶
 □⎼▷
 ○⎼● -->
 
-### Symmetric false friends - cWW AA vs tWW AA
+### Symmetric false friends - cWW A-A vs tWW A-A
 
 ### Alternatives
 
@@ -84,7 +84,7 @@ TODO
 
 <!-- tWWa CC, cWWa GT. -->
 
-![](../img/tWW-U-U-vs-tWWa-U-U.png)
+![The two alternatives of the tWW U-U pair. Although the only Watson-Crick edge is involved in both cases, two pairs of hydrogen bonds are possible and both exist in PDB structures.](../img/tWW-U-U-vs-tWWa-U-U.png){#fig:tWW-U-U-vs-tWWa-U-U}
 
 ### Bifurcated Hydrogen Bonds
 

@@ -40,7 +40,7 @@ def download_cit_info(doi: str) -> CitationInfo:
         doi=doi,
         published_date_parts=list(map(int, (data.get("published") or data["published-print"])["date-parts"][0])),
         title=data["title"][0],
-        authors=[[author["given"], author["family"]] for author in data["author"]],
+        authors=[[author.get("given", ""), author.get("family", "???")] for author in data["author"]],
         journal=data.get("container-title"),
         url=None
     )
@@ -104,7 +104,13 @@ def get_str_content(pandoc_json: dict) -> list[str]:
     result = []
     def core(key, val, fmt, meta):
         if key == "Str":
+            assert isinstance(val, str)
             result.append(val)
+        elif key == "Space":
+            result.append(" ")
+        elif key == "Code":
+            assert isinstance(val[1], str)
+            result.append(val[1])
     pandocfilters.walk(pandoc_json, core, "", {})
     return result
 
@@ -114,7 +120,7 @@ def collect_links(out: dict[str, list[str]]):
             attr, content, [url, wtf] = val
             assert not wtf, wtf
             if url.startswith("http:") or url.startswith("https:"):
-                data = " ".join(get_str_content(content))
+                data = "".join(get_str_content(content))
                 out[url] = out.get(url, []) + [ data ]
 
     return core
@@ -123,24 +129,33 @@ def convert_links(citations: dict[str, CitationInfo]):
     def core(key, val, fmt, meta):
         if key == "Link":
             attr, content, [url, wtf] = val
+            url: str
+            content_text = "".join(get_str_content(content))
             assert not wtf, wtf
             if ['data-footnote-link', 'true'] in attr[2]:
                 pass
             elif url in citations:
-                new_content = [
-                    *content,
-                    pandocfilters.Span(
+                citation_ref = pandocfilters.Span(
                         ['', ["citation-ref"], [ ["data-citation-id", str(citations[url].id)], ["data-citation-seq", str(citations[url].seq)] ] ],
-                        [pandocfilters.Space(),  pandocfilters.Str(f"[{citations[url].id}]")]),
-                ]
+                        [pandocfilters.Space(),  pandocfilters.Str(f"[{citations[url].id}]")])
+                new_content = [ *content, citation_ref ] if content_text.lower() != url else [ citation_ref ]
                 return pandocfilters.Link(attr, new_content,[ url, ''])
             elif url.startswith("http:") or url.startswith("https:"):
+                print(f"External link: {url} -> {content_text} ({repr(attr)})")
+                # print(f"External link: {url} -> {content_text} ({repr(content)})")
+                if 'link-no-footnote' in attr[1]:
+                    return # skip css class
+                if url.lower() == (f"https://www.rcsb.org/structure/" + content_text).lower():
+                    # skip PDB links, it is obvious
+                    return
+                url_html = url.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("'", "&apos;").replace('"', "&quot;")
+                breakable_url = re.sub(r"(([/][#]?|&amp;|[=])+)", r"\1&#8203;", url)
                 footnote = pandocfilters.Span(
                     # ['', [], []],
                     ['', ["link-footnote"], []],
                     [
                         # pandocfilters.Link( ['', [], [ ['data-footnote-link', 'true'], ['href', url]]], [pandocfilters.Str(f"{url}")], [ url, '' ]),
-                        pandocfilters.RawInline('html', f"<a href='{url}'>{url}</a>")
+                        pandocfilters.RawInline('html', f"<a href='{url_html}'>{breakable_url}</a>")
                     ]
                 )
                 new_content = [ *content, footnote ]

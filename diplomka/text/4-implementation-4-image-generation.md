@@ -167,6 +167,6 @@ Fortunately, this is rarely an issue, since only a few nucleic acid structures h
 <!-- Since ignorance is bliss, we simply use the second object when no symmetry operation is specified -->
 
 
-Some structures, like [`4lnt`](https://www.rcsb.org/structure/4lnt) have multiple biological assemblies.
+Some structures, like [`4Lnt`](https://www.rcsb.org/structure/4Lnt) have multiple biological assemblies.
 If the `assembly` option is non-empty, only the selected assembly is loaded into PyMOL.
 Since we usually do not know which assembly a given basepair originates from, we only set `assembly=1` when necessary -- when a basepair with symmetry operation exists.

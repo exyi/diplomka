@@ -24,7 +24,7 @@ As the authors state, the clearly optimized the coordinate system for the canoni
 If we place a purine with a pyrimidine and flip one along the **Y** axis, we get a canonical basepair.
 Without the **Y**-flip, all bases overlap in the same region, with the N1/N9—C1' bond approximately aligned.
 
-![Guanine references and uracil reference with negated Y coordinates form a “perfect” GC canonical pair. The white small cross shows the origin **(0, 0, 0)**.](../img/reference-frame-GC-pair.png)
+![Guanine reference frame and uracil frame with negated Y coordinates form a “perfect” GC canonical pair. The white small cross shows the origin **(0, 0, 0)**.](../img/reference-frame-GC-pair.png){#fig:reference-frame-GC-pair .img-width50}
 
 This property allows us to easily judge an observed basepair by comparing the position and orientation of their reference frame -- the frame origins and axes to be specific.
 The DSSR papers <https://doi.org/10.1093/nar/gkg680> and <https://doi.org/10.1038/nprot.2008.104> do not contain details on the parameters calculation, but [the DSSR webpage shows quite detailed description in a blog post](https://x3dna.org/highlights/details-on-the-simple-base-pair-parameters).
@@ -47,7 +47,7 @@ We do not know how exactly DSSR handles this problem, Curves+ claims to take the
 
 When the standard reference frame is applied to all types of basepairs, the meaning of the basepair parameters is somewhat distorted.
 The values can still be useful, but we need to be cautious in their intuitive interpretation.
-As an example, @fig:1ehz-A8-A14-dssrexample-reframe-fit shows a nearly perfect trans Hoogsteen/Watson-Crick basepair from the [1EHZ](https://www.rcsb.org/structure/1EHZ) structure.
+As an example, @fig:1ehz-A8-A14-dssrexample-reframe-fit shows a nearly perfect trans Hoogsteen/Watson-Crick basepair from the [1ehz](https://www.rcsb.org/structure/1EHZ) structure.
 In the figure bellow, we can see that Watson-Crick edges of the two nucleotides are at an angle slightly bellow 90° -- implying that the **opening** should be above 90°.
 Indeed, DSSR reports **opening** of 103°.
 
@@ -57,7 +57,7 @@ This means that the reference frames overlap, but uracil is on the side of the a
 Generally, we should expect negative **strech** on pairs involving the Hoogsteen or Sugar edge.
 Since these pairs are approximately rotated **90°**, **propeller** and **buckle** have interchanged meaning.
 
-![The [1EHZ](https://www.rcsb.org/structure/1EHZ) A.8 A.14 **tWH UA** pair with the fitted reference basepair.](../img/1ehz-A8-A14-dssrexample-reframe-fit.svg){#fig:1ehz-A8-A14-dssrexample-reframe-fit}
+![The [1ehz](https://www.rcsb.org/structure/1EHZ) A.8 A.14 **tWH UA** pair with the fitted reference basepair.](../img/1ehz-A8-A14-dssrexample-reframe-fit.svg){#fig:1ehz-A8-A14-dssrexample-reframe-fit}
 
 | Parameter | Value |
 |-----|-----|
@@ -68,19 +68,19 @@ Since these pairs are approximately rotated **90°**, **propeller** and **buckle
 | Buckle |	4.6154° |
 | Propeller |	12.1172° |
 | **Opening** |	**-103.0907°** |
-| Shift |	2.7007 Å |
+<!-- | Shift |	2.7007 Å |
 | Slide |	-3.2712 Å |
 | Rise |	3.3277 Å |
-| Tilt |	2.0082 TODO |
-| Roll |	8.6317 TODO |
-| Twist |	-64.0947° |
+| Tilt |	2.0082° |
+| Roll |	8.6317° |
+| Twist |	-64.0947° | -->
 
 Notably, this example demonstrates that the base parameters as calculated by DSSR indeed aren't symmetrical when pushed to such extremes.
 In this instance, the adenine origin is examined relative to the uracil reference frame.
 If it was the other way, we'd observe a positive **stretch**, as the adenine origin has a positive Y coordinate in the uracil reference frame, as shown in @fig:1ehz-A8-A14-dssrexample-translation-measure-comparison.
 It could be interesting to observe how does DSSR decide which nucleotide is the primary reference frame in each basepair.
 
-![A) Adenine origin (green) position in the uracil reference frame (brown) - **x = shear ≈ -4.1 Å**, and **y = stretch ≈ -1.9 Å**. B) Uracil origin position in adenine reference frame - **x = shear ≈ 1 Å**, and **y = stretch ≈ 4.4 Å**.](../img/1ehz-A8-A14-dssrexample-translation-measure-comparison.svg){@fig:1ehz-A8-A14-dssrexample-translation-measure-comparison}
+![A) Adenine origin (green) position in the uracil reference frame (brown) - **x = shear ≈ -4.1 Å**, and **y = stretch ≈ -1.9 Å**. B) Uracil origin position in adenine reference frame - **x = shear ≈ 1 Å**, and **y = stretch ≈ 4.4 Å**.](../img/1ehz-A8-A14-dssrexample-translation-measure-comparison.svg){#fig:1ehz-A8-A14-dssrexample-translation-measure-comparison}
 
 On the other hand, the [Curves+ paper](https://doi.org/10.1093/nar/gkp608) explicitly addresses the issue of symmetry, Lavery et al. write: "To do this as symmetrically as possible, we choose an average frame that is obtained by rotation and translation of the first base reference system but now through the half angle $θ_A/2$, about the same axis vector $U_A$, and with the half translation $λ_A/2$".
 This exact approach will cause other issues if applied to non-canonical basepairs -- notably we would see the "average reference frame" being perpendicular to the basepair plane, if one of the pairs is rotated 180° around the Y axis, such as in trans Watson-Crick basepairs.

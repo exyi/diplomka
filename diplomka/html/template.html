@@ -11,12 +11,21 @@
         .something-to-make-vscode-shutup-about-syntax-errors {}
     </style>
     <style>
+        /* @font-face {
+            font-family: 'Noto Serif';
+            font-style: italic;
+            font-weight: 100 900;
+            font-stretch: 100%;
+            font-display: swap;
+            src: local('Noto Serif') url(../html/vendor/noto-serif-font/NotoSerif-VariableFont_wdth\,wght.ttf) format('ttf');
+        } */
         body {
             margin-left: var(--body-margin-x);
             margin-right: var(--body-margin-x);
             margin-top: var(--body-margin-y);
             margin-bottom: var(--body-margin-y);
-            --font-cm: "Computer Modern Serif", serif;
+            /* --font-cm: "Computer Modern Serif", serif; */
+            --font-cm: "Noto Serif", serif;
             --font-mono: 'Courier New', Courier, monospace;
             font-family: var(--font-cm);
             font-size: 12pt;
@@ -25,12 +34,14 @@
             --a4-width: 210mm;
             --a4-height: 297mm;
 
+            text-wrap: pretty;
+
             /* --full-width: calc(var(--a4-width) - 2 * var(--body-margin-x));
             --full-height: calc(var(--a4-height) - 2 * 0.98in); */
         }
         @media print {
             @page {
-                margin: 0.98in;
+                margin: 0.5in 0.98in;
                 size: 210mm 297mm;
                 /* @bottom-left {
                     content: counter(page) ' of ' counter(pages);
@@ -42,6 +53,15 @@
                     font-size:8pt;
                 }
 
+            }
+            @page:left {
+                margin: 0.5in 1.5in 0.5in 0.75in;
+            }
+            @page:right {
+                margin: 0.5in 0.75in 0.5in 1.5in;
+            }
+            @page:first {
+                margin: 0.5in 0.98in;
             }
             body {
                 /* --full-width: 100vw;
@@ -78,7 +98,8 @@
             float: footnote;
             font-size: 0.75rem;
             font-family: serif;
-            font-weight: lighter;
+            padding-left: 2em;
+            text-indent: -2em;
         }
 
         /* define the position of the footnote on the page (only bottom is possible for now) */
@@ -97,6 +118,7 @@
 
         ::footnote-marker {
             content: counter(footnote-marker) ". ";
+            font-weight: bold;
         }
 
         /* a {
@@ -116,6 +138,9 @@
             /* margin-top: 2cm; */
             display: flex;
             flex-direction: column;
+        }
+        #titlepage1 h1, #titlepage2 h1 {
+            text-align: center;
         }
         #titlepage1 > *, #titlepage2 > * {
             flex-grow: 1;
@@ -153,11 +178,20 @@
             margin-inline-end: 0;
             padding: 0;
             text-align: center;
+            text-wrap: balance;
             break-inside: avoid;
         }
         figure > img {
             max-width: calc(100%);
+            display: block;
+            margin: 0 auto 0.25rem auto;
             /* margin: 1rem; */
+        }
+        figure > img.img-width75 {
+            max-width: calc(75%);
+        }
+        figure > img.img-width50 {
+            max-width: calc(50%);
         }
         figure figcaption {
             text-align: center; text-align-last: center;
@@ -173,7 +207,14 @@
         }
 
         h1, h2, h3, h4, h5, h6 {
+            text-align: left;
             page-break-after: avoid;
+            text-wrap: balance;
+        }
+
+        pre {
+            text-align: left;
+            
         }
 
         #TOC {
@@ -208,20 +249,17 @@
             vertical-align: bottom;
             flex-shrink: 100000;
         }
+        #TOC a > .pagenumber {
+            width: 1.5em;
+            text-align: right;
+        }
         /* #TOC a > .pagenumber {
         } */
 
         .dot-leader {
-            height: 1em; /* very important */
-            overflow: hidden; /* very important */
-            word-wrap: break-word; /* where magic happens */
-            font-weight: normal;
-            color: #999;
-            letter-spacing: 5px;
-        }
-
-        .dot-leader:after {
-            content: '...........................................................';
+            /* background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' stroke='%23333' stroke-width='4' stroke-dasharray='6%2c 14' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e"); */
+            background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3cline x1='100%25' y1='50%25' x2='2' y2='50%25' stroke='%23777' stroke-width='2' stroke-dasharray='0%2c 7' stroke-dashoffset='2' stroke-linecap='round'/%3e%3c/svg%3e");
+            height: 0.9em;
         }
 
         /* #TOC a::after {

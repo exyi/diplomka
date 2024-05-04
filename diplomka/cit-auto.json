@@ -122,6 +122,30 @@
         "id": null,
         "seq": null
     },
+    "https://doi.org/10.1007/978-3-642-25740-7_13": {
+        "doi": "10.1007/978-3-642-25740-7_13",
+        "published_date_parts": [
+            2012
+        ],
+        "title": "Nonredundant 3D Structure Datasets for RNA Knowledge Extraction and Benchmarking",
+        "authors": [
+            [
+                "Neocles B.",
+                "Leontis"
+            ],
+            [
+                "Craig L.",
+                "Zirbel"
+            ]
+        ],
+        "journal": [
+            "Nucleic Acids and Molecular Biology",
+            "RNA 3D Structure Analysis and Prediction"
+        ],
+        "url": null,
+        "id": null,
+        "seq": null
+    },
     "https://doi.org/10.1017/s1355838201002515": {
         "doi": "10.1017/s1355838201002515",
         "published_date_parts": [
@@ -190,6 +214,471 @@
         ],
         "journal": [
             "Nature Protocols"
+        ],
+        "url": null,
+        "id": null,
+        "seq": null
+    },
+    "https://doi.org/10.1038/s41592-019-0686-2": {
+        "doi": "10.1038/s41592-019-0686-2",
+        "published_date_parts": [
+            2020,
+            2,
+            3
+        ],
+        "title": "SciPy 1.0: fundamental algorithms for scientific computing in Python",
+        "authors": [
+            [
+                "Pauli",
+                "Virtanen"
+            ],
+            [
+                "Ralf",
+                "Gommers"
+            ],
+            [
+                "Travis E.",
+                "Oliphant"
+            ],
+            [
+                "Matt",
+                "Haberland"
+            ],
+            [
+                "Tyler",
+                "Reddy"
+            ],
+            [
+                "David",
+                "Cournapeau"
+            ],
+            [
+                "Evgeni",
+                "Burovski"
+            ],
+            [
+                "Pearu",
+                "Peterson"
+            ],
+            [
+                "Warren",
+                "Weckesser"
+            ],
+            [
+                "Jonathan",
+                "Bright"
+            ],
+            [
+                "St\u00e9fan J.",
+                "van der Walt"
+            ],
+            [
+                "Matthew",
+                "Brett"
+            ],
+            [
+                "Joshua",
+                "Wilson"
+            ],
+            [
+                "K. Jarrod",
+                "Millman"
+            ],
+            [
+                "Nikolay",
+                "Mayorov"
+            ],
+            [
+                "Andrew R. J.",
+                "Nelson"
+            ],
+            [
+                "Eric",
+                "Jones"
+            ],
+            [
+                "Robert",
+                "Kern"
+            ],
+            [
+                "Eric",
+                "Larson"
+            ],
+            [
+                "C J",
+                "Carey"
+            ],
+            [
+                "\u0130lhan",
+                "Polat"
+            ],
+            [
+                "Yu",
+                "Feng"
+            ],
+            [
+                "Eric W.",
+                "Moore"
+            ],
+            [
+                "Jake",
+                "VanderPlas"
+            ],
+            [
+                "Denis",
+                "Laxalde"
+            ],
+            [
+                "Josef",
+                "Perktold"
+            ],
+            [
+                "Robert",
+                "Cimrman"
+            ],
+            [
+                "Ian",
+                "Henriksen"
+            ],
+            [
+                "E. A.",
+                "Quintero"
+            ],
+            [
+                "Charles R.",
+                "Harris"
+            ],
+            [
+                "Anne M.",
+                "Archibald"
+            ],
+            [
+                "Ant\u00f4nio H.",
+                "Ribeiro"
+            ],
+            [
+                "Fabian",
+                "Pedregosa"
+            ],
+            [
+                "Paul",
+                "van Mulbregt"
+            ],
+            [
+                "Aditya",
+                "Vijaykumar"
+            ],
+            [
+                "Alessandro Pietro",
+                "Bardelli"
+            ],
+            [
+                "Alex",
+                "Rothberg"
+            ],
+            [
+                "Andreas",
+                "Hilboll"
+            ],
+            [
+                "Andreas",
+                "Kloeckner"
+            ],
+            [
+                "Anthony",
+                "Scopatz"
+            ],
+            [
+                "Antony",
+                "Lee"
+            ],
+            [
+                "Ariel",
+                "Rokem"
+            ],
+            [
+                "C. Nathan",
+                "Woods"
+            ],
+            [
+                "Chad",
+                "Fulton"
+            ],
+            [
+                "Charles",
+                "Masson"
+            ],
+            [
+                "Christian",
+                "H\u00e4ggstr\u00f6m"
+            ],
+            [
+                "Clark",
+                "Fitzgerald"
+            ],
+            [
+                "David A.",
+                "Nicholson"
+            ],
+            [
+                "David R.",
+                "Hagen"
+            ],
+            [
+                "Dmitrii V.",
+                "Pasechnik"
+            ],
+            [
+                "Emanuele",
+                "Olivetti"
+            ],
+            [
+                "Eric",
+                "Martin"
+            ],
+            [
+                "Eric",
+                "Wieser"
+            ],
+            [
+                "Fabrice",
+                "Silva"
+            ],
+            [
+                "Felix",
+                "Lenders"
+            ],
+            [
+                "Florian",
+                "Wilhelm"
+            ],
+            [
+                "G.",
+                "Young"
+            ],
+            [
+                "Gavin A.",
+                "Price"
+            ],
+            [
+                "Gert-Ludwig",
+                "Ingold"
+            ],
+            [
+                "Gregory E.",
+                "Allen"
+            ],
+            [
+                "Gregory R.",
+                "Lee"
+            ],
+            [
+                "Herv\u00e9",
+                "Audren"
+            ],
+            [
+                "Irvin",
+                "Probst"
+            ],
+            [
+                "J\u00f6rg P.",
+                "Dietrich"
+            ],
+            [
+                "Jacob",
+                "Silterra"
+            ],
+            [
+                "James T",
+                "Webber"
+            ],
+            [
+                "Janko",
+                "Slavi\u010d"
+            ],
+            [
+                "Joel",
+                "Nothman"
+            ],
+            [
+                "Johannes",
+                "Buchner"
+            ],
+            [
+                "Johannes",
+                "Kulick"
+            ],
+            [
+                "Johannes L.",
+                "Sch\u00f6nberger"
+            ],
+            [
+                "Jos\u00e9 Vin\u00edcius",
+                "de Miranda Cardoso"
+            ],
+            [
+                "Joscha",
+                "Reimer"
+            ],
+            [
+                "Joseph",
+                "Harrington"
+            ],
+            [
+                "Juan Luis Cano",
+                "Rodr\u00edguez"
+            ],
+            [
+                "Juan",
+                "Nunez-Iglesias"
+            ],
+            [
+                "Justin",
+                "Kuczynski"
+            ],
+            [
+                "Kevin",
+                "Tritz"
+            ],
+            [
+                "Martin",
+                "Thoma"
+            ],
+            [
+                "Matthew",
+                "Newville"
+            ],
+            [
+                "Matthias",
+                "K\u00fcmmerer"
+            ],
+            [
+                "Maximilian",
+                "Bolingbroke"
+            ],
+            [
+                "Michael",
+                "Tartre"
+            ],
+            [
+                "Mikhail",
+                "Pak"
+            ],
+            [
+                "Nathaniel J.",
+                "Smith"
+            ],
+            [
+                "Nikolai",
+                "Nowaczyk"
+            ],
+            [
+                "Nikolay",
+                "Shebanov"
+            ],
+            [
+                "Oleksandr",
+                "Pavlyk"
+            ],
+            [
+                "Per A.",
+                "Brodtkorb"
+            ],
+            [
+                "Perry",
+                "Lee"
+            ],
+            [
+                "Robert T.",
+                "McGibbon"
+            ],
+            [
+                "Roman",
+                "Feldbauer"
+            ],
+            [
+                "Sam",
+                "Lewis"
+            ],
+            [
+                "Sam",
+                "Tygier"
+            ],
+            [
+                "Scott",
+                "Sievert"
+            ],
+            [
+                "Sebastiano",
+                "Vigna"
+            ],
+            [
+                "Stefan",
+                "Peterson"
+            ],
+            [
+                "Surhud",
+                "More"
+            ],
+            [
+                "Tadeusz",
+                "Pudlik"
+            ],
+            [
+                "Takuya",
+                "Oshima"
+            ],
+            [
+                "Thomas J.",
+                "Pingel"
+            ],
+            [
+                "Thomas P.",
+                "Robitaille"
+            ],
+            [
+                "Thomas",
+                "Spura"
+            ],
+            [
+                "Thouis R.",
+                "Jones"
+            ],
+            [
+                "Tim",
+                "Cera"
+            ],
+            [
+                "Tim",
+                "Leslie"
+            ],
+            [
+                "Tiziano",
+                "Zito"
+            ],
+            [
+                "Tom",
+                "Krauss"
+            ],
+            [
+                "Utkarsh",
+                "Upadhyay"
+            ],
+            [
+                "Yaroslav O.",
+                "Halchenko"
+            ],
+            [
+                "Yoshiki",
+                "V\u00e1zquez-Baeza"
+            ],
+            [
+                "",
+                "???"
+            ]
+        ],
+        "journal": [
+            "Nature Methods"
         ],
         "url": null,
         "id": null,
@@ -429,6 +918,71 @@
         ],
         "journal": [
             "Acta Crystallographica Section D Structural Biology"
+        ],
+        "url": null,
+        "id": null,
+        "seq": null
+    },
+    "https://doi.org/10.1109%2FTCBB.2010.104": {
+        "doi": "10.1109%2FTCBB.2010.104",
+        "published_date_parts": [
+            2011,
+            9
+        ],
+        "title": "Fast Flexible Modeling of RNA Structure Using Internal Coordinates",
+        "authors": [
+            [
+                "S. C.",
+                "Flores"
+            ],
+            [
+                "Michael A.",
+                "Sherman"
+            ],
+            [
+                "C. M.",
+                "Bruns"
+            ],
+            [
+                "P.",
+                "Eastman"
+            ],
+            [
+                "R. B.",
+                "Altman"
+            ]
+        ],
+        "journal": [
+            "IEEE/ACM Transactions on Computational Biology and Bioinformatics"
+        ],
+        "url": null,
+        "id": null,
+        "seq": null
+    },
+    "https://doi.org/10.1261/rna.039438.113": {
+        "doi": "10.1261/rna.039438.113",
+        "published_date_parts": [
+            2013,
+            8,
+            22
+        ],
+        "title": "Automated classification of RNA 3D motifs and the RNA 3D Motif Atlas",
+        "authors": [
+            [
+                "Anton I.",
+                "Petrov"
+            ],
+            [
+                "Craig L.",
+                "Zirbel"
+            ],
+            [
+                "Neocles B.",
+                "Leontis"
+            ]
+        ],
+        "journal": [
+            "RNA"
         ],
         "url": null,
         "id": null,

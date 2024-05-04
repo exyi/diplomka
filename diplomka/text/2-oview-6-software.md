@@ -10,9 +10,9 @@ In this section, we will list and briefly overview the available tools used for 
 ### FR3D {#sec:software-FR3D}
 
 We have previously introduced FR3D, which will serve as our primary analysis tool.
-FR3D stands for “Find RNA 3D” and is commonly pronounced “Fred”.
+FR3D stands for “Find RNA 3D” and is pronounced “Fred”.
 [Initially, the software was developed to identify motifs comprised of multiple nucleotides](https://www.bgsu.edu/research/rna/software/fr3d.html).
-We will not cover that extensively, but it is relevant, because [the motif atlas](http://dx.doi.org/10.1261/rna.039438.113) published by the FR3D authors relies on the determined basepairs as its source data.
+We will not cover that extensively, but it is relevant, because [the motif atlas](https://doi.org/10.1261/rna.039438.113) published by the FR3D authors relies on the determined basepairs as its source data.
 
 First version of FR3D was written in Matlab, but it was later rewritten to Python.
 We are using the Python version, downloaded from [github.com/BGSU-RNA/fr3d-python](https://github.com/BGSU-RNA/fr3d-python){.link-no-footnote}.
@@ -34,8 +34,8 @@ FR3D determines the basepairs based on a set of custom rules, distinct for each 
 The rules are not described in literature or documentation, but the rules are conveniently placed in a single source file: [`classifiers/class_limits.py`](https://github.com/BGSU-RNA/fr3d-python/blob/6f0a75ed547c7862d804a8a70ad73e04de89955f/fr3d/classifiers/class_limits.py#L340){.link-no-footnote}.
 
 Thanks to the large list of handcrafted rules, FR3D is able to rule out many edge cases while also including the non-standard basepairs.
-It has been validated on a [representative set of PDB structures](http://dx.doi.org/10.1007/978-3-642-25740-7_13) by the authors and compared against other base determination software.
-The cross-validation experiments are currently available online at http://rna.bgsu.edu/experiments/annotations/compare_v7_cWW_A,G_3.0A.html; the URL may be changed to any basepair type.
+It has been validated on a [representative set of PDB structures](https://doi.org/10.1007/978-3-642-25740-7_13) by the authors and compared against other base determination software.
+The cross-validation experiments are currently available online at [rna.bgsu.edu](http://rna.bgsu.edu/experiments/annotations/compare_v7_cWW_A,G_3.0A.html); the URL may be changed to any basepair type.
 
 
 ### X3DNA DSSR {#sec:software-DSSR}
@@ -77,18 +77,18 @@ In short, they consider three basic rules:
 
 However, RNAView unfortunately does not perform very well in practice, although we find it inspiring that such simplicity is feasible.
 While the algorithm may at first feel to be not strict enough, RNAView in fact has more problems identifying good basepairs than misidentifying bad ones.
-For instance, in the tHS AC class, RNAView frequently misidentifies pairs as another family or misses them entirely -- we can see that [on prof. Zirbel's annotation comparison](http://rna.bgsu.edu/experiments/annotations/compare_v7_tHS_A,C_3.0A.html).
+For instance, in the tHS AC class, RNAView frequently misidentifies pairs as another family or misses them entirely -- we can see that [on BGSU experimental annotation comparison](http://rna.bgsu.edu/experiments/annotations/compare_v7_tHS_A,C_3.0A.html).
 
 TODO kde jsou ty naše porovnání??
 
-![RNAView misidentifies a clear trans Hoogsteen/Sugar A-C basepair as trans Watson/Sugar basepair.](../img/rnaView-tHS-AC-misidentified.png){#fig:rnaView-tHS-AC-misidentified}
+![A clear trans Hoogsteen/Sugar A-C basepair as trans Watson/Sugar basepair misidentified by RNAView. The mistake is very undertandable, as the adenine bound exclusively through the N6 atom, which is part of both Hoogsteen and Watson-Crick edges. See @sec:basepair-metrics-ypr for more discussion regarding this issue.](../img/rnaView-tHS-AC-misidentified.png){#fig:rnaView-tHS-AC-misidentified .img-width75}
 
 
 ### Curves+ {#sec:software-Curves}
 
-[Curves](https://doi.org/10.1093/nar/gkp608) is an older software written in FORTRAN, but it has been recently (2016) updated, with the updated version named **Curves+**.
+[Curves](https://doi.org/10.1093/nar/gkp608) is an older software written in Fortran, but it has been recently (2016) updated, with the updated version named **Curves+**.
 Despite that, we did not find a working web server nor documentation on how to use the program.
-We have the FORTRAN source code and the binary executable, but it also appears to have disappeared from the internet.
+We have the Fortran source code and the binary executable, but it also appears to have disappeared from the internet.
 
 Curves+ is the second software tool which can calculate the standard basepair parameters (@sec:std-base-parameters), and [the paper](https://doi.org/10.1093/nar/gkp608) details how to achieve symmetry of the parameters.
 The values computed by Curves+ should be equal, regardless if it encounters one base first, or the other.

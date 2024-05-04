@@ -1,15 +1,15 @@
-## Basepair Type Classification
+## Basepair Type Classification{#sec:bp-terminology}
 
-### Saenger System
+### Saenger System {#sec:bp-terminology-seanger}
 
 Since many different non-canonical base pairs exists, a systematic naming scheme is necessary.
 The first such scheme we are aware of was described by [W. Saenger in the book 'Principles of Nucleic Acid Structure' (1984)](https://doi.org/10.1007/978-1-4612-5190-3), where he identified and classified possible base pairs with at least two hydrogen bonds into 28 distinct classes.
 The classes are identified using a single ordinal number and are grouped into five higher-level categories based on geometrical symmetry and pairing bases.
 
 
-![Seanger's system of base pair types, [from the](https://doi.org/10.1007/978-1-4612-5190-3) book, page 120](../img/saenger-system-merged.png)
+![Seanger's system of base pair types, [from the](https://doi.org/10.1007/978-1-4612-5190-3) book, page 120](../img/saenger-system-merged.png){#fig:saenger-system-merged}
 
-### The System of Three Edges
+### The Leontis-Westhof System of Three Edges {#sec:bp-terminology-lw}
 
 A more systematic approach was proposed [by N. B. Leontis and E. Westhof in a 2001 paper](https://doi.org/10.1017/s1355838201002515).
 The authors identified that each nucleotide interacts with one of its three edges:
@@ -36,12 +36,13 @@ The [“Strand Orientation” table at NAKB](https://www.nakb.org/basics/basepai
 However, to pair in **cis**, the bases must be flipped -->
 
 Note that “Sugar” refers to the name of a purine or pyrimidine edge, which does not necessarily imply interaction with the ribose sugar, although it is common in RNA.
+Fig. @fig:tSS-GG-DNA-6n4g-A_2-B_2-no-oxygens shows a DNA Sugar/Sugar pair without any sugar interaction.
 The O2' oxygen of the ribose can interact with other bases or even another O2' oxygen.
 Since it is an OH group, it can function both as a hydrogen bond donor and acceptor.
 
 TODO Show example image of tSS GG + something that needs the O2'
 
-![](../img/tSS-GG-DNA-6n4g-A_2-B_2-no-oxygens.png)
+![trans Sugar/Sugar G-G DNA pair -- The "Sugar" basepair does not involve the sugar at all.](../img/tSS-GG-DNA-6n4g-A_2-B_2-no-oxygens.png){#fig:tSS-GG-DNA-6n4g-A_2-B_2-no-oxygens .img-width75}
 
 <!-- A frequent misconception is that "Sugar" means the base binds to the ribose oxygen.
 Although this is frequently the case that the base pair **includes** a hydrogen bond to the O2' atom, it is definitely not necessary.
@@ -87,12 +88,12 @@ For a complete translation table between trivial, Leontis-Westhof, and Saenger n
 
 ### Comparison
 
-The Leontis-Westhof system is more general, we can observe 122 of the LW base pairs in high quality X-ray structures deposited in the PDB.
+The Leontis-Westhof system is more general, we can observe 122 of the base pairs in high quality X-ray structures deposited in the PDB.
 The Saenger system is more restrictive, as it only includes the basepairs that have at least two hydrogen bonds between two polar base atoms.
 Although one could argue that the other pair types do not form “real” basepairs, it is noteworthy that the Saenger system also overlooks certain base pairs that meet the criteria.
-For instance, the **tWS CG** basepair which satisfies the condition is not included in the scheme.
+For instance, the **tWS CG** basepair shown in @fig:tWS-CG-1jj2-9_46-9_4 satisfies the condition, yet it is not included in @fig:saenger-system-merged.
 
-![**tWS GC**: two polar base-to-base H-bonds, but not accounted for in the Saenger system](../img/tWS-CG-1jj2-9_46-9_4.png)
+![**tWS GC**: two polar base-to-base H-bonds, but not accounted for in the Saenger system](../img/tWS-CG-1jj2-9_46-9_4.png){#fig:tWS-CG-1jj2-9_46-9_4 .img-width50}
 
 <!-- We have not seen a recent publication using the Saenger's scheme, but the neither the Leontis-Westhof system is universally adopted.
 It is more general and maybe more importantly it is systematic -- we don't need to remember 28 numbers to be able to identify the basepair type when viewing a molecular structure. -->

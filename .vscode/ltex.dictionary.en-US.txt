@@ -5,3 +5,4 @@ basepairs
 basepairing
 cWW
 datmos
+planarity
