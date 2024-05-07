@@ -18,15 +18,13 @@ First version of FR3D was written in Matlab, but it was later rewritten to Pytho
 We are using the Python version, downloaded from [github.com/BGSU-RNA/fr3d-python](https://github.com/BGSU-RNA/fr3d-python){.link-no-footnote}.
 It appears that the Matlab version is not as actively maintained anymore.
 
-
 The primary advantages of FR3D for our use include:
 
-<!-- * It is freely available including the source code. -->
-* TODO: convince Craig to actually license it?.
-* Ease of use in execution and output processing.
-* Ability to annotate almost all basepair families.
+* It is freely available including the source code licensed under [the Apache 2 license](https://github.com/BGSU-RNA/fr3d-python/blob/master/pyproject.toml#L10).
+* Ability to annotate all basepair families according to the Leontis-Westhof system.
 * Basepair determination quality.
 * Active maintenance, allowing us to potential influence its algorithms.
+* Ease of use in execution and output processing.
 
 FR3D does not calculate the standard basepair parameters discussed in @sec:std-base-parameters, and it does not support writing out its own calculated parameters.
 Because of that, we have to modify FR3D or use other software to calculate them.
@@ -46,7 +44,7 @@ X3DNA was first [published over twenty years ago](https://doi.org/10.1093/nar/gk
 
 DSSR is a commercial product that is not available for free for academic use at the time of writing.
 [It requires licensing from the Columbia University at about \$200 for the basic academic license.](https://inventions.techventures.columbia.edu/technologies/dssr-an-integrated--CU20391)
-However, an older version, 1.9.9, is free for academic use to ensure reproducibility of the literature relying on DSSR analysis.
+Conveniently, an older version, 1.9.9, is free for academic use to ensure reproducibility of the literature relying on DSSR analysis.
 The free version was later withdrawn citing the lack of governmental funding as the reason.
 On the other hand, the source code of [3DNA was made public in 2016](https://x3dna.org/highlights/3dna-c-source-code-is-available), although users are required to register on the X3DNA forum.
 
