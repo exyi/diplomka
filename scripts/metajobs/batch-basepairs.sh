@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 #PBS -N batch-basepairs
-#PBS -l select=1:ncpus=16:mem=30gb:scratch_local=12gb
-#PBS -l walltime=12:00:00
+#PBS -l select=1:ncpus=10:mem=30gb:scratch_local=12gb
+#PBS -l walltime=14:00:00
 #PBS -m ae
 
 # BASEPAIRS_PARTITION=1/40
@@ -43,4 +43,4 @@ $py ./pairs.py --override-pair-family=$BASEPAIRS_PAIR_TYPE\
     --threads="$PBS_NCPUS"\
     --output=$DATADIR/out/all-$BASEPAIRS_PAIR_TYPE.parquet\
     "$DATADIR/fr3d-exportonly-ID.parquet" "$DATADIR/vsecky-paryIDinv.parquet" "$DATADIR/vsecky-paryID.parquet"\
-    $partition_settings | tee $DATADIR/out/all-$BASEPAIRS_PAIR_TYPE-p$BASEPAIRS_PARTITION.log
+    $partition_settings 2>&1 | tee $DATADIR/out/all-$BASEPAIRS_PAIR_TYPE-p${BASEPAIRS_PARTITION/\//of}.log
