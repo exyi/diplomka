@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 #PBS -N batch-basepairs
-#PBS -l select=1:ncpus=16:mem=35gb:scratch_local=12gb
-#PBS -l walltime=18:00:00
+#PBS -l select=1:ncpus=16:mem=30gb:scratch_local=12gb
+#PBS -l walltime=12:00:00
 #PBS -m ae
 
 # BASEPAIRS_PARTITION=1/40
