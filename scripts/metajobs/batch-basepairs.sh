@@ -34,6 +34,8 @@ else
     partition_settings="--partition-input-select=$BASEPAIRS_PARTITION"
 fi
 
+export PYTHONUNBUFFERED=1
+
 $py ./pairs.py --override-pair-family=$BASEPAIRS_PAIR_TYPE\
     --filter --dedupe --postfilter-hb=4.2 --postfilter-shift=2.5\
     --reference-basepairs="$DATADIR/reference-basepairs-KDEyawpitchroll.json"\
