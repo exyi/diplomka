@@ -2,7 +2,8 @@
 
 import subprocess, os, re, sys, json, dataclasses, argparse, shutil, typing as ty
 import requests
-import pandocfilters
+import pandocfilters as pf
+import html
 
 @dataclasses.dataclass
 class Options:
@@ -22,7 +23,7 @@ class CitationInfo:
     published_date_parts: list[int]
     title: str
     authors: list[list[str]]
-    journal: ty.Optional[str]
+    journal: ty.Optional[list[str]]
     url: ty.Optional[str]
     id: ty.Optional[str] = None
     seq: ty.Optional[int] = None
@@ -74,7 +75,7 @@ def get_citations_somehow(url_list: list[str]) -> dict[str, CitationInfo]:
                 os.remove("cit-auto.json.new")
     return {**auto, **manual}
 
-def assign_citation_ids(citations: dict[str, CitationInfo]):
+def assign_citation_ids(citations: dict[str, CitationInfo]) -> dict[str, CitationInfo]:
     assigned_ids = dict()
     for url, cit in citations.items():
         if cit.id is not None:
@@ -111,7 +112,7 @@ def get_str_content(pandoc_json: dict) -> list[str]:
         elif key == "Code":
             assert isinstance(val[1], str)
             result.append(val[1])
-    pandocfilters.walk(pandoc_json, core, "", {})
+    pf.walk(pandoc_json, core, "", {})
     return result
 
 def collect_links(out: dict[str, list[str]]):
@@ -135,11 +136,11 @@ def convert_links(citations: dict[str, CitationInfo]):
             if ['data-footnote-link', 'true'] in attr[2]:
                 pass
             elif url in citations:
-                citation_ref = pandocfilters.Span(
+                citation_ref = pf.Span(
                         ['', ["citation-ref"], [ ["data-citation-id", str(citations[url].id)], ["data-citation-seq", str(citations[url].seq)] ] ],
-                        [pandocfilters.Space(),  pandocfilters.Str(f"[{citations[url].id}]")])
+                        [pf.Space(),  pf.Str(f"[{citations[url].id}]")])
                 new_content = [ *content, citation_ref ] if content_text.lower() != url else [ citation_ref ]
-                return pandocfilters.Link(attr, new_content,[ url, ''])
+                return pf.Link(attr, new_content,[ url, ''])
             elif url.startswith("http:") or url.startswith("https:"):
                 print(f"External link: {url} -> {content_text} ({repr(attr)})")
                 # print(f"External link: {url} -> {content_text} ({repr(content)})")
@@ -148,20 +149,20 @@ def convert_links(citations: dict[str, CitationInfo]):
                 if url.lower() == (f"https://www.rcsb.org/structure/" + content_text).lower():
                     # skip PDB links, it is obvious
                     return
-                url_html = url.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("'", "&apos;").replace('"', "&quot;")
+                url_html = html.escape(url)
                 breakable_url = re.sub(r"(([/][#]?|&amp;|[=])+)", r"\1&#8203;", url)
-                footnote = pandocfilters.Span(
+                footnote = pf.Span(
                     # ['', [], []],
                     ['', ["link-footnote"], []],
                     [
-                        # pandocfilters.Link( ['', [], [ ['data-footnote-link', 'true'], ['href', url]]], [pandocfilters.Str(f"{url}")], [ url, '' ]),
-                        pandocfilters.RawInline('html', f"<a href='{url_html}'>{breakable_url}</a>")
+                        # pf.Link( ['', [], [ ['data-footnote-link', 'true'], ['href', url]]], [pf.Str(f"{url}")], [ url, '' ]),
+                        pf.RawInline('html', f"<a href='{url_html}'>{breakable_url}</a>")
                     ]
                 )
                 new_content = [ *content, footnote ]
-                link = pandocfilters.Link([ attr[0], attr[1], attr[2] + [ ['data-footnote-link', 'true'] ]], content, [url, ''])
+                link = pf.Link([ attr[0], attr[1], attr[2] + [ ['data-footnote-link', 'true'] ]], content, [url, ''])
                 # return link
-                return pandocfilters.Span(
+                return pf.Span(
                     ['', [], []],
                     # ['', ["link-footnote"], []],
                     [link, footnote]
@@ -170,36 +171,93 @@ def convert_links(citations: dict[str, CitationInfo]):
                 # internal link - remove the filename, since it gets smashed into one file
                 new_url = f"#{m.group('hash')}"
                 # new_url = f"{m.group('filename')}.json#{m.group('hash')}"
-                return pandocfilters.Link(attr, content, [new_url, ''])
+                return pf.Link(attr, content, [new_url, ''])
             else:
                 pass
     return core
 
+def format_author(author: list[str], shorten_first_name) -> str:
+    first_name = author[0]
+    if shorten_first_name:
+        first_name = " ".join(n[0] + "." for n in first_name.split())
+    else:
+        first_name = " ".join((n if len(n) > 1 else n + ".") for n in first_name.split())
+    last_name = author[1]
+    return f"{first_name} {last_name}".strip()
 
-def process_links(files: list[str]):
+def format_date(date_parts: list[int]) -> str:
+    if len(date_parts) == 0:
+        return "date???"
+    if len(date_parts) == 1:
+        return str(date_parts[0])
+    month_names = [ "Jan.", "Feb.", "March", "April", "May", "June", "July", "Aug.", "Sep.", "Oct.", "Nov.", "Dec." ]
+    return f"{month_names[date_parts[1]-1]} {date_parts[0]}"
+
+def generate_references(cit_map: dict[str, CitationInfo]):
+    cits = sorted(cit_map.items(), key=lambda c: (c[1].published_date_parts, c[1].seq))
+
+    blocks = [
+        pf.Header(1, ["references", [], []], [pf.Str("References")]),
+    ]
+    for id, cit in cits:
+        link = f'<span class="references-doi"><a href="https://doi.org/{html.escape(cit.doi)}">doi: <span class="references-doi-body">{html.escape(cit.doi)}</span></a></span>' \
+            if cit.doi else \
+            f'<span class="references-url"><a href="{html.escape(cit.url)}">Available at: <span class="references-url-body">{html.escape(cit.url)}</span></a></span>' \
+            if cit.url else ""
+        authors = cit.authors
+        if len(authors) > 20 or ["", "???"] in authors:
+            authors = [a for a in authors if a[1] != "???"]
+            authors = authors[:5] + [["", "et al."]]
+        authors = ", ".join(format_author(a, shorten_first_name=len(authors) > 3) for a in authors)
+        if cit.journal and len(cit.journal) > 0:
+            journal = f'<span class="references-journal">{html.escape(cit.journal[0])},</span>'
+        else:
+            journal = ""
+        body = f"""
+            <span class="references-authors">{html.escape(authors)}</span>
+            <span class="references-title">{html.escape(cit.title)}</span>
+            {journal}
+            <span class="references-date">{format_date(cit.published_date_parts)}</span>
+            {link}
+        """
+        row = f"""
+            <div class="references-table-row" id="ref-{html.escape(id)}">
+                <div class="references-table-id">[{html.escape(id)}]</div>
+                <div class="references-table-body">
+                    {body}
+                </div>
+            </div>
+            """
+        blocks.append(pf.RawBlock("html", row))
+    return {"pandoc-api-version": [1, 23, 1], "meta": {}, "blocks": blocks}
+
+def process_links(files: list[str], out_dir):
     links: dict[str, list[str]] = dict()
     phase1 = [
         collect_links(links)
     ]
     for file in files:
         with open(file) as f:
-            pandocfilters.applyJSONFilters(phase1, f.read(), "")
+            pf.applyJSONFilters(phase1, f.read(), "")
     
     citations = get_citations_somehow(list(links.keys()))
     cit_map = assign_citation_ids(citations)
     for l in links.items():
         cit = citations.get(l[0])
         if cit:
-            print(f" {cit.seq+1: 3d} {cit.id:5s}: {cit.title} ({cit.doi})")
+            print(f" {(cit.seq or -100)+1: 3d} {cit.id:5s}: {cit.title} ({cit.doi})")
 
     phase2 = [convert_links(citations)]
     for file in files:
         with open(file) as f:
-            altered = pandocfilters.applyJSONFilters(phase2, f.read(), "")
+            altered = pf.applyJSONFilters(phase2, f.read(), "")
         with open(file, "w") as f:
             f.write(altered)
 
-    # TODO: generate bibliography
+    references = generate_references(cit_map)
+    with open(os.path.join(out_dir, "references.json"), "w") as f:
+        json.dump(references, f, indent=4)
+    files.append(os.path.join(out_dir, "references.json"))
 
 @dataclasses.dataclass
 class RunResult:
@@ -364,7 +422,7 @@ def main(argv):
 
     files = pandoc_parse("text", "out/parsed")
     reexport_pandoc_for_review(files, "out/for_review.md")
-    process_links(files)
+    process_links(files, "out/parsed")
     pandoc_render(files, "out/thesis.html")
 
     if not options.skip_pdf:

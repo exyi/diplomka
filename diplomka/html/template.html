@@ -171,6 +171,8 @@
             padding: 0.1cm;
         }
 
+        /* Figure styling */
+
         figure {
             max-width: calc(100%);
             /* margin: 40px; */
@@ -195,6 +197,22 @@
         }
         figure figcaption {
             text-align: center; text-align-last: center;
+        }
+
+        /* Code listing styling */
+        .listing:not([data-split-to]) {
+            border-bottom: solid 1px black;
+        }
+        .listing p:first-child {
+            border-top: solid 2px black;
+            border-bottom: solid 1px black;
+            padding-top: 0.25rem;
+            padding-bottom: 0.25rem;
+            page-break-after: avoid;
+        }
+        .listing .sourceCode {
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
         }
 
         section.level2 {

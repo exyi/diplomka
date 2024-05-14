@@ -98,7 +98,7 @@ However, as far as we know, it is not possible to force DSSR to compute basepair
 This unfortunately means that some basepairs might be missing the parameters.
 Although DSSR should recognize all basepairs types reported by FR3D, sometimes almost all the parameter values are missing (TODO specific example, also in ./2-oview-6-software.md).
 
-The rationale for executing DSSR within the `pairs.py` script, instead of running it on all structures beforehand like we do with FR3D, lies in the complexity of DSSR's output format.
+The rationale for executing DSSR within the `pairs.py` script, instead of running it on all structures beforehand like we do with FR3D, is the complexity of DSSR's output format.
 While FR3D generates a single "PDBID_basepair.txt" file, DSSR generates a collection of files such as "dssr-dsStepPars.txt", "dssr-dsStepPars.txt", "dssr-dsHelixPars.txt", and "dssr-basepairs.txt".
 The fact that the output filenames cannot be easily changed prevents us from simply running DSSR in a loop for all structures.
 Since the outputs contain a lot of values, the files are significantly larger than those produced by FR3D.

@@ -146,7 +146,7 @@ mpng "output-directory/", width=640, height=480
 ```
 
 PyMOL produces a directory of numbered PNG images, one for each frame of the animation.
-For the web application, we encode the movie into webm/VP9 codec, preserving the alpha (transparency) channel.
+For the web application, we encode the movie as WebM with the VP9 codec, preserving the alpha (transparency) channel.
 
 ### Asymmetrical units{#sec:impl-basepair-img-asy}
 

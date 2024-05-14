@@ -4,6 +4,9 @@ author: 'Stanislav Lukeš'
 supervizor: 'prof. Ing. Bohdan Schneider, CSc.'
 numberSections: true
 linkReferences: true
+# https://lierdakil.github.io/pandoc-crossref/#table-style-captions
+codeBlockCaptions: true
+lstPrefix: 'listing' # listing is obscure enough
 abstract: |-
     In this thesis we analyze nucleic acid base pairing or something.
     We also analyze something else.

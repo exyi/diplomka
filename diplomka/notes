@@ -78,17 +78,17 @@ copy(
     select pdbid, model, chain1, res1, nr1, ins1, alt1, chain2, res2, nr2, ins2, alt2,
         --    tripletx, triplety, tripletz, pdbsymstr, gemmisymstr, gemmi_shortest
         NULL::text as symmetry_operation1, nullif(pdbsymstr, '1_555') as symmetry_operation2
-    from '/mnt/Aldabrachelys/test/vsecky-pary-refset.parquet'
+    from '/mnt/Aldabrachelys/test/vsecky-pary.parquet'
 )
-to '/mnt/Aldabrachelys/test/vsecky-pary-refsetID.parquet' (format parquet);
+to '/mnt/Aldabrachelys/test/vsecky-paryID.parquet' (format parquet);
 
 copy(
     select pdbid, model, chain2 as chain1, res2 as res1, nr2 as nr1, ins2 as ins1, alt2 as alt1, chain1 as chain2, res1 as res2, nr1 as nr2, ins1 as ins2, alt1 as alt2,
         --    tripletx, triplety, tripletz, pdbsymstr, gemmisymstr, gemmi_shortest
         nullif(pdbsymstr, '1_555') as symmetry_operation1, NULL::text as symmetry_operation2
-    from '/mnt/Aldabrachelys/test/vsecky-pary-refset.parquet'
+    from '/mnt/Aldabrachelys/test/vsecky-pary.parquet'
 )
-to '/mnt/Aldabrachelys/test/vsecky-pary-refsetIDinv.parquet' (format parquet);
+to '/mnt/Aldabrachelys/test/vsecky-paryIDinv.parquet' (format parquet);
 
 --python3 ./pairs.py /mnt/Aldabrachelys/test/pdb/fr3d_6e88eb7d_bpdet/*_basepair_detail.txt --pdbcache /mnt/Aldabrachelys/test/pdb/s --threads 32 --export-only --output /mnt/Aldabrachelys/test/pdb/analyzed-bonds/fr3d-exportonly.csv
 

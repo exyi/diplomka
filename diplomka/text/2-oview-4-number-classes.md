@@ -65,6 +65,8 @@ If the basepair is **cis**, the shape is filled (`●`, `■`, `▶`), if **tran
 The basepair families are then `⎼○⎼` (or `○⎼○`) for **tWW**, `●⎼▶` for **cWS** and `⎼▶⎼` **cSS**.
 Note that only the sugar edge has an asymmetric glyph symbol, indicating the authors' original intention to have the Sugar/Sugar family asymmetrical.
 
+TODO najit font kde to vypada dobre
+
 If the basepair is **cis**, it is represented with filled symbols (`●`, `■`, `▶`); if **trans**, it is shown with empty symbols (`○`, `□`, `▷`). The resulting basepair families are then represented as `⎼○⎼` (or `○⎼○`) for **tWW**, `●⎼▶` for **cWS**, and `⎼▶⎼` for **cSS**. Note that only the sugar edge has an asymmetric glyph symbol.
 
 ![In trans Sugar/Sugar, C-A is defined while A-C is left undefined. In contrast, in W/W and H/H the C-A and A-C show the same pair (turned upside down)](../img/tSS-CA-vs-AC.png)

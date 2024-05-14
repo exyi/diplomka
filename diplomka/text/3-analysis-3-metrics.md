@@ -138,8 +138,7 @@ The coordinate system is similar to the used in [MMB (formerly RNABuilder)](http
 The modification was proposed by Craig Zirbel to roughly aligns the coordinate system with the one used in FR3D, as it conveniently places the Watson-Crick edge in positive X and Y coordinates.
 
 We will calculate the **ZYX intrinsic Euler angles** between the coordinate systems.
-It offers a good interpretability as the **Yaw**, **Pitch** and **Roll** angles of an aircraft going from the first glycosidic bond to the second one, with the wings aligned along the base plane.
+It offers a good interpretability as the **Yaw**, **Pitch**, and **Roll** angles of an aircraft going from the first glycosidic bond to the second one, with the wings aligned along the base plane.
 It is also easy to demonstrate or verify by three `turn` subsequent commands in PyMOL.
 
 ![A purine (A) and a pyrimidine (C) nucleotides overlaid over the base coordinate system for Yaw/Pitch/Roll angle calculation.](../img/MMB_reference_frame-purinepluspyrimidine.svg){#fig:MMB_reference_frame-purinepluspyrimidine}
-
