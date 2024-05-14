@@ -68,7 +68,7 @@ We'll use sample size of 100 for the test, given that about a hundred is a typic
 Although many classes have much fewer found instances, we don't want to optimize the method for cases where we won't be able to produce a reliable number anyway.
 We have slightly over 30 000 datapoints in the canonical classes, so 1000 sampled batches should provide an ample coverage the available dataset.
 
-The following figure -@fig:KDE_bandwidth_golden_length_deviation compares various bandwidth adjustments of the default Scott's factor.
+The following figure [-@fig:KDE_bandwidth_golden_length_deviation] compares various bandwidth adjustments of the default Scott's factor.
 It is clear that the general optimum is in the range from 1.0 to 1.5, although we can see that different hydrogen bonds would have different optima.
 
 ![[Reference H-bond lengths](https://doi.org/10.1107/S2059798321007610) / KDE mode with bandwidth adjustment 0.5 … 3.0](../img/KDE_bandwidth_golden_length_deviation.svg){#fig:KDE_bandwidth_golden_length_deviation}
@@ -93,7 +93,7 @@ $$R_{ps} = \frac{D_{ps}}{n^{-1} \cdot \sum_{k=1}^{n} D_{ks}}$$
 
 This formula calculates the relative deviation $R_{ps}$ of a specific data point $p$ with respect to the statistic $s$.
 The overall performance of a statistic is then calculated as a mean of a column $s$ in matrix $R$.
-As shown in figure -@fig:percentile_kdemode_stability_GC_AU, the percentiles are significantly more stable when compared to the KDE mode.
+As shown in figure [-@fig:percentile_kdemode_stability_GC_AU], the percentiles are significantly more stable when compared to the KDE mode.
 
 TODO compare effect size with ^
 

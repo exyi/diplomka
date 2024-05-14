@@ -1,6 +1,6 @@
 ## Calculation of the proposed metrics
 
-In section -@sec:basepair-metrics, we have informally described the basepairing measures we experimented with.
+In section [-@sec:basepair-metrics], we have informally described the basepairing measures we experimented with.
 The section is dedicated to the exact definitions, including simplified Python code.
 
 ### Hydrogen bond lengths and angles
