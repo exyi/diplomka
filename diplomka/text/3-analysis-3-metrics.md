@@ -127,14 +127,14 @@ hide everything, not %pair-->
 
 ---
 
-The above-mentioned measures already work very well on most basepair classes.
-As described in @sec:TODO, we can verify that by calculating the parameters for all close contacts found in PDB and bounding them by the maximum range observed in basepairs reported by FR3D.
+The above-mentioned measures already work well on most basepair classes.
+As described in @sec:testing-basepair-metrics, we can verify that by calculating the parameters for all close contacts found in PDB and bounding them by the maximum range observed in basepairs reported by FR3D.
 When we do that with the five H-bond parameters and the five coplanarity measures, we are able to reproduce the FR3D reported set to a decent degree.
 For instance, in the cWW U-U class, we have about 60 false positives, out of 750 total basepairs.
-Out of which, we claim that the vast majority of false positives are valid basepairs of this category, albeit slightly streched or shifted.
+Out of which, we claim that the vast majority of false positives are valid basepairs of this category, albeit slightly stretched or shifted.
 We would like to encourage the readers to [judge for themselves in the basepairs.datmos.org web application.](https://basepairs.datmos.org/#cWw-U-U/hb0_L=..4&hb0_DA=85..145&hb0_AA=95..155&hb0_OOPA1=-45..35&hb0_OOPA2=-45..60&hb1_L=..4.1&hb1_DA=85..140&hb1_AA=90..155&hb1_OOPA1=-40..35&hb1_OOPA2=-50..35&min_bond_length=..3.8&coplanarity_a=135..&coplanarity_edge_angle1=-30..45&coplanarity_edge_angle2=-35..45&coplanarity_shift1=-1.6..1.7&coplanarity_shift2=-1.1..1.5&baseline_ds=fr3d-f)
 
-### Relative base rotation{#sec:basepair-metrics-ypr}
+### Relative base rotation {#sec:basepair-metrics-ypr}
 
 However, the weak spot of this approach are the basepair classes with only a single hydrogen bond.
 Such a basepair is free to rotate along H-bonded atoms, as long as it is planar.
@@ -163,3 +163,6 @@ It offers a good interpretability as the **Yaw**, **Pitch**, and **Roll** angles
 It is also easy to demonstrate or verify by three `turn` subsequent commands in PyMOL.
 
 ![A purine (A) and a pyrimidine (C) nucleotides overlaid over the base coordinate system for Yaw/Pitch/Roll angle calculation.](../img/MMB_reference_frame-purinepluspyrimidine.svg){#fig:MMB_reference_frame-purinepluspyrimidine}
+
+
+![Performing yaw (Z axis), pitch (Y), and roll (X) rotations on the 3diL A68:A126 cWH G-A basepair. Part A shows the starting position with the adenine aligned with axes. Parts B and C show the intermediary steps, while part D shows the final rotation with the guanine aligned opposite to the original adenine position.](../img/metrics-yaw-pitch-roll-3dil_A68_126_cWH-G-A.svg)
