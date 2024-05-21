@@ -12,7 +12,7 @@ For better clarity, we will use the following conventions, unless noted otherwis
 
 For brevity, the list only includes ambiguous or uncommon abbreviations.
 
-* **TODO** - this means that the part of the work is incomplete
+* **TODO** — this means that the part of the work is incomplete
 
 **cWW**, **tWW**, **cWH**, **tWH**, **cWS**, **tWS**, **cHH**, **tHH**, **cHS**, **tHS**, **cSS**, **tSS** are abbreviated basepair families. See @sec:bp-terminology-lw or [](https://doi.org/10.1017/s1355838201002515) for explanation.
 

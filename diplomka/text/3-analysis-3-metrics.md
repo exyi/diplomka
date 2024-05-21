@@ -14,10 +14,11 @@ The main qualities of the metrics are:
 It is important that humans can easily understand why the computer did or didn't assign a specific basepair, either for debugging the software or potentially for refining the molecular structures.
 Thus, we want the metrics to be reasonably simple and interpretable.
 
-In order to be useful, the metric must have a sharp enough distribution to help identifying the specific basepair class.
-As an extreme example, we can easily rule out using the euler angles shown in @fig:euler-angles-bad-distribution, because the values may span the entire range of -180° ... +180°.
+In order to be useful, the metric must have a sharp enough distribution to help in identifying the specific basepair class.
+In @fig:cWH-G-G-yaw-hbond, we show that the **yaw** angle performs relatively well on the **cWH G-G** class, while the H-bond length has a relatively long tail where it is quickly amassing false positives.
+For similar reasons, we entirely ruled out using ZXZ Euler angles in @sec:basepair-metrics-ypr, because the values span the entire range of $-180° \cdots +180°$.
 
-![TODO](TODO){#fig:euler-angles-bad-distribution}
+![“Selectivity” of **yaw** angle (@sec:basepair-metrics-ypr) and **H-bond length** (@sec:basepair-metrics-hbonds) demonstrated on **cWH G-G**. Basepairs annotated by FR3D on the reference set, compared with all close contacts (one of the defined H-bonds is ≤ 4.2 Å).](../img/cWH-G-G-yaw-hbond.svg){#fig:cWH-G-G-yaw-hbond}
 
 
 ### The Number of Parameters
@@ -36,9 +37,9 @@ That makes it easier to set the limit and also allows us to share the same condi
 We would rather avoid more complex constraints than a set of one dimensional numeric ranges.
 Generalizing the constraints into two or more dimensions is similar to inventing additional parameters by linearly combining the existing ones, except that the potential new parameter is easier to share across the ~120 basepair classes.
 
-TODO trans + Yaw/Pitch/Roll demo image
+TODO xyz translation + Yaw/Pitch/Roll demo image
 
-### Hydrogen bond lengths and angles
+### Hydrogen bond lengths and angles {#sec:basepair-metrics-hbonds}
 
 A good starting point is simply measuring the distance between the atoms forming the hydrogen bonds.
 Traditionally, we would measure a hydrogen bond between the hydrogen and the acceptor heavy atom.
@@ -91,8 +92,8 @@ We will therefore name it **"Left Plane Angle"** and **"Right Plane Angle"**, as
 ### Plane to plane comparison
 
 We have a number of options for comparing the relative orientation of the base planes.
-The obvious choice is the angle between the planes, more specifically the angle between their normal vectors which we will call simply **Coplanarity angle**.
-(TODO cite ten paper co posilala Helen?).
+The obvious choice is the angle between the planes, more specifically the angle between their normal vectors as used for example in <https://doi.org/10.1261/rna.381407>.
+We will simply call this number the **Coplanarity angle**.
 That does not capture the vertical distance, but also cannot distinguish "bent" from "twisted" basepairs.
 In the language of the standard basepair parameters, there is a difference between having a large propeller or large buckle.
 
@@ -138,11 +139,23 @@ We would like to encourage the readers to [judge for themselves in the basepairs
 
 However, the weak spot of this approach are the basepair classes with only a single hydrogen bond.
 Such a basepair is free to rotate along H-bonded atoms, as long as it is planar.
-An example of this issue is shown in figure TODO.
+An example of this issue is shown in figure @fig:metrics-ypr-necessity-tHH-GG-misassignment, and the [web application demonstrates this issue interactively](http://localhost:1922/#tHH-A-G/hb0_L=..4&hb0_DA=100..150&hb0_AA=100..165&hb0_OOPA1=-25..35&hb0_OOPA2=-10..35&min_bond_length=..3.8&coplanarity_a=..40&coplanarity_edge_angle1=-10..25&coplanarity_edge_angle2=-10..30&coplanarity_shift1=-0.2..1.5&coplanarity_shift2=-0.3..1.3&baseline_ds=fr3d-f).
 
-TODO fig **A.** An example of a correctly assigned tHH A-G basepair. **B.** The tHH A-G candidates also includes a clear Watson-Crick/Hoogsteen basepair. The coplanarity is perfect and the N6 ··· O6 H-bond cannot distinguish it either, as it defined both of these two classes.
+![**A.** An example of a correctly assigned tHH A-G basepair (3cd6 913:1071 in chain 0). **B.** The tHH A-G candidates also includes a clear Watson-Crick/Hoogsteen basepair (7osm 407:390 in chain 18S). The coplanarity is perfect and the N6 ··· O6 H-bond cannot distinguish it either, as it defined both of these two classes.](../img/metrics-ypr-necessity-tHH-GG-misassignment.svg){#fig:metrics-ypr-necessity-tHH-GG-misassignment}
 
-Again, the [web application demonstrates this issue interactively](http://localhost:1922/#tHH-A-G/hb0_L=..4&hb0_DA=100..150&hb0_AA=100..165&hb0_OOPA1=-25..35&hb0_OOPA2=-10..35&min_bond_length=..3.8&coplanarity_a=..40&coplanarity_edge_angle1=-10..25&coplanarity_edge_angle2=-10..30&coplanarity_shift1=-0.2..1.5&coplanarity_shift2=-0.3..1.3&baseline_ds=fr3d-f)
+<!--
+fetch 3cd6
+select pair, 3cd6 and chain 0 and resi 913+1071
+show sticks, %pair
+orient %pair
+hide everything, not %pair
+
+fetch 7osm
+select pair, 7osm and chain 18S and resi 407+390
+show sticks, %pair
+orient %pair
+hide everything, not %pair
+-->
 
 ---
 
@@ -155,7 +168,7 @@ The relative position of the pairing bases can be trivially described as the tra
 
 As suggested by Jiří Černý, we choose to place the origin in the N1 or N9 atom, align the glycosidic bond with negative Y axis, as illustrated in figure [-@fig:MMB_reference_frame-purinepluspyrimidine].
 The C6 / C8 atom is placed in negative X with zero Z coordinate, uniquely determining the new coordinate system.
-The coordinate system is similar to the used in [MMB (formerly RNABuilder)](https://doi.org/10.1109%2FTCBB.2010.104), except for that the X and Y axis are swapped and negated.
+The coordinate system is similar to the used in [MMB (formerly RNABuilder)](https://doi.org/10.1109/TCBB.2010.104), except for that the X and Y axis are swapped and negated.
 The modification was proposed by Craig Zirbel to roughly aligns the coordinate system with the one used in FR3D, as it conveniently places the Watson-Crick edge in positive X and Y coordinates.
 
 We will calculate the **ZYX intrinsic Euler angles** between the coordinate systems.

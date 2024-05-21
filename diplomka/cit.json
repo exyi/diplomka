@@ -1,1 +1,20 @@
-{}
+{
+    "https://networkx.org": {
+        "doi": "10.1107/S2059798321007610",
+        "published_date_parts": [
+            2008,8
+        ],
+        "title": "Exploring network structure, dynamics, and function using NetworkX",
+        "authors": [
+            [ "Aric A.", "Hagberg" ],
+            [ "Daniel A.", "Schult" ],
+            [ "Pieter J.", "Swart" ]
+        ],
+        "journal": [
+            "Proceedings of the 7th Python in Science Conference"
+        ],
+        "url": "https://networkx.org",
+        "id": "NX",
+        "seq": null
+    }
+}

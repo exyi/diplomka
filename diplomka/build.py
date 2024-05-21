@@ -82,11 +82,13 @@ def assign_citation_ids(citations: dict[str, CitationInfo]) -> dict[str, Citatio
             assigned_ids[cit.id] = cit
 
     for url, cit in citations.items():
-        if len(cit.authors) > 3:
+        if cit.id:
+            preferred_id = cit.id
+        elif len(cit.authors) > 3:
             preferred_id = f"{cit.authors[0][1][0]}{cit.published_date_parts[0] % 100:02d}"
         else:
             preferred_id = f"{''.join(author[1][0] for author in cit.authors)}{cit.published_date_parts[0] % 100:02d}"
-        if preferred_id in assigned_ids:
+        if preferred_id in assigned_ids and assigned_ids[preferred_id] != cit:
             for i in range(ord('b'), ord('z')+1):
                 if f'{preferred_id}{chr(i)}' not in assigned_ids:
                     preferred_id = f'{preferred_id}{chr(i)}'
@@ -139,7 +141,8 @@ def convert_links(citations: dict[str, CitationInfo]):
                 citation_ref = pf.Span(
                         ['', ["citation-ref"], [ ["data-citation-id", str(citations[url].id)], ["data-citation-seq", str(citations[url].seq)] ] ],
                         [pf.Space(),  pf.Str(f"[{citations[url].id}]")])
-                new_content = [ *content, citation_ref ] if content_text.lower() != url else [ citation_ref ]
+                print(f"Reference: {url} -> {content_text} [{citations[url].id}]")
+                new_content = [ *content, citation_ref ] if content_text.lower() != url.lower() else [ citation_ref ]
                 return pf.Link(attr, new_content,[ url, ''])
             elif url.startswith("http:") or url.startswith("https:"):
                 print(f"External link: {url} -> {content_text} ({repr(attr)})")
@@ -200,7 +203,7 @@ def generate_references(cit_map: dict[str, CitationInfo]):
         pf.Header(1, ["references", [], []], [pf.Str("References")]),
     ]
     for id, cit in cits:
-        link = f'<span class="references-doi"><a href="https://doi.org/{html.escape(cit.doi)}">doi: <span class="references-doi-body">{html.escape(cit.doi)}</span></a></span>' \
+        link = f'<span class="references-doi"><a href="https://doi.org/{html.escape(cit.doi)}">DOI: <span class="references-doi-body">{html.escape(cit.doi)}</span></a></span>' \
             if cit.doi else \
             f'<span class="references-url"><a href="{html.escape(cit.url)}">Available at: <span class="references-url-body">{html.escape(cit.url)}</span></a></span>' \
             if cit.url else ""
@@ -210,14 +213,14 @@ def generate_references(cit_map: dict[str, CitationInfo]):
             authors = authors[:5] + [["", "et al."]]
         authors = ", ".join(format_author(a, shorten_first_name=len(authors) > 3) for a in authors)
         if cit.journal and len(cit.journal) > 0:
-            journal = f'<span class="references-journal">{html.escape(cit.journal[0])},</span>'
+            journal = f'<span class="references-journal">{html.escape(re.sub(r"(\s|[,])+$", "", cit.journal[0]))}</span>'
         else:
             journal = ""
         body = f"""
             <span class="references-authors">{html.escape(authors)}</span>
+            <span class="references-date">{format_date(cit.published_date_parts)}</span>
             <span class="references-title">{html.escape(cit.title)}</span>
             {journal}
-            <span class="references-date">{format_date(cit.published_date_parts)}</span>
             {link}
         """
         row = f"""
@@ -416,9 +419,15 @@ def main(argv):
     parser = argparse.ArgumentParser(description='Build the thesis')
     parser.add_argument('--verbose', action='store_true', help='Verbose output')
     parser.add_argument('--skip-pdf', action='store_true', help='Verbose output')
+    parser.add_argument('--pdf', type=str, help="Input PDF file, only perform PDF/A conversion")
     args = parser.parse_args(argv)
     options.verbose = args.verbose
     options.skip_pdf = args.skip_pdf
+
+    if args.pdf:
+        convert_pdfa(args.pdf, "out/thesis-pdfa.pdf")
+        print("PDF/A conversion done, see out/thesis-pdfa.pdf")
+        return
 
     files = pandoc_parse("text", "out/parsed")
     reexport_pandoc_for_review(files, "out/for_review.md")

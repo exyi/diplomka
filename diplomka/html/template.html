@@ -291,6 +291,39 @@
             content: target-counter(attr(data-pagehref), page)
         }
 
+        .references-table-row {
+            display: flex;
+            text-align: left;
+            text-align-last: left;
+            margin-bottom: 0.5rem;
+            page-break-inside: avoid;
+        }
+        .references-table-row .references-table-id {
+            flex: 0 0 5rem;
+        }
+        .references-table-row .references-table-body {
+            flex-grow: 1;
+        }
+        .references-table-row .references-title {
+            font-weight: bold;
+            display: block;
+        }
+        .references-table-row .references-journal {
+            font-style: italic;
+        }
+        .references-table-row .references-journal::after {
+            content: " ";
+        }
+        .references-table-row a:has(.references-doi-body) {
+            float: right;
+        }
+        .references-table-row .references-date::before {
+            content: " (";
+        }
+        .references-table-row .references-date::after {
+            content: ")";
+        }
+
         .hide {
             display: none;
         }

@@ -8,15 +8,8 @@ linkReferences: true
 codeBlockCaptions: true
 lstPrefix: 'listing' # listing is obscure enough
 abstract: |-
-    In this thesis we analyze nucleic acid base pairing or something.
-    We also analyze something else.
-    We do other stuff as well.
-    We also do some more stuff.
-    In the end we conclude that we've done some stuff.
-    We also conclude that we've done some other stuff.
-    We also conclude that we've done some more stuff.
     (TODO)
 abstract-cs: |-
-    Ehhh
+    (TODO)
 # acknowledgement: |-
 #     Něco něco něco.

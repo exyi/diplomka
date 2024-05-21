@@ -38,7 +38,7 @@ A more sophisticated option involves using [Kernel Density Estimate (KDE)](https
 The density estimate requires a bandwidth parameter which has a large impact on the resulting distribution.
 The bandwidth is conceptually similar to a bin width in a histogram;the KDE can be thought of as a histogram constructed from Gaussian curves instead of rectangles.
 
-Several automatic bandwidth determination methods exist, and we'll use the Scott's formula recommended in `scipy` documentation [TODO cite].
+Several automatic bandwidth determination methods exist, and we'll use the Scott's formula [recommended in `scipy` documentation](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.gaussian_kde.html).
 The formula depends on the number of samples and on the variance of the provided datapoints.
 Optionally, we can specify an adjustment factor of the computed value -- for instance, making the bandwidth 1.5-times larger than the Scott's formula result.
 

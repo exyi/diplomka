@@ -34,8 +34,8 @@ Practical data should contain very little conflicts, so both approaches should y
 The greedy approach is obviously faster and much easier to implement, but the optimal selection isn't hard either, with the right libraries.
 
 In any case, we enforce rule A first without optimizing for rule B (i.e., greedily) — it does not seem appropriate to select the optimal basepair family based on its surroundings.
-Rule B can be reformulated as a problem of maximum weight matching on general graph, which is [solvable in polynomial time ($\mathcal{O}(N^3)$)](https://doi.org/10.1007%2Fs12532-009-0002-8).
-In Python, we can use the [`algorithms.max_weight_matching` function](https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.matching.max_weight_matching.html) from the NetworkX library [TODO citation].
+Rule B can be reformulated as a problem of maximum weight matching on general graph, which is [solvable in polynomial time ($\mathcal{O}(N^3)$)](https://doi.org/10.1007/s12532-009-0002-8).
+In Python, we can use the [`algorithms.max_weight_matching` function](https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.matching.max_weight_matching.html) from the [NetworkX library](https://networkx.org).
 
 
 TODO obrázek

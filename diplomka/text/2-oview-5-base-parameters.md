@@ -86,4 +86,4 @@ On the other hand, the [Curves+ paper](https://doi.org/10.1093/nar/gkp608) expli
 This exact approach will cause other issues if applied to non-canonical basepairs -- notably we would see the "average reference frame" being perpendicular to the basepair plane, if one of the pairs is rotated 180° around the Y axis, such as in trans Watson-Crick basepairs.
 In this case, **opening** and **buckle** would have interchanged meaning.
 
-TODO img?
+<!-- TODO img? -->
