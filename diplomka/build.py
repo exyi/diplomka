@@ -313,7 +313,18 @@ def start_server(directory, port):
     return p
 
 def convert_pdfa(infile, outfile):
-    run("Convert to PDF/A with GhostScript", "gs", "-dPDFA", "-dBATCH", "-dNOPAUSE", "-sColorConversionStrategy=UseDeviceIndependentColor", "-sDEVICE=pdfwrite", "-dPDFACompatibilityPolicy=2", f"-sOutputFile={outfile}", infile, capture_output=True)
+    compress = ["-dDownsampleColorImages", "-dDownsampleGrayImages", "-dDownsampleMonoImages", "-dPDFSETTINGS=/screen"]
+    run("Convert to PDF/A with GhostScript", "gs",
+        "-dPDFA", "-dBATCH",
+        "-dPrinted=false", "-dPreserveAnnots=true", # don't remove links
+        "-dColorImageDownsampleType=Bicubic",
+        "-dFastWebView=true", # first page is loaded faster maybe?
+        "-dNOPAUSE",
+        "-sColorConversionStrategy=UseDeviceIndependentColor",
+        "-sDEVICE=pdfwrite",
+        "-dPDFACompatibilityPolicy=2",
+        *compress,
+        f"-sOutputFile={outfile}", infile, capture_output=True)
     validate_pdfa(outfile)
 
 def validate_pdfa(file):
