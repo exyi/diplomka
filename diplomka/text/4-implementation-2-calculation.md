@@ -1,4 +1,4 @@
-## Calculation of the proposed metrics
+## Calculation of the Proposed Basepair Parameters
 
 In section [-@sec:basepair-metrics], we have informally described the basepairing measures we experimented with.
 The section is dedicated to the exact definitions, including simplified Python code.
@@ -38,7 +38,7 @@ def hbond_geometry(res1: Residue, res2: Residue, hbond):
 
 ### Hydrogen bond planarity
 
-The second set of metrics requires determination of the base planes, represented as the translation and an orthonormal basis of a new coordinate system.
+The second set of parameters requires determination of the base planes, represented as the translation and an orthonormal basis of a new coordinate system.
 We have mentioned that we are looking for optimal plane by least squared distance, but it is important to note that we need to use euclidean (L2) distance, not the distance along the Y coordinate.
 This makes the procedure more similar to Principal Component Analysis (PCA) or Kabsch algorithm ("RMSD alignment") than to linear regression.
 The plane fitting implementation in @lst:code-calc-base-plane-fit uses [singular value decomposition](https://en.wikipedia.org/wiki/Singular_value_decomposition), a good explanation of [the math can be found in StackExchange answers](https://math.stackexchange.com/q/99317).

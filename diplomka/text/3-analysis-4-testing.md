@@ -1,6 +1,6 @@
-## Testing the Basepair Metrics {#sec:testing-basepair-metrics}
+## Testing Basepair Parameters {#sec:testing-basepair-metrics}
 
-<!-- We have done a simple experiment to verify that the metrics proposed in the previous section [-@sec:basepair-metrics] work — that it is sufficient to define basepairs using them.
+<!-- We have done a simple experiment to verify that the parameters proposed in the previous section [-@sec:basepair-metrics] work — that it is sufficient to define basepairs using them.
 In the experiment, we simply try to replicate FR3D annotations by setting the boundaries at the lowest and highest observed value in basepairs reported by FR3D on the reference set.
 
 We deliberately use a different set parameter than FR3D in order for this experiment to work.

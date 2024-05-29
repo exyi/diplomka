@@ -21,9 +21,10 @@ This data format provides compatibility with other software tools used at IBT.
 
 The script loads all PDB structures from the input table using the [BioPython library](https://doi.org/10.1093/bioinformatics/btp163) and computes the following:
 
-* Distance between heavy atoms of defined H-bonds
-* Donor and acceptor angles
-* Various metrics of coplanarity (see TODO)
+* The measured parameters, as defined in @sec:basepair-metrics
+    * Distance between heavy atoms of defined H-bonds
+    * Donor and acceptor angles
+    * Various metrics of coplanarity and relative base orientation
 * If the basepair is a dinucleotide (i.e. are covalently bonded though the phosphodiester bond)
 * If it is part of a parallel or an antiparallel chain
 * Adds the Structure Deposition Date, Determination Method and Resolution metadata to the output.

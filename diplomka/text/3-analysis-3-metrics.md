@@ -1,20 +1,20 @@
-## Basepair Metrics{#sec:basepair-metrics}
+## New Basepair Parameters{#sec:basepair-metrics}
 
 The objective of this work is to find and compare decent measures of basepairing, so we shall finally specify what we are looking for.
-The main qualities of the metrics are:
+The main qualities of the desired parameters are:
 
 * Interpretability — can we easily tell what the number means, can we easily guess the number by looking at the 3D structure?
-* Simplicity — the ideal metric is easy to define and calculate algorithmically.
+* Simplicity — the ideal parameter is easy to define and calculate algorithmically.
 * Stability — it should have low variance for good quality basepairs.
 * Universality — it should have similar value or similar variance on different basepair types.
-* Independence — it is advantageous, if the metric is empirically independent on the other metrics we want to use.
+* Independence — it is advantageous, if the distribution is empirically independent on the other parameters we want to use.
 
 <!-- We need to define basepairs in such a way, that humans can easily understand the results of computer calculations. -->
 
 It is important that humans can easily understand why the computer did or didn't assign a specific basepair, either for debugging the software or potentially for refining the molecular structures.
-Thus, we want the metrics to be reasonably simple and interpretable.
+Thus, we want the parameters to be reasonably simple and interpretable.
 
-In order to be useful, the metric must have a sharp enough distribution to help in identifying the specific basepair class.
+In order to be useful, each parameter must have a sharp enough distribution to help in identifying the specific basepair class.
 In @fig:cWH-G-G-yaw-hbond, we show that the **yaw** angle performs relatively well on the **cWH G-G** class, while the H-bond length has a relatively long tail where it is quickly amassing false positives.
 For similar reasons, we entirely ruled out using ZXZ Euler angles in @sec:basepair-metrics-ypr, because the values span the entire range of $-180° \cdots +180°$.
 
@@ -102,8 +102,8 @@ For each basepair class, we know which atoms form the hydrogen bonds and also th
 The **Edge to plane distance** is the minimal distance of atoms in the first residue pairing edge to the plane of the second residue.
 The **Edge to plane angle** is the angle between the line of first residue pairing edge and the plane of the second residue.
 Each edge always has at least two atoms in RNA, allowing us to calculate the angle even if only one hydrogen bond is defined.
-Both of these metrics depend on the order of bases.
-The two **Edge to plane angles** are usually very similar, but **Edge to plane distances** might be very different, if the basepair is sufficiently "bent".
+Both of these parameters depend on the order of bases --
+the two **Edge to plane angles** are usually very similar, but **Edge to plane distances** might be very different, if the basepair is sufficiently "bent".
 <!-- A symmetrical alternative would be to take center point of both edges, project it onto both planes the distance between the center -->
 
 <!--
