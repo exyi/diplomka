@@ -21,7 +21,7 @@ B. Each residue has at most one partner at each edge.
 
 Some care is needed regarding disordered atoms (alternative positions).
 Rule A assumes that the alternative residues are distinct — the alternative position might sensibly lead to a different basepair assignment.
-However, Rule B allows multiple alternatives of a single residue on the considered edge.
+However, Rule B allows multiple alternatives of a single residue on each edge, effectively treating the alternatives as a single entity.
 
 To enforce the rule in the least disruptive way, we want to keep the “better” pairs and to filter out as little as possible.
 To quantify that, we need a rudimentary scoring function for basepairs.

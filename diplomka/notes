@@ -26,6 +26,8 @@ je ok psát o implementaci?
 web?
  - B: samozrejme
 
+Results and discussion se Bohdanovi víc líbí dohromady
+
 ### blbost
 
 Interesting pair: 6W6L 1 D 40  D 104  both parallel and antiparallel
@@ -113,3 +115,11 @@ copy (select * from '/home/exyi/code/rna-ml/pairclusters/out/plots-reexport0413/
 ```
 find . -type f -name '*.parquet' -printf "%CF %CH:%CM\t%s\t%P\n" | sort -k 4 | awk -F\t 'BEGIN { print "<html><title>List of tables directory</title><body><h1>List of tables/</h1><table><tr><th> Last changed</th><th>Size (MiB)</th><th>Size (rows)</th><th>File</th></tr>" } { "duckdb -list -noheader -s \'select count(*) as rows from read_parquet(\"" $3 "\")\'" | getline count; printf "<tr><td>%s</td>\t<td>%.2g MiB</td>\t<td>%d rows</td>\t<td><a href=\"./%s\" download>%s</a></td></tr>\n", $1, $2/1024/1024, count, $3, $3} END { print "</table></body></html>" }' > index.html
 ```
+
+
+
+
+TODO:
+
+alternativní cHHa, cWWa
+celá PDB pro naše páry

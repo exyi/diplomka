@@ -315,21 +315,23 @@ def start_server(directory, port):
 def convert_pdfa(infile, outfile):
     compress = ["-dDownsampleColorImages", "-dDownsampleGrayImages", "-dDownsampleMonoImages", "-dPDFSETTINGS=/screen"]
     run("Convert to PDF/A with GhostScript", "gs",
-        "-dPDFA", "-dBATCH",
+        "-dPDFA=2", "-dBATCH", "-dNOPAUSE", "-dNOOUTERSAVE",
         "-dPrinted=false", "-dPreserveAnnots=true", # don't remove links
-        "-dColorImageDownsampleType=Bicubic",
-        "-dFastWebView=true", # first page is loaded faster maybe?
-        "-dNOPAUSE",
+        "-dColorImageDownsampleType=/Bicubic",
+        # "-dFastWebView=true", # first page is loaded faster maybe?
         "-sColorConversionStrategy=UseDeviceIndependentColor",
+        "-sProcessColorModel=DeviceCMYK",
         "-sDEVICE=pdfwrite",
-        "-dPDFACompatibilityPolicy=2",
+        "-dPDFACompatibilityPolicy=2", # error when incompatible
         *compress,
-        f"-sOutputFile={outfile}", infile, capture_output=True)
+        f"-sOutputFile={outfile}",
+        "./pdf/PDFA_def.ps",
+        infile, capture_output=True)
     validate_pdfa(outfile)
 
 def validate_pdfa(file):
     try:
-        r = run("PDF/A Verification", "verapdf", file, capture_output=True, check=False)
+        r = run("PDF/A Verification", "verapdf", "--profile", "./pdf/UK_validation_profile.xml", file, capture_output=True, check=False)
     except FileNotFoundError:
         eprint("verapdf not found, skipping PDF/A validation")
         return False
