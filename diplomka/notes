@@ -117,7 +117,13 @@ find . -type f -name '*.parquet' -printf "%CF %CH:%CM\t%s\t%P\n" | sort -k 4 | a
 ```
 
 
-
+```sql
+COPY (SELECT DISTINCT ON (pairid, family)
+                 * EXCLUDE (comparison_in_baseline, comparison_in_current),
+                 bool_or(comparison_in_baseline) OVER (PARTITION BY pairid) as comparison_in_baseline,
+                 bool_or(comparison_in_current) OVER (PARTITION BY pairid) as comparison_in_current             FROM (                 SELECT *, TRUE AS comparison_in_current, FALSE AS comparison_in_baseline
+FROM nabirnew                 UNION ALL BY NAME                 SELECT *, FALSE AS comparison_in_current, TRUE AS comparison_in_baseline FROM fr3d                 ORDER BY comparison_in_current DESC             )) to 'union-with-fr3d.parquet';
+```
 
 TODO:
 

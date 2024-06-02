@@ -35,7 +35,7 @@ FR3D reports each pairs twice, in both orientations.
 For illustration, if a `cWH G-C` pair is reported, a corresponding `cHW C-G` pair is also reported.
 To avoid redundancy, we will de-duplicate the outputs using the following three rules:
 
-1. If the pair family is asymmetrical, we keep the variant shown in LSW 2002 paper
+1. If the pair family is asymmetrical, we keep the variant shown in<>
     * Preferred families are cis or trans `WH`, `WS`, `HS`.
     * `HW`, `SW`, `SH` pairs are always dropped
 2. If the pair nucleotides aren't equal, we keep the variant ordered according to `A > G > C > U`

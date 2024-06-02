@@ -2,12 +2,13 @@
 
 ### Saenger System {#sec:bp-terminology-seanger}
 
+![Seanger's system of base pair types, [from the](https://doi.org/10.1007/978-1-4612-5190-3) book, page 120](../img/saenger-system-merged.png){#fig:saenger-system-merged}
+
 Since many different non-canonical base pairs exists, a systematic naming scheme is necessary.
 The first such scheme we are aware of was described by [W. Saenger in the book 'Principles of Nucleic Acid Structure' (1984)](https://doi.org/10.1007/978-1-4612-5190-3), where he identified and classified possible base pairs with at least two hydrogen bonds into 28 distinct classes.
 The classes are identified using a single ordinal number and are grouped into five higher-level categories based on geometrical symmetry and pairing bases.
 
 
-![Seanger's system of base pair types, [from the](https://doi.org/10.1007/978-1-4612-5190-3) book, page 120](../img/saenger-system-merged.png){#fig:saenger-system-merged}
 
 ### The Leontis-Westhof System of Three Edges {#sec:bp-terminology-lw}
 

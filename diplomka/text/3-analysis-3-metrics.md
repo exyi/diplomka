@@ -1,4 +1,4 @@
-## New Basepair Parameters{#sec:basepair-metrics}
+## New Basepair Parameters {#sec:basepair-metrics}
 
 The objective of this work is to find and compare decent measures of basepairing, so we shall finally specify what we are looking for.
 The main qualities of the desired parameters are:
@@ -37,7 +37,6 @@ That makes it easier to set the limit and also allows us to share the same condi
 We would rather avoid more complex constraints than a set of one dimensional numeric ranges.
 Generalizing the constraints into two or more dimensions is similar to inventing additional parameters by linearly combining the existing ones, except that the potential new parameter is easier to share across the ~120 basepair classes.
 
-TODO xyz translation + Yaw/Pitch/Roll demo image
 
 ### Hydrogen bond lengths and angles {#sec:basepair-metrics-hbonds}
 
@@ -45,7 +44,7 @@ A good starting point is simply measuring the distance between the atoms forming
 Traditionally, we would measure a hydrogen bond between the hydrogen and the acceptor heavy atom.
 Since the exact hydrogen positions are often unknown, we will instead only consider the distance between heavy atoms (oxygen, nitrogen, or carbon).
 Despite the availability of many algorithms for completing PDB structures with the missing hydrogens, there are tricky cases where automatic the completion fails.
-Specifically, some bases may hold a charge and thus have an additional hydrogen, or it may be in a tautomeric form where the hydrogens are on different atoms.
+Specifically, some bases may hold a charge and thus have an additional hydrogen, such as in i-Motif cytosine pairs or it may be in a tautomeric form where the hydrogens are on different atoms.
 Although it isn't common, it is crucial in some basepair classes, and it is likely to be biologically relevant (TODO https://doi.org/10.1002/cphc.200900687 ?, TODO https://www.ncbi.nlm.nih.gov/pmc/articles/PMC97597/ ?). TODO cWH-A-G
 
 In addition to the distance, we can simply determine an angle between the two heavy atoms and a third atom situated on each base.
