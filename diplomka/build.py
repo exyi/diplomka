@@ -319,15 +319,28 @@ def convert_pdfa(infile, outfile):
         "-dPrinted=false", "-dPreserveAnnots=true", # don't remove links
         "-dColorImageDownsampleType=/Bicubic",
         # "-dFastWebView=true", # first page is loaded faster maybe?
-        "-sColorConversionStrategy=UseDeviceIndependentColor",
-        "-sProcessColorModel=DeviceCMYK",
+        # "-sColorConversionStrategy=UseDeviceIndependentColor",
+        "-sColorConversionStrategy=RGB",
+        "-sProcessColorModel=DeviceRGB",
         "-sDEVICE=pdfwrite",
         "-dPDFACompatibilityPolicy=2", # error when incompatible
-        *compress,
+        # *compress,
         f"-sOutputFile={outfile}",
         "./pdf/PDFA_def.ps",
         infile, capture_output=True)
     validate_pdfa(outfile)
+
+    recompress_pdf(outfile, os.path.join(os.path.dirname(outfile), "recompressed.pdf"))
+    print("Optimized pdf:", os.path.join(os.path.dirname(outfile), "recompressed.pdf"))
+    validate_pdfa(os.path.join(os.path.dirname(outfile), "recompressed.pdf"))
+    return True
+
+def recompress_pdf(infile, outfile):
+    run("Recompress PDF with qpdf",
+        "qpdf", infile, "--linearize", "--object-streams=generate", "--stream-data=compress", "--recompress-flate", "--compression-level=9",
+        "--normalize-content", "--remove-unreferenced-resources",
+        outfile,
+        capture_output=True)
 
 def validate_pdfa(file):
     try:
@@ -339,12 +352,14 @@ def validate_pdfa(file):
     if r.returncode != 0:
         eprint("PDF/A validation failed")
         eprint(r.stdout)
-        exit(1)
+        return False
     assert r.stdout is not None
     if 'nonCompliant="0"' in r.stdout and 'compliant="1"' in r.stdout:
         print("PDF/A validation passed")
+        return True
     else:
         eprint("PDF/A validation is sus")
+        return False
 
 def build_pdf(infile, outfile="out/thesis-{}.pdf", httpserver=True):
     os.makedirs("out", exist_ok=True)
