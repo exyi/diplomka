@@ -502,22 +502,22 @@ def make_histogram_group(dataframes: list[pl.DataFrame], axes: list[Axes], title
             if c in nn_columns
         ])
         if is_symmetric:
-            print(f"{pair_type} is symetric")
-            # merge symetric bonds
-            all_hbons = pair_defs.get_hbonds(pair_type)
-            symetric_bonds = list(set(
-                tuple(sorted((i, all_hbons.index(pair_defs.hbond_swap_nucleotides(hb)))))
-                for i, hb in enumerate(all_hbons)
+            print(f"{pair_type} is symmetric")
+            # merge symmetric bonds
+            all_hbonds = pair_defs.get_hbonds(pair_type)
+            symmetric_bonds = list(set(
+                tuple(sorted((i, all_hbonds.index(pair_defs.hbond_swap_nucleotides(hb)))))
+                for i, hb in enumerate(all_hbonds)
             ))
-            assert (0, 0) not in symetric_bonds and (1, 1) not in symetric_bonds and (2, 2) not in symetric_bonds
+            assert (0, 0) not in symmetric_bonds and (1, 1) not in symmetric_bonds and (2, 2) not in symmetric_bonds
             renamed_columns_ = renamed_columns.select(
                 pl.col(legend[j]).alias(legend[i])
-                for i, j in symetric_bonds
+                for i, j in symmetric_bonds
                 if i < len(legend) and j < len(legend) and legend[j] in renamed_columns.columns
             )
             if len(renamed_columns_.columns) == len(renamed_columns.columns):
-                print("Merging symetric bonds: ", symetric_bonds)
-                renamed_columns = renamed_columns.select(pl.col(legend[i]) for i, _ in symetric_bonds)
+                print("Merging symmetric bonds: ", symmetric_bonds)
+                renamed_columns = renamed_columns.select(pl.col(legend[i]) for i, _ in symmetric_bonds)
                 renamed_columns = pl.concat([ renamed_columns, renamed_columns_ ])
 
         if len(renamed_columns.columns) == 0 or len(renamed_columns) == 0:

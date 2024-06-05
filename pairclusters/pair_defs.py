@@ -220,7 +220,7 @@ def is_preferred_pair_type_orientation(pair_type: Union[PairType, tuple[str, str
     if other == pair_type:
         return True
     if other.type == pair_type.type:
-        # symetric pair type like cWW, cHH, ...
+        # symmetric pair type like cWW, cHH, ...
         # we prefer A > G > C > U (who knows why)
         preference = [ "A", "DA", "G", "DG", "C", "DC", "U", "DU", "T", "DT" ]
         bases = pair_type.bases
@@ -234,7 +234,7 @@ def is_preferred_pair_type_orientation(pair_type: Union[PairType, tuple[str, str
 
         return preference.index(bases[0]) <= preference.index(bases[1])
     else:
-        # non-symetric pair type like cWH, cWS, ...
+        # non-symmetric pair type like cWH, cWS, ...
         return pair_type.type.lower() in pair_families
 
 # all pair type ordered according to The Paper
