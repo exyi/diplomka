@@ -26,6 +26,7 @@ for (const pairMeta of metadata) {
     // parquetFiles[`${family}-${bases}-filtered`] = `${nf}-${bases}-filtered.parquet${cacheBuster}`
     parquetFiles[`${nf}-${bases}-filtered`] = `${nf}-${bases}-filtered.parquet${cacheBuster}`
     parquetFiles[`${nf}-${bases}-filtered-allcontacts`] = `${nf}-${bases}-filtered-allcontacts.parquet${cacheBuster}`
+    parquetFiles[`${nf}-${bases}-allcontacts`] = `${nf}-${bases}-allcontacts.parquet${cacheBuster}`
     parquetFiles[`n${nf}-${bases}`] = `n${nf}-${bases}.parquet${cacheBuster}`
     parquetFiles[`${nf}-${bases}_n`] = `n${nf}-${bases}.parquet${cacheBuster}`
   }

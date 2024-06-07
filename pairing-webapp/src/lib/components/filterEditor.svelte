@@ -44,7 +44,9 @@
                           f.datasource == "fr3d-nf" ? "FR3D with nears, RS" :
                           f.datasource == "fr3d-n" ? "FR3D with nears, PDB" :
                           f.datasource == "allcontacts-f" ? "All polar contacts, RS" :
+                          f.datasource == "allcontacts" ? "All polar contacts, PDB" :
                           f.datasource == "allcontacts-boundaries-f" ? "Pairs Selected by New Parameters, RS" :
+                          f.datasource == "allcontacts-boundaries" ? "Pairs Selected by New Parameters, PDB" :
                           "dataset???"
       const sameDataSource = compareWith?.datasource == f.datasource
       const sameFilters = newClauses.length == 0 && removedClauses.length == 0
@@ -530,23 +532,24 @@
                   id="ntfilter-data-source"
                   on:change={ev => {
                     dataSourceChange(ev.currentTarget.value)
-                  }}
-                >
+                  }}>
                   <option value="fr3d-f">FR3D, Representative Set</option>
                   <option value="fr3d">FR3D, Entire PDB</option>
                   <option value="fr3d-nf">FR3D with nears, RS</option>
                   <option value="fr3d-n">FR3D with nears, PDB</option>
-                  <option value="allcontacts-f">All Polar Contacts</option>
-                  <option value="allcontacts-boundaries-f">Pairs Selected by New Parameters</option>
+                  <option value="allcontacts-f">All Polar Contacts, RS</option>
+                  <option value="allcontacts">All Polar Contacts, PDB</option>
+                  <option value="allcontacts-boundaries-f">Pairs Selected by New Parameters, RS</option>
+                  <option value="allcontacts-boundaries">Pairs Selected by New Parameters, PDB</option>
                 </select>
               </div>
             </div>
           </div>
-          {#if filter.datasource == "allcontacts-boundaries-f"}
+          {#if ["allcontacts-boundaries-f", "allcontacts-boundaries"].includes(filter.datasource)}
             <div class="field">
               <button class="button is-small" on:click={async ()=> {
                 await setFr3dObservedBoundaries(false)
-                filter = {...filter, datasource: "allcontacts-f" }
+                filter = {...filter, datasource: "allcontacts-boundaries" == filter.datasource ? "allcontacts" : "allcontacts-f"}
               } }>Edit the selection boundaries</button>
             </div>
           {/if}
@@ -603,7 +606,7 @@
             <div class="control">
               {#if filterBaseline == null}
                 <div class="buttons has-addons">
-                  <button class="button is-small" on:click={() => setBaseline({ ...defaultFilter(), datasource: filter.filtered ? "fr3d-f" : "fr3d" }, "ranges")}
+                  <button class="button is-small" on:click={() => setBaseline({ ...defaultFilter(), datasource: filter.filtered ? "fr3d-f" : "fr3d", filtered: filter.filtered }, "ranges")}
                     title="Sets the current filters as the filter baseline, allowing you to change some parameters and observe the changed">
                     FR3D
                   </button>
@@ -678,6 +681,8 @@
             await setFr3dObservedBoundaries(true)
             if (filter.datasource == "allcontacts-boundaries-f") {
               filter = {...filter, datasource: "allcontacts-f"}
+            } else if (filter.datasource == "allcontacts-boundaries") {
+              filter = {...filter, datasource: "allcontacts"}
             }
           } }>
             {#if filter.datasource == "allcontacts-boundaries-f"}Edit the filter boundaries{:else}Constrain to FR3D observed ranges{/if}

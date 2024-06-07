@@ -122,7 +122,7 @@
           // await conn.query(`DROP VIEW IF EXISTS selectedpair_allcontacts_f`)
           // await conn.query(`DROP VIEW IF EXISTS selectedpair_allcontacts`)
           // await conn.query(`DROP VIEW IF EXISTS selectedpair_allcontacts_boundaries_f`)
-          await conn.query(`DROP VIEW IF EXISTS selectedpair; DROP VIEW IF EXISTS selectedpair_f; DROP VIEW IF EXISTS selectedpair_n; DROP VIEW IF EXISTS selectedpair_allcontacts_f; DROP VIEW IF EXISTS selectedpair_allcontacts; DROP VIEW IF EXISTS selectedpair_allcontacts_boundaries_f;`)
+          await conn.query(`DROP VIEW IF EXISTS selectedpair; DROP VIEW IF EXISTS selectedpair_f; DROP VIEW IF EXISTS selectedpair_n; DROP VIEW IF EXISTS selectedpair_allcontacts_f; DROP VIEW IF EXISTS selectedpair_allcontacts; DROP VIEW IF EXISTS selectedpair_allcontacts_boundaries_f;DROP VIEW IF EXISTS selectedpair_allcontacts_boundaries;`)
           // return Promise.all([
           //   conn.query(`CREATE OR REPLACE VIEW 'selectedpair' AS SELECT * FROM parquet_scan('${selectedPairing}')`),
           //   conn.query(`CREATE OR REPLACE VIEW 'selectedpair_f' AS SELECT * FROM parquet_scan('${selectedPairing}-filtered')`),

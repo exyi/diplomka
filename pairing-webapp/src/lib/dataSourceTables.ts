@@ -31,6 +31,10 @@ export async function ensureViews(conn: AsyncDuckDBConnection, abort: AbortSigna
       await addView(selectedNorm, 'selectedpair_f', `${selectedNorm}-filtered`)
       tableSet.delete('selectedpair_f')
     }
+    if (tableSet.has('selectedpair_allcontacts') || tableSet.has('selectedpair_allcontacts_boundaries')) {
+      await addView(selectedNorm, 'selectedpair_allcontacts', `${selectedNorm}-allcontacts`)
+      tableSet.delete('selectedpair_allcontacts')
+    }
     if (tableSet.has('selectedpair_allcontacts_f') || tableSet.has('selectedpair_allcontacts_boundaries_f')) {
       await addView(selectedNorm, 'selectedpair_allcontacts_f', `${selectedNorm}-filtered-allcontacts`)
       tableSet.delete('selectedpair_allcontacts_f')
@@ -38,8 +42,14 @@ export async function ensureViews(conn: AsyncDuckDBConnection, abort: AbortSigna
     if (tableSet.has('selectedpair_allcontacts_boundaries_f')) {
       const f = filterLoader.addHBondLengthLimits(selectedNorm, 0.01, filterLoader.toNtFilter((await filterLoader.defaultFilterLimits.value).limits, 0.02, selectedNorm, null))
       console.log("boundaries filter: ", f)
-      await conn.query(`CREATE OR REPLACE VIEW 'selectedpair_allcontacts_boundaries_f' AS ${makeSqlQuery(f, 'selectedpair_allcontacts_f')}`)
+      await conn.query(`CREATE OR REPLACE VIEW 'selectedpair_allcontacts_boundaries_f' AS ${makeSqlQuery({...f, filtered: false}, 'selectedpair_allcontacts_f')}`)
       tableSet.delete('selectedpair_allcontacts_boundaries_f')
+    }
+    if (tableSet.has('selectedpair_allcontacts_boundaries')) {
+      const f = filterLoader.addHBondLengthLimits(selectedNorm, 0.01, filterLoader.toNtFilter((await filterLoader.defaultFilterLimits.value).limits, 0.02, selectedNorm, null))
+      console.log("boundaries filter: ", f)
+      await conn.query(`CREATE OR REPLACE VIEW 'selectedpair_allcontacts_boundaries' AS ${makeSqlQuery({...f, filtered: false}, 'selectedpair_allcontacts')}`)
+      tableSet.delete('selectedpair_allcontacts_boundaries')
     }
     if (tableSet.has('selectedpair_n')) {
       await addView(selectedNorm, 'selectedpair_n', `n${selectedNorm}`)

@@ -24,7 +24,7 @@
     async function updateRealFilter() {
         realFilter = filter
         filterLabel = undefined
-        if (filter.datasource == "allcontacts-boundaries-f") {
+        if (["allcontacts-boundaries-f", "allcontacts-boundaries"].includes(filter.datasource)) {
             await filterLoader.defaultFilterLimits.value.then(v => {
                 filterLabel = v.id
                 realFilter = filterLoader.addHBondLengthLimits(pairType, 0.01, filterLoader.toNtFilter(v.limits, 0, pairType, filter))
@@ -44,6 +44,8 @@
         if (dataSourceTable == 'selectedpair_allcontacts_boundaries_f') {
             // avoid issues when it isn't found because the filter does not match anymore...
             dataSourceTable = 'selectedpair_allcontacts_f'
+        } else if (dataSourceTable == 'selectedpair_allcontacts_boundaries') {
+            dataSourceTable = 'selectedpair_allcontacts'
         }
         const query = `
             SELECT * FROM ${dataSourceTable}

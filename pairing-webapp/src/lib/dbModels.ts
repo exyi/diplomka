@@ -35,7 +35,7 @@ export type NucleotideFilterModel = {
     dna?: true | false | undefined
     orderBy: string
     filtered: boolean
-    datasource?: "fr3d" | "fr3d-f" | "fr3d-n" | "fr3d-nf" | "allcontacts-f" | "allcontacts-boundaries-f"
+    datasource?: "fr3d" | "fr3d-f" | "fr3d-n" | "fr3d-nf" | "allcontacts-f" | "allcontacts" | "allcontacts-boundaries-f" | "allcontacts-boundaries"
     includeNears?: boolean
     rotX?: boolean
 }
@@ -158,6 +158,8 @@ export function getDataSourceTable(filter: NucleotideFilterModel) {
         return "selectedpair_allcontacts_f"
     } else if (ds == "allcontacts-boundaries-f") {
         return "selectedpair_allcontacts_boundaries_f"
+    } else if (ds == "allcontacts-boundaries") {
+        return "selectedpair_allcontacts_boundaries"
     } else {
         console.error("Unknown datasource", ds)
         return "selectedpair_allcontacts"
