@@ -52,22 +52,20 @@ $$2 \cdot \left( 16 \cdot 3 + 10 \cdot 3 \right) = 156$$ -->
 ### Sugar-Sugar Symmetry
 
 Unfortunately, the assumption of symmetry we made earlier is generally invalid.
-Many Sugar-Sugar basepairs are not defined asymetrically, such as **cSS A-C** which isn't a flipped version of **cSS C-A**.
-All six “symmetrical” pairs are defined differently in **cis** Sugar/Sugar, and only one in **trans** Sugar/Sugar (G-A/A-G). <!--TODO Ref-->
+Many Sugar-Sugar basepairs are not defined asymmetrically, such as **cSS A-C** which isn't a flipped version of **cSS C-A**.
+All six “symmetric” pairs are defined differently in **cis** Sugar/Sugar, and only one in **trans** Sugar/Sugar (G-A/A-G). <!--TODO Ref-->
 
 This property isn't explicitly mentioned in [Leontis, Westhof 2001](https://doi.org/10.1017/s1355838201002515) (TODO verify again), however the tables of examples in [Leontis 2002](https://doi.org/10.1093/nar/gkf481) clearly show different base pairing for the two cases.
 
-![The C-A pair is different from A-C -- it is shifted by ~3 Å horizontally, resulting in a different set of H-bonds](../img/cSS-CA-vs-AC.png)
+![The C-A pair is different from A-C -- it is shifted by ~3 Å horizontally, resulting in a different set of H-bonds TODO cite](../img/cSS-CA-vs-AC.png)
 
 Leontis and Westhof also propose a glyph symbols for each base pair family:
 Watson-Crick edge as a circle (`○`), Hoogsteen edge as square (`□`) and sugar edge as an triangle (`▷`).
 If the basepair is **cis**, the shape is filled (`●`, `■`, `▶`), if **trans**, it is empty (`○`, `□`, `▷`).
 The basepair families are then `⎼○⎼` (or `○⎼○`) for **tWW**, `●⎼▶` for **cWS** and `⎼▶⎼` **cSS**.
-Note that only the sugar edge has an asymmetric glyph symbol, indicating the authors' original intention to have the Sugar/Sugar family asymmetrical.
+Note that only the sugar edge has an asymmetrical glyph symbol, indicating the authors' original intention to have the Sugar/Sugar family asymmetric.
 
-TODO najit font kde to vypada dobre
-
-If the basepair is **cis**, it is represented with filled symbols (`●`, `■`, `▶`); if **trans**, it is shown with empty symbols (`○`, `□`, `▷`). The resulting basepair families are then represented as `⎼○⎼` (or `○⎼○`) for **tWW**, `●⎼▶` for **cWS**, and `⎼▶⎼` for **cSS**. Note that only the sugar edge has an asymmetric glyph symbol.
+If the basepair is **cis**, it is represented with filled symbols (`●`, `■`, `▶`); if **trans**, it is shown with empty symbols (`○`, `□`, `▷`). The resulting basepair families are then represented as `⎼○⎼` (or `○⎼○`) for **tWW**, `●⎼▶` for **cWS**, and `⎼▶⎼` for **cSS**. Note that only the sugar edge has the asymmetrical glyph symbol.
 
 ![In trans Sugar/Sugar, C-A is defined while A-C is left undefined. In contrast, in W/W and H/H the C-A and A-C show the same pair (turned upside down)](../img/tSS-CA-vs-AC.png)
 
@@ -78,11 +76,19 @@ FR3D reports all basepair in both orientations -- A **cSs A-C** pair is also rep
 □⎼▷
 ○⎼● -->
 
-### Symmetric false friends - cWW A-A vs tWW A-A
+### Symmetric false friends — cWW A-A vs tWW A-A
+
+TODO
 
 ### Alternatives
 
-TODO
+In few classes, it is possible for the two bases to interact with two possible sets of H-bonds on the same edges in the same orientation.
+We observe these subclasses for **cWW G-U**, **tWW C-C** and **tWW U-U** classes, but there might be other less common ones.
+The **cWW G-U** pair especially interesting, because [one of the subclasses is anionic -- one of the bases holds a charge instead of a hydrogen, leading to unconventional donor positions.](https://doi.org/10.1261/rna.079583.123).
+
+In order to distinguish the subclasses, FR3D appends `"a"` to family name of one of them.
+For instance, the standard **cWW G-U** is labeled as `"cWW"`, the anionic form is labeled `"cWWa"`.
+In this work, we follow the same convention, although we have had debates on revisiting these ad-hoc names.
 
 <!-- tWWa CC, cWWa GT. -->
 

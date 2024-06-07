@@ -1,6 +1,6 @@
-## Calculation of the Proposed Basepair Parameters
+## Calculation of the Proposed Basepair Parameters {#sec:sw-calculation}
 
-In section [-@sec:basepair-metrics], we have informally described the basepairing measures we experimented with.
+In section [-@sec:basepair-params], we have informally described the basepairing measures we experimented with.
 The section is dedicated to the exact definitions, including simplified Python code.
 
 ### Hydrogen bond lengths and angles
@@ -121,7 +121,7 @@ def plane_projection(basis: np.ndarray, point: np.ndarray) -> np.ndarray:
 
 ### Relative base rotation
 
-First, we need the coordinate system defined in @sec:basepair-metrics-ypr and illustrated in @fig:MMB_reference_frame-purinepluspyrimidine.
+First, we need the coordinate system defined in @sec:basepair-params-ypr and illustrated in @fig:MMB_reference_frame-purinepluspyrimidine.
 Similarly to the base plane, the coordinate system is represented by the origin position and its orthonormal basis (a rotation matrix).
 In this case, three atoms — three points in space define the coordinate system, and it can therefore be computed directly, without least squares fitting.
 First, we set the origin to **N1** for pyrimidines or **N9** for purines.

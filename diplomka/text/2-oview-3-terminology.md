@@ -59,6 +59,7 @@ However, this is the exception to the rule, and it makes us ask whether we shoul
 TODO Example: cWW GC, tWW GC
 
 Basepair names are commonly abbreviated using 3-letter codes -- **c** or **t** for cis or trans, and **W**, **H** or **S** for each of the two edges (**W**atson-Crick, **H**oogsteen, and **S**ugar).
+TODO 12 possible combinations instead of @ffig:tSS-GG-DNA-6n4g-A_2-B_2-no-oxygens
 Since pairing conformation also depends on the bases involved, we include the base letters (A, T, U, G, C) to specify the sequence.
 For example, we can refer to the pairs in the Figure TODO as `cWW GC` and `tWW GC`.
 

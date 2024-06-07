@@ -1,4 +1,4 @@
-## New Basepair Parameters {#sec:basepair-metrics}
+## New Basepair Parameters {#sec:basepair-params}
 
 The objective of this work is to find and compare decent measures of basepairing, so we shall finally specify what we are looking for.
 The main qualities of the desired parameters are:
@@ -16,9 +16,9 @@ Thus, we want the parameters to be reasonably simple and interpretable.
 
 In order to be useful, each parameter must have a sharp enough distribution to help in identifying the specific basepair class.
 In @fig:cWH-G-G-yaw-hbond, we show that the **yaw** angle performs relatively well on the **cWH G-G** class, while the H-bond length has a relatively long tail where it is quickly amassing false positives.
-For similar reasons, we entirely ruled out using ZXZ Euler angles in @sec:basepair-metrics-ypr, because the values span the entire range of $-180° \cdots +180°$.
+For similar reasons, we entirely ruled out using ZXZ Euler angles in @sec:basepair-params-ypr, because the values span the entire range of $-180° \cdots +180°$.
 
-![“Selectivity” of **yaw** angle (@sec:basepair-metrics-ypr) and **H-bond length** (@sec:basepair-metrics-hbonds) demonstrated on **cWH G-G**. Basepairs annotated by FR3D on the reference set, compared with all close contacts (one of the defined H-bonds is ≤ 4.2 Å).](../img/cWH-G-G-yaw-hbond.svg){#fig:cWH-G-G-yaw-hbond}
+![“Selectivity” of **yaw** angle (@sec:basepair-params-ypr) and **H-bond length** (@sec:basepair-params-hbonds) demonstrated on **cWH G-G**. Basepairs annotated by FR3D on the reference set, compared with all close contacts (one of the defined H-bonds is ≤ 4.2 Å).](../img/cWH-G-G-yaw-hbond.svg){#fig:cWH-G-G-yaw-hbond}
 
 
 ### The Number of Parameters
@@ -38,14 +38,15 @@ We would rather avoid more complex constraints than a set of one dimensional num
 Generalizing the constraints into two or more dimensions is similar to inventing additional parameters by linearly combining the existing ones, except that the potential new parameter is easier to share across the ~120 basepair classes.
 
 
-### Hydrogen bond lengths and angles {#sec:basepair-metrics-hbonds}
+### Hydrogen bond lengths and angles {#sec:basepair-params-hbonds}
 
 A good starting point is simply measuring the distance between the atoms forming the hydrogen bonds.
 Traditionally, we would measure a hydrogen bond between the hydrogen and the acceptor heavy atom.
 Since the exact hydrogen positions are often unknown, we will instead only consider the distance between heavy atoms (oxygen, nitrogen, or carbon).
 Despite the availability of many algorithms for completing PDB structures with the missing hydrogens, there are tricky cases where automatic the completion fails.
-Specifically, some bases may hold a charge and thus have an additional hydrogen, such as in i-Motif cytosine pairs or it may be in a tautomeric form where the hydrogens are on different atoms.
-Although it isn't common, it is crucial in some basepair classes, and it is likely to be biologically relevant (TODO https://doi.org/10.1002/cphc.200900687 ?, TODO https://www.ncbi.nlm.nih.gov/pmc/articles/PMC97597/ ?). TODO cWH-A-G
+Specifically, some bases may hold a charge and thus have an additional hydrogen, such as [in i-Motif cytosine pairs](https://doi.org/10.1002/anie.202309327).
+Alternatively, the base may be in a tautomeric form where the hydrogens are on different atoms than usual.
+<!-- Although it isn't common, it is crucial in some basepair classes, and it is likely to be biologically relevant (TODO https://doi.org/10.1002/cphc.200900687 ?, TODO https://www.ncbi.nlm.nih.gov/pmc/articles/PMC97597/ ?). TODO cWH-A-G -->
 
 In addition to the distance, we can simply determine an angle between the two heavy atoms and a third atom situated on each base.
 Depending on if we select the third atom next to the acceptor or the donor, we get what we will call "Donor angle" or "Acceptor angle".
@@ -128,17 +129,17 @@ hide everything, not %pair-->
 ---
 
 The above-mentioned measures already work well on most basepair classes.
-As described in @sec:testing-basepair-metrics, we can verify that by calculating the parameters for all close contacts found in PDB and bounding them by the maximum range observed in basepairs reported by FR3D.
+As described in @sec:testing-basepair-params, we can verify that by calculating the parameters for all close contacts found in PDB and bounding them by the maximum range observed in basepairs reported by FR3D.
 When we do that with the five H-bond parameters and the five coplanarity measures, we are able to reproduce the FR3D reported set to a decent degree.
 For instance, in the cWW U-U class, we have about 60 false positives, out of 750 total basepairs.
 Out of which, we claim that the vast majority of false positives are valid basepairs of this category, albeit slightly stretched or shifted.
 We would like to encourage the readers to [judge for themselves in the basepairs.datmos.org web application.](https://basepairs.datmos.org/#cWw-U-U/hb0_L=..4&hb0_DA=85..145&hb0_AA=95..155&hb0_OOPA1=-45..35&hb0_OOPA2=-45..60&hb1_L=..4.1&hb1_DA=85..140&hb1_AA=90..155&hb1_OOPA1=-40..35&hb1_OOPA2=-50..35&min_bond_length=..3.8&coplanarity_a=135..&coplanarity_edge_angle1=-30..45&coplanarity_edge_angle2=-35..45&coplanarity_shift1=-1.6..1.7&coplanarity_shift2=-1.1..1.5&baseline_ds=fr3d-f)
 
-### Relative base rotation {#sec:basepair-metrics-ypr}
+### Relative base rotation {#sec:basepair-params-ypr}
 
 However, the weak spot of this approach are the basepair classes with only a single hydrogen bond.
 Such a basepair is free to rotate along H-bonded atoms, as long as it is planar.
-An example of this issue is shown in figure @fig:metrics-ypr-necessity-tHH-GG-misassignment, and the [web application demonstrates this issue interactively](http://localhost:1922/#tHH-A-G/hb0_L=..4&hb0_DA=100..150&hb0_AA=100..165&hb0_OOPA1=-25..35&hb0_OOPA2=-10..35&min_bond_length=..3.8&coplanarity_a=..40&coplanarity_edge_angle1=-10..25&coplanarity_edge_angle2=-10..30&coplanarity_shift1=-0.2..1.5&coplanarity_shift2=-0.3..1.3&baseline_ds=fr3d-f).
+An example of this issue is shown in figure @fig:metrics-ypr-necessity-tHH-GG-misassignment, and the [web application demonstrates this issue interactively](https://basepairs.datmos.org/#tHH-A-G/hb0_L=..4&hb0_DA=100..150&hb0_AA=100..165&hb0_OOPA1=-25..35&hb0_OOPA2=-10..35&min_bond_length=..3.8&coplanarity_a=..40&coplanarity_edge_angle1=-10..25&coplanarity_edge_angle2=-10..30&coplanarity_shift1=-0.2..1.5&coplanarity_shift2=-0.3..1.3&baseline_ds=fr3d-f).
 
 ![**A.** An example of a correctly assigned tHH A-G basepair (3cd6 913:1071 in chain 0). **B.** The tHH A-G candidates also includes a clear Watson-Crick/Hoogsteen basepair (7osm 407:390 in chain 18S). The coplanarity is perfect and the N6 ··· O6 H-bond cannot distinguish it either, as it defined both of these two classes.](../img/metrics-ypr-necessity-tHH-GG-misassignment.svg){#fig:metrics-ypr-necessity-tHH-GG-misassignment}
 

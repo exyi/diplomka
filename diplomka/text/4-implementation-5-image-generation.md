@@ -1,6 +1,6 @@
-## Basepair image generation {#sec:impl-basepair-img}
+## Basepair Image Generation {#sec:impl-basepair-img}
 
-In order to visualize how similar of different various basepairs are, we use a PyMOL [TODO] script to generate an image of any basepair of interest.
+In order to visualize how similar of different various basepairs are, we use a PyMOL [TODO] Python API to generate images of all basepairs of interest.
 
 This is implemented in the `gen_contact_images.py` Python script.
 The script loads PyMOL as a library, it can be executed directly using Python interpreter.
@@ -148,10 +148,10 @@ mpng "output-directory/", width=640, height=480
 PyMOL produces a directory of numbered PNG images, one for each frame of the animation.
 For the web application, we encode the movie as WebM with the VP9 codec, preserving the alpha (transparency) channel.
 
-### Asymmetrical units{#sec:impl-basepair-img-asy}
+### Asymmetric units{#sec:impl-basepair-img-asy}
 
 PyMOL directly supports loading the biological assembly of a structure, [when the `assembly` option is set, as described on wiki](https://pymolwiki.org/index.php/Assembly).
-The assembly can be later split into the individual asymmetrical units using the `split_states` command, creating new objects with a numeric suffix.
+The assembly can be later split into the individual asymmetric units using the `split_states` command, creating new objects with a numeric suffix.
 For instance, if we want to load the `6ros` structure:
 
 ```

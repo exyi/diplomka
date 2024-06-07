@@ -87,12 +87,19 @@
             }
         }
 
-        .link-footnote {
+        body.pagedjs .link-footnote {
             float: footnote;
             font-size: 0.75rem;
             font-family: serif;
             padding-left: 2em;
             text-indent: -2em;
+        }
+
+        body.nopagedjs .link-footnote::before {
+            content: " ([footnote]";
+        }
+        body.nopagedjs .link-footnote::after {
+            content: ")";
         }
 
         code {
@@ -214,6 +221,10 @@
 
         section.level2 {
             page-break-before: always;
+        }
+
+        body.nopagedjs h2 {
+            border-top: 1px solid black;
         }
 
         section {
@@ -351,7 +362,8 @@
     $endfor$
 
 </head>
-<body>
+<!-- <body class="pagedjs"> -->
+<body class="nopagedjs">
     <!-- Pandoc include-before: -->
     $for(include-before)$
         $include-before$
@@ -454,9 +466,11 @@
         })()
 
         document.addEventListener("DOMContentLoaded", function() {
-            const scripttag = document.createElement("script");
-            scripttag.setAttribute("src", "https://unpkg.com/pagedjs/dist/paged.polyfill.js");
-            document.head.appendChild(scripttag);
+            if (document.body.classList.contains("pagedjs")) {
+                const scripttag = document.createElement("script");
+                scripttag.setAttribute("src", "https://unpkg.com/pagedjs/dist/paged.polyfill.js");
+                document.head.appendChild(scripttag);
+            }
         })
     </script>
 </body>

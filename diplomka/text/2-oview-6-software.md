@@ -79,7 +79,7 @@ For instance, in the tHS AC class, RNAView frequently misidentifies pairs as ano
 
 TODO kde jsou ty naše porovnání??
 
-![A clear trans Hoogsteen/Sugar A-C basepair as trans Watson/Sugar basepair misidentified by RNAView. The mistake is very undertandable, as the adenine bound exclusively through the N6 atom, which is part of both Hoogsteen and Watson-Crick edges. See @sec:basepair-metrics-ypr for more discussion regarding this issue.](../img/rnaView-tHS-AC-misidentified.png){#fig:rnaView-tHS-AC-misidentified .img-width75}
+![A clear trans Hoogsteen/Sugar A-C basepair as trans Watson/Sugar basepair misidentified by RNAView. The mistake is very undertandable, as the adenine bound exclusively through the N6 atom, which is part of both Hoogsteen and Watson-Crick edges. See @sec:basepair-params-ypr for more discussion regarding this issue.](../img/rnaView-tHS-AC-misidentified.png){#fig:rnaView-tHS-AC-misidentified .img-width75}
 
 
 ### Curves+ {#sec:software-Curves}

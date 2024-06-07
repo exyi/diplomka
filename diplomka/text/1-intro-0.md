@@ -2,7 +2,7 @@
 
 <!-- Since the [initial discovery of DNA structure](https://doi.org/10.1038/171737a0),  -->
 
-Nucleic acids are some of the most important molecules of molecular biology, and the study of their structure and function is critical to understanding the fundamental principles of life.
+Nucleic acids are some of the most important biological molecules, and the study of their structure and function is critical to understanding the fundamental principles of life.
 The [well known double-stranded helix](https://doi.org/10.1038/171737a0) dominates the structure of DNA, protecting its valuable information content.
 On the other hand, RNA molecules often form complicated structures, some of them can even have catalytic activity independent on proteins (<https://doi.org/10.1261%2Frna.031401.111>, <https://doi.org/10.1038%2Fnchembio.1846>).
 Similarly to the DNA helices, these complex structures are also driven by the pairwise interaction of nucleotide bases.
@@ -10,11 +10,11 @@ However, these interactions have more diverse forms than the two most common bas
 
 Given the diversity of non-canonical basepairs, it is unsurprising that they require more research than their canonical counterparts.
 A significant step towards addressing the gap is the [Leontis-Westhof classification system](https://doi.org/10.1017/s1355838201002515), introduced in 2002, which provides a framework for categorizing and naming non-canonical basepairs.
-A subsequent publication shows more than a hundred different basepairing conformations in NDB/PDB structures.
+A subsequent publication shows more than a hundred different basepairing conformations in experimental structures archived in the PDB database (TODO cite).
 Today, with the availability of about 17 000 nucleic acid structures, we are in a better position to properly describe even the rarer basepair kinds.
 
-If we analyze the entire database with one of the available basepair assignment programs (@sec:software), we can see that Watson-Crick pairs are dominating all other basepair classes.
-However, the total cardinality of all non-canonical pairs is actually larger than the canonical ones in RNA; meaning that canonical pairs represent slightly bellow 50% of the total.
+If we analyze the entire database with one of the available basepair assignment programs (@sec:software), we can see that Watson-Crick pairs dominate all other basepair classes.
+However, in RNA the total cardinality of all non-canonical pairs is actually larger than the canonical ones; meaning that canonical pairs represent slightly bellow 50% of the total.
 Even in DNA structures, 25% of all basepairs are non-canonical, notable biologically relevant structures are the [i-Motif](https://doi.org/10.1093/nar/gky735) and the [G-quadruplex](https://doi.org/10.1016/j.trechm.2019.07.002).
 
 ![Our plan to improve the shortcomings of existing programs for basepair assignment.](../img/xkcd_standards_2x.png){#fig:xkcd_standards_2x}

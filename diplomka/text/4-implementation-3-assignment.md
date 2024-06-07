@@ -1,7 +1,7 @@
-## Basepair Assignment Procedure {#sec:assignment}
+## Basepair Assignment Procedure {#sec:sw-assignment}
 
-The procedure for assigning basepairs based on the parameters described in @sec:basepair-metrics requires defining the acceptable ranges for each basepair class.
-As a starting point, we can use the ranges from @sec:testing-basepair-metrics.
+The procedure for assigning basepairs based on the parameters described in @sec:basepair-params requires defining the acceptable ranges for each basepair class.
+As a starting point, we can use the ranges from @sec:testing-basepair-params.
 With the table of allowed ranges, the assignment procedure is fairly straightforward.
 
 First, we have to identify all potential basepairs to calculate the parameters.

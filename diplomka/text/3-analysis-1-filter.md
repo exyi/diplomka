@@ -5,17 +5,17 @@ However, we also have to make sure that the data has a high enough quality, most
 It is not such a problem if the data is noisy, as the statistics can deal with variance provided enough observations.
 
 Even when working with small sample sizes, the uncertainty arising from the noise can be characterized using confidence intervals.
-However, the interval will be "overconfident", unless the observations are independent of each other.
-
+However, the interval would be "overconfident", if the observations are not independent of each other.
 
 ![Canonical GC pairs with the filtering (left) and without it (right). Without the filter, the plot illustrates a large effect from 2.89 Å hydrogen-bond restraints used in model refining.](../img/hbonds-hist-filter-comparison-GConly.svg)
 
-Since multiple entries in the PDB often share a common refined structure with only varying ligands.
-To avoid the bias, we remove all redundant structures.
-Moreover, nucleotides not satisfying MolProbity MolProbity and DNATCO criteria are filtered out, as well as nucleotides with poor RSCC (electron density fit).
+Since multiple entries in the PDB often share a common refined structure with only varying ligands, we also need to remove all redundant structures to avoid the bias.
+Moreover, nucleotides not satisfying MolProbity and DNATCO criteria are filtered out, as well as nucleotides with poor RSCC (electron density fit).
 
-The filtration methodology was prepared by Jiří Černý's laboratory, and we only utilized their prepared lists of passing nucleotides.
-Given the filter is rather selective, any basepair with at least one passing nucleotide is accepted.
+The filtration methodology was prepared by Jiří Černý's laboratory, and we simply utilized the prepared lists of about 180 000 nucleotides.
+Given that the nucleotide filter is rather selective, any basepair with at least one passing nucleotide is accepted.
+
+### Summary of the filtration method
 
 TODO jirkův filtr popis:
 
