@@ -16,5 +16,19 @@
         "url": "https://networkx.org",
         "id": "NX",
         "seq": null
+    },
+    "https://imagemagick.org": {
+        "doi": null,
+        "published_date_parts": [
+            2024
+        ],
+        "title": "ImageMagick",
+        "authors": [
+            [ "", "ImageMagick Studio LLC" ]
+        ],
+        "journal": null,
+        "url": "https://imagemagick.org",
+        "id": "IM",
+        "seq": null
     }
 }
