@@ -7,6 +7,7 @@
     import * as dbInstance from '$lib/dbInstance'
 	import { ensureViews } from "$lib/dataSourceTables";
 	import config from "$lib/config";
+	import MolStarMaybe from "./MolStarMaybe.svelte";
 
     export let imageUrl: string | undefined
     export let rotImageUrl: string | undefined
@@ -73,12 +74,15 @@
         }
     }
 
-    let avifError = false
-    let avifRotError = false
-    let videoError = false
-    $: { videoUrl; videoError = false }
-    $: { rotImageUrl; avifRotError = false }
-    $: { imageUrl; avifError = false }
+    let avifError = false,
+        imgError = false,
+        avifRotError = false,
+        videoError = false,
+        rotError = false,
+        molStar = false
+    $: { videoUrl; videoError = false; rotError = false; molStar = false }
+    $: { rotImageUrl; avifRotError = false; rotError = false; molStar = false }
+    $: { imageUrl; avifError = false; imgError = false; molStar = false }
 
     function getRange(f: NucleotideFilterModel, column: string) : NumRange | undefined {
         if (!f) return undefined
@@ -206,21 +210,37 @@
         text-decoration: underline;
     }
 
+    .molstar-container {
+        width: 70%;
+        height: 70vh;
+        position: relative;
+    }
+
 </style>
 <div>
     <div class="imgpane">
-        {#if !avifError}
-        <img src={imageUrl.replace(/[.]\w+$/, '-1440.avif')} alt='x' on:error={() => { avifError = true }} />
+        {#if pair != null && (molStar || (imgError && rotError) || (imageUrl == null && videoUrl == null))}
+            <div class="molstar-container">
+                <MolStarMaybe pairId={pair.id} />
+            </div>
         {:else}
-        <img src={imageUrl} alt='x' />
-        {/if}
+            {#if !avifError}
+            <img src={imageUrl.replace(/[.]\w+$/, '-1440.avif')} alt='x' on:error={() => { avifError = true }} />
+            {:else if !imgError}
+            <img src={imageUrl} alt='The basepair in plane with the screen' on:error={_ => { imgError = true }} />
+            {:else}
+                <p>Image was not pre-generated</p>
+            {/if}
 
-        {#if videoUrl && !videoError}
-            <video src={videoUrl} autoplay muted loop controls on:error={() => { videoError = true }} />
-        {:else if rotImageUrl && !avifRotError}
-            <img src={rotImageUrl.replace(/[.]\w+$/, '-1440.avif')} alt='x' />
-        {:else if rotImageUrl}
-            <img src={rotImageUrl} alt='x' />
+            {#if videoUrl && !videoError}
+                <video src={videoUrl} autoplay muted loop controls on:error={() => { videoError = true }} />
+            {:else if rotImageUrl && !avifRotError}
+                <img src={rotImageUrl.replace(/[.]\w+$/, '-1440.avif')} alt='The basepair rotated 90° along the X axis' on:error={_ => {avifRotError=true}} />
+            {:else if rotImageUrl && !rotError}
+                <img src={rotImageUrl} alt='The basepair rotated 90° along the X axis' on:error={_ => {rotError = true}} />
+            {:else}
+                <p>Rotated image nor movie was not pre-generated</p>
+            {/if}
         {/if}
     </div>
     <div>

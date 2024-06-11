@@ -4,6 +4,7 @@
   import Modal, * as modal from 'svelte-simple-modal'
 	import DetailModal from "./DetailModal.svelte";
   import type { Context } from 'svelte-simple-modal';
+	import MolStarMaybe from "./MolStarMaybe.svelte";
 
 
   export let url: string | undefined
@@ -13,6 +14,7 @@
   export let videoShow: boolean = false
   export let allowHoverVideo: boolean = true
   export let parentSize: boolean = false
+  export let allowMolStar: boolean = false
   export let linkText: string | undefined = undefined
   export let linkUrl: string | undefined = undefined
   export let labelText: string | undefined = undefined
@@ -20,7 +22,9 @@
 
   let pngFallback = false,
     webpFallback = false,
-    videoLoaded = false
+    videoLoaded = false,
+    imgFailed = false,
+    videoFailed = false
   const resolutions = [ [450, 800 ], [720, 1280], [1080, 1980], [1440, 2560 ] ],
     webpResolution = [ [450, 800 ], [1440, 2560 ] ]
 
@@ -30,15 +34,19 @@
     return `${avifs}`
   }
 
-
   $: {
     url
     pngFallback = false
     webpFallback = false
     videoLoaded = false
+    imgFailed = false
+    videoFailed = false
   }
 
-  function onerror(e: Event) {
+  let alttext = ""
+  $: alttext = pair?.id == null ? null : `${pair.id.pairingType[0]??'??'} ${pair.id.pairingType[1]??''} basepair in ${pair?.id.nt1.pdbid} — ${pair?.id.nt1.chain} ${pair?.id.nt1.resnum}${pair?.id.nt1.inscode??''} : ${pair?.id.nt2.chain??''} ${pair?.id.nt2.resnum??''}${pair?.id.nt2.inscode??''}`
+
+  function imgonerror1(e: Event) {
     if (!webpFallback) {
       webpFallback = true
       return
@@ -128,16 +136,28 @@
 <div class="img-root" class:autosize={!parentSize} class:allow-video={allowHoverVideo && videoUrl != null} class:video-show={videoShow} on:mouseover={() => { videoLoaded = true }} on:focus={() => { videoLoaded = true }}>
   <div class="video">
     {#if videoLoaded || videoPreload || videoShow}
-      <video src={videoUrl} autoplay loop muted preload="none"></video>
+      {#if videoFailed}
+        <span title="{alttext}">Video for the basepair is not available</span>
+      {:else}
+        <video src={videoUrl} autoplay loop muted preload="none"
+          on:error={_ => videoFailed = true}></video>
+      {/if}
     {/if}
   </div>
   <div class="img">
-    {#if url == null}
+    {#if allowMolStar && pair != null && (imgFailed || !url)}
+      <MolStarMaybe pairId={pair.id} />
+    {:else if url == null}
       <span>no image</span>
+    {:else if imgFailed}
+      <span title="{alttext}">Image for the basepair is not available</span>
     {:else if pngFallback}
-      <img src={url} alt="image wasn't generated" loading="lazy" />
+      <img src={url} alt="A {alttext}"
+        on:error={_ => { imgFailed = true } }
+        loading="lazy" />
     {:else}
-      <img src={url} srcset={generateSrcset(url, webpFallback)} alt="xxx" loading="lazy" on:error={onerror} />
+      <img src={url} alt="A {alttext}"
+        srcset={generateSrcset(url, webpFallback)} loading="lazy" on:error={imgonerror1} />
     {/if}
   </div>
 </div>

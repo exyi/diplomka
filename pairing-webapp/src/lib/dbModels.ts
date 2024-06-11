@@ -73,7 +73,7 @@ export type DetailModalViewModel = {
 }
 
 export function defaultFilter(datasource: NucleotideFilterModel["datasource"] = config.defaultDataSource): NucleotideFilterModel {
-    return { datasource, bond_acceptor_angle: [], bond_donor_angle: [], bond_length: [], bond_plane_angle1: [], bond_plane_angle2: [], filtered: true, orderBy: config.defaultOrderBy }
+    return { datasource, bond_acceptor_angle: [], bond_donor_angle: [], bond_length: [], bond_plane_angle1: [], bond_plane_angle2: [], filtered: datasource.endsWith("f"), orderBy: config.defaultOrderBy }
 }
 
 function rangeToCondition(col: string, range: NumRange | undefined | null): string[] {
@@ -519,6 +519,7 @@ function parseFilter(f: URLSearchParams, filter: NucleotideFilterModel | undefin
             ds = ds.slice(0, -1)
         }
         filter.datasource = ds as NucleotideFilterModel['datasource']
+        filter.filtered = filter.datasource.endsWith("f")
     }
     else if (f.has(`${prefix}f`)) { // legacy links
         const fParam = f.get(`${prefix}f`)
