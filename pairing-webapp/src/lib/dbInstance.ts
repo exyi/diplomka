@@ -36,6 +36,10 @@ export const assetBaseUri = host == 'localhost' ? config.debugHost : document.ba
 export const fileBase = (new URL(config.tablesPath, assetBaseUri)).href
 export const imgDir = (new URL(config.imgPath, assetBaseUri)).href
 
+export const mainQueryHistory = {
+  history: [] as {sql: string}[]
+}
+
 export function getConnectionSync(): AsyncDuckDBConnection {
   if (!conn)
     throw new Error("DuckDB connection not initialized")
@@ -54,10 +58,19 @@ export async function ensureFiles(files: string[]) {
   for (const file of files) {
     if (!registeredFiles.has(file) && file in parquetFiles) {
       registeredFiles.add(file)
-      const url = new URL(parquetFiles[file], fileBase.replace(/\/$/, '') + "/").href
+      const url = new URL(parquetFiles[file], fileBase.replace(/\/?$/, '/')).href
       await db.registerFileURL(file, url, DuckDBDataProtocol.HTTP, false)
     }
   }
+}
+
+export async function getOutputFile(name: string): Promise<Uint8Array> {
+  if (!db) {
+    throw new Error("DuckDB connection not initialized")
+  }
+  const result = await db.copyFileToBuffer(name)
+  await db.dropFile(name)
+  return result
 }
 
 export async function connect(): Promise<AsyncDuckDBConnection> {

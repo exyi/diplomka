@@ -9,6 +9,7 @@
 	import Pairimage from "./pairimage.svelte";
 	import { imgDir } from "$lib/dbInstance";
 	import ClearFilterButton from "./ClearFilterButton.svelte";
+	import DownloadButton from "./DownloadButton.svelte";
 
     export let filter: NucleotideFilterModel
     export let filterBaseline: NucleotideFilterModel | undefined
@@ -654,6 +655,10 @@
               <input type="checkbox" checked={!!filter.rotX} on:change={e => filter = {...filter, rotX: e.currentTarget.checked }}>
               Rotate images
             </label>
+          </div>
+
+          <div class="control">
+            <DownloadButton {filter} selectedPairType={metadata?.pair_type.join("-")} />
           </div>
         </div>
 

@@ -203,6 +203,7 @@
       }
 
       console.log(sql)
+      db.mainQueryHistory.history.push({sql})
       abort.throwIfAborted()
       const queryTables = new Set(await conn.getTableNames(sql))
       const requiredSelectedPair = [...queryTables].some(t => t.toLowerCase().startsWith("selectedpair"))
