@@ -30,5 +30,11 @@
         "url": "https://imagemagick.org",
         "id": "IM",
         "seq": null
+    },
+    "https://math.stackexchange.com/q/99317": {
+        "title": "Best Fitting Plane given a Set of Points",
+        "authors": [ "Felix", "Pahl (joriki)" ],
+        "journal": [ "Mathematics Stack Exchange" ],
+        "url": "https://math.stackexchange.com/q/99317",
     }
 }

@@ -4,7 +4,7 @@ In order to visualize how similar of different various basepairs are, we use a P
 
 This is implemented in the `gen_contact_images.py` Python script.
 The script loads PyMOL as a library, it can be executed directly using Python interpreter.
-However, the global environment must be used, since PyMOL is not published in the [PyPI repository](https://pypi.org/) and thus is not included in the poetry virtualenv.
+However, the global environment must be used, since PyMOL is not published in the PyPI repository and thus is not included in the poetry virtualenv.
 The Polars library must be also installed globally.
 
 For efficiency, the script is written to process a batch of basepairs.

@@ -905,7 +905,7 @@ def create_pair_image(row: pl.DataFrame, output_dir: str, pair_type: PairType) -
     print(p.stderr.decode('utf-8'))
     raise ValueError(f"Could not find PyMOL generated image file")
 
-def reexport_df(df: pl.DataFrame, columns, drop: list[str] = []):
+def reexport_df(df: pl.DataFrame, columns, drop: list[str], round:bool):
     df = df.with_columns(
         is_some_quality.alias("jirka_approves"),
         *[
@@ -917,9 +917,14 @@ def reexport_df(df: pl.DataFrame, columns, drop: list[str] = []):
     df = df.drop([col for col in df.columns if col.startswith('^') in drop])
     df = df.drop(["label"])
     # round float columns
-    df = df.with_columns([
-        pl.col(c).round_sig_figs(5).cast(pl.Float32).alias(c) for c in df.columns if df[c].dtype == pl.Float64 or df[c].dtype == pl.Float32
-    ])
+    if round:
+        df = df.with_columns([
+            pl.col(c).round_sig_figs(5).cast(pl.Float32).alias(c) for c in df.columns if df[c].dtype == pl.Float64 or df[c].dtype == pl.Float32
+        ])
+    else:
+        df = df.with_columns([
+            pl.col(c).cast(pl.Float32).alias(c) for c in df.columns if df[c].dtype == pl.Float64
+        ])
     return df
 
 def enumerate_pair_types(files: list[str], include_nears: bool) -> Generator[tuple[PairType, pl.DataFrame], None, None]:
@@ -1114,6 +1119,7 @@ def main(argv):
     parser.add_argument("--skip-kde", default=False, action="store_true", help="Skip generating kernel density estimates for histograms, image selection and 'niceness' score calculation.")
     parser.add_argument("--skip-image", default=False, action="store_true", help="Skip generating images for the nicest basepairs (use if the gen_contact_images.py script is broken)")
     parser.add_argument("--drop-columns", default=[], nargs="*", help="remove the specified columns from the reexport output (regex supported when in ^...$)")
+    parser.add_argument("--reexport-noround", default=False, action="store_true", help="Do not round float columns in the reexported data")
     parser.add_argument("--output-dir", "-o", required=True, help="Output directory")
     args = parser.parse_args(argv)
 
@@ -1285,8 +1291,8 @@ def main(argv):
                 pair_type
             ))
         if args.reexport == "partitioned":
-            reexport_df(df, stat_columns or [], drop=args.drop_columns).write_parquet(os.path.join(args.output_dir, f"{pair_type.normalize_capitalization()}.parquet"))
-            reexport_df(df.filter(is_some_quality), stat_columns or [], drop=args.drop_columns).write_parquet(os.path.join(args.output_dir, f"{pair_type.normalize_capitalization()}-filtered.parquet"))
+            reexport_df(df, stat_columns or [], drop=args.drop_columns, round=not args.reexport_noround).write_parquet(os.path.join(args.output_dir, f"{pair_type.normalize_capitalization()}.parquet"))
+            reexport_df(df.filter(is_some_quality), stat_columns or [], drop=args.drop_columns, round=not args.reexport_noround).write_parquet(os.path.join(args.output_dir, f"{pair_type.normalize_capitalization()}-filtered.parquet"))
         results.append({
             # "input_file": file,
             "pair_type": pair_type.to_tuple(),

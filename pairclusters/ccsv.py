@@ -1,10 +1,14 @@
 import polars as pl
 import argparse, os
+import typing as ty
 import pair_defs
 import pair_csv_parse
 import simulate_fr3d_output
 
-def write_directory(df, out, v):
+def write_directory(df: pl.LazyFrame, out, v):
+    if v: print("all.csv...", end="")
+    df.sink_csv(os.path.join(out, "all.csv"), include_header=True)
+    if v: print(" Done.")
     if {'pdbid', 'model', 'chain1', 'chain2', 'nr1', 'nr2', 'family'}.issubset(df.columns):
         if v: print("basepair.txt...", end="")
         identification_df = df.select(
@@ -41,11 +45,30 @@ def write_directory(df, out, v):
 
 def main(args):
     df = pair_csv_parse.scan_pair_csvs(args.input)
-    if "res1" in df.columns:
+    if "res1" in df.columns and "family" in df.columns:
+        def is_hoogsteen(edge: ty.Literal[1, 2]):
+            edge_regex = "[WHSBwhsb]"
+            regex = "^n?[ct]" + (edge_regex + "H" if edge == 2 else "H" + edge_regex) + "[abcde]?$"
+            return pl.col("family").str.contains(regex)
+        
+        map_with_t = dict(pair_defs.resname_map)
+        map_without_t = dict(map_with_t)
+        del map_without_t["T"]
+        del map_without_t["DT"]
         df = df.with_columns(
-            res1_=pl.col("res1").replace(pair_defs.resname_map).str.to_uppercase(),
-            res2_=pl.col("res2").replace(pair_defs.resname_map).str.to_uppercase()
+            res1_=
+                pl.when(is_hoogsteen(1))
+                    .then(pl.col("res1").replace(map_without_t).str.to_uppercase())
+                    .otherwise(pl.col("res1").replace(map_with_t).str.to_uppercase()),
+            res2_=pl.when(is_hoogsteen(2))
+                    .then(pl.col("res2").replace(map_without_t).str.to_uppercase())
+                    .otherwise(pl.col("res2").replace(map_with_t).str.to_uppercase())
         )
+        # df = df.with_columns(
+        #     res1_=pl.col("res1").replace(pair_defs.resname_map).str.to_uppercase(),
+        #     res2_=pl.col("res2").replace(pair_defs.resname_map).str.to_uppercase()
+        # )
+
     out = args.output_dir
     if not args.quiet:
         print("schema:")
