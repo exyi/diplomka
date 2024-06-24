@@ -10,7 +10,7 @@ However, these interactions have more diverse forms than the two most common bas
 
 Given the diversity of non-canonical basepairs, it is unsurprising that they require more research than their canonical counterparts.
 A significant step towards addressing the gap is the [Leontis-Westhof classification system](https://doi.org/10.1017/s1355838201002515), introduced in 2002, which provides a framework for categorizing and naming non-canonical basepairs.
-A subsequent publication shows more than a hundred different basepairing conformations in experimental structures archived in the PDB database (TODO cite).
+A subsequent publication shows more than a hundred different basepairing conformations in experimental structures archived in the [PDB database](https://doi.org/10.1093/nar/gky949).
 Today, with the availability of about 17 000 nucleic acid structures, we are in a better position to properly describe even the rarer basepair kinds.
 
 If we analyze the entire database with one of the available basepair assignment programs (@sec:software), we can see that Watson-Crick pairs dominate all other basepair classes.

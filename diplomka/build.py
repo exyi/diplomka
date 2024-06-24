@@ -41,7 +41,7 @@ def download_cit_info(doi: str) -> CitationInfo:
         doi=doi,
         published_date_parts=list(map(int, (data.get("published") or data["published-print"])["date-parts"][0])),
         title=data["title"][0],
-        authors=[[author.get("given", ""), author.get("family", "???")] for author in data["author"]],
+        authors=[["", author["name"]] if "name" in author else [author.get("given", ""), author.get("family", "???")] for author in data["author"]],
         journal=data.get("container-title"),
         url=None
     )
@@ -401,7 +401,7 @@ def pandoc_parse(input_dir, output_dir):
 
     out_files = []
     for file in sorted(os.listdir(input_dir), key=human_sort_keys):
-        cmd = ["pandoc", "--to=json", "--output=" + os.path.join(output_dir, file + ".json"), "--strip-comments"]
+        cmd = ["pandoc", "--to=json", "--wrap=preserve", "--output=" + os.path.join(output_dir, file + ".json"), "--strip-comments"]
         format = None
 
         if file in ['metadata.yaml']:
@@ -423,7 +423,7 @@ def reexport_pandoc_for_review(files, output_file):
     """
     Single markdown file for AI review using llamacpp-review.mjs
     """
-    run(f"Pandoc reexport for review", "pandoc", "--to=markdown", "--output=" + output_file, *files)
+    run(f"Pandoc reexport for review", "pandoc", "--to=markdown", "--wrap=preserve", "--output=" + output_file, *files)
 
 def pandoc_render(files, output_file):
     cmd = ["pandoc",

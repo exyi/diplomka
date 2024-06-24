@@ -10,9 +10,9 @@ However, the interval would be "overconfident", if the observations are not inde
 ![Canonical GC pairs with the filtering (left) and without it (right). Without the filter, the plot illustrates a large effect from 2.89 Å hydrogen-bond restraints used in model refining.](../img/hbonds-hist-filter-comparison-GConly.svg)
 
 Since multiple entries in the PDB often share a common refined structure with only varying ligands, we also need to remove all redundant structures to avoid the bias.
-Moreover, nucleotides not satisfying MolProbity and DNATCO criteria are filtered out, as well as nucleotides with poor RSCC (electron density fit).
+Moreover, nucleotides not satisfying MolProbity and DNATCO criteria are filtered out, as well as nucleotides with poor electron density fit.
 
-The filtration methodology was prepared by Jiří Černý's laboratory, and we simply utilized the prepared lists of about 180 000 nucleotides.
+The filtration methodology was prepared by Jiří Černý's laboratory  will be published in TODO??, and we simply utilized the prepared lists of about 180 000 nucleotides.
 Given that the nucleotide filter is rather selective, any basepair with at least one passing nucleotide is accepted.
 
 ### Summary of the filtration method

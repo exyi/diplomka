@@ -32,9 +32,28 @@
         "seq": null
     },
     "https://math.stackexchange.com/q/99317": {
+        "doi": null,
+        "published_date_parts": [ 2012, 1, 15 ],
         "title": "Best Fitting Plane given a Set of Points",
         "authors": [ "Felix", "Pahl (joriki)" ],
         "journal": [ "Mathematics Stack Exchange" ],
-        "url": "https://math.stackexchange.com/q/99317",
+        "url": "https://math.stackexchange.com/q/99317"
+    },
+
+    "https://doi.org/10.1093/nar/gky949": {
+        "doi": "10.1093/nar/gky949",
+        "published_date_parts": [
+            2018,
+            10,
+            24
+        ],
+        "title": "Protein Data Bank: the single global archive for 3D macromolecular structure data",
+        "authors": [
+            [ "", "wwPDB consortium" ]
+        ],
+        "journal": [ "Nucleic Acids Research" ],
+        "url": null,
+        "id": "PDB",
+        "seq": null
     }
 }

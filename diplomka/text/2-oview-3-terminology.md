@@ -1,4 +1,4 @@
-## Basepair Type Classification{#sec:bp-terminology}
+## Classification of Basepairs{#sec:bp-terminology}
 
 ### Saenger System {#sec:bp-terminology-seanger}
 
@@ -43,7 +43,7 @@ Since it is an OH group, it can function both as a hydrogen bond donor and accep
 
 TODO Show example image of tSS GG + something that needs the O2'
 
-![trans Sugar/Sugar G-G DNA pair -- The "Sugar" basepair does not involve the sugar at all.](../img/tSS-GG-DNA-6n4g-A_2-B_2-no-oxygens.png){#fig:tSS-GG-DNA-6n4g-A_2-B_2-no-oxygens .img-width75}
+![A trans Sugar/Sugar G-G DNA pair -- The "Sugar" basepair does not involve the ribose at all.](../img/tSS-GG-DNA-6n4g-A_2-B_2-no-oxygens.png){#fig:tSS-GG-DNA-6n4g-A_2-B_2-no-oxygens .img-width75}
 
 <!-- A frequent misconception is that "Sugar" means the base binds to the ribose oxygen.
 Although this is frequently the case that the base pair **includes** a hydrogen bond to the O2' atom, it is definitely not necessary.

@@ -28,7 +28,7 @@ The standard basepair parameters (@sec:std-base-parameters) can be one such desc
 However, we may not be able to characterize all the basepair types using simple numeric ranges of this minimal set of parameters.
 
 Additionally, we consider it more elegant to avoid “hard cuts” in the data distributions.
-As Craig Zirbel said in one of our meetings, we would prefer to have gentle limits on many parameters, than few uncompromising cutoffs.
+In the words of Craig Zirbel, "we would prefer to have gentle limits on many parameters, than few uncompromising cutoffs".
 FR3D indeed performs very well regarding this — we didn't find a single unnatural looking line in any of our scatter plots and histograms.
 Since each of gentle limits cuts out a small fraction of the potential basepairs, the exact value of the limits isn't as sensitive.
 That makes it easier to set the limit and also allows us to share the same conditions across all classes of a given basepairing family.
