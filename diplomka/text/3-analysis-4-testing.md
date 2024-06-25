@@ -8,8 +8,32 @@ This approach will in principle yield zero false negatives, but it is sensitive 
 Instead of minimum and maximum, we used quantiles **0.001** and **0.999** to lessen the sensitivity.
 We also extended the boundaries by rounding them.
 H-bond length do not have a lower limit, and the upper limit is always 4 Å, or 4.2 Å in case of C-H bonds.
-This limit enables efficient search for basepair candidates, for instance using [Gemmi NeighborSearch](https://gemmi.readthedocs.io/en/latest/analysis.html).
+This limit enables efficient search for basepair candidates, for instance using [NeighborSearch in Gemmi](https://gemmi.readthedocs.io/en/latest/analysis.html).
 
+Table [-@tbl:fr3d-autoboundaries-comparison] shows the results for a selection of basepairing (those with over 500 samples on our reference set).
+The _“False negatives”_ column shows the number of pair identified by FR3D, but not included by our scheme (i.e., _missed_); and _“False positives”_ is the opposite (i.e., _misidentified_).
+We can see, that most classes are re-identified well enough and furthermore, the few _misidentified_ or _missed_ percents are generally “borderline basepairs”, hard to classify even by hand.
+To examine the individual differences we used the basepairs.datmos.org web application, as described in the next section.
+The terms _false negative_ and _false positive_ are an overstatement, as we do not have a ground truth.
+
+However, first, we need to explain and mitigate the major discrepancies, notably the missing cases of **cSS A-G**, **tHS A-G**, **cSS G-A**, and the misidentified ones in **cSS A-C**, **tSS A-G**, and **cSS C-A**.<!-- maybe also cHH A-G, cWW A-G -->
+Essentially all _false negatives_ can be attributed to the 4 Å length limit on hydrogen bonds.
+<!-- cite https://biomodel.uah.es/en/water/hbonds.htm? -->
+Although a _real_ H-bond cannot be significantly longer than that, it is simply practical to not require this in every single case.
+In the **cSS A-G**, the issues lies in the N3···O2' H-bond, which often involves a water molecule as the basepair geometry contains a natural cavity (@fig:testing-missed-cases).
+The **tHS A-G** class has a different issue with a O2' H-bond -- the glycosidic bonds may rotate, substituting O2' with O4' as the H-bond donor.
+Strictly speaking, this behavior defies the **tHS A-G** class definition, but we want to allow that, when it is fairly common and gentle “violation”.
+**cSS G-A** essentially the same case, a third, O2'-related H-bond is often missing, marking the entire basepair as invalid.
+
+Marking the beginning of the “clash with reality” project phase, our solution is to simply allow longer bonds in these three cases.
+We proceed similarly in the remaining classes with a third O2'-related H-bond.
+The adjustment brings the _false negative_ rate down to at most 12% (in **cSS A-G**, others are lower).
+More importantly, the remaining false negatives again are from the “borderline basepair” camp.
+The number of _false positives_ did not increase significantly, as the two other H-bonds sufficiently constrain the overall geometry.
+
+![**cSS A-G** (left, 3cpw 0-1259:0-1074) and **tHS A-G** (right, 3ccm 0-1606:0-1589) basepairs: In both cases, insisting on presence of the O2' related H-bond is too limiting. We thus lift the length limit on few specific ](../img/testing-missed-cases.svg){#fig:testing-missed-cases}
+
+Classes with too many false positives are a tougher nut to crack
 
 <!--
 family	bases	count_all	count_baseline	count_target	count_dropped	count_added	family_id	diff	diff_percent_p	diff_percent_n
@@ -35,21 +59,21 @@ chs	U-G	582	534	581	1	48	9	-1 +48	-0.19%	+8.3%
 |Basepair | FR3D count | False negatives | False positives | FN rate | FP rate |
 |-------:|---------:|--------:|--------:|------:|------:|
 | cWW G-C | 57457 | -283 | +2153 | -0.49%  | +3.6%  |
-| cWW A-U | 28947 | -519 | +465  | -1.80%   | +1.6%  |
-| cWW G-U | 5959  | -2   | +343  | -0.03% | +5.4%  |
+| cWW A-U | 28947 | -519 | +465  | -1.80%  | +1.6%  |
+| cWW G-U | 5959  | -2   | +343  | -0.03%  | +5.4%  |
 | tHS A-G | 3228  | -516 | +144  | -16.0%  | +5.0%  |
-| cSS A-C | 1586  | -38  | +738  | -2.40%   | +32.0% |
+| cSS A-C | 1586  | -38  | +738  | -2.40%  | +32.0% |
 | tWH U-A | 2127  | -4   | +94   | -0.19%  | +4.2%  |
-| tSS A-G | 2091  | -32  | +527  | -1.50%   | +20.3% |
-| cSS C-A | 1718  | -46  | +248  | -2.70%   | +13.0% |
-| cWW U-U | 1500  | -1   | +29   | -0.07% | +1.9%  |
+| tSS A-G | 2091  | -32  | +527  | -1.50%  | +20.3% |
+| cSS C-A | 1718  | -46  | +248  | -2.70%  | +13.0% |
+| cWW U-U | 1500  | -1   | +29   | -0.07%  | +1.9%  |
 | cWW A-G | 845   | -7   | +96   | -0.83%  | +10.0% |
 | cWH G-G | 795   | -6   | +26   | -0.75%  | +3.2%  |
-| cSS A-G | 742   | -302 | +22   | -41.70%  | +4.8%  |
+| cSS A-G | 742   | -302 | +22   | -41.70% | +4.8%  |
 | cSS U-A | 698   | -28  | +28   | -4.01%  | +4.0%  |
 | tHH A-A | 689   | -2   | +20   | -0.29%  | +2.8%  |
-| cSS G-A | 641   | -96  | +48   | -14.98%  | +8.1%  |
-| tWS A-G | 651   | -11  | +33   | -1.68%   | +4.9%  |
+| cSS G-A | 641   | -96  | +48   | -14.98% | +8.1%  |
+| tWS A-G | 651   | -11  | +33   | -1.68%  | +4.9%  |
 | cHH A-G | 539   | -1   | +66   | -0.19%  | +11.0% |
 | cHS U-G | 534   | -1   | +48   | -0.19%  | +8.3%  |
 

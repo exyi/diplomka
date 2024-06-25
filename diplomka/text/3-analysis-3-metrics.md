@@ -87,7 +87,7 @@ Each base has its own plane, giving us two separate numbers, similar to the dono
 We could name these parameters "Donor Plane Angle" and "Acceptor Plane Angle", but the conceptual relation to the hydrogens is unimportant, compared to the relation with the base planes.
 We will therefore name it **"Left Plane Angle"** and **"Right Plane Angle"**, assuming the first base is placed on the left, as in left-to-right text.
 
-![**Hydrogen bond / base plane angles** shown on a tHW A-C basepair (same as @fig:metrics-edge2plane-angle-4v9i-1-AA_479-AA_453). We have two hydrogen bonds — N7···N4, and N6· ··N3, each giving us two angles. A: angles relative to the cytosine (right) plane. B: angles relative to the adenine (left) plane. Please note that some angles look substantially exaggerated in the 2-dimensional projection.](../img/metrics-hbond2plane-4v9i-1-AA_479-AA_453.svg){#fig:metrics-hbond2plane-4v9i-1-AA_479-AA_453}
+![**Hydrogen bond / base plane angles** shown on a tHW A-C basepair (same as @fig:metrics-edge2plane-angle-4v9i-1-AA_479-AA_453). We have two hydrogen bonds — N7···N4, and N6···N3, each giving us two angles. A: angles relative to the cytosine (right) plane. B: angles relative to the adenine (left) plane. Please note that some angles look substantially exaggerated in the 2-dimensional projection.](../img/metrics-hbond2plane-4v9i-1-AA_479-AA_453.svg){#fig:metrics-hbond2plane-4v9i-1-AA_479-AA_453}
 
 ### Plane to plane comparison
 
