@@ -9,11 +9,10 @@ The first such scheme we are aware of was described by [W. Saenger in the book '
 The classes are identified using a single ordinal number and are grouped into five higher-level categories based on geometrical symmetry and pairing bases.
 
 
-
 ### The Leontis-Westhof System of Three Edges {#sec:bp-terminology-lw}
 
 A more systematic approach was proposed [by N. B. Leontis and E. Westhof in a 2001 paper](https://doi.org/10.1017/s1355838201002515).
-The authors identified that each nucleotide interacts with one of its three edges:
+The authors identified that each nucleotide interacts with one of its three edges (@fig:LW-3-edges-UG).
 The “front edge” is called **“Watson-Crick”**, since this is the only edge involved in the canonical base pairing.
 The two side edges are called **“Hoogsteen”** and **“Sugar”** -- the former is involved in the Hoogsteen pairs and the latter covalently bonds with the ribose sugar.
 The base pairs are classified based on the two interacting edges and their relative orientation (cis or trans).
@@ -25,12 +24,13 @@ This usually results in different sets of hydrogen bonds, and a distinct shape o
 The Leontis-Westhof naming system labels one conformation **cis** and the other **trans**, based on the direction of the N-C1' bonds.
 Generally, **cis** pairs have the N-C1' bonds pointing in a similar direction, while **trans** pairs orient them in opposite directions.
 However, there is not a strict 90° limit on their angle; instead, we label a conformation as **cis** if it has a more acute angle than the corresponding **trans** conformation (see example of **cHH AG** vs. **tHH AG** in Figure TODO).(TODO image, direct citation of cis/trans).
+All 12 basepair families are shown in figure [-@fig:LWS-all-families-G-G]
 
 The **cis** and **trans** prefixes only indicate the orientation of the base edges relative to each other, not whether the pairing helix is parallel or antiparallel, although there is a correlation.
 Canonical A-T, A-U, and G-C basepairs are **cis** Watson-Crick/Watson-Crick with antiparallel strands.
 For instance, **trans** Watson-Crick G-G can also occur in antiparallel strands (see the [`4pmi`](https://www.rcsb.org/structure/4pmi) PDB structure).
 Some basepair types may appear in both parallel and antiparallel strands, depending on the sugar-base conformation being **syn** or **anti**.
-The [“Strand Orientation” table at NAKB](https://www.nakb.org/basics/basepairs.html#LW/) is thus not entirely accurate, as it only indicates typical cases. 
+The [“Strand Orientation” table at NAKB](https://www.nakb.org/basics/basepairs.html#LW/) is thus not entirely accurate, as it only indicates typical case. 
 
 <!-- **Cis** basepairs have the pairing edge arrows oriented in parallel, while **trans** basepairs have edges in opposing direction.
 
@@ -62,6 +62,8 @@ Basepair names are commonly abbreviated using 3-letter codes -- **c** or **t** f
 TODO 12 possible combinations instead of @ffig:tSS-GG-DNA-6n4g-A_2-B_2-no-oxygens
 Since pairing conformation also depends on the bases involved, we include the base letters (A, T, U, G, C) to specify the sequence.
 For example, we can refer to the pairs in the Figure TODO as `cWW GC` and `tWW GC`.
+
+![G-G pair in all 12 basepairing families.](../img/LWS-all-families-G-G.svg){#fig:LWS-all-families-G-G}
 
 ### M-N/M+N DSSR Labels
 

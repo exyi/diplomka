@@ -1,8 +1,8 @@
-## Special Cases of the Leontis-Westhof Naming Scheme
+## Special Cases of the Leontis-Westhof Naming Scheme {#sec:bp-terminology-lw-edgecase}
 
 ### Symmetry of L-W Classes
 
-As presented in the previous chapter, the L-W scheme theoretically distinguishes 156 distinct base pair conformations, when treating uracil as equivalent to thymine. <!--TODO this is maybe interesting-->
+As presented in the previous section, the L-W scheme theoretically distinguishes 156 distinct base pair conformations, when treating uracil as equivalent to thymine. <!--TODO this is maybe interesting-->
 On each side of the pair, there are three options for the edge and four options for the nucleotide, resulting in a total of twelve unique combinations.
 We can create a $12 \times 12$ matrix of base-edge combinations.
 Assuming symmetry between pairs, such as **cWH A-G** being equivalent to its flipped counterpart **cHW G-A**, we count the number of elements in the lower triangular matrix, ignoring all entries above the diagonal.
@@ -52,7 +52,7 @@ $$2 \cdot \left( 16 \cdot 3 + 10 \cdot 3 \right) = 156$$ -->
 ### Sugar-Sugar Symmetry
 
 Unfortunately, the assumption of symmetry we made earlier is generally invalid.
-Many Sugar-Sugar basepairs are not defined asymmetrically, such as **cSS A-C** which isn't a flipped version of **cSS C-A**.
+Many Sugar-Sugar basepairs are not defined asymmetrically, such as **cSS A-C** which is not a flipped version of **cSS C-A**.
 All six “symmetric” pairs are defined differently in **cis** Sugar/Sugar, and only one in **trans** Sugar/Sugar (G-A/A-G). <!--TODO Ref-->
 
 This property isn't explicitly mentioned in [Leontis, Westhof 2001](https://doi.org/10.1017/s1355838201002515) (TODO verify again), however the tables of examples in [Leontis 2002](https://doi.org/10.1093/nar/gkf481) clearly show different base pairing for the two cases.
@@ -69,7 +69,7 @@ If the basepair is **cis**, it is represented with filled symbols (`●`, `■`,
 
 ![In trans Sugar/Sugar, C-A is defined while A-C is left undefined. In contrast, in W/W and H/H the C-A and A-C show the same pair (turned upside down)](../img/tSS-CA-vs-AC.png)
 
-A detailed discussion of software tools appears in a subsequent section; however, it is worth noting here how FR3D disambiguates the two **cSS** cases by lowering the second `S` letter.
+Section [-@sec:software] discusses available software tools more thoroughly; however, it is worth noting here how FR3D disambiguates the two **cSS** cases by lowering the second `S` letter.
 FR3D reports all basepair in both orientations -- A **cSs A-C** pair is also reported as the corresponding **csS C-A** pair, both meaning **cSS A-C** in the Leontis-Westhof terminology.
 
 <!-- ■⎼▶
@@ -78,7 +78,7 @@ FR3D reports all basepair in both orientations -- A **cSs A-C** pair is also rep
 
 ### Symmetric false friends — cWW A-A vs tWW A-A
 
-TODO
+trans Watson-Crick/Watson-Crick A-A, G-G, C-C, and U-U
 
 ### Alternatives
 

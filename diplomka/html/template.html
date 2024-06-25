@@ -203,6 +203,22 @@
             text-align: center; text-align-last: center;
         }
 
+        table {
+            text-align-last: initial;
+        }
+        table th {
+            /* pandoc insists on putting text-align: right on all cells, including the heading... */
+            text-align: center !important;
+            text-align-last: center !important;
+            text-wrap: balance;
+        }
+        table caption {
+            text-align: center; text-align-last: center;
+            text-wrap: balance;
+        }
+
+ 
+
         /* Code listing styling */
         .listing:not([data-split-to]) {
             border-bottom: solid 1px black;

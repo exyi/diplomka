@@ -130,4 +130,3 @@ FROM nabirnew                 UNION ALL BY NAME                 SELECT *, FALSE 
 TODO:
 
 alternativní cHHa, cWWa
-celá PDB pro naše páry
