@@ -130,3 +130,20 @@ FROM nabirnew                 UNION ALL BY NAME                 SELECT *, FALSE 
 TODO:
 
 alternativní cHHa, cWWa
+
+tWS UG přidat kontakt
+tWS-U-C přidat O2-N3
+přepočítat s novými kontakty
+přepočítat porovnání, porovnat graph deconfliction
+tSS-G-G - WTF
+
+comparison scatterplot
+
+zkusit přidat
+
+  --and abs(columns('hb_\d_OOPA.*')) < abs(coplanarity_angle - 180)
+  --and abs(columns('shift\d'))-1.0 < abs(sin(radians(coplanarity_angle)))
+  --and (@hb_0_OOPA1 + @hb_0_OOPA2 + @hb_1_OOPA1 + @hb_1_OOPA2 + @hb_2_OOPA1 + @hb_2_OOPA2)/6 < abs(coplanarity_angle-180)/3
+
+  --and abs(columns('hb_\d_OOPA.*')) < abs(coplanarity_angle - 180)
+  --and abs(columns('shift\d'))-2.0 < abs(sin(coplanarity_angle))

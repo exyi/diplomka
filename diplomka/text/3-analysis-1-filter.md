@@ -12,12 +12,26 @@ However, the interval would be "overconfident", if the observations are not inde
 Since multiple entries in the PDB often share a common refined structure with only varying ligands, we also need to remove all redundant structures to avoid the bias.
 Moreover, nucleotides not satisfying MolProbity and DNATCO criteria are filtered out, as well as nucleotides with poor electron density fit.
 
-The filtration methodology was prepared by Jiří Černý's laboratory  will be published in TODO??, and we simply utilized the prepared lists of about 180 000 nucleotides.
+The filtration methodology was prepared by Jiří Černý's laboratory and will be published in TODO??.
+In this project, we simply utilized the prepared lists of about 180 000 nucleotides.
 Given that the nucleotide filter is rather selective, any basepair with at least one passing nucleotide is accepted.
 
 ### Summary of the filtration method
 
-TODO jirkův filtr popis:
+<!-- TODO jirkův filtr popis: -->
+
+0. Selection of all nucleic acid crystal structures with resolution of 3.5 Å or better
+1. Grouping of sequentially redundant clusters.
+    * Sequences with more than 90% similarity are considered redundant.
+    * Sequences are considered non-redundant, if one is part of a protein complex and the other is not.
+2. Selection of the highest quality chain from each cluster of redundancy
+    * The score is similar to “BGSU RNA score” (Roll et al., 2016 TODO), a weighted sum of resolution, Rfree, clashscore, per-residue value of RSCC, and a fraction of unobserved residues.
+3. Selection of residues with sufficiently high quality, defined as:
+    * All atoms must have RSCC (real-space correlation coefficient) ≥ 0.7, and backbone atoms must have harmonic of RSCC ≥ 0.8
+    * MolProbity criteria (Williams et al., 2018 TODO) are satisfied: no steric clashes ≥ 0.5 Å, and no sugar-pucker outliers are allowed.
+    * The nucleotide conforms to one of NtCs (sugar-phosphate backbone conformations, TODO cite) with confal (TODO cite?) ≥ 60% and RMSD ≤ 0.5 Å.
+
+The list of residues and detailed description (from TODO cite) is included as an attachment.
 
 <!-- 
 
