@@ -158,36 +158,61 @@ trans W/S,U,A,-,O2,---,H2,C2,
 trans W/S,U,C,-,O4,---,H2',O2',
 trans W/S,U,C,N3,H3,---,O2,-,
 trans W/S,U,G,-,O2,---,H21,N2,
+trans W/S,U,G,N3,H?,---,N3,-,            *** not H-bond just spatial constraint ***
+trans W/S,U,G,-,O4,---,H2',O2',            *** not H-bond just spatial constraint ***
 trans W/S,U,U,-,O4,---,H2',O2',
 trans W/S,U,U,N3,H3,---,O2,-,
 cis H/H,A,G,N6,H62,---,O6,-,
+cis H/H,A,G,N7,H?,---,O6,-,            *** not H-bond just spatial constraint ***
 cis H/H,G,C,-,O6,---,H6,C6,
+cis H/H,G,C,-,N7,---,H6,C6,            *** additional spatial constraint ***
 cis H/Ha,G,C,-,O6,---,H42,N4,          *** plausible alternate set of hydrogen bonds ***
 cis H/Ha,G,C,-,N7,---,H5,C5,           *** plausible alternate set of hydrogen bonds ***
 cis H/h,G,G,-,O6,---,H8,C8,
+cis H/h,G,G,-,N7,---,H8,C8,            *** additional spatial constraint ***
 trans H/H,A,A,-,N7,---,H62,N6,
 trans H/H,A,A,N6,H62,---,N7,-,
 trans H/H,A,C,-,N7,---,H42,N4,
+trans H/H,A,C,-,N6,---,H???,C5,            *** not H-bond just spatial constraint ***
 trans H/H,A,G,N6,H62,---,O6,-,
+trans H/H,A,G,N7,H?,---,O6,-,            *** not H-bond just spatial constraint ***
 trans H/H,A,U,N6,H62,---,O4,-,
+trans H/H,A,U,N7,H?,---,O4,-,            *** not H-bond just spatial constraint ***
 trans H/H,C,U,N4,H42,---,O4,-,
+trans H/H,C,U,N4,H42,---,C5,-,            *** not H-bond just spatial constraint ***
+trans H/H,C,U,C5,H?,---,O4,-,            *** not H-bond just spatial constraint ***
 trans H/H,G,C,-,N7,---,H42,N4,
 trans H/H,G,C,-,O6,---,H5,C5,          *** plausible additional hydrogen bond 2023-07-19 CLZ ***
 trans H/h,G,G,-,O6,---,H8,C8,
+trans H/h,G,G,-,N7,---,H8,C8,            *** additional spatial constraint ***
 cis H/S,A,A,N6,H62,---,N3,-,
+cis H/S,A,A,N7,H?,---,N3,-,            *** additional spatial constraint *** different from Lada's suggestion
 cis H/S,A,C,N6,H62,---,O2,-,
+cis H/S,A,C,N7,H?,---,O2,-,            *** additional spatial constraint *** different from Lada's suggestion
 cis H/S,A,G,-,N7,---,H21,N2,
+cis H/S,A,G,-,N7,---,H?,N1,            *** additional spatial constraint *** different from Lada's suggestion
 cis H/S,A,U,N6,H62,---,O2,-,
+cis H/S,A,U,N7,H?,---,O2,-,            *** additional spatial constraint *** different from Lada's suggestion
 cis H/S,C,A,N4,H42,---,N3,-,
+cis H/S,C,A,C5,H?,---,C1',-,            *** additional spatial constraint *** different from Lada's suggestion
 cis H/S,C,C,N4,H42,---,O2,-,
+cis H/S,C,C,C5,H?,---,C1',-,            *** additional spatial constraint *** different from Lada's suggestion
 cis H/S,C,G,N4,H42,---,N3,-,
+cis H/S,C,G,C5,H?,---,C1',-,            *** additional spatial constraint ***
 cis H/S,C,U,N4,H42,---,O2,-,
+cis H/S,C,U,C5,H?,---,C1',-,            *** additional spatial constraint ***
 cis H/S,G,A,-,O6,---,H2,C2,
+cis H/S,G,A,-,N7,---,H?,N3,            *** additional spatial constraint ***
 cis H/S,G,G,-,O6,---,H21,N2,
+cis H/S,G,G,-,N7,---,H?,N3,            *** additional spatial constraint ***
 cis H/S,U,A,-,O4,---,H2,C2,
+cis H/S,U,A,C5,H5,---,N3,-,            *** additional spatial constraint ***
 cis H/S,U,C,C5,H5,---,O2,-,
+cis H/S,U,A,C5,H5,---,C1',-,            *** additional spatial constraint *** different from Lada's suggestion
 cis H/S,U,G,-,O4,---,H21,N2,
+cis H/S,U,G,C5,H5,---,N3,-,            *** additional spatial constraint ***
 cis H/S,U,U,C5,H5,---,O2,-,
+cis H/S,U,U,C5,H5,---,C1',-,            *** additional spatial constraint *** different from Lada's suggestion
 trans H/S,A,A,-,N7,---,H2,C2,
 trans H/S,A,A,N6,H62,---,N3,-,
 trans H/S,A,A,N6,H61,---,O2',-,
@@ -205,18 +230,26 @@ trans H/S,C,C,N4,H41,---,O2',-,
 trans H/S,C,U,N4,H42,---,O2,-,
 trans H/S,C,U,N4,H41,---,O2',-,
 trans H/S,G,G,-,O6,---,H21,N2,
+trans H/S,G,G,-,O6,---,H?,N3,            *** additional spatial constraint ***
+trans H/S,G,G,-,N7,---,H21,N2,            *** additional spatial constraint ***
 trans H/S,U,A,-,O4,---,H2,C2,
+trans H/S,U,A,-,O4,---,H?,N3,            *** additional spatial constraint ***
+trans H/S,U,A,C5,H?,---,C2,-,            *** additional spatial constraint ***
 trans H/S,U,G,-,O4,---,H21,N2,
+trans H/S,U,G,-,O4,---,H?,N3,            *** additional spatial constraint ***
+trans H/S,U,G,C5,H?,---,N2,-,            *** additional spatial constraint ***
 cis S/s,A,A,O2',H2',---,N3,-,
 cis S/s,A,A,-,N3,---,H2,C2,
 cis S/s,A,A,-,O2',---,H2',O2',
 cis S/s,A,C,-,O2',---,H2',O2',
 cis S/s,A,C,O2',H2',---,O2,-,
+cis S/s,A,C,N3,H?,---,O2,-,            *** additional spatial constraint ***
 cis S/s,A,G,O2',H2',---,N3,-,
 cis S/s,A,G,-,N3,---,H21,N2,
 cis S/s,A,G,-,O2',---,H2',O2',
 cis S/s,A,U,-,O2',---,H2',O2',
 cis S/s,A,U,O2',H2',---,O2,-,
+cis S/s,A,U,N3,H?,---,O2,-,            *** additional spatial constraint ***
 cis S/s,C,A,-,O2',---,H2',O2',
 cis S/s,C,A,O2',H2',---,N3,-,
 cis S/s,C,A,-,O2,---,H2,C2,              *** added 2023-05-16 CLZ to resemble UA cSS ***
@@ -227,16 +260,19 @@ cis S/s,C,G,-,O2,---,H21,N2,
 cis S/s,C,G,-,O2',---,H2',O2',
 cis S/s,C,U,-,O2',---,H2',O2',
 cis S/s,C,U,O2',H2',---,O2,-,
+cis S/s,C,U,O2,H?,---,O2,-,            *** additional spatial constraint ***
 cis S/s,G,A,O2',H2',---,N3,-,
 cis S/s,G,A,-,N3,---,H2,C2,
 cis S/s,G,A,-,O2',---,H2',O2',
 cis S/s,G,C,-,O2',---,H2',O2',
 cis S/s,G,C,O2',H2',---,O2,-,
+cis S/s,G,C,N3,H?,---,O2,-,            *** additional spatial constraint ***
 cis S/s,G,G,O2',H2',---,N3,-,
 cis S/s,G,G,-,N3,---,H21,N2,
 cis S/s,G,G,-,O2',---,H2',O2',
 cis S/s,G,U,-,O2',---,H2',O2',
 cis S/s,G,U,O2',H2',---,O2,-,
+cis S/s,G,U,N3,H?,---,O2,-,            *** additional spatial constraint ***
 cis S/s,U,A,-,O2',---,H2',O2',
 cis S/s,U,A,O2',H2',---,N3,-,
 cis S/s,U,A,-,O2,---,H2,C2,
@@ -247,6 +283,7 @@ cis S/s,U,G,O2',H2',---,N3,-,
 cis S/s,U,G,-,O2,---,H21,N2,
 cis S/s,U,U,-,O2',---,H2',O2',
 cis S/s,U,U,O2',H2',---,O2,-,
+cis S/s,U,U,O2,H?,---,O2,-,            *** additional spatial constraint ***
 trans S/s,A,A,-,N3,---,H2,C2,              *** usually a bad bond; reconsider ***
 trans S/s,A,A,C2,H2,---,N3,-,              *** fixed 2023-06-17 CLZ to use H2 ***
 trans S/s,A,A,-,N1,---,H2',O2',

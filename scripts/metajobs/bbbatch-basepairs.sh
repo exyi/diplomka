@@ -20,7 +20,7 @@ else
     partition_settings="--partition-input-select=$BASEPAIRS_PARTITION"
 fi
 
-runname=all3
+runname=all4
 
 export PYTHONUNBUFFERED=1
 pdbcache=~/tmp/pdbcache

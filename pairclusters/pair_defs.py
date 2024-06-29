@@ -168,23 +168,27 @@ def read_pair_definitions(file = os.path.join(os.path.dirname(__file__), "H_bond
     
     result_mapping = {}
     for line in data:
-        res1, res2 = line[1].strip(), line[2].strip()
-        pt = (translate_pair_type(line), res1 +"-"+ res2)
-        if pt[0] is None:
-            continue
-        if pt not in result_mapping:
-            result_mapping[pt] = []
-        assert line[5] == '---', line
-        atom1, atom2, atom3, atom4 = line[3].strip(), line[4].strip(), line[6].strip(), line[7].strip()
-        if atom1 == '-':
-            # atom2 is the acceptor, atom3 is hydrogen and atom4 is the donor
-            b = ("B"+get_angle_ref_atom(res2, atom4), "B"+atom4, "A"+atom2, "A"+get_angle_ref_atom(res1, atom2))
-        else:
-            # aton3 is the acceptor, atom2 is hydrogen and atom1 is the donor
-            assert atom4 == '-'
-            b = ("A"+get_angle_ref_atom(res1, atom1), "A"+atom1, "B"+atom3, "B"+get_angle_ref_atom(res2, atom3))
-        if b not in result_mapping[pt]: # cWB has some bonds duplicated (the nitrogen has two hydrogens)
-            result_mapping[pt].append(b)
+        try:
+            res1, res2 = line[1].strip(), line[2].strip()
+            pt = (translate_pair_type(line), res1 +"-"+ res2)
+            if pt[0] is None:
+                continue
+            if pt not in result_mapping:
+                result_mapping[pt] = []
+            assert line[5] == '---', line
+            atom1, atom2, atom3, atom4 = line[3].strip(), line[4].strip(), line[6].strip(), line[7].strip()
+            if atom1 == '-':
+                # atom2 is the acceptor, atom3 is hydrogen and atom4 is the donor
+                b = ("B"+get_angle_ref_atom(res2, atom4), "B"+atom4, "A"+atom2, "A"+get_angle_ref_atom(res1, atom2))
+            else:
+                # aton3 is the acceptor, atom2 is hydrogen and atom1 is the donor
+                assert atom4 == '-'
+                b = ("A"+get_angle_ref_atom(res1, atom1), "A"+atom1, "B"+atom3, "B"+get_angle_ref_atom(res2, atom3))
+            if b not in result_mapping[pt]: # cWB has some bonds duplicated (the nitrogen has two hydrogens)
+                result_mapping[pt].append(b)
+        except Exception as e:
+            print("ERROR on line: ", line)
+            raise
     return result_mapping
 
 def get_angle_ref_atom(res: str, atom: str)-> str:
