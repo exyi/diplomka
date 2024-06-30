@@ -4,20 +4,32 @@
 
 Nucleic acids are some of the most important biological molecules, and the study of their structure and function is critical to understanding the fundamental principles of life.
 The [well known double-stranded helix](https://doi.org/10.1038/171737a0) dominates the structure of DNA, protecting its valuable information content.
-On the other hand, RNA molecules often form complicated structures, some of them can even have catalytic activity independent on proteins (<https://doi.org/10.1261%2Frna.031401.111>, <https://doi.org/10.1038%2Fnchembio.1846>).
+On the other hand, RNA molecules often form complicated structures, often with dynamic catalytic domains such as those in the ribosome <https://doi.org/10.1201/9781315735368> TODO cit The_Ribosome_Is_a_Ribozyme page 346.
+A number of RNAs can even have catalytic activity independent on proteins (<https://doi.org/10.1261/rna.031401.111>, <https://doi.org/10.1038/nchembio.1846>).
 Similarly to the DNA helices, these complex structures are also driven by the pairwise interaction of nucleotide bases.
 However, these interactions have more diverse forms than the two most common basepairs described by Watson and Crick.
 
 Given the diversity of non-canonical basepairs, it is unsurprising that they require more research than their canonical counterparts.
-A significant step towards addressing the gap is the [Leontis-Westhof classification system](https://doi.org/10.1017/s1355838201002515), introduced in 2002, which provides a framework for categorizing and naming non-canonical basepairs.
-A subsequent publication shows more than a hundred different basepairing conformations in experimental structures archived in the [PDB database](https://doi.org/10.1093/nar/gky949).
+A significant step towards addressing the gap is the [Leontis-Westhof classification system](https://doi.org/10.1017/s1355838201002515), introduced in 2001, which provides a framework for categorizing and naming non-canonical basepairs.
+A [subsequent publication](https://doi.org/10.1093/nar/gkf481) shows more than a hundred different basepairing conformations in experimental structures archived in the [PDB database](https://doi.org/10.1093/nar/gky949).
 Today, with the availability of about 17 000 nucleic acid structures, we are in a better position to properly describe even the rarer basepair kinds.
 
 If we analyze the entire database with one of the available basepair assignment programs (@sec:software), we can see that Watson-Crick pairs dominate all other basepair classes.
 However, in RNA the total cardinality of all non-canonical pairs is actually larger than the canonical ones; meaning that canonical pairs represent slightly bellow 50% of the total.
 Even in DNA structures, 25% of all basepairs are non-canonical, notable biologically relevant structures are the [i-Motif](https://doi.org/10.1093/nar/gky735) and the [G-quadruplex](https://doi.org/10.1016/j.trechm.2019.07.002).
 
-![Our plan to improve the shortcomings of existing programs for basepair assignment.](../img/xkcd_standards_2x.png){#fig:xkcd_standards_2x}
+## Aims of This Project
+
+
+The higher-level objective of our working group is to provide unambiguous definitions for the basepair classes of the Leontis-Westhof system.
+At present, a number of rigorous definitions exists, as each computer program capable to annotating basepairs requires one.
+However, with the exception of few overly simplistic algorithms, the exact selection criteria are not published outside the source codes, rendering it largely inaccessible to a significant portion of structural biologists.
+
+In this work, we establish a framework necessary for achieving the objective.
+We define and implement the measurable parameters which will be subsequently utilized to define the basepairs (@sec:basepair-params).
+Additionally, we develop an interactive application that enables the tuning of selection criteria for each basepairing class (@sec:tuning-app).
+
+![Our plan to improve the shortcomings of existing programs for basepair assignment. XKCD #927 by Randall Munroe](../img/xkcd_standards_2x.png){#fig:xkcd_standards_2x}
 
 
 <!-- Even though the number of solved nucleic acid structures is significantly lower than the number of known protein structures,  -->

@@ -1,4 +1,4 @@
-## Optimal Parameter Values
+## Optimal Parameter Values {#sec:opt-params}
 
 <!-- We totally understand that even if two basepairs are in the same category, they shouldn't be necessarily equal.
 In the same conditions, maybe yes, there should be an optimal geometry with minimal energy.
@@ -112,7 +112,7 @@ The KDE will have a bandwidth factor of 1.5.
 Both median and the KDE mode will thus be included in the attached tables.
 
 
-### Circular mean
+### Circular Mean
 
 A significant number of the measured parameters are angle in the range -180° ... 180°.
 The arithmetic average does not take into account that -180 is equal to 180, producing useless results if the distribution spans this boundary.
@@ -139,3 +139,14 @@ If we can assume this, we can use the circular mean to center the entire distrib
 This trick is crucial for reporting the range of observed values, or comuting a confidence interval of any other statistic.
 Please note that the interval upper bound may be numerically lower than the lower bound.
 For instance, an interval $[160°, -170°]$ means the same as $[160°, 180°] \cup [-180°, -170°]$.
+
+
+### Most Typical Basepair {#sec:opt-params-exemplar}
+
+For presentations and a rudimentary RMSD distance based validation, it is convenient to find the most typical basepair in each class.
+After we calculate the KDE mode for each parameter, we look for the basepair with which is nearest to the modes, after normalizing each distance by the standard deviation of the parameter.
+
+Alternativelly, we could look for the basepair with highest combined KDE likelihood in all parameters of interest.
+However, we opted for the "distance to mode" approach to disqualify basepairs from secondary peaks.
+While the secondary peak has a large distance to the KDE likelihood, it might have a very similar KDE likelihood.
+Therefore, a basepair from the secondary peak might be selected, if it also has slightly better likelihoods in the other parameters.

@@ -18,7 +18,7 @@ In order to be useful, each parameter must have a sharp enough distribution to h
 In @fig:cWH-G-G-yaw-hbond, we show that the **yaw** angle performs relatively well on the **cWH G-G** class, while the H-bond length has a relatively long tail where it is quickly amassing false positives.
 For similar reasons, we entirely ruled out using ZXZ Euler angles in @sec:basepair-params-ypr, because the values span the entire range of $-180° \cdots +180°$.
 
-![“Selectivity” of **yaw** angle (@sec:basepair-params-ypr) and **H-bond length** (@sec:basepair-params-hbonds) demonstrated on **cWH G-G**. Basepairs annotated by FR3D on the reference set, compared with all close contacts (one of the defined H-bonds is ≤ 4.2 Å).](../img/cWH-G-G-yaw-hbond.svg){#fig:cWH-G-G-yaw-hbond}
+![“Selectivity” of **yaw** angle (@sec:basepair-params-ypr) and **H-bond length** (@sec:basepair-params-hbonds) demonstrated on **cWH G-G**. Basepairs annotated by FR3D on the reference set (@sec:filter), compared with all close contacts (one of the defined H-bonds is ≤ 4.2 Å).](../img/cWH-G-G-yaw-hbond.svg){#fig:cWH-G-G-yaw-hbond}
 
 
 ### The Number of Parameters

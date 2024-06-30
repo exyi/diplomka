@@ -1,4 +1,4 @@
-## Data Selection
+## Data Selection {#sec:filter}
 
 In order to get useful statistics, we need a large enough data sample.
 However, we also have to make sure that the data has a high enough quality, most importantly try to remove any biases.
@@ -15,6 +15,7 @@ Moreover, nucleotides not satisfying MolProbity and DNATCO criteria are filtered
 The filtration methodology was prepared by Jiří Černý's laboratory and will be published in TODO??.
 In this project, we simply utilized the prepared lists of about 180 000 nucleotides.
 Given that the nucleotide filter is rather selective, any basepair with at least one passing nucleotide is accepted.
+We will call this filtered set the **"Reference Set"**.
 
 ### Summary of the filtration method
 

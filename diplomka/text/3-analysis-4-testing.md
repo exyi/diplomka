@@ -62,7 +62,7 @@ chs	U-G	582	534	581	1	48	9	-1 +48	-0.19%	+8.3%
 | cHH A-G | 539   | -1   | +66   | -0.19%  | +11.0% |
 | cHS U-G | 534   | -1   | +48   | -0.19%  | +8.3%  |
 
-: Comparison of basepair counts as assigned by FR3D and by the procedure from @sec:testing-basepair-params. Only selection of basepair types with over 500 samples in the reference set. {#tbl:fr3d-autoboundaries-comparison}
+: Comparison of basepair counts as assigned by FR3D and by the procedure from @sec:testing-basepair-params. Only selection of basepair types with over 500 samples in the reference set (@sec:filter). {#tbl:fr3d-autoboundaries-comparison}
 
 However, first, we need to explain and mitigate the major discrepancies, notably the missing cases of **cSS A-G**, **tHS A-G**, **cSS G-A**, and the misidentified ones in **cSS A-C**, **tSS A-G**, **cSS C-A**, and **cHH A-G**.<!-- maybe also cWW A-G -->
 Essentially all _false negatives_ can be attributed to the 4 Å length limit on hydrogen bonds.

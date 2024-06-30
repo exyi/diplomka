@@ -322,6 +322,51 @@
         "id": null,
         "seq": null
     },
+    "https://doi.org/10.1038/nchembio.1846": {
+        "doi": "10.1038/nchembio.1846",
+        "published_date_parts": [
+            2015,
+            7,
+            13
+        ],
+        "title": "New classes of self-cleaving ribozymes revealed by comparative genomics analysis",
+        "authors": [
+            [
+                "Zasha",
+                "Weinberg"
+            ],
+            [
+                "Peter B",
+                "Kim"
+            ],
+            [
+                "Tony H",
+                "Chen"
+            ],
+            [
+                "Sanshu",
+                "Li"
+            ],
+            [
+                "Kimberly A",
+                "Harris"
+            ],
+            [
+                "Christina E",
+                "L\u00fcnse"
+            ],
+            [
+                "Ronald R",
+                "Breaker"
+            ]
+        ],
+        "journal": [
+            "Nature Chemical Biology"
+        ],
+        "url": null,
+        "id": null,
+        "seq": null
+    },
     "https://doi.org/10.1038/nprot.2008.104": {
         "doi": "10.1038/nprot.2008.104",
         "published_date_parts": [
@@ -882,8 +927,16 @@
         "title": "The non-Watson-Crick base pairs and their associated isostericity matrices",
         "authors": [
             [
-                "N. B.",
+                "Neocles B.",
                 "Leontis"
+            ],
+            [
+                "Jesse",
+                "Stombaugh"
+            ],
+            [
+                "Eric",
+                "Westhof"
             ]
         ],
         "journal": [
@@ -903,8 +956,32 @@
         "title": "Tools for the automatic identification and classification of RNA base pairs",
         "authors": [
             [
-                "H.",
+                "Huanwang",
                 "Yang"
+            ],
+            [
+                "Fabrice",
+                "Jossinet"
+            ],
+            [
+                "Neocles",
+                "Leontis"
+            ],
+            [
+                "Li",
+                "Chen"
+            ],
+            [
+                "John",
+                "Westbrook"
+            ],
+            [
+                "Helen",
+                "Berman"
+            ],
+            [
+                "Eric",
+                "Westhof"
             ]
         ],
         "journal": [
@@ -924,8 +1001,12 @@
         "title": "3DNA: a software package for the analysis, rebuilding and visualization of three-dimensional nucleic acid structures",
         "authors": [
             [
-                "X.-J.",
+                "Xiang-Jun",
                 "Lu"
+            ],
+            [
+                "Wilma K.",
+                "Olson"
             ]
         ],
         "journal": [
@@ -1160,8 +1241,84 @@
         "id": null,
         "seq": null
     },
+    "https://doi.org/10.1201/9781315735368": {
+        "doi": "10.1201/9781315735368",
+        "published_date_parts": [
+            2017,
+            8,
+            7
+        ],
+        "title": "Molecular Biology of the Cell",
+        "authors": [
+            [
+                "Bruce",
+                "Alberts"
+            ],
+            [
+                "Alexander",
+                "Johnson"
+            ],
+            [
+                "Julian",
+                "Lewis"
+            ],
+            [
+                "David",
+                "Morgan"
+            ],
+            [
+                "Martin",
+                "Raff"
+            ],
+            [
+                "Keith",
+                "Roberts"
+            ],
+            [
+                "Peter",
+                "Walter"
+            ]
+        ],
+        "journal": [],
+        "url": null,
+        "id": null,
+        "seq": null
+    },
     "https://doi.org/10.1261%2Frna.031401.111": {
         "doi": "10.1261%2Frna.031401.111",
+        "published_date_parts": [
+            2012,
+            3,
+            27
+        ],
+        "title": "The ubiquitous hammerhead ribozyme",
+        "authors": [
+            [
+                "Christian",
+                "Hammann"
+            ],
+            [
+                "Andrej",
+                "Luptak"
+            ],
+            [
+                "Jonathan",
+                "Perreault"
+            ],
+            [
+                "Marcos",
+                "de la Pe\u00f1a"
+            ]
+        ],
+        "journal": [
+            "RNA"
+        ],
+        "url": null,
+        "id": null,
+        "seq": null
+    },
+    "https://doi.org/10.1261/rna.031401.111": {
+        "doi": "10.1261/rna.031401.111",
         "published_date_parts": [
             2012,
             3,

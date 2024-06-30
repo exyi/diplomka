@@ -1,6 +1,6 @@
-## Web Gallery of Basepairs
+## Web Gallery of Basepairs {#sec:impl-webapp}
 
-In section TODO, have introduced a web application for browsing various sets of basepairs (available at https://basepairs.datmos.org/).
+In section [-@sec:tuning-app], we have introduced a web application for browsing the various sets of basepairs (available at https://basepairs.datmos.org/, with the source code attached to this work).
 In this section, we would like to uncover some inner working, software design choices and explain advanced usage options.
 
 TODO
