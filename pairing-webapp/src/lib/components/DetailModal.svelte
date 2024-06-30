@@ -245,7 +245,13 @@
     </div>
     <div>
         <h4>PyMol script<span style="font-size: 1rem; font-weight: 400"> &nbsp;&nbsp;- copy and paste into PyMol command line</span></h4>
-        <pre>{generatePymolScript(pair.id).join("\n")}</pre>
+        <pre on:click={ev => {
+            const selection = window.getSelection()
+            selection.removeAllRanges()
+            const range = document.createRange()
+            range.selectNodeContents(ev.currentTarget)
+            selection.addRange(range)
+        }}>{generatePymolScript(pair.id).join("\n")}</pre>
     </div>
     <div style="display: flex; flex-direction: row; justify-content: space-evenly; gap: 2rem">
     {#if pairDB?.hbonds}
