@@ -6,6 +6,9 @@ import { Lazy } from './lazy'
 import _ from 'lodash'
 
 // export type JsFlatTypeArray = Float64Array | Int32Array | Uint8Array | Uint16Array | Uint32Array | Int8Array | Int16Array | Int32Array
+export type FloatArray = Float32Array | Float64Array
+export type NumArray = FloatArray | Int32Array | Uint32Array | Uint16Array | Int16Array | Uint8Array | Int8Array
+export type SmallIntArray = Int32Array | Uint32Array | Uint16Array | Int16Array | Uint8Array | Int8Array
 
 function andBitmap(destination: Uint8Array, source: Uint8Array, destOffset) {
     if (destOffset % 8 == 0) {
@@ -22,25 +25,21 @@ function andBitmap(destination: Uint8Array, source: Uint8Array, destOffset) {
         }
     }
 }
+function popcountBitmap(bitmap: Uint8Array, size: number) {
+    let count = 0;
+    for (let i = 0; i < size; i++) {
+        if ((bitmap[i >> 3] & (1 << (i & 7))) != 0) {
+            count++
+        }
+    }
+    return count
+}
 
 type DataList<T extends arrow.DataType<arrow.Type, any>> = readonly arrow.Data<T>[]
 
-export function filterData(ArrayType: typeof Float64Array | typeof Float32Array, data: DataList<any>, filters: readonly DataList<arrow.Bool>[], nnfilters: readonly DataList<any>[]): [Float64Array | Float32Array, number, Uint8Array] {
-    const totalCount = data.reduce((acc, cur) => acc + cur.length, 0)
-    const bitmap = new Uint8Array(Math.ceil(totalCount / 8))
+function makeFilterBitmap(size: number, filters: readonly DataList<arrow.Bool>[], nnfilters: readonly DataList<any>[]): Uint8Array {
+    const bitmap = new Uint8Array(Math.ceil(size / 8))
     bitmap.fill(0xff)
-
-    for (let i = 0, offset = 0; i < data.length; offset += data[i].length, i++) {
-        const d = data[i]
-        if (d.nullable == false) {
-            // done
-
-        } else if (offset % 8 == 0) {
-            bitmap.set(d.nullBitmap, offset >> 3)
-        } else {
-            andBitmap(bitmap, d.nullBitmap, offset)
-        }
-    }
 
     for (const filter of filters) {
         for (let i = 0, offset = 0; i < filter.length; offset += filter[i].length, i++) {
@@ -60,14 +59,17 @@ export function filterData(ArrayType: typeof Float64Array | typeof Float32Array,
             }
         }
     }
+    return bitmap
+}
 
-    let count = 0;
-    for (let i = 0; i < totalCount; i++) {
-        if ((bitmap[i >> 3] & (1 << (i & 7))) != 0) {
-            count++
-        }
+export function filterData(ArrayType: typeof Float64Array | typeof Float32Array, data: DataList<any>, filters: readonly DataList<arrow.Bool>[], nnfilters: readonly DataList<any>[]): [Float64Array | Float32Array, number, Uint8Array] {
+    const totalCount = data.reduce((acc, cur) => acc + cur.length, 0)
+    if (!nnfilters.includes(data) && data.some(d => d.nullable)) {
+        nnfilters = [...nnfilters, data]
     }
-    const result = new ArrayType(count)
+    const bitmap = makeFilterBitmap(totalCount, filters, nnfilters)
+
+    const result = new ArrayType(popcountBitmap(bitmap, totalCount))
     for (let di = 0, ri = 0, si = 0; di < data.length; di++) {
         const d = data[di]
         for (let i = 0; i < d.length; i++, si++) {
@@ -77,6 +79,37 @@ export function filterData(ArrayType: typeof Float64Array | typeof Float32Array,
         }
     }
     return [result, totalCount, bitmap]
+}
+
+export function filterTransposeBools(dataLists: DataList<arrow.Bool>[], filters: readonly DataList<arrow.Bool>[], nnfilters: readonly DataList<any>[], nullValue: boolean): [Uint32Array, number, Uint8Array] {
+    if (dataLists.length > 32) {
+        throw new Error("Too many boolean columns")
+    }
+    const totalCount = dataLists[0].reduce((acc, cur) => acc + cur.length, 0)
+    for (const data of dataLists) {
+        if (data.reduce((acc, cur) => acc + cur.length, 0) != totalCount) {
+            throw new Error("Data length mismatch")
+        }
+    }
+    const filterBitmap = makeFilterBitmap(totalCount, filters, nnfilters)
+
+    const result = new Uint32Array(popcountBitmap(filterBitmap, totalCount))
+    result.fill(0)
+
+    for (let dli = 0; dli < dataLists.length; dli++) {
+        const data = dataLists[dli]
+        for (let di = 0, ri = 0, si = 0; di < data.length; di++) {
+            const d = data[di]
+            for (let i = 0; i < d.length; i++, si++) {
+                if ((filterBitmap[si >> 3] & (1 << (si & 7))) != 0) {
+                    const isNull = d.nullable && (d.nullBitmap[i >> 3] & (1 << (i & 7))) > 0
+                    const bit = isNull ? Number(nullValue) : ((d.values[i >> 3] >> (i & 7)) & 1)
+                    result[ri++] |= bit << dli
+                }
+            }
+        }
+    }
+    return [result, totalCount, filterBitmap]
 }
 
 export function getIndexIndex(bitmap: Uint8Array, count: number): Int32Array {
@@ -136,6 +169,29 @@ export function tryGetColumnHelper(table: arrow.Table, variable: VariableModel, 
     }
 }
 
+export function tryGetBoolColumn(table: arrow.Table, variables: Omit<VariableModel, "label">[], shareFilters: Omit<VariableModel, "label">[] = [], nullValue: boolean | null = null) {
+    const filters = [...shareFilters, ...variables].flatMap(v => v.filterId ? [table.getChild(v.filterId)?.data] : [])
+    const varData = variables.map(v => table.getChild(v.column)?.data)
+    const nnfilters = shareFilters.map(v => table.getChild(v.column)?.data)
+
+    if (varData.some(v => v == null) || nnfilters.some(v => v == null) || filters.some(v => v == null)) {
+        return null
+    }
+
+    const processed = new Lazy(() => filterTransposeBools(varData, filters, nnfilters, nullValue ?? false))
+    return {
+        get data() {
+            return processed.value[0] as Uint32Array
+        },
+        get totalRowCount() {
+            return processed.value[1]
+        },
+        get filterOutBitmap() {
+            return processed.value[2]
+        },
+    }
+}
+
 export type ColumnHelper = ReturnType<typeof getColumnHelper>
 
 export function concatArrays<T extends TypedArray>(arrays: readonly T[]): T {
@@ -153,7 +209,7 @@ function clamp(x: number, min: number, max: number) {
 }
 
 
-export function binArrays(data: Float32Array | Float64Array, min, max, binCount) {
+export function binArrays(data: FloatArray, min, max, binCount) {
     const result = new Uint32Array(binCount).fill(0)
     const binSize = (max - min) / binCount
     for (let i = 0; i < data.length; i++) {
@@ -163,7 +219,7 @@ export function binArrays(data: Float32Array | Float64Array, min, max, binCount)
     return result
 }
 
-export function binArray2D(x: Float32Array | Float64Array, y: Float32Array | Float64Array, minX, maxX, minY, maxY, binCountX, binCountY) {
+export function binArray2D(x: FloatArray, y: FloatArray, minX, maxX, minY, maxY, binCountX, binCountY) {
     const result = new Uint32Array(binCountX * binCountY).fill(0)
     const binSizeX = (maxX - minX) / binCountX
     const binSizeY = (maxY - minY) / binCountY
@@ -173,6 +229,20 @@ export function binArray2D(x: Float32Array | Float64Array, y: Float32Array | Flo
         result[binX + binY * binCountX]++
     }
     return result
+}
+
+export function binArrayCateg(x: FloatArray, y: SmallIntArray, min, max, binCount) {
+    const categos = new Map<number, Uint32Array>()
+    const binSize = (max - min) / binCount
+    for (let i = 0; i < x.length; i++) {
+        let a = categos.get(y[i])
+        if (a == null) {
+            categos.set(y[i], a = new Uint32Array(binCount).fill(0))
+        }
+        const bin = Math.min(binCount - 1, Math.floor((x[i] - min) / binSize))
+        a[clamp(bin, 0, a.length - 1)]++
+    }
+    return categos
 }
 
 export function arange(start: number, stop: number, step = 1): Int32Array {
