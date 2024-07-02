@@ -41,7 +41,7 @@
       const newClauses = clauses.filter(x => !currentClauses.includes(x))
       const removedClauses = currentClauses.filter(x => !clauses.includes(x))
       const datasetName = f.datasource == "fr3d-f" ? "FR3D, Representative Set" :
-                          f.datasource == "fr3d" ? "3D, entire PDB" :
+                          f.datasource == "fr3d" ? "FR3D, entire PDB" :
                           f.datasource == "fr3d-nf" ? "FR3D with nears, RS" :
                           f.datasource == "fr3d-n" ? "FR3D with nears, PDB" :
                           f.datasource == "allcontacts-f" ? "All polar contacts, RS" :

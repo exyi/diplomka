@@ -75,6 +75,12 @@ def main(args):
     # ])
     comparison.write_csv(args.output)
 
+    agg = comparison.select(pl.sum("count_all"), pl.sum("count_baseline"), pl.sum("count_target"), pl.sum("count_dropped"), pl.sum("count_added"), (pl.col("count_dropped") / pl.col("count_baseline") * 100).drop_nans().mean().alias("diff_percent_p"), (pl.col("count_added") / pl.col("count_target") * 100).drop_nans().mean().alias("diff_percent_n"))
+
+    print(f"Baseline: {agg[0, 'count_baseline']} Target: {agg[0, 'count_target']} Dropped: {agg[0, 'count_dropped']} Added: {agg[0, 'count_added']}")
+    print(f"Per-instance mean diff: -{agg[0, 'count_dropped'] / agg[0, 'count_baseline'] * 100:2.3f}%   +{agg[0, 'count_added'] / agg[0, 'count_target'] * 100:2.3f}%")
+    print(f"Per-class mean diff:    -{agg[0, 'diff_percent_p']:2.3f}%   +{agg[0, 'diff_percent_n']:2.3f}%")
+
     if file_is_tmp:
         os.remove(comparison_file)
 

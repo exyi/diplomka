@@ -168,13 +168,13 @@
         return script
     }
 
-    const columnBlacklist = [ "pdbid", "model", "chain1", "chain2", "res1", "res2", "nr1", "nr2", "alt1", "alt2", "ins1", "ins2", "type", "C1_C1_euler_phi", "C1_C1_euler_theta", "C1_C1_euler_psi", "C1_C1_euler_phicospsi", "x1", "x2", "y1", "y2", "z1", "z2", "rmsd_edge_C1N_frame", "label", "pair_bases" ]
+    const columnBlacklist = [ "pdbid", "model", "chain1", "chain2", "res1", "res2", "nr1", "nr2", "alt1", "alt2", "ins1", "ins2", "type", "symmetry_operation1", "symmetry_operation2", "C1_C1_euler_phi", "C1_C1_euler_theta", "C1_C1_euler_psi", "C1_C1_euler_phicospsi", "x1", "x2", "y1", "y2", "z1", "z2", "rmsd_edge_C1N_frame", "label", "pair_bases" ]
 
     function getTableRows(tuple: object | null) {
         if (!tuple)  return []
         const meta = metadata.find(m => m.pair_type[0].toUpperCase() == pair.id.pairingType[0].toUpperCase() && m.pair_type[1] == pair.id.pairingType[1])
 
-        return Object.entries(tuple).filter(([colName, _]) => !hideColumn(colName, meta) && !columnBlacklist.includes(colName)).map(([colName, value]) => {
+        return Object.entries(tuple).filter(([colName, value]) => !hideColumn(colName, meta, value) && !columnBlacklist.includes(colName)).map(([colName, value]) => {
             const [ label, tooltip ] = getColumnLabel(colName, meta) ?? [ null, null ]
             return { colName, label, tooltip, value }
         })

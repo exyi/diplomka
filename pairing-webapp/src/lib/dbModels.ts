@@ -837,10 +837,10 @@ export function getColumnLabel(column: string, metadata: UnwrapArray<typeof meta
     return null
 }
 
-export function hideColumn(column: string, metadata: UnwrapArray<typeof metadataModule> | undefined) {
+export function hideColumn(column: string, metadata: UnwrapArray<typeof metadataModule> | undefined, value: any) {
     let m
     if (metadata && (m = /hb_(\d)_(\w+)/.exec(column))) {
-        return Number(m[1]) >= metadata.atoms.length
+        return Number(m[1]) >= metadata.atoms.length && value == null
     }
     return false
 }
