@@ -30,13 +30,14 @@ We choose to sum both edge-to-plane distances and the H-bond lengths.
 To avoid giving an unfair advantage to basepairs with a low number of defined H-bond, the undefined lengths are filled with value **4**.
 
 Scoring of the conflicting basepairs gives us the option to either find a globally optimal selection, or select the best basepairs greedily.
-Practical data should contain very little conflicts, so both approaches should yield similar results. TODO otestovat toto
+Practical data should contain very little conflicts, so both approaches should yield similar results.
 The greedy approach is obviously faster and much easier to implement, but the optimal selection isn't hard either, with the right libraries.
 
 In any case, we enforce rule A first without optimizing for rule B (i.e., greedily) — it does not seem appropriate to select the optimal basepair family based on its surroundings.
 Rule B can be reformulated as a problem of maximum weight matching on general graph, which is [solvable in polynomial time ($\mathcal{O}(N^3)$)](https://doi.org/10.1007/s12532-009-0002-8).
 In Python, we can use the [`algorithms.max_weight_matching` function](https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.matching.max_weight_matching.html) from the [NetworkX library](https://networkx.org).
 
+TODO: OMG, některé S páry se nevylučují. I guess ta exkluzivní hrana musí být vodíková vazba (atom), ne celý edge...
 
 TODO obrázek
 

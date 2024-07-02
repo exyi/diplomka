@@ -75,34 +75,33 @@ FR3D reports each pairs twice, in both orientations.
 For illustration, if a `cWH G-C` pair is reported, a corresponding `cHW C-G` pair is also reported.
 To avoid redundancy, we will de-duplicate the outputs using the following three rules:
 
-1. If the pair family is asymmetrical, we keep the variant shown in<>
+1. If the pair family is asymmetric, we keep the variant shown in<>
     * Preferred families are cis or trans `WH`, `WS`, `HS`.
     * `HW`, `SW`, `SH` pairs are always dropped
 2. If the pair nucleotides aren't equal, we keep the variant ordered according to `A > G > C > U`
     * For instance, `cWW G-C` is preferred to `cWW C-G`, as `C` is before `G` in the ordering
     * `T` is treated as equivalent to `U`
-3. Otherwise, the pair type name is completely symmetrical (`cWW G-G`)
+3. Otherwise, the pair type name is completely symmetric (`cWW G-G`)
     * We exclude the pair with longer H-bonds.
     * If the H-bonds are the same, we keep the pair with lower UnitID of the first nucleotide.
 
 ### Pairs between asymmetric unit {#sec:impl-collection-symmetry}
 
-TODO: přepsat asi
+<!-- TODO: přepsat asi
 
-* uspořádání je přes symetrické elementy
+* uspořádání je přes symetrické elementy -->
 
-Crystals are made of the same molecule, repeated many times, but they not necessarily always in the same orientation.
+Crystals are made of the same molecule, repeated many times, but not necessarily always in the same orientation.
 <!-- Crystallographers have a comprehensive theory for describing these repetitions, it is crucial for resolving the molecular structures from diffraction patterns. -->
-The X-Ray structures in PDB only contain one of the repeating fragments — the **asymmetric unit** / ****.
-If the molecule of interest forms a symmetrical dimer, the interactions between asymmetric units are potentially relevant for biology.
-In nucleic acids, double helices and tetraplexes may be completely symmetrical, with the pairs forming between the symmetry-related molecules.
+The X-Ray structures in PDB only contain coordinates for one of the repeating fragments — the **asymmetric unit**.
+If the molecule of interest forms a symmetric dimer, the interactions between asymmetric units are potentially relevant for biology.
+In nucleic acids, double helices and tetraplexes may be completely symmetric, with the pairs forming between the symmetry-related molecules.
 
-![The asymmetric unit of [`6ros`](https://www.rcsb.org/structure/6ROS) structure is formed by a single strand, but the biological assembly is a duplex. The data file thus contains the coordinates of only one strand, and the second one is a symmetric copy. All basepairs are formed between the two strands.](../img/6ros-symmetry-illustration.png)
+![The asymmetric unit of [`6ros`](https://www.rcsb.org/structure/6ROS) structure is formed by a single strand, but the *biological assembly* is a duplex. The data file contains the coordinates of only one strand, and the second one is a symmetric copy. All basepairs are formed between the two strands.](../img/6ros-symmetry-illustration.png)
 
-PDBx/mmCIF files include the complete description of the crystal symmetry as the crystal space group.
-Helpfully, the files also encode the biologically relevant symmetry operation as [a rotation matrix and a translation in the `pdbx_struct_oper_list` CIF category](https://mmcif.wwpdb.org/dictionaries/mmcif_pdbx_v50.dic/Categories/pdbx_struct_oper_list.html).
+PDBx/mmCIF files include the complete description of the crystal symmetry as the crystal space group, and the files also encode the biologically relevant symmetry operation as [a rotation matrix and a translation in the `pdbx_struct_oper_list` CIF category](https://mmcif.wwpdb.org/dictionaries/mmcif_pdbx_v50.dic/Categories/pdbx_struct_oper_list.html).
 This category may contain any number of transformations, labeled by the [PDB symmetry operation code](http://www.bmsc.washington.edu/CrystaLinks/man/pdb/part_74.html).
-We can thus avoid the handling the space group operations and rely on the provided transformation.
+We thus avoid handling the space group operations and rely on the provided transformation matrices.
 
 <!-- ```
 loop_                                                                                                                          
@@ -129,12 +128,13 @@ _pdbx_struct_oper_list.vector[3]
 ``` -->
 
 Technically, the implementation is still slightly tricky, because the **BioPython** library does not parse the `pdbx_struct_oper_list` category.
-Another Python library with similar API -- **Gemmi**, has a very good support for crystallographic symmetry.
+Another Python library with a similar API -- **Gemmi**, has a very good support for crystallographic symmetry.
 It, however, exposes the information in terms of space groups, instead of the PDB symmetry operation codes.
 Since **FR3D** uses the PDB codes in its output, we need to use them to map the basepairs into atomic coordinates.
-We thus use another library -- **mmcif**, which simply parses the CIF without any additional abstraction.
+Therefore, we utilize the **mmcif** library to get this information.
+As **mmcif** simply parses the CIF without any additional abstraction, we currently use it in addition to **BioPython**.
 
-PyMOL has a direct support for assembling the biological unit, the [structure only has to be loaded after setting `assembly` flag to 1](https://pymolwiki.org/index.php/Assembly) (see @sec:impl-basepair-img-asy for more details on PyMOL usage).
+PyMOL has a direct support for assembling the biological unit, the [structure only has to be loaded after setting `assembly` flag to 1](https://pymolwiki.org/index.php/Assembly) (more details is in @sec:impl-basepair-img-asy).
 
 <!-- ### X3DNA DSSR integration
 
@@ -154,6 +154,14 @@ Since DDSR only calculates the base parameters when the `--analyze` is specified
 
 ### Partitioning and Parallelism
 
-By default, script loads all basepairs into memory to group them by PDB ID and process them structure by structure.
+By default, the `pairs.py` script loads all basepairs into memory to group them by PDB ID and process them structure by structure.
+It allows for simple parallel processing using Python `multiprocessing` module: we group the DataFrame by pdbid, and use `multiprocessing.Pool.map(...)` to process each structure.
+To avoid mean emails from the PBS daemon, we try to consume CPU time more uniformly: we split structures with more than 100 000 basepair candidates into multiple groups, and prioritize larger groups over smaller ones.
+
+For annotating basepairs (@sec:testing-basepair-params) on the entire PDB, we need to calculate the parameters for all basepair candidates -- all pairs of nucleotides close enough to each other.
+It is practical to partition the large dataset into smaller chunks and process them sequentially.
+As we needed this frequently, this feature is facilitated by the `--partition-input-select=K/N` option, where N is total number of partitions and K is the partition to process in this run.
+`K` may also be range, so we can run 64 partitions with a single command using `--partition-input-select=0-64/64`.
+Apart from reducing memory usage, this option allows parallelism across multiple machines, enabling short runtime with a short PBS queue waiting time.
 
 TODO

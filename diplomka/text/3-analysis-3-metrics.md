@@ -104,7 +104,7 @@ The **Edge to plane angle** is the angle between the line of first residue pairi
 Each edge always has at least two atoms in RNA, allowing us to calculate the angle even if only one hydrogen bond is defined.
 Both of these parameters depend on the order of bases --
 the two **Edge to plane angles** are usually very similar, but **Edge to plane distances** might be very different, if the basepair is sufficiently "bent".
-<!-- A symmetrical alternative would be to take center point of both edges, project it onto both planes the distance between the center -->
+<!-- A symmetric alternative would be to take center point of both edges, project it onto both planes the distance between the center -->
 
 <!--
 fetch 4v9i

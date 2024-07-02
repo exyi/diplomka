@@ -338,7 +338,7 @@ def convert_pdfa(infile, outfile):
 def recompress_pdf(infile, outfile):
     run("Recompress PDF with qpdf",
         "qpdf", infile, "--linearize", "--object-streams=generate", "--stream-data=compress", "--recompress-flate", "--compression-level=9",
-        "--normalize-content", "--remove-unreferenced-resources",
+        "--normalize-content=y", "--remove-unreferenced-resources=yes",
         outfile,
         capture_output=True)
 

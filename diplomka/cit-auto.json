@@ -32,6 +32,27 @@
         "id": null,
         "seq": null
     },
+    "https://doi.org/10.1002/qua.560120704": {
+        "doi": "10.1002/qua.560120704",
+        "published_date_parts": [
+            2009,
+            6,
+            18
+        ],
+        "title": "Non-watson-crick base pairs in ribonucleic acids",
+        "authors": [
+            [
+                "M.",
+                "Sundaralingam"
+            ]
+        ],
+        "journal": [
+            "International Journal of Quantum Chemistry"
+        ],
+        "url": null,
+        "id": null,
+        "seq": null
+    },
     "https://doi.org/10.1006/jmbi.1998.2390": {
         "doi": "10.1006/jmbi.1998.2390",
         "published_date_parts": [

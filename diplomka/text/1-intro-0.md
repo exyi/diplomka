@@ -18,7 +18,7 @@ If we analyze the entire database with one of the available basepair assignment 
 However, in RNA the total cardinality of all non-canonical pairs is actually larger than the canonical ones; meaning that canonical pairs represent slightly bellow 50% of the total.
 Even in DNA structures, 25% of all basepairs are non-canonical, notable biologically relevant structures are the [i-Motif](https://doi.org/10.1093/nar/gky735) and the [G-quadruplex](https://doi.org/10.1016/j.trechm.2019.07.002).
 
-## Aims of This Project
+## Aims of the Project
 
 
 The higher-level objective of our working group is to provide unambiguous definitions for the basepair classes of the Leontis-Westhof system.
@@ -48,10 +48,7 @@ Additionally, we develop an interactive application that enables the tuning of s
 ... At the time of writing we have more than 7 thousand RNA structures in PDB, and almost 2 thousand of them are pure nucleic acid, without any protein
 ... 
 
-"Only" 61.4% of all found basepairs are canonical Watson-Crick (in all PDB structures < 3.5 Å) --> -->
-
-<!-- [see output format TODO???](./4-implementation-1-collection.md#output-format) -->
-
+"Only" 61.4% of all found basepairs are canonical Watson-Crick (in all PDB structures < 3.5 Å) -->
 
 <!--
 Promptses

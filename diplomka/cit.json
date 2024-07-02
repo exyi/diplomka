@@ -14,8 +14,7 @@
             "Proceedings of the 7th Python in Science Conference"
         ],
         "url": "https://networkx.org",
-        "id": "NX",
-        "seq": null
+        "id": "NX"
     },
     "https://imagemagick.org": {
         "doi": null,
@@ -28,8 +27,7 @@
         ],
         "journal": null,
         "url": "https://imagemagick.org",
-        "id": "IM",
-        "seq": null
+        "id": "IM"
     },
     "https://math.stackexchange.com/q/99317": {
         "doi": null,
@@ -53,7 +51,42 @@
         ],
         "journal": [ "Nucleic Acids Research" ],
         "url": null,
-        "id": "PDB",
-        "seq": null
+        "id": "PDB"
+    },
+    "https://tandy.cs.illinois.edu/Hunter_MolecularBiology.pdf": {
+        "doi": null,
+        "url": "https://tandy.cs.illinois.edu/Hunter_MolecularBiology.pdf",
+        "published_date_parts": [
+            1993,2,1
+        ],
+        "title": "Molecular Biology for Computer Scientists",
+        "authors": [
+            [ "Lawrence", "Hunter" ]
+        ],
+        "journal": "Artificial intelligence and molecular biology"
+    },
+    "https://pymolwiki.org/index.php/Assembly": {
+        "doi": null,
+        "url": "https://pymolwiki.org/index.php/Assembly",
+        "published_date_parts": [
+            2016, 9, 1
+        ],
+        "authors": [
+            [ "Thomas", "Holder" ]
+        ],
+        "journal": null,
+        "title": "PyMOL Wiki: Assembly"
+    },
+    "http://www.bmsc.washington.edu/CrystaLinks/man/pdb/": {
+        "doi": null,
+        "url": "http://www.bmsc.washington.edu/CrystaLinks/man/pdb/part_74.html",
+        "published_date_parts": [
+            2001, 9
+        ],
+        "title": "PDB Format Description Version 2.3 — Appendix 1: Symmetry Operations",
+        "journal": null,
+        "authors": [
+            [ "???", "TODO" ]
+        ]
     }
 }

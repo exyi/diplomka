@@ -20,7 +20,7 @@ Therefore, extracting the mean value from the data is useful, if only to determi
 Our goal is to show that each of the measured parameters has a distribution -->
 
 <!-- We will not bother ourselves with the canonical Watson-Crick A-U and G-C pairs too much, since they are well studied already. But this is great for calibrating our measurements to the well-known optimal canonical basepair parameters. -->
-In this work, we will generally not focus on canonical Watson-Crick A-U and G-C base pairs, given that these pairs are already extensively studied.
+In this work, we will generally not focus on canonical Watson-Crick A-U and G-C base pairs, given that these pairs have been extensively studied.
 However, they will serve as valuable references in calibrating our measurements to the well known optimal canonical basepair parameters.
 We'll use the [hydrogen-bond lengths provided as restraints for building nucleic acid structures in](https://doi.org/10.1107/S2059798321007610) as the reference values for the comparison.
 
@@ -122,7 +122,8 @@ The procedure is very simple to implement using complex numbers in NumPy:
 ```python
 import numpy as np
 
-mean = np.angle(np.mean(np.exp(1j * np.radians(observations))), deg=True)
+circle = np.exp(1j * np.radians(observations))
+mean = np.angle(np.mean(circle), deg=True)
 ```
 
 ![Histograms of a distribution including the -180/180 point and its circular mean and the naïve arithmetic mean. On left, the distribution is shown using polar coordinates, on right using standard cartesian coordinates. (left roll of tSS AG, explained in sec. TODO)](../img/angular-stats-polar-vs-cartesian-means.svg)
@@ -131,7 +132,7 @@ The kernel density estimate can be also computed in the two dimensions or in one
 Although both methods seem to work well, computing two dimensional KDE when all points are on unit circle severely violates the assumption of normal distribution.
 We thus choose to compute the one dimensional KDE on range of -360...360 and then use only the -180...180 range.
 
-Unfortunatelly, other basic statistics like the median, maximum, or minimum cannot be well-defined, because we have no notion of comparison in modular (circular) arithmetics.
+Unfortunately, other basic statistics like the median, maximum, or minimum cannot be well-defined, because we have no notion of comparison in modular (circular) arithmetics.
 However, we can exploit the fact, that the distributions of our interest do not span the entire range of 360°.
 In order to be a useful discriminator, any measured basepair parameter must be constrained to a relatively small range.
 If we can assume this, we can use the circular mean to center the entire distribution on zero and then proceed as for if the variable was linear.

@@ -20,6 +20,8 @@
             src: local('Noto Serif') url(../html/vendor/noto-serif-font/NotoSerif-VariableFont_wdth\,wght.ttf) format('ttf');
         } */
         body {
+            background-color: white;
+            color: black;
             margin: 0px auto;
             /* --font-cm: "Computer Modern Serif", serif; */
             --font-cm: "Noto Serif", serif;
@@ -52,10 +54,10 @@
 
             }
             @page:left {
-                margin: 0.5in 1.5in 1.75in 1in;
+                margin: 0.75in 1.5in 1.5in 1in;
             }
             @page:right {
-                margin: 0.5in 1in 0.75in 1.5in;
+                margin: 0.75in 1in 1.5in 1.5in;
             }
             @page:first {
                 margin: 0.5in 0.98in;
@@ -67,7 +69,7 @@
 
             a {
                 text-decoration: none;
-                color: black;
+                color: inherit;
             }
         }
 
@@ -87,12 +89,16 @@
             }
         }
 
-        body.pagedjs .link-footnote {
+        /* .link-footnote {
             float: footnote;
             font-size: 0.75rem;
             font-family: serif;
             padding-left: 2em;
             text-indent: -2em;
+        } */
+
+        body.nopagedjs .link-footnote {
+            float: none;
         }
 
         body.nopagedjs .link-footnote::before {
@@ -358,6 +364,13 @@
         }
         .katex-error::after {
             content: "Katex error" attr(title);
+        }
+
+        .link-footnote[data-footnote-call]::after {
+            vertical-align: baseline;
+            font-size: 100%;
+            line-height: inherit;
+            font-variant-position: super;
         }
 
 

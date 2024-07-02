@@ -9,8 +9,8 @@ We simply compute the parameters for all basepairs reported by FR3D and set the 
 Then, we obtain all basepairs satisfying these constraints and examine the differences between this set and FR3D assignments.
 
 This approach will in principle yield zero false negatives, but it is sensitive to extremes in FR3D-annotated basepairs.
-Instead of minimum and maximum, we used quantiles **0.001** and **0.999** to lessen the sensitivity.
-We also extended the boundaries by rounding them.
+Instead of minimum and maximum, we used **0.001** and **0.999** quantiles to lessen the sensitivity.
+We also extended the boundaries by rounding them down or up.
 H-bond length do not have a lower limit, and the upper limit is always 4 Å, or 4.2 Å in case of C-H bonds.
 This limit enables efficient search for basepair candidates, for instance using [NeighborSearch in Gemmi](https://gemmi.readthedocs.io/en/latest/analysis.html).
 
