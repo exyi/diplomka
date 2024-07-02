@@ -20,7 +20,7 @@ The base pairs are classified based on the two interacting edges and their relat
 ![The three edges of a pyrimidine (U) and a purine (G)](../img/purine-pyrimidine-edges.svg){#fig:LW-3-edges-UG}
 
 A pair of edges still leaves two possible conformations: either the indicated edge arrows point in opposite directions or they are parallel (i.e., one base is flipped).
-This usually results in different sets of hydrogen bonds, and a distinct shape of the nucleic acid backbone.
+Such change usually results in different sets of hydrogen bonds, and a distinct shape of the nucleic acid backbone.
 The Leontis-Westhof naming system labels one conformation **cis** and the other **trans**, based on the direction of the N-C1' bonds.
 Generally, **cis** pairs have the N-C1' bonds pointing in a similar direction, while **trans** pairs orient them in opposite directions.
 However, there is not a strict 90° limit on their angle; instead, we label a conformation as **cis** if it has a more acute angle than the corresponding **trans** conformation (see example of **cHH AG** vs. **tHH AG** in fig. TODO).

@@ -11,7 +11,7 @@ Therefore, we need a tool to speed up:
 3. And finally, interactively tuning the selection criteria.
 
 The application which answers these requests to a certain extent is running at https://basepairs.datmos.org (and is attached to the thesis).
-This section outlines the basic usage modes, while notes about implementation can be found in @sec:impl-webapp.
+This section outlines the basic use cases, while notes about implementation can be found in @sec:impl-webapp.
 It should be noted that it was developed as a tool for internal use with more emphasis on flexibility and comprehensive functionality than a gentle learning curve.
 Also note that the application is rather gluttonous when it comes to network bandwidth and system memory (it runs the database in the browser for flexibility).
 
@@ -57,6 +57,23 @@ TODO screenshot diff
 At the time of writing and submission of the thesis, the criteria are still subject to change and are dynamically loaded from a shared Google Sheet.
 The exact results will be likely different from the ones presented here.
 
+### Filtering Basepairs
+
+To examine the behavior of the parameters from @sec:basepair-params, we can switch from **Basic** to **Parameter Ranges** and try filtering out basepairs with certain parameter values.
+A favorite request is to see whether we should include basepairs with overly stretched H-bonds -- given that such interaction typically exhibits minimal energies at 4.0 Å [TODO co kde citovat?], which FR3D usually permits.
+Let us show how to identify relevant examples.
+
+Firstly, the website remembers its state when navigating to another basepair class (selected data source, filters, comparison are kept), but the state can be reset at any time by clicking the **Home** button in the top menu.
+We can select any populated class of basepairs, and switch to **Parameter Ranges**, prompting the display of several numeric input fields.
+For each defined H-bond, we get a column of input fields, with a row for each parameters; each cell in table enables limiting its minimum and maximum allowed value.
+Our focus is on the first row, which controls the limits on distance between heavy atoms.
+To find the _bad_ examples, we set the minimum to 3.6 Å, a threshold often referenced as the upper limit for hydrogen bonds [TODO cite "Westhof is obsessed with it" or something].
+Typically, only a small fraction of basepairs have all H-bonds >= 3.6 Å, but we found three cases in the reference set for **tWW A-A**.
+Upon inspection, two of these look arguably borderline, while one case is surprisingly well-structured.
+
+TODO screenshot https://basepairs.datmos.org/#tWW-A-A/ds=fr3d-f&hb0_L=3.6..&hb1_L=3.6..
+
 ### Editing the Criteria
 
-We will try to improve (or impair) the selection TODO TODO
+Most importantly, the application allows for editing the selection criteria.
+We will try to improve (or impair) the selection TODO

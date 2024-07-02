@@ -20,13 +20,13 @@ We can fit it onto an observed molecule using Kabsch algorithm and then apply tr
 The reference frame **X** axis is defined to be parallel the Watson-Crick edge, **Y** axis run alongside the rest of the base.
 Since all bases are planar under ideal conditions, this enables us to have the **Z** nearly equal to **0**.
 
-As the authors state, the clearly optimized the coordinate system for the canonical Watson-Crick basepairs.
-If we place a purine with a pyrimidine and flip one along the **Y** axis, we get a canonical basepair.
+As the authors state, they clearly optimized the coordinate system for the canonical basepairs.
+If we place a purine with a pyrimidine and flip one along the **Y** axis, we get an idealized Watson-Crick basepair.
 Without the **Y**-flip, all bases overlap in the same region, with the N1/N9—C1' bond approximately aligned.
 
 ![Guanine reference frame and uracil frame with negated Y coordinates form a “perfect” GC canonical pair. The white small cross shows the origin **(0, 0, 0)**. TODO krizek je blbe vidět](../img/reference-frame-GC-pair.png){#fig:reference-frame-GC-pair .img-width50}
 
-This property allows us to easily judge an observed basepair by comparing the position and orientation of their reference frame -- the frame origins and axes to be specific.
+This property allows us to easily judge an observed basepair by comparing the position and orientation of their reference frame -- comparing the coordinates of frame origins and the vectors of the X, Y, Z axes.
 The DSSR papers <https://doi.org/10.1093/nar/gkg680> and <https://doi.org/10.1038/nprot.2008.104> do not contain details on the parameters calculation, but [the DSSR webpage shows quite detailed description in a blog post](https://x3dna.org/highlights/details-on-the-simple-base-pair-parameters).
 As x3dna.org post shows, we get the translational parameters from projecting one origin into the other reference frame coordinate system.
 **Shear** is the **X** coordinate, **Stretch** is **Y**, **stagger** is **Z**.

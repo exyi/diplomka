@@ -154,14 +154,12 @@ Since DDSR only calculates the base parameters when the `--analyze` is specified
 
 ### Partitioning and Parallelism
 
-By default, the `pairs.py` script loads all basepairs into memory to group them by PDB ID and process them structure by structure.
-It allows for simple parallel processing using Python `multiprocessing` module: we group the DataFrame by pdbid, and use `multiprocessing.Pool.map(...)` to process each structure.
-To avoid mean emails from the PBS daemon, we try to consume CPU time more uniformly: we split structures with more than 100 000 basepair candidates into multiple groups, and prioritize larger groups over smaller ones.
+By default, the `pairs.py` script loads all basepairs into memory to group them by PDB ID and subsequently process each structure individually.
+This enables straightforward parallel processing using the Python `multiprocessing` module: we group the DataFrame by PDB ID and use `multiprocessing.Pool.map(...)` to process each structure.
+In an effort to maintain a uniform CPU time consumption and to avoid mean emails from the PBS daemon, we split structures with more than 100 000 basepairs into several groups, and prioritize larger groups over smaller ones.
 
-For annotating basepairs (@sec:testing-basepair-params) on the entire PDB, we need to calculate the parameters for all basepair candidates -- all pairs of nucleotides close enough to each other.
-It is practical to partition the large dataset into smaller chunks and process them sequentially.
-As we needed this frequently, this feature is facilitated by the `--partition-input-select=K/N` option, where N is total number of partitions and K is the partition to process in this run.
-`K` may also be range, so we can run 64 partitions with a single command using `--partition-input-select=0-64/64`.
-Apart from reducing memory usage, this option allows parallelism across multiple machines, enabling short runtime with a short PBS queue waiting time.
-
-TODO
+In the context of annotating base pairs on the entire PDB (@sec:testing-basepair-params), we must compute the parameters for all _basepair candidates_, i.e., pairs of nucleotides in proximity to one another.
+Given the substantial size of the dataset, it is practical to subdivide it into smaller chunks and process them sequentially.
+This functionality can be invoked using the `--partition-input-select=K/N` command-line option, where **N** is a placeholder for the total number of partitions, and **K** is the specific partition to be processed in the current run.
+The parameter `K` can also be specified to be a range, allowing for execution of multiple partitions via a single command, such as `--partition-input-select=0-64/64`.
+Apart from reducing memory usage, the option may be used for parallel processing across multiple machines.

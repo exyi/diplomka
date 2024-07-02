@@ -8,11 +8,11 @@ Translational constraints are powerful, but because they are hard to generalize 
 We simply compute the parameters for all basepairs reported by FR3D and set the parameter boundaries to the observed minimum and maximum.
 Then, we obtain all basepairs satisfying these constraints and examine the differences between this set and FR3D assignments.
 
-This approach will in principle yield zero false negatives, but it is sensitive to extremes in FR3D-annotated basepairs.
+The approach will in principle yield zero false negatives, but it is sensitive to extremes in FR3D-annotated basepairs.
 Instead of minimum and maximum, we used **0.001** and **0.999** quantiles to lessen the sensitivity.
 We also extended the boundaries by rounding them down or up.
 H-bond length do not have a lower limit, and the upper limit is always 4 Å, or 4.2 Å in case of C-H bonds.
-This limit enables efficient search for basepair candidates, for instance using [NeighborSearch in Gemmi](https://gemmi.readthedocs.io/en/latest/analysis.html).
+Notably, the limit enables an efficient search for basepair candidates, for instance using [NeighborSearch in Gemmi](https://gemmi.readthedocs.io/en/latest/analysis.html).
 
 Table [-@tbl:fr3d-autoboundaries-comparison] shows the results for a selection of basepairing (those with over 500 samples on our reference set).
 The _“False negatives”_ column shows the number of pair identified by FR3D, but not included by our scheme (i.e., _missed_); and _“False positives”_ is the opposite (i.e., _misidentified_).
