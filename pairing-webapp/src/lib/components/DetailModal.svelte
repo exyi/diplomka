@@ -74,6 +74,8 @@
         }
     }
 
+    const allowMolstar = false
+
     let avifError = false,
         imgError = false,
         avifRotError = false,
@@ -219,7 +221,7 @@
 </style>
 <div>
     <div class="imgpane">
-        {#if pair != null && (molStar || (imgError && rotError) || (imageUrl == null && videoUrl == null))}
+        {#if pair != null && allowMolstar && (molStar || (imgError && rotError) || (imageUrl == null && videoUrl == null))}
             <div class="molstar-container">
                 <MolStarMaybe pairId={pair.id} />
             </div>
