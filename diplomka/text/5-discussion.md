@@ -1,4 +1,4 @@
-## Discussion
+# Discussion
 
 ### Future work
 

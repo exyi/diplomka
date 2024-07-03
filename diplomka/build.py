@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 
+import datetime
 import subprocess, os, re, sys, json, dataclasses, argparse, shutil, typing as ty
 import requests
 import pandocfilters as pf
 import html
+
+import tzlocal
 
 @dataclasses.dataclass
 class Options:
@@ -426,6 +429,8 @@ def reexport_pandoc_for_review(files, output_file):
     run(f"Pandoc reexport for review", "pandoc", "--to=markdown", "--wrap=preserve", "--output=" + output_file, *files)
 
 def pandoc_render(files, output_file):
+    commit = run(f"git current commit", "git", "rev-parse", "--short", "HEAD", check=False, capture_output=True).stdout.strip()
+    commit_num = run(f"git commit number", "git", "rev-list", "--count", "HEAD", check=False, capture_output=True).stdout.strip()
     cmd = ["pandoc",
            "--from=json", "--to=html",
            "-F", "pandoc-crossref",
@@ -433,6 +438,9 @@ def pandoc_render(files, output_file):
            "--resource-path=text:html:images",
            "--output=" + output_file,
            "--metadata-file=text/metadata.yaml",
+           f"--metadata=generated_at:{str(datetime.datetime.now(tzlocal.get_localzone()))}",
+           f"--metadata=generated_from_commit:{commit}",
+           f"--metadata=generated_from_commit_num:{commit_num}",
            "--template=html/template.html",
            "--standalone",
         #    "--shift-heading-level-by=1",

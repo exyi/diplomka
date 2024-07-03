@@ -76,4 +76,6 @@ TODO screenshot https://basepairs.datmos.org/#tWW-A-A/ds=fr3d-f&hb0_L=3.6..&hb1_
 ### Editing the Criteria
 
 Most importantly, the application allows for editing the selection criteria.
-We will try to improve (or impair) the selection TODO
+For demonstration, we can try to improve (or impair) the annotation of the **cWW A-A** class.
+Let's reset current state, navigate to **cWW A-A**, switch to **Parameter Ranges** and select **Pairs Selected by New Parameters** data source.
+Then we want to set the comparison baseline to FR3D assignments and click on **Edit the selection boundaries**.

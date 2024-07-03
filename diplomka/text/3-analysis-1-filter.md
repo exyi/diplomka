@@ -7,7 +7,7 @@ It is not such a problem if the data is noisy, as the statistics can deal with v
 Even when working with small sample sizes, the uncertainty arising from the noise can be characterized using confidence intervals.
 However, the interval would be "overconfident", if the observations are not independent of each other.
 
-![Canonical GC pairs with the filtering (left) and without it (right). Without the filter, the plot illustrates a large effect from 2.89 Å hydrogen-bond restraints used in model refining.](../img/hbonds-hist-filter-comparison-GConly.svg)
+![Canonical GC pairs with the filtering (left) and without it (right). Without the filter, the plot illustrates a large effect from 2.89 Å hydrogen-bond restraints used in model refining.](../img/hbonds-hist-filter-comparison-GConly.png)
 
 Since multiple entries in the PDB often share a common refined structure with only varying ligands, we also need to remove all redundant structures to avoid the bias.
 Moreover, nucleotides not satisfying MolProbity and DNATCO criteria are filtered out, as well as nucleotides with poor electron density fit.

@@ -12,7 +12,7 @@ For each pair candidate, we calculate the specified parameters for each of the t
 With that, we check that all the parameters lie in the defined ranges and if it does, we report it as a basepair.
 
 
-### Structure invariants ??
+### Whole Structure Invariants
 
 While the above-mentioned procedure works, we can do further post-processing to make sure that the reported basepairs satisfy the following invariants:
 

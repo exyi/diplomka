@@ -89,13 +89,13 @@
             }
         }
 
-        /* .link-footnote {
+        .link-footnote {
             float: footnote;
             font-size: 0.75rem;
             font-family: serif;
             padding-left: 2em;
             text-indent: -2em;
-        } */
+        }
 
         body.nopagedjs .link-footnote {
             float: none;
@@ -391,8 +391,8 @@
     $endfor$
 
 </head>
-<!-- <body class="pagedjs"> -->
-<body class="nopagedjs">
+<body class="pagedjs">
+<!-- <body class="nopagedjs"> -->
     <!-- Pandoc include-before: -->
     $for(include-before)$
         $include-before$
@@ -429,6 +429,9 @@
         </div>
         <div style="flex-grow: 0;">
             Prague, 2024
+        </div>
+        <div style="flex-grow: 0; color: red">
+            Draft $generated_at$, git $generated_from_commit$ #$generated_from_commit_num$
         </div>
     </div>
 

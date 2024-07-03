@@ -221,6 +221,27 @@
         "id": null,
         "seq": null
     },
+    "https://doi.org/10.1016/j.febslet.2014.06.031": {
+        "doi": "10.1016/j.febslet.2014.06.031",
+        "published_date_parts": [
+            2014,
+            6,
+            17
+        ],
+        "title": "Isostericity and tautomerism of base pairs in nucleic acids",
+        "authors": [
+            [
+                "Eric",
+                "Westhof"
+            ]
+        ],
+        "journal": [
+            "FEBS Letters"
+        ],
+        "url": null,
+        "id": null,
+        "seq": null
+    },
     "https://doi.org/10.1016/j.trechm.2019.07.002": {
         "doi": "10.1016/j.trechm.2019.07.002",
         "published_date_parts": [
@@ -1028,6 +1049,39 @@
             [
                 "Wilma K.",
                 "Olson"
+            ]
+        ],
+        "journal": [
+            "Nucleic Acids Research"
+        ],
+        "url": null,
+        "id": null,
+        "seq": null
+    },
+    "https://doi.org/10.1093/nar/gkp011": {
+        "doi": "10.1093/nar/gkp011",
+        "published_date_parts": [
+            2009,
+            2,
+            24
+        ],
+        "title": "Frequency and isostericity of RNA base pairs",
+        "authors": [
+            [
+                "Jesse",
+                "Stombaugh"
+            ],
+            [
+                "Craig L.",
+                "Zirbel"
+            ],
+            [
+                "Eric",
+                "Westhof"
+            ],
+            [
+                "Neocles B.",
+                "Leontis"
             ]
         ],
         "journal": [
