@@ -374,23 +374,23 @@
             {#if hasYawPitchRoll}
               <h3 class="panel-title">Yaw <ClearFilterButton bind:clear1={filter.yaw1} bind:clear2={filter.yaw2} /></h3>
               <div class="panel-field field is-horizontal">
-                <RangeEditor bind:range={filter.yaw1} step={1} min={-180} max={180} />
+                <RangeEditor bind:range={filter.yaw1} step={5} min={-180} max={180} />
               </div>
               <div class="panel-field field is-horizontal">
-                <RangeEditor bind:range={filter.yaw2} step={1} min={-180} max={180} />
+                <RangeEditor bind:range={filter.yaw2} step={5} min={-180} max={180} />
               </div>
             {/if}
 
             {#if filter.coplanarity_angle}
               <h3 class="panel-title">Coplanarity angle <ClearFilterButton bind:clear1={filter.coplanarity_angle} /></h3>
               <div class="panel-field field is-horizontal">
-                <RangeEditor bind:range={filter.coplanarity_angle} step={1} min={-180} max={180} />
+                <RangeEditor bind:range={filter.coplanarity_angle} step={5} min={-180} max={180} />
               </div>
             {/if}
             {#if filter.min_bond_length}
               <h3 class="panel-title" title="At least one H-bond must satisfy this length constraint">Min H-bond length <ClearFilterButton bind:clear1={filter.min_bond_length}/></h3>
               <div class="panel-field field is-horizontal">
-                <RangeEditor bind:range={filter.min_bond_length} step={1} min={0} max={4.2} />
+                <RangeEditor bind:range={filter.min_bond_length} step={0.1} min={0} max={4.2} />
               </div>
             {/if}
         </div>
@@ -418,17 +418,17 @@
             {#if hasYawPitchRoll}
               <h3 class="panel-title">Pitch <ClearFilterButton bind:clear1={filter.pitch1} bind:clear2={filter.pitch2}/></h3>
               <div class="panel-field field is-horizontal">
-                <RangeEditor bind:range={filter.pitch1} step={1} min={-180} max={180} />
+                <RangeEditor bind:range={filter.pitch1} step={5} min={-180} max={180} />
               </div>
               <div class="panel-field field is-horizontal">
-                <RangeEditor bind:range={filter.pitch2} step={1} min={-180} max={180} />
+                <RangeEditor bind:range={filter.pitch2} step={5} min={-180} max={180} />
               </div>
             {/if}
 
             {#if filter.coplanarity_edge_angle1}
               <h3 class="panel-title">Edge1/Plane2 angle <ClearFilterButton bind:clear1={filter.coplanarity_edge_angle1}/></h3>
               <div class="panel-field field is-horizontal">
-                <RangeEditor bind:range={filter.coplanarity_edge_angle1} step={1} min={-180} max={180} />
+                <RangeEditor bind:range={filter.coplanarity_edge_angle1} step={5} min={-180} max={180} />
               </div>
             {/if}
 
@@ -464,17 +464,17 @@
             {#if hasYawPitchRoll}
               <h3 class="panel-title">Roll <ClearFilterButton bind:clear1={filter.roll1} bind:clear2={filter.roll2}/></h3>
               <div class="panel-field field is-horizontal">
-                <RangeEditor bind:range={filter.roll1} step={1} min={-180} max={180} />
+                <RangeEditor bind:range={filter.roll1} step={5} min={-180} max={180} />
               </div>
               <div class="panel-field field is-horizontal">
-                <RangeEditor bind:range={filter.roll2} step={1} min={-180} max={180} />
+                <RangeEditor bind:range={filter.roll2} step={5} min={-180} max={180} />
               </div>
             {/if}
 
             {#if filter.coplanarity_edge_angle2}
               <h3 class="panel-title">Edge2/Plane1 angle <ClearFilterButton bind:clear1={filter.coplanarity_edge_angle2}/></h3>
               <div class="panel-field field is-horizontal">
-                <RangeEditor bind:range={filter.coplanarity_edge_angle2} step={1} min={-180} max={180} />
+                <RangeEditor bind:range={filter.coplanarity_edge_angle2} step={5} min={-180} max={180} />
               </div>
             {/if}
             {#if filter.coplanarity_shift2}
