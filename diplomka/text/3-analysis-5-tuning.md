@@ -48,9 +48,9 @@ TODO screenshot modalu
 When we switch to the **Pairs Selected by New Parameters** data source, we get the option to "**Enable FR3D Comparison**".
 We get a union of the basepairs returned by FR3D and the set returned by our proposed criteria.
 
-If the data is still **Ordered by** the **Smallest Edge RMSD**, the screen is unlikely to show anything interesting.
-To see the disparities, let us either switch to **Largest Edge RMSD** or select **Show only differences**, instead of **Show all matches**.
-Pairs annotated by FR3D and not annotated by our new system are highlighted red, while the ones reported exclusively by us are highlighted in green (it does not mean anything good either).
+If the data is still **Ordered by** the **Smallest Edge RMSD**, the screen is unlikely to display interesting cases.
+To see the disparities, we can either switch to **Largest Edge RMSD** or select the **Show only differences** option, instead of **Show all matches**.
+Pairs annotated by FR3D and not annotated by our new system are highlighted _red_, while the ones reported exclusively by us are highlighted in _green_ (the positive connotation of green).
 
 TODO screenshot diff
 
@@ -75,7 +75,16 @@ TODO screenshot https://basepairs.datmos.org/#tWW-A-A/ds=fr3d-f&hb0_L=3.6..&hb1_
 
 ### Editing the Criteria
 
-Most importantly, the application allows for editing the selection criteria.
-For demonstration, we can try to improve (or impair) the annotation of the **cWW A-A** class.
-Let's reset current state, navigate to **cWW A-A**, switch to **Parameter Ranges** and select **Pairs Selected by New Parameters** data source.
-Then we want to set the comparison baseline to FR3D assignments and click on **Edit the selection boundaries**.
+Most importantly, the application enables interactive editing of the selection criteria.
+For demonstration, we can try to improve (or impair) the annotation of the **cWH C-C** class.
+Firstly, we will reset current state, navigate to **cWH C-C**, switch to **Parameter Ranges**, and select **Pairs Selected by New Parameters** data source.
+Subsequently, we set the comparison baseline to **FR3D** assignments, and click on **Edit the selection boundaries**.
+By this action, the data source switches to **All Contacts**, and filtering ranges got populated with pre-defined limiting values.
+At the time of writing, the exact parameter limits are still under development, which is mostly done by other team members; consequently, the values might differ slightly from figure TODO.
+
+Given the limited number of few examples of **cWH C-C** in the reference set, we can see all basepairs without excessive scrolling.
+If we have the dataset ordered by the **Largest RMSD** (to an ideal basepair), the most anomalous cases should appear first.
+In the current version, the set includes basepairs that significantly deviate from the optimal coplanarity.
+To mitigate this issue, we can tighten the edge-to-plane distance constraint from 2.0 Å to 1.7 Å.
+This constraint refinement successfully removes the most misguided assignments, while leaving in a number of reasonably well-looking _green_ pairs.
+

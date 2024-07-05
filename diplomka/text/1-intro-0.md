@@ -14,9 +14,10 @@ A significant step towards addressing the gap is the [Leontis-Westhof classifica
 A [subsequent publication](https://doi.org/10.1093/nar/gkf481) shows more than a hundred different basepairing conformations in experimental structures archived in the [PDB database](https://doi.org/10.1093/nar/gky949).
 Today, with the availability of about 17 000 nucleic acid structures, we are in a better position to properly describe even the rarer basepair kinds.
 
-If we analyze the entire database with one of the available basepair assignment programs (@sec:software), we can see that Watson-Crick pairs dominate all other basepair classes.
+If we analyze the entire PDB database with one of the available basepair assignment programs (FR3D, @sec:software-FR3D), we can see that Watson-Crick pairs dominate all other basepair classes.
 However, in RNA the total cardinality of all non-canonical pairs is actually larger than the canonical ones; meaning that canonical pairs represent slightly bellow 50% of the total.
 Even in DNA structures, 25% of all basepairs are non-canonical, notable biologically relevant structures are the [i-Motif](https://doi.org/10.1093/nar/gky735) and the [G-quadruplex](https://doi.org/10.1016/j.trechm.2019.07.002).
+<!-- However, it must be noted that the PDB is heavily biased towards _interesting_ structures -->
 
 ## Aims of the Project
 

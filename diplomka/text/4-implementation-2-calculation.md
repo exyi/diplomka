@@ -41,7 +41,7 @@ def hbond_geometry(res1: Residue, res2: Residue, hbond):
 The second set of parameters requires determination of the base planes, represented as the translation and an orthonormal basis of a new coordinate system.
 We have mentioned that we are looking for optimal plane by least squared distance, but it is important to note that we need to use euclidean (L2) distance, not the distance along the Y coordinate.
 This makes the procedure more similar to Principal Component Analysis (PCA) or Kabsch algorithm ("RMSD alignment") than to linear regression.
-The plane fitting implementation in @lst:code-calc-base-plane-fit uses [singular value decomposition](https://en.wikipedia.org/wiki/Singular_value_decomposition), a good explanation of [the math can be found in StackExchange answers](https://math.stackexchange.com/q/99317).
+The plane fitting implementation in @lst:code-calc-base-plane-fit uses [singular value decomposition](https://en.wikipedia.org/wiki/Singular_value_decomposition) (SVD), a good explanation of [the math can be found in StackExchange answers](https://math.stackexchange.com/q/99317).
 SVD returns decomposes a rectangular matrix into three matrices, the first of which is an orthogonal matrix.
 The first two columns of the matrix are the plane basis, while last one is the normal vector orthogonal to the plane.
 The other two matrices would allow us to get the atom position in the new vector space, but that is unnecessary for this algorithm.

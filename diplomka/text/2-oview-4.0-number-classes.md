@@ -2,7 +2,7 @@
 
 ### Symmetry of L-W Classes
 
-As presented in the previous section, the L-W scheme theoretically distinguishes 156 distinct base pair conformations, when treating uracil as equivalent to thymine. <!--TODO this is maybe interesting-->
+As presented in the previous section, the L-W system theoretically distinguishes 156 distinct base pair conformations, when treating uracil as equivalent to thymine. <!--TODO this is maybe interesting-->
 On each side of the pair, there are three options for the edge and four options for the nucleotide, resulting in a total of twelve unique combinations.
 We can create a $12 \times 12$ matrix of base-edge combinations.
 Assuming symmetry between pairs, such as **cWH A-G** being equivalent to its flipped counterpart **cHW G-A**, we count the number of elements in the lower triangular matrix, ignoring all entries above the diagonal.

@@ -29,7 +29,7 @@ All 12 basepair families are shown in figure [-@fig:LWS-all-families-G-G], the o
 [Leontis and Westhof](https://doi.org/10.1017/s1355838201002515) define **cis** and **trans** as:
 
 > A given edge of one base can potentially interact in a plane with any one of the three edges of a second base, and can do so in either the cis or trans orientation of the glycosidic bonds (this nomenclature was used before, see, e.g., [Sundaralingam, 1977](https://doi.org/10.1002/qua.560120704)).
-> The cis and trans orientations, which follow the usual stereochemical meanings, are illustrated in the right panel of Figure 1 for two bases interacting with their Watson–Crick edges.
+> The cis and trans orientations, which follow the usual stereochemical meanings, are illustrated in the right panel of Figure 1 TODO for two bases interacting with their Watson–Crick edges.
 
 The **cis** and **trans** prefixes only indicate the orientation of the base edges relative to each other, not whether the pairing helix is parallel or antiparallel, although there is a correlation.
 Canonical A-T, A-U, and G-C basepairs are **cis** Watson-Crick/Watson-Crick with antiparallel strands.
