@@ -72,30 +72,30 @@ The resulting basepair families are then represented as `⎼○⎼` (or `○⎼�
 Note that only the sugar edge has an asymmetric symbol, to allow placing the symbol on a diagram in any orientation.
 
 
-Section [-@sec:software] discusses available software tools more thoroughly; however, it is worth noting here how FR3D disambiguates the two **cSS** cases by lowering the second **S** letter.
-For easier lookup by nucleotide number, FR3D reports all basepair in both orientations -- A **cWW G-C** is also reported as **cWW C-G**.
-If this would lead to ambiguities due to asymmetry, the second edge letter of the canonical. **cSs A-C** pair is also reported as the corresponding **csS C-A** pair, both meaning **cSS A-C** in the Leontis-Westhof terminology.
+Section [-@sec:software] discusses available software tools more thoroughly; however, it is worth noting here how the FR3D program disambiguates the two **cSS** cases by lowering the second **S** letter.
+For easier lookup by nucleotide number, FR3D reports all basepairs in both orientations, e.g., **cWW G-C** is also reported as **cWW C-G**.
+If this would lead to ambiguities due to asymmetry, the second edge letter is lowered.
+For instance, a **cSs A-C** pair is also reported as the corresponding **csS C-A** pair, both meaning **cSS A-C** in the Leontis-Westhof terminology.
 FR3D does not lower the second **S**, if the other orientation is left undefined.
+
+FR3D also lowers the second edge letter, if the full class name is symmetric, but the defined hydrogen bonds are not identical when flipped.
+For instance, the exact H-bonds in **cWW A-A** pairs would be ambiguous, as these pairs bind from **N6** to **N1**, and from **N1** to **C2**.
 
 <!-- ■⎼▶
 □⎼▷
 ○⎼● -->
 
-### Symmetric false friends TODO
-
-One more consideration regarding the symmetry of a basepair is whether the defined hydrogen bonds are identical when flipped.
-
-cWW A-A vs tWW A-A
-TODO trans Watson-Crick/Watson-Crick A-A, G-G, C-C, and U-U
-
 ### Alternative H-bond Sets
 
-In few classes, it is possible for the two bases to interact with two possible sets of H-bonds on the same edges in the same orientation.
+In a few classes, it is possible that the bases can interact by two
+possible sets of H-bonds on the same edges and the same cis/trans orientation.
 We observe these _subclasses_ for in **cWW G-U**, **tWW C-C** and **tWW U-U**, but it is possible that other, less common ones, exist.
-The **cWW G-U** pair is especially interesting, because [one of the subclasses is anionic -- one of the bases holds a charge instead of a hydrogen, leading to unconventional donor positions.](https://doi.org/10.1261/rna.079583.123)
+The **cWW G-U** pair is especially interesting, because [one of the
+subclasses is anionic. One of the bases is charged by loosing a hydrogen
+leading to unconventional donor positions.](https://doi.org/10.1261/rna.079583.123)
 
-In order to distinguish the subclasses, FR3D appends an **“a”** to the family name.
-For instance, the standard **cWW G-U** is labeled as **cWW**, the anionic form is labeled **cWWa**.
+In these cases, FR3D appends an **“a”** to the family name to distinguish subclasses.
+For instance, the standard **cWW G-U** is labeled as **cWW**, and the anionic form is labeled **cWWa**.
 We are not aware of other programs capable of classifying subclasses.
 In this work, we follow the FR3D convention, although we have had debates on revisiting subclass naming in the working group.
 
@@ -105,13 +105,16 @@ In this work, we follow the FR3D convention, although we have had debates on rev
 
 ### Bifurcated Hydrogen Bonds
 
-Finally, to underline that there is a [thousand exception to each rule in biology](https://tandy.cs.illinois.edu/Hunter_MolecularBiology.pdf), we also have a special category for basepairs between the three edges.
-In these pairs, two hydrogen bonds form onto the single _corner_ atom.
+Finally, to underline the saying that [in biology, there is a thousand
+exceptions to each rule](https://tandy.cs.illinois.edu/Hunter_MolecularBiology.pdf), a special category for basepairs between the three edges also exists.
+In these pairs, two hydrogen bonds are formed onto the single _corner_ atom.
 Specifically, two donors may share a single acceptor, or a NH<sub>2</sub> group can have both hydrogens bound.
 Since bifurcated H-bonds require two adjacent acceptors or donors, they are only defined for the Watson-Crick edge.
 
-Our pipeline does process these pairs, there isn't anything too special about it.
-However, we will not discuss this category further here, as we are already getting lost in edge cases.
+Our pipeline does process these pairs, there is nothing special about them, but we will not discuss this category in the following text further.
+<!-- However, we will not discuss this category further here, as we are already getting lost in edge cases.
+ -->
+
 <!-- 
 While the 2002 paper presents this category and at least FR3D reports it, it is often not considered.
 The category only contains 6 distinct base pairs, none of which bind with at least two hydrogen bonds.
