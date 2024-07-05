@@ -2,6 +2,8 @@
 
 <!-- Since the [initial discovery of DNA structure](https://doi.org/10.1038/171737a0),  -->
 
+TODO zapracovat Bohdanovo review
+
 Nucleic acids are some of the most important biological molecules, and the study of their structure and function is critical to understanding the fundamental principles of life.
 The [well known double-stranded helix](https://doi.org/10.1038/171737a0) dominates the structure of DNA, protecting its valuable information content.
 On the other hand, RNA molecules often form complicated structures, often with dynamic catalytic domains such as those in the ribosome <https://doi.org/10.1201/9781315735368> TODO cit The_Ribosome_Is_a_Ribozyme page 346.
