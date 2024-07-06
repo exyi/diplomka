@@ -2,16 +2,16 @@
 
 ### Symmetry of L-W Classes
 
-As presented in the previous section, the L-W system theoretically distinguishes 156 distinct base pair conformations, when treating uracil as equivalent to thymine. <!--TODO this is maybe interesting-->
+As presented in the previous section, the L-W system theoretically distinguishes 156 distinct basepair conformations, when treating uracil as equivalent to thymine. <!--TODO this is maybe interesting-->
 On each side of the pair, there are three options for the edge and four options for the nucleotide, resulting in a total of twelve unique combinations.
 We can create a $12 \times 12$ matrix of base-edge combinations.
 Assuming symmetry between pairs, such as **cWH A-G** being equivalent to its flipped counterpart **cHW G-A**, we count the number of elements in the lower triangular matrix, ignoring all entries above the diagonal.
 This results in $12 + 11 + \cdots + 1 = 78$ unique combinations.
-Given that each base-edge couple can pair in either **cis** or in **trans** conformation, we multiply this by an additional two options, resulting in a total of 156 possibilities.
+Given that each base-edge couple can pair in either **cis** or in **trans** conformation, we multiply this by an additional two options, resulting in a total of **156** possibilities.
 
 It is evident that not all theoretically possible pairs can make sense chemically.
-For instance, the Hoogsteen edge of a cytosine consists of single NH<sub>2</sub> group, which can only act as hydrogen bond donor.
-Thus, **cHH C-C** basepair, involving only this edge, cannot provide a stabilizing base interaction.
+For instance, the Hoogsteen edge of cytosine consists of single NH<sub>2</sub> group, which can only act as hydrogen bond donor.
+Thus, a **cHH C-C** basepair, involving only this edge, cannot provide a stabilizing base interaction.
 
 <!-- The conformation is different for each of the four nucleotides.
 We have the following choices:
@@ -56,7 +56,7 @@ $$2 \cdot \left( 16 \cdot 3 + 10 \cdot 3 \right) = 156$$ -->
 Unfortunately, the assumption of symmetry we made earlier is generally invalid, as Sugar/Sugar pairs are actually defined asymmetrically — for instance, **cSS A-C** is not a flipped version of **cSS C-A** (@fig:cSS-CA-vs-AC).
 In <https://doi.org/10.1017/s1355838201002515>, Leontis and Westhof only define **cis** Sugar/Sugar as non-symmetric, while **trans** Sugar/Sugar should be symmetric:
 
-> The cis and trans W.C./W.C., the trans Hoogsteen/Hoogsteen, and the trans Sugar-edge/Sugar-edge geometries (…) are symmetric, with the interacting bases related by a twofold rotation about an axis passing either vertically or horizontally through the center of the base pair.
+> The cis and trans W.C./W.C., the trans Hoogsteen/Hoogsteen, and the trans Sugar-edge/Sugar-edge geometries (…) are symmetric, with the interacting bases related by a twofold rotation about an axis passing either vertically or horizontally through the center of the basepair.
 > **The cis Sugar-edge/Sugar-edge geometry (…), however, is not symmetric.**
 > To illustrate this point, two different A-G cis Sugar-edge/Sugar-edge pairs are shown in Figure 7. [note: we show A-C in @fig:cSS-CA-vs-AC]
 
@@ -65,11 +65,11 @@ However, only the **tSS A-G** and **tSS G-A** classes are defined _in conflict_,
 
 ![In trans Sugar/Sugar, C-A is defined while A-C is left undefined. In contrast, in W/W and H/H the C-A and A-C show the same pair (turned upside down)](../img/tSS-CA-vs-AC.png){#fig:tSS-CA-vs-AC}
 
-Leontis and Westhof also propose a glyph symbols for each base pair family:
-Watson-Crick edge as a circle (`○`), Hoogsteen edge as square (`□`) and sugar edge as a triangle (`▷`).
+Leontis and Westhof also propose a glyph symbol for each basepair family:
+the Watson-Crick edge as a circle (`○`), Hoogsteen edge as square (`□`) and the sugar edge as a triangle (`▷`).
 If the basepair is **cis**, it is represented with filled symbols (`●`, `■`, `▶`); if **trans**, it is shown with empty symbols (`○`, `□`, `▷`).
 The resulting basepair families are then represented as `⎼○⎼` (or `○⎼○`) for **tWW**, `●⎼▶` for **cWS**, and `⎼▶⎼` for **cSS**.
-Note that only the sugar edge has an asymmetric symbol, to allow placing the symbol on a diagram in any orientation.
+Note that only the sugar edge has an asymmetric symbol, intuitively indicating its asymmetry and allowing placing of the symbol on a diagram in any orientation.
 
 
 Section [-@sec:software] discusses available software tools more thoroughly; however, it is worth noting here how the FR3D program disambiguates the two **cSS** cases by lowering the second **S** letter.
@@ -87,12 +87,10 @@ For instance, the exact H-bonds in **cWW A-A** pairs would be ambiguous, as thes
 
 ### Alternative H-bond Sets
 
-In a few classes, it is possible that the bases can interact by two
-possible sets of H-bonds on the same edges and the same cis/trans orientation.
+In a few classes, it is possible that the bases can interact by two possible sets of H-bonds on the same edges and the same cis/trans orientation.
 We observe these _subclasses_ for in **cWW G-U**, **tWW C-C** and **tWW U-U**, but it is possible that other, less common ones, exist.
-The **cWW G-U** pair is especially interesting, because [one of the
-subclasses is anionic. One of the bases is charged by loosing a hydrogen
-leading to unconventional donor positions.](https://doi.org/10.1261/rna.079583.123)
+The **cWW G-U** pair is especially interesting, because
+[one of the subclasses is anionic. One of the bases is charged by loosing a hydrogen leading to an atypical donor positions.](https://doi.org/10.1261/rna.079583.123)
 
 In these cases, FR3D appends an **“a”** to the family name to distinguish subclasses.
 For instance, the standard **cWW G-U** is labeled as **cWW**, and the anionic form is labeled **cWWa**.
@@ -117,9 +115,9 @@ Our pipeline does process these pairs, there is nothing special about them, but 
 
 <!-- 
 While the 2002 paper presents this category and at least FR3D reports it, it is often not considered.
-The category only contains 6 distinct base pairs, none of which bind with at least two hydrogen bonds.
+The category only contains 6 distinct basepairs, none of which bind with at least two hydrogen bonds.
 In this work, we mostly skip the analysis of these Watson-Bifurcated basepairs.
 The provided scripts do process them, but we will avoid them in the discussion for brevity.
 
-Mixtral: The text is clear and mostly well-written. However, there are some minor stylistic improvements that can be made for consistency and readability. Consider revising to: "The 2002 paper introduces this category, which FR3D also reports; however, it is not commonly considered in the literature. This category comprises only six distinct base pairs, none of which engage in at least two hydrogen bonds. In our work, we generally omit an analysis of Watson-Bifurcated basepairs for brevity. The provided scripts do process these cases; however, we will intentionally exclude them from the discussion."
+Mixtral: The text is clear and mostly well-written. However, there are some minor stylistic improvements that can be made for consistency and readability. Consider revising to: "The 2002 paper introduces this category, which FR3D also reports; however, it is not commonly considered in the literature. This category comprises only six distinct basepairs, none of which engage in at least two hydrogen bonds. In our work, we generally omit an analysis of Watson-Bifurcated basepairs for brevity. The provided scripts do process these cases; however, we will intentionally exclude them from the discussion."
 -->

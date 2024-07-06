@@ -248,10 +248,8 @@ def process_links(files: list[str], out_dir):
     
     citations = get_citations_somehow(list(links.keys()))
     cit_map = assign_citation_ids(citations)
-    for l in links.items():
-        cit = citations.get(l[0])
-        if cit:
-            print(f" {(cit.seq or -100)+1: 3d} {cit.id:5s}: {cit.title} ({cit.doi})")
+    for _, cit in sorted({ cit.seq: cit for l in links.items() if (cit:=citations.get(l[0])) is not None}.items()):
+        print(f" {(cit.seq+1 if cit.seq is not None else -4086200234935): 3d} {cit.id:5s}: {cit.title} ({cit.doi or cit.url})")
 
     phase2 = [convert_links(citations)]
     for file in files:

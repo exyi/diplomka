@@ -158,7 +158,7 @@ By default, the `pairs.py` script loads all basepairs into memory to group them 
 This enables straightforward parallel processing using the Python `multiprocessing` module: we group the DataFrame by PDB ID and use `multiprocessing.Pool.map(...)` to process each structure.
 In an effort to maintain a uniform CPU time consumption and to avoid mean emails from the PBS daemon, we split structures with more than 100 000 basepairs into several groups, and prioritize larger groups over smaller ones.
 
-In the context of annotating base pairs on the entire PDB (@sec:testing-basepair-params), we must compute the parameters for all _basepair candidates_, i.e., pairs of nucleotides in proximity to one another.
+In the context of annotating basepairs on the entire PDB (@sec:testing-basepair-params), we must compute the parameters for all _basepair candidates_, i.e., pairs of nucleotides in proximity to one another.
 Given the substantial size of the dataset, it is practical to subdivide it into smaller chunks and process them sequentially.
 This functionality can be invoked using the `--partition-input-select=K/N` command-line option, where **N** is a placeholder for the total number of partitions, and **K** is the specific partition to be processed in the current run.
 The parameter `K` can also be specified to be a range, allowing for execution of multiple partitions via a single command, such as `--partition-input-select=0-64/64`.

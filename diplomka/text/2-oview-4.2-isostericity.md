@@ -5,7 +5,7 @@ It is widely known that the canonical **G-C** and **A-U** pairs are similar in t
 Consequently, a mutation from **G** to **A** can be effectively reversed by mutating the complementary **C** to **U**, without significant change in the sugar-phosphate backbone.
 Even non-canonical basepairing classes form groups with equivalent geometric configurations, we call this equivalence [**isostericity**]
 (https://doi.org/10.1016/j.febslet.2014.06.031).
-More complicated substitutions of one non-canonical base pair to another require further analysis but first of all, a reliable assignment of all pair classes.
+More complicated substitutions of one non-canonical basepair to another require further analysis but first of all, a reliable assignment of all pair classes.
 The similarity of basepairs can be quantified using [the IsoDiscrepancy index]
 (https://doi.org/10.1093/nar/gkp011), which assesses the distance
 between C1' atoms, basepair structure, and a rotation between the glycosidic bonds.

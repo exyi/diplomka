@@ -13,7 +13,7 @@ const no_cached_prompt = args.find(
 const mode = args.find(
     (_, index) => args[index - 1] === "--mode"
 ) ?? "doc";
-if (!["doc", "chat"].includes(mode)) {
+if (!["doc", "chat", "grammar", "grammar-chat"].includes(mode)) {
     throw new Error(`Invalid mode: ${mode}, must be doc/chat`);
 }
 
@@ -46,9 +46,9 @@ const cc = {
 const st = model == 'mistral' ? {
         instBegin: '[INST]',
         instEnd: '[/INST]',
-        systemRole: '%%%System: ',
-        userRole: '%%%User: ',
-        assRole: '%%%Assistant: ',
+        systemRole: '%%% System: ',
+        userRole: '%%% Human: ',
+        assRole: '%%% Assistant: ',
 
     } :
     model == 'llama3' ? {
@@ -56,7 +56,7 @@ const st = model == 'mistral' ? {
         instEnd: '<|eot_id|>',
         systemRole: '<|start_header_id|>system<|end_header_id|>\n\n',
         userRole: '<|start_header_id|>system<|end_header_id|>\n\n',
-        assRole: '|start_header_id|>assistant<|end_header_id|>\n\n',
+        assRole: '<|start_header_id|>assistant<|end_header_id|>\n\n',
     } : 
     undefined;
 
@@ -85,7 +85,7 @@ const chatConstSuffix = [
 const rollingHistory = []
 
 // const instruction = `${st.instBegin}%%% System: An interaction between a human and an artificial intelligence assistant - a reviewer. The assistant always responds by pointing out mistakes or suspicious statements, if there are any. If there are no major issues, the assistant responds 'No issues.', otherwise writes a concise description of the issues and remedy (for example: 'teh' is a typo, replace with 'the'). The text is in Markdown format, the assistant doesn't check Markdown grammar. The text should be formal (academic) English, the assistant also points out stylistic issues in the text.${st.instEnd}`
-const instruction = `${st.instBegin}${st.systemRole}An interaction between a human and an artificial intelligence assistant - a reviewer. The assistant always responds by pointing out mistakes or suspicious statements, if there are any. If there are no major issues, the assistant responds 'No issues.', otherwise writes a concise description of the issues and remedy (for example: 'teh' is a typo, replace with 'the'). The text is in Markdown format, the assistant doesn't check Markdown grammar. The text should be formal (academic) English, the assistant also points out stylistic issues in the text.${st.instEnd}`
+const chatInstruction = `${st.instBegin}${st.systemRole}An interaction between a human and an artificial intelligence assistant - a reviewer. The assistant always responds by pointing out mistakes or suspicious statements, if there are any. If there are no major issues, the assistant responds 'No issues.', otherwise writes a concise description of the issues and remedy (for example: 'teh' is a typo, replace with 'the'). The text is in Markdown format, the assistant doesn't check Markdown grammar. The text should be formal (academic) English, the assistant also points out stylistic issues in the text.${st.instEnd}`
 
 const docModeHeader = `
 # Reviewed manuscript
@@ -96,6 +96,9 @@ The review may be opinionated, don't take every comment too seriously, but it is
 I think it is better to have "false positive" comments than "false negatives" ;)
 I ignored Markdown syntax errors and similar issues, as you can find them easily with a linter.`
 
+const chatGrammarInstruction = `
+${st.instBegin}${st.systemRole}An interaction between a human and an artificial intelligence assistant - a reviewer. The assistant always responds by repeating the same sentence, with the grammar errors removed. The text is in Markdown format, the assistant doesn't validate Markdown grammar, but repeats it exactly as is in the source. The text should be formal (academic) English, the assistant may do performs slight correction in style.${st.instEnd}`
+
 const bullshitSentencePrompts = [
     `> Lorem ipsum\n\nProbably remove this.\n\n`,
     `> The largest city is Europe is Moscow, the capital of Russia.\n\nSeems out of place.\n\n`,
@@ -105,15 +108,64 @@ const fineBullshits = [
     `> <!-- returning 8,783 PDB IDs (as of 16 Oct 2022) -->`,
 ]
 
-const contextInstruction = ``
+const docGrammarHeader = `
+# Reviewed manuscript
+
+Hi! This is the corrected manuscript -- I left the original text quoted using the markdown syntax ('> xx'), and then wrote the corrected version after each sentence/line.
+I think it is better to have "false positive" comments than "false negatives", so there might mistakes in the review, please don't apply it blindly ;)
+I ignored Markdown syntax errors and similar issues, as you can find them easily with a linter.`
+
+function mutateText(text, rate=0.1, maxPerSentence = 10) {
+    const mutKinds = [
+        (i) => {
+            const tmp = words[i]
+            words[i] = words[i+1]
+            words[i+1] = tmp
+        },
+        (i) => {
+            const v = ["the", "a", "anything", "something", "this", "that", "else", "pair", "thing", "many"]
+            words[i] = v[Math.floor(Math.random()*v.length)]
+        },
+        (i) => {
+            words[i] = words[i].substring(1)
+        },
+        (i) => {
+            words.splice(i, 1)
+        },
+        (i) => {
+            words.splice(i, 0, words[Math.floor(Math.random()*words.length)])
+        },
+        (i) => {
+            words[i] = words[i].replace(/[,.():]/g, "")
+        }
+    ]
+    const words = text.split(" ")
+    let mutCount = 0;
+    for (let i = 0; i < words.length; i++) {
+        mutCount += (Math.random() < rate)
+    }
+    mutCount = Math.min(mutCount, maxPerSentence)
+    const muts = words.map(() => null)
+    for (let i = 0; i < mutCount; i++) {
+        const idx = Math.floor(Math.random() * words.length)
+        muts[idx] = true
+    }
+    for (let i = muts.length -1; i >= 0; i--) {
+        if (muts[i]) {
+            mutKinds[Math.floor(Math.random()*mutKinds.length)](i)
+        }
+    }
+    return words.join(" ")
+}
+
 const docDropout = 0.7 // 0..1 - probability to include a review in the autoregressive prompt
 
 function format_prompt(question) {
-    if (mode == "chat") {
-        return `${instruction}\n${
-            [...chatInitial, ...rollingHistory, ...chatConstSuffix].map(m =>`%%% Human: ${m.human}\n\n%%% Assistant: ${m.assistant || "No issues."}\n`).join("\n")
-        }\n${instruction}\n\n%%% Human: ${question}\n\n%%% Assistant: `
-    } else if (mode == "doc") {
+    if ("chat" == mode) {
+        return `${chatInstruction}\n${
+            [...chatInitial, ...rollingHistory, ...chatConstSuffix].map(m =>`${st.userRole}${m.human}\n\n${st.assRole}${m.assistant || "No issues."}\n`).join("\n")
+        }\n${chatInstruction}\n\n${st.userRole}${question}\n\n${st.assRole}`
+    } else if ("doc" == mode) {
         const sentences = [
             ...chatInitial,
             { human: "", assistant: "" },
@@ -132,6 +184,19 @@ ${docModeHeader}
 
 ${reviewSentences.join("\n")}
 ${md_quote(question)}`
+    } else if ("grammar" == mode || "grammar-chat" == mode) {
+        const autoregr = 0.2;
+
+        let history = [...chatInitial, ...rollingHistory].map(x => Math.random() < autoregr ? x : { human: mutateText(x.human), assistant: x.human })
+        history = history.slice(-rollingContextSize)
+        if ("grammar-chat" == mode) {
+            return `${chatGrammarInstruction}\n\n${history.map(m => `${st.userRole}${m.human}\n\n${st.assRole}${m.assistant || ""}\n`).join("\n\n")}\n\n`
+        } else {
+            return `${docGrammarHeader}\n\n${history.map(m => `${md_quote(m.human)}\n${m.assistant}`).join("\n\n")}\n\n${md_quote(question)}`
+        }
+
+    } else {
+        throw new Error(`mode = ${mode}`)
     }
 }
 
@@ -152,17 +217,16 @@ async function tokenize(content) {
     return await result.json().tokens
 }
 
-const n_keep = await tokenize(instruction).length
+const n_keep = await tokenize(chatInstruction).length
 
 async function ask_model(fullPrompt) {
-
-    const stop = ["\n%%% Human:", '\n' + st.userRole] // stop completion after generating this
-    if (mode == "doc") {
+    const stop = ["\n%%% Human:", '\n' + st.userRole, "\n\n"] // stop completion after generating this
+    if (mode == "doc" || mode == "grammar") {
         stop.push("\n>")
         // stop.push("\n\n")
     } else if (mode == "chat") {
     }
-    // console.log(cc.fgCyan + fullPrompt + cc.reset, stop)
+    // console.log(cc.fgCyan + fullPrompt + cc.reset)
     const signal = new AbortController()
     const result = await fetch(`${API_URL}/completion`, {
         method: 'POST',
@@ -239,19 +303,16 @@ async function chat_completion(document, question) {
 
 async function doc_completion(document, paragraph) {
     const xx = paragraph.split("\n")
+    const includeAll = false
     for (let i = 0; i < xx.length; ++i) {
         const line = xx[i]
         console.log(cc.fgYellow + md_quote(line) + cc.reset)
         while (rollingHistory.length > rollingContextSize) {
             rollingHistory.shift()
         }
+        const prompt = includeAll ? `${document.join("\n")}\n\n---\n\n${format_prompt(line)}\n` : format_prompt(line) + "\n"
         let answer = await ask_model(
-            `
-    ${document.join("\n")}
-
-    ---
-
-    ${format_prompt(line)}\n` + (xx.length - 1 == i ? "\n" : "")
+            prompt // + (xx.length - 1 == i ? "\n" : "")
         )
 
         if (answer.trim().endsWith("\n>")) {
@@ -263,7 +324,7 @@ async function doc_completion(document, paragraph) {
     rollingHistory.push({ human: "", assistant: "" })
 }
 
-const completion = mode == "doc" ? doc_completion : chat_completion
+const completion = mode == "doc" || mode == "grammar" ? doc_completion : chat_completion
 
 if (inputFile == null) {
     const rl = readline.createInterface({ input: stdin, output: stdout });

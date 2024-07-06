@@ -17,7 +17,7 @@ A [subsequent publication](https://doi.org/10.1093/nar/gkf481) shows more than a
 Today, with the availability of about 17 000 nucleic acid structures, we are in a better position to properly describe even the rarer basepair kinds.
 
 If we analyze the entire PDB database with one of the available basepair assignment programs (FR3D, @sec:software-FR3D), we can see that Watson-Crick pairs dominate all other basepair classes.
-However, in RNA the total cardinality of all non-canonical pairs is actually larger than the canonical ones; meaning that canonical pairs represent slightly bellow 50% of the total.
+However, in RNA the total cardinality of all non-canonical pairs is actually larger than the canonical ones; meaning that canonical pairs represent slightly below 50% of the total.
 Even in DNA structures, 25% of all basepairs are non-canonical, notable biologically relevant structures are the [i-Motif](https://doi.org/10.1093/nar/gky735) and the [G-quadruplex](https://doi.org/10.1016/j.trechm.2019.07.002).
 <!-- However, it must be noted that the PDB is heavily biased towards _interesting_ structures -->
 
@@ -67,7 +67,7 @@ Despite their importance, non-canonical basepairs have been historically underst
 
 Today, with the availability of more than 17,000 NA structures, there is a wealth of data that can be used to identify and classify non-canonical basepairs. Automated tools have been developed to annotate these basepairs in 3D structures, although they have certain limitations, as discussed in section 3.2.
 
-In this study, we propose a comprehensive analysis of all types of non-canonical basepairs, including an update of the definition images from the Leontis-Westhof classification system. Additionally, we aim to develop a more robust and comprehensive classification system that can accurately categorize and analyze non-canonical basepairs in NA structures. This work will contribute to a better understanding of the role of non-canonical basepairs in biological processes and provide valuable insights into their functional significance.
+In this study, we propose a comprehensive analysis of all classes of non-canonical basepairs, including an update of the definition images from the Leontis-Westhof classification system. Additionally, we aim to develop a more robust and comprehensive classification system that can accurately categorize and analyze non-canonical basepairs in NA structures. This work will contribute to a better understanding of the role of non-canonical basepairs in biological processes and provide valuable insights into their functional significance.
 
 In summary, non-canonical basepairs are crucial components of NA structures and play a vital role in various biological processes. With the availability of a large number of NA structures and advanced computational tools, it is now possible to conduct a comprehensive analysis of non-canonical basepairs and develop a more accurate and comprehensive classification system. This work will provide valuable insights into the functional significance of non-canonical basepairs and contribute to a better understanding of NA structure and function.
 -->

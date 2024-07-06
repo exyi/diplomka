@@ -1190,6 +1190,27 @@
         "id": null,
         "seq": null
     },
+    "https://doi.org/10.1107%2FS0567739476001873": {
+        "doi": "10.1107%2FS0567739476001873",
+        "published_date_parts": [
+            1976,
+            9,
+            1
+        ],
+        "title": "A solution for the best rotation to relate two sets of vectors",
+        "authors": [
+            [
+                "Wolfgang",
+                "Kabsch"
+            ]
+        ],
+        "journal": [
+            "Acta Crystallographica Section A"
+        ],
+        "url": null,
+        "id": null,
+        "seq": null
+    },
     "https://doi.org/10.1107/S2059798318000050": {
         "doi": "10.1107/S2059798318000050",
         "published_date_parts": [

@@ -1,20 +1,19 @@
 ## Data Selection {#sec:filter}
 
-In order to get useful statistics, we need a large enough data sample.
-However, we also have to make sure that the data has a high enough quality, most importantly try to remove any biases.
-It is not such a problem if the data is noisy, as the statistics can deal with variance provided enough observations.
+In order to get useful statistics, we need a sufficient quantity of data samples.
+However, it is equally important to ensure a high level of data quality, particularly eliminate potential biases.
+A degree of unbiased noise may be tolerated, as statistical methods can account for variance provided enough observations.
 
-Even when working with small sample sizes, the uncertainty arising from the noise can be characterized using confidence intervals.
-However, the interval would be "overconfident", if the observations are not independent of each other.
-
-![Canonical GC pairs with the filtering (left) and without it (right). Without the filter, the plot illustrates a large effect from 2.89 Å hydrogen-bond restraints used in model refining.](../img/hbonds-hist-filter-comparison-GConly.png)
+<!-- Even when working with small sample sizes, the uncertainty arising from the noise can be characterized using confidence intervals.
+However, the resulting intervals may be deemed _overconfident_ if the observations are not independent of one another. -->
+![Canonical GC pairs, filtered (left) and unfiltered (right). Without the filter, the plot illustrates a large effect from 2.89 Å hydrogen-bond restraints used in model refining.](../img/hbonds-hist-filter-comparison-GConly.png)
 
 Since multiple entries in the PDB often share a common refined structure with only varying ligands, we also need to remove all redundant structures to avoid the bias.
 Moreover, nucleotides not satisfying MolProbity and DNATCO criteria are filtered out, as well as nucleotides with poor electron density fit.
 
 The filtration methodology was prepared by Jiří Černý's laboratory and will be published in TODO??.
 In this project, we simply utilized the prepared lists of about 180 000 nucleotides.
-Given that the nucleotide filter is rather selective, any basepair with at least one passing nucleotide is accepted.
+Given that the nucleotide filter is rather selective, any basepair with at least one passing nucleotide will be accepted.
 We will call this filtered set the **"Reference Set"**.
 
 ### Summary of the filtration method
@@ -22,15 +21,15 @@ We will call this filtered set the **"Reference Set"**.
 <!-- TODO jirkův filtr popis: -->
 
 0. Selection of all nucleic acid crystal structures with resolution of 3.5 Å or better
-1. Grouping of sequentially redundant clusters.
+1. Clustering of sequentially redundant structures.
     * Sequences with more than 90% similarity are considered redundant.
-    * Sequences are considered non-redundant, if one is part of a protein complex and the other is not.
+    * However, sequences are considered non-redundant, if one is part of a protein complex and the other is not.
 2. Selection of the highest quality chain from each cluster of redundancy
-    * The score is similar to “BGSU RNA score” (Roll et al., 2016 TODO), a weighted sum of resolution, Rfree, clashscore, per-residue value of RSCC, and a fraction of unobserved residues.
+    * The score is similar to [“BGSU RNA score”](https://doi.org/10.1093/nar/gkw453), a weighted sum of resolution, Rfree, clashscore, per-residue value of RSCC, and a fraction of unobserved residues.
 3. Selection of residues with sufficiently high quality, defined as:
     * All atoms must have RSCC (real-space correlation coefficient) ≥ 0.7, and backbone atoms must have harmonic of RSCC ≥ 0.8
-    * MolProbity criteria (Williams et al., 2018 TODO) are satisfied: no steric clashes ≥ 0.5 Å, and no sugar-pucker outliers are allowed.
-    * The nucleotide conforms to one of NtCs (sugar-phosphate backbone conformations, TODO cite) with confal (TODO cite?) ≥ 60% and RMSD ≤ 0.5 Å.
+    * [MolProbity criteria](https://doi.org/10.1002/pro.3330) are satisfied: no steric clashes ≥ 0.5 Å, and no sugar-pucker outliers are allowed.
+    * The nucleotide conforms to one of NtCs ([sugar-phosphate backbone conformations](https://doi.org/10.1093/nar/gkaa383)) with confal score (TODO cite?) ≥ 60% and RMSD ≤ 0.5 Å.
 
 The list of residues and detailed description (from TODO cite) is included as an attachment.
 

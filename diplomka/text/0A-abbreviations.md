@@ -13,25 +13,25 @@ For better clarity, we will use the following conventions, unless noted otherwis
 For brevity, the list only includes ambiguous or uncommon abbreviations.
 
 * **TODO** — means that the part of the work is incomplete
-* **API** - Application Programming Interface; i.e., an interface of a software library
-* **CIF** / **mmCIF** - \[**m**acro**m**olecular\] Crystallographic Information File
-* **PDB** - Protein DataBank (structural biology database, despite the name includes nucleic acids)
+* **API** - Application Programming Interface (an interface of a software library)
+* **CIF** / **mmCIF** - \[**m**acro**m**olecular\] Crystallographic Information File (standard file format for molecular structures)
+* **PDB** - Protein DataBank (structural biology database; includes nucleic acids, despite the name)
 * **RMSD** - Root Mean Squared Deviation (structure similarity metric)
 * **CSV** - Comma Separated Values (tabular text-based file format)
 * **JSON** - JavaScript Object Notation (hierarchical text-based file format)
 * **KDE** - Kernel Density Estimate (non-parametric probability density estimator)
-* **L-W** - Leontis-Westhof (terminology, @sec:bp-terminology-lw)
-* **NAKB** - Nucleic Acid Knowledge Base (TODO cite?)
-* **FR3D** - (see @sec:software-FR3D)
-* **DDSR** - (see @sec:software-DSSR)
+* **L-W** - Leontis-Westhof naming system (explained in @sec:bp-terminology-lw)
+* **NAKB** - Nucleic Acid Knowledge Base
+* **FR3D** - "Find RNA 3D" (nucleic acid analysis program, see @sec:software-FR3D)
+* **DDSR** - "Dissecting the Spatial Structure of RNA" (nucleic acid analysis program, see @sec:software-DSSR)
 
-**cWW**, **tWW**, **cWH**, **tWH**, **cWS**, **tWS**, **cHH**, **tHH**, **cHS**, **tHS**, **cSS**, **tSS** are abbreviated basepair families. See @sec:bp-terminology-lw or [](https://doi.org/10.1017/s1355838201002515) for explanation.
+**cWW**, **tWW**, **cWH**, **tWH**, **cWS**, **tWS**, **cHH**, **tHH**, **cHS**, **tHS**, **cSS**, **tSS** are abbreviated basepair families according to the Leontis-Westhof terminology. See @sec:bp-terminology-lw or <https://doi.org/10.1017/s1355838201002515> for explanation.
 
 ### Single Letter Abbreviations {.unnumbered}
 
 Single letters are special category because of their ambiguity.
 In this work, we use the letters **A**, **T**, **U**, **G**, **C** as the DNA and RNA bases -- adenine, thymine, uracil, guanine and cytosine.
-The letters **N**, **O**, **P**, **C**, **H** are atom names.
+The letters **N**, **O**, **P**, **C**, **H** represent atom names.
 **X**, **Y**, **Z** are the axes in three-dimensional space.
 
 
