@@ -90,7 +90,7 @@ def assign_citation_ids(citations: dict[str, CitationInfo]) -> dict[str, Citatio
         elif len(cit.authors) > 3:
             preferred_id = f"{cit.authors[0][1][0]}{cit.published_date_parts[0] % 100:02d}"
         else:
-            preferred_id = f"{''.join(author[1][0] for author in cit.authors)}{cit.published_date_parts[0] % 100:02d}"
+            preferred_id = f"{''.join(author[1][0:1] for author in cit.authors)}{cit.published_date_parts[0] % 100:02d}"
         if preferred_id in assigned_ids and assigned_ids[preferred_id] != cit:
             for i in range(ord('b'), ord('z')+1):
                 if f'{preferred_id}{chr(i)}' not in assigned_ids:
@@ -222,7 +222,7 @@ def generate_references(cit_map: dict[str, CitationInfo]):
         body = f"""
             <span class="references-authors">{html.escape(authors)}</span>
             <span class="references-date">{format_date(cit.published_date_parts)}</span>
-            <span class="references-title">{html.escape(cit.title)}</span>
+            <span class="references-title">{cit.title}</span>
             {journal}
             {link}
         """
@@ -402,6 +402,9 @@ def pandoc_parse(input_dir, output_dir):
 
     out_files = []
     for file in sorted(os.listdir(input_dir), key=human_sort_keys):
+        if file.endswith('_'):
+            continue
+
         cmd = ["pandoc", "--to=json", "--wrap=preserve", "--output=" + os.path.join(output_dir, file + ".json"), "--strip-comments"]
         format = None
 

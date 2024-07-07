@@ -1,0 +1,186 @@
+# Appendix A - AI use {.unnumbered #sec:app-AI}
+
+Charles University has published an official statement on AI use: [ai.cuni.cz/AI-17.html](https://ai.cuni.cz/AI-17.html){.link-no-footnote} and also a set of informal recommendations for students: [ai.cuni.cz/AI-11.html](https://ai.cuni.cz/AI-11.html){.link-no-footnote}.
+The statement essentially allows the use of AI tools, specifically the large language models like GPT 3.5.
+However, we students have to be transparent about how we used the tools, and we obviously cannot rely solely on AI to do the science nor learning for us.
+
+ChatGPT is already public for more than a year, but there still isn't much precedent on how to use AI responsibly and how to be transparent about.
+I have decided to write this entire section about it.
+Since AI is still quite new in its current form, I suppose this "case study" might quite interesting to some readers.
+I have chosen to use more informal voice, write it more like a blog post than a study -- I think it's more effective in sharing the real experience, with examples where the AI was useful and where I was less successful with it.
+
+## Charles University Position on AI {.unnumbered}
+
+Since the linked statement is in Czech, I have decided to include a translation of the statement for clarity.
+It is translated using the free version of deepl.com for good measure (it is an AI translation tool).
+
+The College of the Rector of Charles University welcomes the use of modern artificial intelligence (AI) technologies and tools such as ChatGPT, but stresses the need to set boundaries for their use.
+
+* AI technologies can be useful for students, educators and researchers, bringing a competitive advantage and increasing work productivity.
+* The use of AI tools should be complementary and not a substitute for one's own thinking and work.
+* The use of AI tools will require profound innovations in teaching methods and testing.
+* If used responsibly and in accordance with ethical principles, AI tools can make a significant contribution to improving the quality of education and research.
+* The use of AI tools needs to be transparent and in line with the guidance of the teacher/supervisor.
+* AI tools must be used with respect for academic integrity and honesty.
+* Risks associated with the use of AI include uncritical acceptance of generated content without scrutiny, dependence on AI technologies, plagiarism, AI errors in the form of false results.
+* Taking AI-generated results verbatim or in slightly modified form and passing them off as one's own work is considered plagiarism.
+
+<div style="text-align: right">
+On behalf of the management of Charles University<br />
+David Hurný, Member of the Rector's College<br /><br />
+Prague, 24 April 2023
+</div>
+
+_End of quotation._
+
+## ???{.unnumbered}
+
+First I thought, it would maybe be easier to just avoid using the LLMs, avoid this discussion and avoid the potential debates if I or ChatGPT should get the degree.
+Then I realized, I already have half of the software done, with the Github Copilot enabled.
+With the **Avoid** option greyed out, I might as well try all other models and maybe learn something from it.
+
+Github Copilot had probably the largest impact on this work, although it didn't write a single word in this PDF.
+It is a service developed by Github, owned by Microsoft, and it is a code autocompletion tool, based on OpenAI's Codex LLM.
+
+
+Github/Microsoft is currently pushing towards making Copilot do more than just code completion.
+"Copilot chat" was available for free for some time as a beta feature.
+I have tried to enable it, but disabled it shortly after because the VS Code extension was hampering other extensions I use.
+However, it was apparently just a different frontend to OpenAI's GPT 3.5.
+Compared to ChatGPT it could have better insight into my other code.
+
+### Fitting a Plane to Points - a Case Study {.unnumbered}
+
+### LLMs for the Real Language {.unnumbered}
+
+```
+Transcript of a dialog, where the User interacts with an Assistant. The Assistant is helpful, kind, honest, good at writing, and never fails to answer the User's requests immediately and with precision.
+
+Assistant: Hello. How may I help you today?
+User: Please tell me the largest city in Europe.
+Assistant: The largest city in Europe is Moscow, the capital of Russia.
+User: Please rewrite the following paragraph to more formal (academic) english. Feel free to reorder sentences if you like:
+
+The reason why we run DSSR from inside the `pairs.py` script instead of running it ahead of time like we do with FR3D is that DSSR output format are convoluted as THE HELL ITSELF.
+FR3D simply writes out a single "PDBID_basepair.txt" file.
+DSSR on the other hand always outputs a set files such as "dssr-dsStepPars.txt", "dssr-dsStepPars.txt", "dssr-dsHeliPars.txt", "dssr-pairFrames.txt" and few other.
+We also cannot keep just the only file we want - "dssr-dsStepPars.txt", because we also need "dssr-dsStepPars.txt" to map the basepairs onto those we already have.
+Since the outputs contain a lot of values, the files are significantly larger than those produced by FR3D.
+DSSR has an `--json` option to switch to a machine readable JSON output, but we cannot use it because it doesn't work with `--analayze` and the JSON thus doesn't contain the base parameters.
+
+Assistant: Here are two alternatives you can choose from:
+
+Option 1:
+The rationale for implementing the DSSR algorithm within the `pairs.py` script, instead of executing it priorly like we do with FR3D, lies in the intricacy of DSSR's output format. Compared to FR3D, which generates a solitary "PDBID_basepair.txt" file, DSSR generates a collection of files such as "dssr-dsStepPars.txt", "dssr-dsStepPars.txt", "dssr-dsHelixPars.txt", and "dssr-basepairs.txt". This is necessitated by our requirement to associate the newly generated basepairs with those we have previously processed. However, since the generated files encompass a multitude of data, their sizes are significantly larger than those of FR3D. Regrettably, DSSR offers a JSON output format with the `--json` option; however, this option is incompatible with the `--analyze` parameter, and thus, fails to incorporate the essential base parameters.
+
+Option 2:
+To explain the reasoning behind incorporating DSSR within the `pairs.py` script, as opposed to running it beforehand like FR3D, we must take into consideration the complexity of DSSR's output format. In contrast to FR3D, which yields a sole "PDBID_basepair.txt" file, DSSR produces a series of files including "dssr-dsStepPars.txt", "dssr-dsStepPars.txt", "dssr-dsHelixPars.txt", and "dssr-basepairs.txt". This is due to the need to align the newly derived basepairs with those that have already been processed. The resulting files contain extensive data, which leads to larger sizes compared to FR3D. Unfortunately, while DSSR provides a JSON output format using the `--json` option, this option is unable to run alongside the `--analyze` parameter and, consequently, does not provide the necessary base parameters.
+ 
+
+Both options maintain the same meaning but are written with different styles. Option 1 is more formal and uses a more complex sentence structure, while Option 2 is written in a more conversational style. The choice between the two depends on the intended audience and the desired tone of the text.
+```
+
+Best :joy:
+
+```
+User: Reformulate to formal (academic) english: "We are already getting lost in edge cases"
+Bob: The emergence of various intricate scenarios has led to a certain degree of complexity in the comprehension of the matter at hand.
+```
+
+
+```
+Transcript of a dialog, where the User interacts with an Assistant. The Assistant is helpful, kind, honest, good at writing, and never fails to answer the User's requests immediately and with precision.
+
+Assistant: Hello. How may I help you today?
+User: Please tell me the largest city in Europe.
+Assistant: The largest city in Europe is Moscow, the capital of Russia.
+User: Please rewrite the following paragraph to more formal (academic) english. Feel free to reorder sentences if you like:
+
+FR3D reports all pairs twice, in both orientation.
+For example, if a `cWH G-C` pair is reported, a corresponding `cHW C-G` is also reported.
+Not to be too repetitive, we only want to work with one of the variants.
+We have 3 rules to remove the duplicate entries.
+
+1. If the pair family is asymmetrical, we keep the variant shown in LSW 2002 paper
+    * Preferred families are `c`/`tWH`, `c`/`tWS`, `c`/`tHS`.
+    * `HW`, `SW`, `SH` pairs are always dropped, or the order is swapped if the symmetrical one would not exist
+2. If the pair nucleotides aren't equal, we keep the variant ordered according to `A > G > C > U`
+    * For example, `cWW G-C` is preferred to `cWW C-G`
+    <!-- * This means **A**denine is always the first
+    * If **A**denine isn't present, **G**uanine must be first
+    * Otherwise `C-U` is preferred to `U-C` -->
+    * `T` is equivalent to `U`
+3. Otherwise, the pair type name is completely symmetrical (`cWW G-G`)
+    * We exclude the pair with longer H-bonds, if it is different.
+    * If the H-bonds are also the same, we keep the pair with lower UnitID of the first nucleotide.
+
+Assistant: Here are two alternatives you can choose from:
+
+Alternative 1:
+
+FR3D records each pair twice, in both orientations. For illustrative purposes, let us consider the pair "cWW" and the base pair "G-C". This pair is represented in two ways in the dataset: "G-C" and "C-G". According to the rules outlined below, the first of these two representations, "G-C", is considered the preferred one.
+
+The rules governing pair selection in FR3D are as follows:
+
+1. If the pair is not symmetrical, meaning the nucleotides differ, the pair is selected based on the order of the nucleotides, adhering to the convention A > G > C > U. For instance, "cWW G-C" is preferred over "cWW C-G".
+2. In cases where the pair is symmetrical, meaning the nucleotides are identical, the pair with the shorter hydrogen bonds is retained, except when the hydrogen bond length differs. For example, both "cWW G-G" and "cWW G-U" have identical hydrogen bond lengths; however, since "cWW G-G" has no asymmetric hydrogen bonds, it is the preferred choice.
+
+Alternative 2:
+
+FR3D stores each base pair twice: once in its canonical form, and once in its Watson-Crick complementary form. For illustrative purposes, let us consider the base pair "G-C". This pair is represented in the dataset as both "G-C" and "C-G". Our analysis focuses on the former representation, "G-C".
+
+The rules for selecting base pairs in FR3D are:
+
+1. For non-symmetrical base pairs, where the nucleotides differ, the pair is chosen based on the nucleotide order, adhering to the A > G > C > U rule. For example, "cWW G-C" is preferred over "cWW C-G".
+2. For symmetrical base pairs, where the nucleotides are identical, the pair with the shorter hydrogen bonds is retained. For example, both "cWW G-G" and "cWW G-U" have identical hydrogen bond lengths; however, "cWW G-G" is the preferred choice due to its absence of asymmetric hydrogen bonds.
+```
+
+Mixtral review highlights:
+
+```
+> ![**tWS CG**: two polar base-to-base H-bonds, but not accounted for in
+> the Saenger system](../img/tWS-CG-1jj2-9_46-9_4.png)
+
+ In the image caption, it seems like there's a typo in the basepair name. It should be 'tWS CG', not 'tWS GC'. Also, consider adding a period at the end of the sentence to complete it properly.
+
+```
+
+
+```python
+def get_residue_posinfo_C1_N(res: AltResidue) -> TranslationThenRotation:
+    """
+    Orients residue so that the C1-N bond is aligned with the x-axis, the N1-C2 or N9-C8 bond is towards Y axis and remaining is Z
+    """
+    c1 = res.get_atom("C1'", None)
+    if res.get_atom("N9", None) is not None:
+        n = res.get_atom("N9", None)
+        c2 = res.get_atom("C8", None)
+    else:
+        n = res.get_atom("N1", None)
+        c2 = res.get_atom("C6", None) # ale tady mi copilot dal hajzl C dvojku
+    if c1 is None or n is None or c2 is None:
+        raise ResideTransformError(f"Missing atoms in residue {res.res.full_id}")
+    translation = -n.coord # tvl copilot toto dal asi, cool priklad do appendix AI
+    y = n.coord - c1.coord
+    y /= np.linalg.norm(y)
+    x = n.coord - c2.coord
+    x -= np.dot(y, x) * y # project X onto Y
+    x /= np.linalg.norm(x)
+    z = np.cross(x, y)
+    z /= np.linalg.norm(z)
+    rotation = np.array([x, y, z]).T
+```
+
+## List of Models and Tools {.unnumbered}
+
+Quick reference of the used all models and tools with a brief description. More details are above.
+
+* Github Copilot - editor extension and code autocompletion model (available on student license)
+* ChatGPT 3.5 - no need to introduce
+* [Goblin.tools Formalizer](https://goblin.tools/Formalizer) - Converts the tone of a sentence to professional, formal, snarky, sarcastic, ...
+* DeepL - Machine translation.
+* llama.cpp - Easy to run local tool to run Llama, Mistral and similar models.
+* Llama-2 13B and 70B - quasi-open model from Meta (Facebook) AI.
+* CodaLlama - similar to Llama, optimized for programming tasks.
+* Mistral 7B and Mixtral 8x7B - better and lighter replacement for Llama.
+* [groq.com](https://groq.com/) - Service hosting the Mixtral8x7B model with unparalleled speed.

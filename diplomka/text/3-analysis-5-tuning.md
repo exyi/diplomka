@@ -36,7 +36,7 @@ Regardless, we can click on each basepair to display detailed description:
 
 * Identity of the basepair (PDB structure ID, chains, residue numbers).
 * Two images from different angles, if it was pre-generated.
-* A PyMOL script which displays the pair, when pasted to PyMOL command line. We use this to display basepairs which image could not load.
+* A [PyMOL](https://github.com/schrodinger/pymol-open-source) script which displays the pair, when pasted to PyMOL command line. We use this to display basepairs which image could not load.
 * The calculated parameters (@sec:basepair-params) with a short description.
 
 TODO screenshot modalu

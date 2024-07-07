@@ -21,7 +21,7 @@
         "published_date_parts": [
             2024
         ],
-        "title": "ImageMagick",
+        "title": "ImageMagick - a collection of command-line tools that can be used to modify and manipulate images",
         "authors": [
             [ "", "ImageMagick Studio LLC" ]
         ],
@@ -33,7 +33,7 @@
         "doi": null,
         "published_date_parts": [ 2012, 1, 15 ],
         "title": "Best Fitting Plane given a Set of Points",
-        "authors": [ "Felix", "Pahl (joriki)" ],
+        "authors": [ ["Felix", "Pahl (joriki)" ] ],
         "journal": [ "Mathematics Stack Exchange" ],
         "url": "https://math.stackexchange.com/q/99317"
     },
@@ -86,7 +86,33 @@
         "title": "PDB Format Description Version 2.3 — Appendix 1: Symmetry Operations",
         "journal": null,
         "authors": [
-            [ "???", "TODO" ]
+            [ "", "worldwide Protein Data Bank" ]
+        ]
+    },
+    "https://github.com/rcsb/py-mmcif": {
+        "doi": null,
+        "url": "https://github.com/rcsb/py-mmcif",
+        "published_date_parts": [ 2024, 2, 26 ],
+        "title": "rcsb/py-mmcif 0.86 - mmCIF Core Access Library",
+        "journal": null,
+        "authors": [
+            [ "John", "Westbrook" ],
+            [ "Dennis", "Piehl" ],
+            [ "other py-mmcif contributors", "" ]
+        ]
+    },
+    "https://github.com/schrodinger/pymol-open-source": {
+        "doi": null,
+        "url": "https://github.com/schrodinger/pymol-open-source",
+        "published_date_parts": [ 2024, 4, 25 ],
+        "title": "The PyMOL Molecular Graphics System, Version 3.0 (Open Source)",
+        "journal": null,
+        "id": "PM",
+        "authors": [
+            [ "Thomas", "Holder" ],
+            [ "Jarrett", "Johnson" ],
+            ["", "Schrödinger, LLC."],
+            ["", "other PyMOL contributors"]
         ]
     }
 }

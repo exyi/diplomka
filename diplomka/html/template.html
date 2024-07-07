@@ -156,7 +156,8 @@
             flex-grow: 1;
         }
 
-        .pagedjs_page:is([data-page-number="1"], [data-page-number="2"], [data-page-number="3"]) .pagedjs_margin-content {
+        .pagedjs_page:is([data-page-number="1"], [data-page-number="2"], [data-page-number="3"], [data-page-number="4"], [data-page-number="5"], [data-page-number="6"]) .pagedjs_margin-content {
+            /* hide page number before TOC */
             display: none;
         }
 
@@ -432,6 +433,32 @@
         </div>
         <div style="flex-grow: 0; color: red">
             Draft $generated_at$, git $generated_from_commit$ #$generated_from_commit_num$
+        </div>
+    </div>
+
+    <div class="full-page" style="position: relative;">
+        <div style="position: absolute; left:0; bottom: 0;">
+            <p>I declare that I carried out this master thesis independently, and only with the cited sources,
+                literature, and other professional sources. It has not been used to obtain another or the same
+                degree.</p>
+            <p>I understand that my work relates to the rights and obligations under the Act No. 121/2000 Sb.,
+                the Copyright Act, as amended, in particular the fact that the Charles University has the right
+                to conclude a license agreement on the use of this work as a school work pursuant to Section
+                60 subsection 1 of the Copyright Act</p>
+            <p></p>
+            
+            <div style="width: 100%; display: flex; text-align-last: left;">
+                <div style="flex-grow: 0; text-align: left;">
+                    In <sub>. . . . . . . . . . . . . . . . .</sub>
+                    <!-- <span class="dot-leader" style="width: 3cm; display: inline-block;"></span> -->
+                    date <sub>. . . . . . . . . . . . . . . . .</sub>
+                </div>
+                <div style="flex-grow: 1;"></div>
+                <div style="flex-grow: 0; text-align: center; text-align-last: center;">
+                    <sub>. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .</sub><br>
+                    Author's signature
+                </div>
+            </div>
         </div>
     </div>
 

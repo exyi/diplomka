@@ -1,6 +1,6 @@
 ## Calculation of the Proposed Basepair Parameters {#sec:sw-calculation}
 
-In section [-@sec:basepair-params], we have informally described the basepairing measures we experimented with.
+In section [-@sec:basepair-params], we have _informally_ described the basepairing measures we experimented with.
 The section is dedicated to the exact definitions, including simplified Python code.
 
 ### Hydrogen bond lengths and angles
@@ -38,16 +38,16 @@ def hbond_geometry(res1: Residue, res2: Residue, hbond):
 
 ### Hydrogen bond planarity
 
-The second set of parameters requires determination of the base planes, represented as the translation and an orthonormal basis of a new coordinate system.
-We have mentioned that we are looking for optimal plane by least squared distance, but it is important to note that we need to use euclidean (L2) distance, not the distance along the Y coordinate.
-This makes the procedure more similar to Principal Component Analysis (PCA) or Kabsch algorithm ("RMSD alignment") than to linear regression.
-The plane fitting implementation in @lst:code-calc-base-plane-fit uses [singular value decomposition](https://en.wikipedia.org/wiki/Singular_value_decomposition) (SVD), a good explanation of [the math can be found in StackExchange answers](https://math.stackexchange.com/q/99317).
-SVD returns decomposes a rectangular matrix into three matrices, the first of which is an orthogonal matrix.
-The first two columns of the matrix are the plane basis, while last one is the normal vector orthogonal to the plane.
-The other two matrices would allow us to get the atom position in the new vector space, but that is unnecessary for this algorithm.
+The second set of parameters requires determination of the base planes, represented as a translation vector and an orthonormal basis of the new coordinate system.
+It is important to note that we are looking for optimal plane by least squared Euclidean (L2) distance, instead of the distance along the Y coordinate.
+This makes the procedure more similar to Principal Component Analysis (PCA) or [Kabsch algorithm (_"RMSD alignment"_)](https://doi.org/10.1107/S0567739476001873) than to linear regression.
+The plane fitting implementation in @lst:code-calc-base-plane-fit uses [singular value decomposition (SVD)](https://en.wikipedia.org/wiki/Singular_value_decomposition), a good explanation of [the math can be found on the StackExchange forum.](https://math.stackexchange.com/q/99317)
+The SVD decomposes a rectangular matrix into three matrices, the first of which is an orthogonal matrix.
+The first two columns of the matrix are the plane basis, while the last one is the normal vector orthogonal to the plane.
+The other two matrices would allow us to map the atom position into the new vector space, but that is unnecessary for this algorithm.
 <!-- We also define a projection function, which will be useful in the next step. -->
 
-Listing: Fit a plane to the base atoms with SVD {#lst:code-calc-base-plane-fit}
+Listing: Fit a plane to the base atoms using SVD (credit https://math.stackexchange.com/q/99317) {#lst:code-calc-base-plane-fit}
 
 ```python
 def fit_plane(res: Residue):
@@ -67,10 +67,10 @@ def fit_plane(res: Residue):
 #     tpoint = point - origin
 #     return tpoint @ projection_matrix + origin-->
 
-As shown in @lst:code-calc-bond-to-plane, we can now calculate the dot product of the H-bond vector and the plane normal, getting the cosine of their angle.
-The angle to the plane is the same as angle to the normal, except shifted from the $0 \cdot 180$ range to $-90 \cdot 90$ (in other words, arcus sine of the dot product, instead of the arcus cosine).
+The listing [-@lst:code-calc-bond-to-plane] shows that we can now calculate the dot product of the H-bond vector and the plane normal, getting the cosine of their angle.
+The angle to the plane is the same as the angle to the normal, except shifted from the $[0°, 180°]$ range to $[-90°, 90°]$; in other words, $\mathrm{sin}^{-1} (<h_D - h_A,n>)$ of the dot product, instead of $\mathrm{cos}^{-1}$.
 
-Listing: H-bond to plane calculation {#lst:code-calc-bond-to-plane}
+Listing: H-bond to plane angle calculation {#lst:code-calc-bond-to-plane}
 
 ```python
 def hbond_plane_angle(plane_normal, res1: Residue, res2: Residue, hbond):
@@ -82,9 +82,9 @@ def hbond_plane_angle(plane_normal, res1: Residue, res2: Residue, hbond):
 
 ### Plane to plane comparison
 
-In this section, we calculate the overall **Coplanarity angle**, and the **Edge to plane distance** with the **Edge to plane angle**.
-The **Coplanarity angle** is trivial, and the **Edge to plane angle** is calculated similarly to the **H-Bond to plane angle** above --
-Instead of the hydrogen bond atoms, we take first and last atom of the edge.
+In this block, we calculate the overall **Coplanarity angle**, and the **Edge to plane distance** with the **Edge to plane angle**.
+The **Coplanarity angle** a trivial dot product, and the **Edge to plane angle** is calculated similarly to the **H-Bond to plane angle** above --
+instead of the hydrogen bond atoms, we take first and last atom of the edge.
 The code in @lst:code-calc-edge-to-plane assumes that the `edge1` list contains the pairing edge atom coordinates of the first residue.
 
 The **Edge to plane distance** is calculated by projecting the atom coordinates onto the plane and measuring their distance.
@@ -92,7 +92,7 @@ The **Edge to plane distance** is calculated by projecting the atom coordinates 
 Listing: Edge to plane angle calculation {#lst:code-calc-edge-to-plane}
 
 ```python
-def plane_angles(plane_basis1, plane_basis2)
+def plane_angles(plane_basis1, plane_basis2, edge1)
     plane_normal1 = plane_basis1[:, 2]
     plane_normal2 = plane_basis2[:, 2]
 
@@ -121,14 +121,14 @@ def plane_projection(basis: np.ndarray, point: np.ndarray) -> np.ndarray:
 
 ### Relative base rotation
 
-First, we need the coordinate system defined in @sec:basepair-params-ypr and illustrated in @fig:MMB_reference_frame-purinepluspyrimidine.
+First, we need to obtain the coordinate system defined in @sec:basepair-params-ypr and illustrated in @fig:MMB_reference_frame-purinepluspyrimidine.
 Similarly to the base plane, the coordinate system is represented by the origin position and its orthonormal basis (a rotation matrix).
 In this case, three atoms — three points in space define the coordinate system, and it can therefore be computed directly, without least squares fitting.
 First, we set the origin to **N1** for pyrimidines or **N9** for purines.
 The first basis vector (**Y**) is the vector from **C1'** to **N1**/**N9**, normalized to length **1**.
 The third atom, **C6** for pyrimidines and **C8** for purines, now uniquely determines the plane — we set the **X** coordinate such that **Z = 0** at **C6**/**C8**.
 
-Listing: Fit a coordinate system rooted in N1/N9 {#lst:code-calc-fit-YPR-coord}
+Listing: Fit the coordinate system rooted in N1/N9 (@sec:basepair-params-ypr) {#lst:code-calc-fit-YPR-coord}
 
 ```python
 def N_coordinate_system(res: Bio.PDB.Residue.Residue):

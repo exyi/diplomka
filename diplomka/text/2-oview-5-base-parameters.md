@@ -16,7 +16,7 @@ The rest of the publication backs the premise, and we agree that it is the case 
 
 [A standard reference frame was defined as the “Tsukuba convention”](https://doi.org/10.1006/jmbi.2001.4987), few years after the <https://doi.org/10.1006/jmbi.1998.2390> publication.
 The reference frame essentially defines a coordinate system for each of the five common nucleotides -- the Tsukuba convention includes a table of coordinates for each heavy atom in each base.
-We can fit it onto an observed molecule using the [Kabsch algorithm](https://doi.org/10.1107%2FS0567739476001873) and then apply translation and rotation to align the reference frame.
+We can fit it onto an observed molecule using the [Kabsch algorithm](https://doi.org/10.1107/S0567739476001873) and then apply translation and rotation to align the reference frame.
 The reference frame **X** axis is defined to be parallel with the Watson-Crick edge, **Y** axis run alongside the rest of the base.
 Since all bases are planar under ideal conditions, this enables us to have the **Z** nearly equal to **0**.
 

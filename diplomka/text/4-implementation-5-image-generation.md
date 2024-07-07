@@ -1,17 +1,17 @@
 ## Basepair Image Generation {#sec:impl-basepair-img}
 
-In order to visualize how similar of different various basepairs are, we use a PyMOL [TODO] Python API to generate images of all basepairs of interest.
+In order to visualize how similar of different various basepairs are, we use a [PyMOL](https://github.com/schrodinger/pymol-open-source) Python API to generate images of all basepairs of interest.
 
 This is implemented in the `gen_contact_images.py` Python script.
-The script loads PyMOL as a library, it can be executed directly using Python interpreter.
-However, the global environment must be used, since PyMOL is not published in the PyPI repository and thus is not included in the poetry virtualenv.
-The Polars library must be also installed globally.
+The script loads PyMOL as a library; it can be executed directly using the Python interpreter.
+However, the global environment must be used since PyMOL is not published in the PyPI repository and thus is not included in the poetry virtualenv.
+The Polars library must be also installed globally, other dependencies are unnecessary for this script.
 
-For efficiency, the script is written to process a batch of basepairs.
-It will identify all PDB structures in a given Parquet table, load each structure and generate the image for each basepair in the structure.
-Different PDB structures may be processed in parallel, if the `--threads=X` option is specified.
+For efficiency, the script is written to process basepairs in batches.
+In a given Parquet table, it identifies all PDB structures, load each structure and generates the image for each basepair in the structure.
+Different PDB structures are processed in parallel if the `--threads=X` option is specified.
 
-The following steps are applied for each basepair and can be used to replicate a similar view in an interactive PyMOL session. (The commands are slightly simplified for the sake of this publication and are rewritten in the PyMOL scripting language, unless noted otherwise.)
+The following steps are applied for each basepair and can be used to replicate a similar view in an interactive PyMOL session. (The commands are rewritten into the PyMOL scripting language and slightly simplified for the sake of this publication).
 
 * Select the basepair of interest (the fragments in curly braces are placeholders)
 

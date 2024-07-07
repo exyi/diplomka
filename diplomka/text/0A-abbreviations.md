@@ -22,6 +22,8 @@ For brevity, the list only includes ambiguous or uncommon abbreviations.
 * **KDE** - Kernel Density Estimate (non-parametric probability density estimator)
 * **L-W** - Leontis-Westhof naming system (explained in @sec:bp-terminology-lw)
 * **NAKB** - Nucleic Acid Knowledge Base
+* **SVD** - Singular Value Decomposition
+* **PCA** - Principal Component Analysis
 * **FR3D** - "Find RNA 3D" (nucleic acid analysis program, see @sec:software-FR3D)
 * **DDSR** - "Dissecting the Spatial Structure of RNA" (nucleic acid analysis program, see @sec:software-DSSR)
 

@@ -71,6 +71,7 @@ If the basepair is **cis**, it is represented with filled symbols (`●`, `■`,
 The resulting basepair families are then represented as `⎼○⎼` (or `○⎼○`) for **tWW**, `●⎼▶` for **cWS**, and `⎼▶⎼` for **cSS**.
 Note that only the sugar edge has an asymmetric symbol, intuitively indicating its asymmetry and allowing placing of the symbol on a diagram in any orientation.
 
+#### FR3D Family Lowercasing {#sec:bp-fr3d-lowercasing}
 
 Section [-@sec:software] discusses available software tools more thoroughly; however, it is worth noting here how the FR3D program disambiguates the two **cSS** cases by lowering the second **S** letter.
 For easier lookup by nucleotide number, FR3D reports all basepairs in both orientations, e.g., **cWW G-C** is also reported as **cWW C-G**.

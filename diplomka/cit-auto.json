@@ -32,6 +32,95 @@
         "id": null,
         "seq": null
     },
+    "https://doi.org/10.1002/pro.3330": {
+        "doi": "10.1002/pro.3330",
+        "published_date_parts": [
+            2017,
+            11,
+            27
+        ],
+        "title": "MolProbity: More and better reference data for improved all\u2010atom structure validation",
+        "authors": [
+            [
+                "Christopher J.",
+                "Williams"
+            ],
+            [
+                "Jeffrey J.",
+                "Headd"
+            ],
+            [
+                "Nigel W.",
+                "Moriarty"
+            ],
+            [
+                "Michael G.",
+                "Prisant"
+            ],
+            [
+                "Lizbeth L.",
+                "Videau"
+            ],
+            [
+                "Lindsay N.",
+                "Deis"
+            ],
+            [
+                "Vishal",
+                "Verma"
+            ],
+            [
+                "Daniel A.",
+                "Keedy"
+            ],
+            [
+                "Bradley J.",
+                "Hintze"
+            ],
+            [
+                "Vincent B.",
+                "Chen"
+            ],
+            [
+                "Swati",
+                "Jain"
+            ],
+            [
+                "Steven M.",
+                "Lewis"
+            ],
+            [
+                "W. Bryan",
+                "Arendall"
+            ],
+            [
+                "Jack",
+                "Snoeyink"
+            ],
+            [
+                "Paul D.",
+                "Adams"
+            ],
+            [
+                "Simon C.",
+                "Lovell"
+            ],
+            [
+                "Jane S.",
+                "Richardson"
+            ],
+            [
+                "David C.",
+                "Richardson"
+            ]
+        ],
+        "journal": [
+            "Protein Science"
+        ],
+        "url": null,
+        "id": null,
+        "seq": null
+    },
     "https://doi.org/10.1002/qua.560120704": {
         "doi": "10.1002/qua.560120704",
         "published_date_parts": [
@@ -289,51 +378,6 @@
         ],
         "journal": [
             "RNA"
-        ],
-        "url": null,
-        "id": null,
-        "seq": null
-    },
-    "https://doi.org/10.1038%2Fnchembio.1846": {
-        "doi": "10.1038%2Fnchembio.1846",
-        "published_date_parts": [
-            2015,
-            7,
-            13
-        ],
-        "title": "New classes of self-cleaving ribozymes revealed by comparative genomics analysis",
-        "authors": [
-            [
-                "Zasha",
-                "Weinberg"
-            ],
-            [
-                "Peter B",
-                "Kim"
-            ],
-            [
-                "Tony H",
-                "Chen"
-            ],
-            [
-                "Sanshu",
-                "Li"
-            ],
-            [
-                "Kimberly A",
-                "Harris"
-            ],
-            [
-                "Christina E",
-                "L\u00fcnse"
-            ],
-            [
-                "Ronald R",
-                "Breaker"
-            ]
-        ],
-        "journal": [
-            "Nature Chemical Biology"
         ],
         "url": null,
         "id": null,
@@ -959,6 +1003,60 @@
         "id": null,
         "seq": null
     },
+    "https://doi.org/10.1093/nar/28.1.235": {
+        "doi": "10.1093/nar/28.1.235",
+        "published_date_parts": [
+            2000,
+            1,
+            1
+        ],
+        "title": "The Protein Data Bank",
+        "authors": [
+            [
+                "H. M.",
+                "Berman"
+            ]
+        ],
+        "journal": [
+            "Nucleic Acids Research"
+        ],
+        "url": null,
+        "id": null,
+        "seq": null
+    },
+    "https://doi.org/10.1093/nar/gkaa383": {
+        "doi": "10.1093/nar/gkaa383",
+        "published_date_parts": [
+            2020,
+            5,
+            14
+        ],
+        "title": "A unified dinucleotide alphabet describing both RNA and DNA structures",
+        "authors": [
+            [
+                "Ji\u0159\u00ed",
+                "\u010cern\u00fd"
+            ],
+            [
+                "Paul\u00edna",
+                "Bo\u017e\u00edkov\u00e1"
+            ],
+            [
+                "Jakub",
+                "Svoboda"
+            ],
+            [
+                "Bohdan",
+                "Schneider"
+            ]
+        ],
+        "journal": [
+            "Nucleic Acids Research"
+        ],
+        "url": null,
+        "id": null,
+        "seq": null
+    },
     "https://doi.org/10.1093/nar/gkf481": {
         "doi": "10.1093/nar/gkf481",
         "published_date_parts": [
@@ -1157,6 +1255,43 @@
         "id": null,
         "seq": null
     },
+    "https://doi.org/10.1093/nar/gkw453": {
+        "doi": "10.1093/nar/gkw453",
+        "published_date_parts": [
+            2016,
+            5,
+            27
+        ],
+        "title": "JAR3D Webserver: Scoring and aligning RNA loop sequences to known 3D motifs",
+        "authors": [
+            [
+                "James",
+                "Roll"
+            ],
+            [
+                "Craig L.",
+                "Zirbel"
+            ],
+            [
+                "Blake",
+                "Sweeney"
+            ],
+            [
+                "Anton I.",
+                "Petrov"
+            ],
+            [
+                "Neocles",
+                "Leontis"
+            ]
+        ],
+        "journal": [
+            "Nucleic Acids Research"
+        ],
+        "url": null,
+        "id": null,
+        "seq": null
+    },
     "https://doi.org/10.1093/nar/gky735": {
         "doi": "10.1093/nar/gky735",
         "published_date_parts": [
@@ -1190,8 +1325,8 @@
         "id": null,
         "seq": null
     },
-    "https://doi.org/10.1107%2FS0567739476001873": {
-        "doi": "10.1107%2FS0567739476001873",
+    "https://doi.org/10.1107/S0567739476001873": {
+        "doi": "10.1107/S0567739476001873",
         "published_date_parts": [
             1976,
             9,
@@ -1380,39 +1515,6 @@
         "id": null,
         "seq": null
     },
-    "https://doi.org/10.1261%2Frna.031401.111": {
-        "doi": "10.1261%2Frna.031401.111",
-        "published_date_parts": [
-            2012,
-            3,
-            27
-        ],
-        "title": "The ubiquitous hammerhead ribozyme",
-        "authors": [
-            [
-                "Christian",
-                "Hammann"
-            ],
-            [
-                "Andrej",
-                "Luptak"
-            ],
-            [
-                "Jonathan",
-                "Perreault"
-            ],
-            [
-                "Marcos",
-                "de la Pe\u00f1a"
-            ]
-        ],
-        "journal": [
-            "RNA"
-        ],
-        "url": null,
-        "id": null,
-        "seq": null
-    },
     "https://doi.org/10.1261/rna.031401.111": {
         "doi": "10.1261/rna.031401.111",
         "published_date_parts": [
@@ -1540,6 +1642,27 @@
         ],
         "journal": [
             "RNA"
+        ],
+        "url": null,
+        "id": null,
+        "seq": null
+    },
+    "https://doi.org/10.21105/joss.04200": {
+        "doi": "10.21105/joss.04200",
+        "published_date_parts": [
+            2022,
+            5,
+            4
+        ],
+        "title": "GEMMI: A library for structural biology",
+        "authors": [
+            [
+                "Marcin",
+                "Wojdyr"
+            ]
+        ],
+        "journal": [
+            "Journal of Open Source Software"
         ],
         "url": null,
         "id": null,

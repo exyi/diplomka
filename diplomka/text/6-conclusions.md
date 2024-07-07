@@ -1,6 +1,12 @@
 # Conclusions
 
-We have defined a comprehensive set of 
+We have successful defined and implemented a comprehensive set of parameters describing for basepairs (@sec:basepair-params).
+These parameters have been demonstrated to work as a method for basepair assignment (@sec:testing-basepair-params), although it requires further tuning of the selection criteria to be accepted by the structural biology community.
+
+To assist in the manual work of parameter tuning, we have implemented a tool for interactive visualization of the parameter distributions and for comparing the selected sets of basepairs (@sec:tuning-app).
+After the initial batch processing, it is a web-based application hosted as a set of static files, with the computation happening client-side -- making it easily executable on users' computers and also unlikely to be a maintenance burden on the web administrator.
+The application is running at https://basepairs.datmos.org, 
+
 
 ### Future work
 
