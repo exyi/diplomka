@@ -73,25 +73,28 @@ We will measure the statistic across the entire dataset and compare its mean abs
 In this case, it isn't necessary use only the H-bond lengths, we can use all other parameters we are currently working with (@sec:basepair-params).
 
 Since the parameters aren't in the same range, we will normalize the deviations by their standard deviation.
-<!--Instead, we will first divide each deviation by the average deviation for a specific parameter.
+As shown in figure [-@fig:percentile_kdemode_stability_GC_AU], the percentiles are significantly more stable when compared to the KDE mode, but the difference gets smaller with higher bandwidth factors.
+The absolute effect size is about 0.01 Å, somewhat lower than the effect in @fig:KDE_bandwidth_golden_length_deviation.
+<!-- Instead, we will first divide each deviation by the average deviation for a specific parameter.
 Given a $n \times m$ matrix $D$ containing deviations for each parameter and each statistic, we can calculate the matrix $R$ of relative deviations:
 $$R_{ps} = \frac{D_{ps}}{n^{-1} \cdot \sum_{k=1}^{n} D_{ks}}$$
 This formula calculates the relative deviation $R_{ps}$ of a specific data point $p$ with respect to the statistic $s$.
-The overall performance of a statistic is then calculated as a mean of a column $s$ in matrix $R$.-->
-As shown in figure [-@fig:percentile_kdemode_stability_GC_AU], the percentiles are significantly more stable when compared to the KDE mode, but the difference gets smaller with higher bandwidth factors.
+The overall performance of a statistic is then calculated as a mean of a column $s$ in matrix $R$. -->
 
-TODO compare effect size with 1.
-
-
-![Stability of the mode and percentile on various parameters of canonical GC and AU pairs. The error bars show the variance for different measured parameters.](../img/percentile_kdemode_stability_GC_AU.svg){#fig:percentile_kdemode_stability_GC_AU}
+![Stability of the modes and percentiles on various parameters of canonical G-C and A-U pairs. The error bars show the variance for different measured parameters.](../img/percentile_kdemode_stability_GC_AU.svg){#fig:percentile_kdemode_stability_GC_AU}
 
 
-TODO: The 3., biased distributions
+The third consideration, **stability on skewed samples** is easy to test by including _“near basepairs”_ reported by FR3D.
+Those are usually pairs which are a bit too much out of plane, a bit too stretched or otherwise deformed.
+Figure [-@fig:relative_stability_ncRR] shows another relative deviation plot, comparing the calculated modes and percentiles on the **cWW G-C** basepairs with the same set with 20% mixed in _near basepairs_.
+Absolute magnitude of this effect on H-bond length is again as in the previous point, at about 0.02 Å.
 
-TODO rewrite The median will serve as the primary point of reference in the analysis.
-However, if the KDE mode deviates noticeably from the median, it may signify a more intricate distribution, necessitating further exploration.
+![Deviance of modes and percentiles on various parameters of canonical G-C pairs when 20% FR3D _near pairs_ are. The error bars show the variance for different measured parameters.](../img/relative_stability_ncRR.svg){#fig:relative_stability_ncRR}
+
+On the grounds of this evaluation, we will primarily utilize the KDE mode with bandwidth adjustment factor of 1.5.
+Although it does not appear to be substantially better than the alternatives, it generalizes well onto modular arithmetic, necessary for some angles.
+
 It may be a bimodal distribution or one with a long tail on one side.
-The KDE will have a bandwidth factor of 1.5.
 Both median and the KDE mode will thus be included in the attached tables.
 
 
@@ -110,7 +113,7 @@ def circular_mean(observations):
     return np.angle(np.mean(circle), deg=True)
 ```
 
-![Histograms of a distribution including the -180°/180° point, its circular mean, and the naive arithmetic mean. On the left, the distribution is shown using polar coordinates, on right using standard cartesian coordinates. (The value is left roll angle of tSS AG pairs, explained in @sec:basepair-params-ypr)](../img/angular-stats-polar-vs-cartesian-means.svg){#fig:angular-stats-polar-vs-cartesian-means}
+![Histograms of a distribution including the -180°/180° point, its circular mean, and the naive arithmetic mean. On the left, the distribution is shown using polar coordinates, on right using standard cartesian coordinates. (The value is left roll angle of **tSS A-G** pairs, explained in @sec:basepair-params-ypr)](../img/angular-stats-polar-vs-cartesian-means.svg){#fig:angular-stats-polar-vs-cartesian-means}
 
 The kernel density estimate can be also computed in the two dimensions or in one dimension with the datapoints duplicated.
 Although both methods seem to work well, computing two-dimensional KDE when all points are on unit circle severely violates the assumption of normal distribution.
@@ -128,8 +131,9 @@ For instance, an interval $[160°, -170°]$ means the same as $[160°, 180°] \c
 
 ### Most Typical Basepair {#sec:opt-params-exemplar}
 
+
 For presentations and a rudimentary RMSD distance based validation, it is convenient to find the most typical basepair in each class.
-After we calculate the KDE mode for each parameter, we look for the basepair with which is nearest to the modes, after normalizing each distance by the standard deviation of the parameter.
+After we calculate the KDE mode for each parameter, we look for the basepair with which is nearest to the modes, after normalizing each parameter variance to equal 1 across all benchmarked statistics.
 
 Alternativelly, we could look for the basepair with highest combined KDE likelihood in all parameters of interest.
 However, we opted for the "distance to mode" approach to disqualify basepairs from secondary peaks.

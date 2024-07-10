@@ -45,7 +45,10 @@ Since the exact hydrogen positions are often unknown, we will instead only consi
 Despite the availability of many algorithms for completing PDB structures with missing hydrogens, there are tricky cases where automatic the completion fails.
 Specifically, some bases may hold a charge and thus have an additional hydrogen, such as those in [in i-Motif cytosine pairs](https://doi.org/10.1002/anie.202309327).
 Alternatively, the base may be in an unusual tautomeric form where its hydrogens are on different atoms than usual.
-<!-- Although it isn't common, it is crucial in some basepair classes, and it is likely to be biologically relevant (TODO https://doi.org/10.1002/cphc.200900687 ?, TODO https://www.ncbi.nlm.nih.gov/pmc/articles/PMC97597/ ?). TODO cWH-A-G -->
+Although it is not very common, it is crucial in some basepair classes, and it is biologically relevant in a number of cases.
+We have already discussed the anionic form of **cWW G-U** (@sec:bp-terminology-lw-edgecase-a, <https://doi.org/10.1261/rna.079583.123>), but we can also [find a protonated **cWW C-U** in the ribosomes of some species](https://doi.org/10.1093/nar/29.24.5067) and even a [charged _"canonical"_ **cWW G-C** pair may exist](https://doi.org/10.1002/cphc.200900687).
+
+<!-- maybe cWH-A-G ?? -->
 
 In addition to distance measurements, we can determine an angle between the two heavy atoms and a third atom situated on each base.
 Depending on whether we select the third atom next to the acceptor or donor, we get what we will call "Donor angle" or "Acceptor angle".
@@ -57,16 +60,16 @@ select pair, 3Lz0 and (chain J and resi 21 or chain I and resi \-20) -->
 
 Unfortunately, our problem isn't as simple as measuring few distances.
 Even if we set strict limits on them, we will still get many false positives.
-As shown in figure [-@fig:cWW-GC-length-and-covalent-angles], an ideal cWW GC pair should have h-bond lengths of about 2.9 Å and all angles at about 120°.
+As shown in figure [-@fig:cWW-GC-length-and-covalent-angles], an ideal **cWW G-C** pair should have h-bond lengths of about 2.9 Å and all angles at about 120°.
 We must allow some slack, as no ideal pair exists in reality — a 0.5 Å and 20° tolerance is quite conservative.
 Yet, we still find false positives like the one shown in @fig:cWW-GC-false-positive-hbond-lengthsangles.
 Tightening the limits slightly would dismiss this case, but we are already dropping many good examples, as we can see using the
 [basepairs.datmos.org](https://basepairs.datmos.org/#cWW-G-C/hb0_L=..3.4&hb0_DA=100..140&hb0_AA=100..140&hb1_L=..3.4&hb1_DA=100..140&hb1_AA=100..140&hb2_L=..3.4&hb2_DA=100..140&hb2_AA=100..140&baseline_ds=fr3d-f) web application.
 
 
-![A canonical cWW GC basepair (3cpw A1103:A1240). The distance between O2 and N2 is indicated, in addition to the donor and acceptor angles of the other four involved atoms. Note that the hydrogens are not considered in the calculation, they were added in PyMOL to easily recognize donors and acceptors.](../img/cWW-GC-length-and-covalent-angles.png){#fig:cWW-GC-length-and-covalent-angles}
+![A canonical **cWW G-C** basepair (3cpw A1103:A1240). The distance between O2 and N2 is indicated, in addition to the donor and acceptor angles of the other four involved atoms. Note that the hydrogens are not considered in the calculation, they were added in PyMOL to easily recognize donors and acceptors.](../img/cWW-GC-length-and-covalent-angles.png){#fig:cWW-GC-length-and-covalent-angles}
 
-![A false positive found (3Lz0 J21:I-20) in the cWW GC class using solely the basic H-bond parameters. We can see that the distances and angles are adequate, but the bases are shifted by almost one step.](../img/cWW-GC-false-positive-hbond-lengthsangles.png){#fig:cWW-GC-false-positive-hbond-lengthsangles}
+![A false positive found (3Lz0 J21:I-20) in the **cWW G-C** class using solely the basic H-bond parameters. We can see that the distances and angles are adequate, but the bases are shifted by almost one step.](../img/cWW-GC-false-positive-hbond-lengthsangles.png){#fig:cWW-GC-false-positive-hbond-lengthsangles}
 
 <!-- fetch 3Lz0
 select pair, 3Lz0 and (chain J and resi 21 or chain I and resi \-20) -->
@@ -86,7 +89,7 @@ Each base has its own plane, giving us two separate numbers, similar to the dono
 We could name these parameters "Donor Plane Angle" and "Acceptor Plane Angle", but the conceptual relation to the hydrogens is less important than the relation with the particular base planes.
 We will therefore name the parameters **"Left Plane Angle"** and **"Right Plane Angle"**, assuming the first base is placed on the left, as in left-to-right text.
 
-![**Hydrogen bond / base plane angles** shown on a tHW A-C basepair (same as @fig:metrics-edge2plane-angle-4v9i-1-AA_479-AA_453). We have two hydrogen bonds — N7···N4, and N6···N3, each giving us two angles. **A.** angles relative to the cytosine (right) plane. **B.** angles relative to the adenine (left) plane. Please note that some angles look substantially exaggerated in the 2-dimensional projection.](../img/metrics-hbond2plane-4v9i-1-AA_479-AA_453.svg){#fig:metrics-hbond2plane-4v9i-1-AA_479-AA_453}
+![**Hydrogen bond / base plane angles** shown on a **tHW A-C** basepair (same as @fig:metrics-edge2plane-angle-4v9i-1-AA_479-AA_453). We have two hydrogen bonds — N7···N4, and N6···N3, each giving us two angles. **A.** angles relative to the cytosine (right) plane. **B.** angles relative to the adenine (left) plane. Please note that some angles look substantially exaggerated in the 2-dimensional projection.](../img/metrics-hbond2plane-4v9i-1-AA_479-AA_453.svg){#fig:metrics-hbond2plane-4v9i-1-AA_479-AA_453}
 
 ### Plane to plane comparison
 
@@ -112,7 +115,7 @@ show sticks, %pair
 orient %pair
 hide everything, not %pair-->
 
-![**Edge to plane angle** shown on a tHW A-C basepair (4v9i A479:A453). **A.** top-down view of the basepair. **B.** sideways view of the same basepair, the angle is measured between the adenine Hoogsteen edge and the cytosine base plane. The **Edge to plane distance** of this basepair is small, as both edges intersect the other base plane.](../img/metrics-edge2plane-angle-4v9i-1-AA_479-AA_453.svg){#fig:metrics-edge2plane-angle-4v9i-1-AA_479-AA_453}
+![**Edge to plane angle** shown on a **tHW A-C** basepair (4v9i A479:A453). **A.** top-down view of the basepair. **B.** sideways view of the same basepair, the angle is measured between the adenine Hoogsteen edge and the cytosine base plane. The **Edge to plane distance** of this basepair is small, as both edges intersect the other base plane.](../img/metrics-edge2plane-angle-4v9i-1-AA_479-AA_453.svg){#fig:metrics-edge2plane-angle-4v9i-1-AA_479-AA_453}
 
 <!--
 fetch 4dv6
@@ -121,7 +124,7 @@ show sticks, %pair
 orient %pair
 hide everything, not %pair-->
 
-![**Edge to plane distance** shown on another tHW A-C basepair (4dv6 A1200:A1055). Parts A and B show the two possible orientations of the same basepair -- in this case, we observe substantial difference between the distance of right edge to left plane (part A, about 0 Å), and the distance from left edge to right plane (part B, over 1 Å).](../img/metrics-edge2plane-distance-4dv6-1-A_1200-A_1055.svg){#fig:metrics-edge2plane-distance-4dv6-1-A_1200-A_1055}
+![**Edge to plane distance** shown on another **tHW A-C** basepair (4dv6 A1200:A1055). Parts A and B show the two possible orientations of the same basepair -- in this case, we observe substantial difference between the distance of right edge to left plane (part A, about 0 Å), and the distance from left edge to right plane (part B, over 1 Å).](../img/metrics-edge2plane-distance-4dv6-1-A_1200-A_1055.svg){#fig:metrics-edge2plane-distance-4dv6-1-A_1200-A_1055}
 
 
 
@@ -130,7 +133,7 @@ hide everything, not %pair-->
 The above-mentioned measures already work well on most basepair classes.
 As described in @sec:testing-basepair-params, we can verify that by calculating the parameters for all close contacts found in PDB and bounding them by the maximum range observed in basepairs reported by FR3D.
 When we do that with the five H-bond parameters and the five coplanarity measures, we are able to reproduce the FR3D reported set to a decent degree.
-For instance, in the cWW U-U class, we have about 60 false positives out of 750 total basepairs, which are all debatable.
+For instance, in the **cWW U-U** class, we have about 60 false positives out of 750 total basepairs, which are all debatable.
 <!-- Out of which, we claim that the vast majority of false positives are valid basepairs of this category, albeit slightly stretched or shifted.
 We would like to encourage the readers to [judge for themselves in the basepairs.datmos.org web application.](https://basepairs.datmos.org/#cWw-U-U/hb0_L=..4&hb0_DA=85..145&hb0_AA=95..155&hb0_OOPA1=-45..35&hb0_OOPA2=-45..60&hb1_L=..4.1&hb1_DA=85..140&hb1_AA=90..155&hb1_OOPA1=-40..35&hb1_OOPA2=-50..35&min_bond_length=..3.8&coplanarity_a=135..&coplanarity_edge_angle1=-30..45&coplanarity_edge_angle2=-35..45&coplanarity_shift1=-1.6..1.7&coplanarity_shift2=-1.1..1.5&baseline_ds=fr3d-f) -->
 
@@ -140,7 +143,7 @@ However, the weak spot of this approach are basepair classes with only a single 
 Such a basepair is free to rotate along H-bonded atoms, as long as it is planar.
 An example of this issue is shown in figure @fig:metrics-ypr-necessity-tHH-GG-misassignment, and the [web application demonstrates this issue interactively](https://basepairs.datmos.org/#tHH-A-G/hb0_L=..4&hb0_DA=100..150&hb0_AA=100..165&hb0_OOPA1=-25..35&hb0_OOPA2=-10..35&min_bond_length=..3.8&coplanarity_a=..40&coplanarity_edge_angle1=-10..25&coplanarity_edge_angle2=-10..30&coplanarity_shift1=-0.2..1.5&coplanarity_shift2=-0.3..1.3&baseline_ds=fr3d-f).
 
-![**A.** An example of a correctly assigned tHH A-G basepair (3cd6 913:1071 in chain 0). **B.** The tHH A-G candidates also includes a clear Watson-Crick/Hoogsteen basepair (7osm 407:390 in chain 18S). The coplanarity is perfect and the N6 ··· O6 H-bond cannot distinguish it either, as both of these two classes define it.](../img/metrics-ypr-necessity-tHH-GG-misassignment.svg){#fig:metrics-ypr-necessity-tHH-GG-misassignment}
+![**A.** An example of a correctly assigned **tHH A-G** basepair (3cd6 913:1071 in chain 0). **B.** The **tHH A-G** candidates also includes a clear Watson-Crick/Hoogsteen basepair (7osm 407:390 in chain 18S). The coplanarity is perfect and the N6 ··· O6 H-bond cannot distinguish it either, as both of these two classes define it.](../img/metrics-ypr-necessity-tHH-GG-misassignment.svg){#fig:metrics-ypr-necessity-tHH-GG-misassignment}
 
 
 ---
@@ -164,4 +167,4 @@ It is also easy to demonstrate or verify the angles by three subsequent `turn` c
 ![A purine (A) and a pyrimidine (C) nucleotides overlaid over the base coordinate system for Yaw/Pitch/Roll angle calculation.](../img/MMB_reference_frame-purinepluspyrimidine.svg){#fig:MMB_reference_frame-purinepluspyrimidine}
 
 
-![Performing yaw (Z axis), pitch (Y), and roll (X) rotations on the 3diL A68:A126 cWH G-A basepair. Part A shows the starting position with the adenine aligned with axes. Parts B and C show the intermediary steps, while part D shows the final rotation with the guanine aligned opposite to the original adenine position.](../img/metrics-yaw-pitch-roll-3dil_A68_126_cWH-G-A.svg)
+![Performing yaw (Z axis), pitch (Y), and roll (X) rotations on the 3diL A68:A126 **cWH G-A** basepair. Part A shows the starting position with the adenine aligned with axes. Parts B and C show the intermediary steps, while part D shows the final rotation with the guanine aligned opposite to the original adenine position.](../img/metrics-yaw-pitch-roll-3dil_A68_126_cWH-G-A.svg)

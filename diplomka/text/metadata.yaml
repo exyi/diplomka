@@ -11,13 +11,14 @@ abstract: |-
     (TODO)
 abstract-cs: |-
     (TODO)
+# Struktura nukleových kyselin je do značné míry určena párovými interakcemi mezi bázemi nukleotidů.
+# Tyto páry se dají relativně dobře rozřadit do kategorií, z čehož nejčastějším a nejprostudovanějším typem jsou kanonické "Watson-Crickovské" G-C a A-T páry.
 acknowledgement: |-
-    TODO
-#     First and foremost, I'd like to express my gratitude to my supervisor Bohdan Schneider for his helpfulness and staunch patience.
-#     From providing overall project guidance, to correcting my grammatical errors, his support has been invaluable to the completion of the thesis.
-#     This thesis is part of a collaborative effort, and I'd like to extend my thanks to the other group members
+    First and foremost, I'd like to express my gratitude to my supervisor Bohdan Schneider for his helpfulness and staunch patience.
+    From providing overall project guidance, to correcting my grammatical errors, his support has been invaluable to the completion of the thesis.
+    My heartfelt thanks also belong to the other member of research group, most notably Lada Biedermannová, Jiří Černý, and Craig Zirbel for sharing their ideads, providing technical advice, and reviewing my software and data.
 
-#     <hr />
+    <hr />
 
-#     A significant portion of computational resources were provided by the e-INFRA CZ project (ID:90254), supported by the Ministry of Education, Youth and Sports of the Czech Republic.
+    A significant portion of computational resources were provided by the e-INFRA CZ project (ID:90254), supported by the Ministry of Education, Youth and Sports of the Czech Republic.
 

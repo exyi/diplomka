@@ -77,7 +77,7 @@ To avoid redundancy, we deduplicate the pair using the following rules:
 2. If FR3D lowercased the first family edge letter (@sec:bp-fr3d-lowercasing), we drop the pair.
 3. If the pair nucleotides aren't equal, we keep the variant ordered according to the **A** > **G** > **C** > **U** = **T** rule.
     * For instance, **cWW G-C** is preferred to **cWW C-G**, as `C` is before `G` in the ordering.
-4. Otherwise, the pair type name is completely symmetric (`cWW G-G`).
+4. Otherwise, the pair type name is completely symmetric (e.g., **cWW G-G**).
     * We exclude the pair with longer H-bonds.
     * If the H-bonds are the same, we keep the pair with lower UnitID of the first nucleotide.
 

@@ -12,7 +12,8 @@ The approach will, in principle, yield zero false negatives, but is sensitive to
 Instead of minimum and maximum, we used **0.001** and **0.999** quantiles to lessen the sensitivity.
 We also extended the boundaries by rounding the minima down and maxima up.
 H-bond lengths do not have a lower limit, and we always set the upper limit to 4 Å, or 4.2 Å in case of C-H bonds.
-This strict limit enables an efficient search for basepair candidates, for instance using [NeighborSearch in Gemmi](https://gemmi.readthedocs.io/en/latest/analysis.html).
+We set the 4 Å limit as [Jeffrey (1997)](https://archive.org/details/introductiontohy0000jeff) also identifies “weak, electrostatic” H-bonds up to 4 Å.
+The strict limit also enables an efficient search for basepair candidates, for instance using [NeighborSearch in Gemmi](https://gemmi.readthedocs.io/en/latest/analysis.html).
 
 Table [-@tbl:fr3d-autoboundaries-comparison] shows the results for a selection of basepairing with over 500 samples on our reference set.
 The _False negatives_ column shows the number of pair identified by FR3D, but not included by our scheme (i.e., _missed_); and _False positives_ is the opposite (i.e., _misidentified_).

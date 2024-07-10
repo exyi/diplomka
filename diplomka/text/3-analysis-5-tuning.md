@@ -64,7 +64,7 @@ Firstly, the website remembers its state when navigating to another basepair cla
 We can select any populated class of basepairs, and switch to **Parameter Ranges**, prompting the display of several numeric input fields.
 For each defined H-bond, we get a column of input fields, with a row for each parameter; each cell allows to limit its minimum and maximum allowed value.
 Our focus is on the first row, which controls the limits on distance between heavy atoms.
-To find the _bad_ examples, we set the minimum to 3.6 Å, a threshold often referenced as the upper limit for hydrogen bonds [TODO cite].
+To find the _bad_ examples, we set the minimum to 3.6 Å, a threshold for instance used by PyMOL in default settings.
 Typically, only a small fraction of basepairs have all H-bonds >= 3.6 Å, but we found three cases in the reference set for **tWW A-A**.
 Upon inspection, two of these look arguably borderline, while one case is surprisingly well-structured.
 

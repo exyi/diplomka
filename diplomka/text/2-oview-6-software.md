@@ -66,16 +66,16 @@ Similarly to FR3D, [RNAView](https://doi.org/10.1093/nar/gkg529) identifies base
 First published in 2003, it has received recent activity in development; notably, it has got a support for mmCIF files few months ago.
 [The current version is published on GitHub](https://github.com/rcsb/RNAView) and available under the Apache 2 license.
 
-Somewhat uniquely, [Yang et al. (2002)](https://doi.org/10.1093/nar/gkg529) details the used basepair determination algorithm.
+Somewhat uniquely, [Yang et al.](https://doi.org/10.1093/nar/gkg529) detail the used basepair determination algorithm.
 In short, they consider three basic rules:
 
 1. The angle between base planes must be below 65°.
 2. The vertical distance between the planes (at the point of contact) must be below 2.5 Å.
-3. Two hydrogen bonds must exist, one of which is allowed to involve a carbon atom.
+3. Two hydrogen bonds must exist, one of which must be polar and shorter than 3.4 Å.
 
 However, RNAView unfortunately does not perform that well in practice; although we find it inspiring that such simplicity is feasible.
 While the algorithm may at first feel to be quite lax, RNAView has more problems identifying good basepairs than misidentifying bad ones.
-For instance, in the tHS AC class, RNAView frequently misidentifies pairs as another family or misses them entirely -- we can see that [on BGSU experimental annotation comparison](http://rna.bgsu.edu/experiments/annotations/compare_v7_tHS_A,C_3.0A.html).
+For instance, in the **tHS A-C** class, RNAView frequently misidentifies pairs as another family or misses them entirely -- we can see that [on BGSU experimental annotation comparison](http://rna.bgsu.edu/experiments/annotations/compare_v7_tHS_A,C_3.0A.html).
 
 <!-- TODO kde jsou ty naše porovnání?? -->
 

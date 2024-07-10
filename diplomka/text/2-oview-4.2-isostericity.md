@@ -14,4 +14,4 @@ between C1' atoms, basepair structure, and a rotation between the glycosidic bon
 <!-- Tools like [Infernal](https://doi.org/10.1093/bioinformatics/btp157) can utilize structural information (albeit in the form of an MSA) -->
 
 
-<!-- TODO: CM/Infernal alignment/search něco? {{{NE STACI}}} -->
+<!-- maybe?: CM/Infernal alignment/search něco? {{{NE STACI}}} -->

@@ -37,7 +37,7 @@ Rule B can be reformulated as a problem of maximum weight matching on general gr
 In Python, we use the [`algorithms.max_weight_matching` function](https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.matching.max_weight_matching.html) from the [NetworkX library](https://networkx.org).
 The practical effect of the optimal selection is indeed small; however, it does not slow down the assignment substantially, as the graphs are rather sparse.
 
-TODO: OMG, některé S páry se nevylučují. I guess ta exkluzivní hrana musí být vodíková vazba (atom), ne celý edge... to asi fixnu, ale už se mi to nechce popisovat
+<!-- TODO: OMG, některé S páry se nevylučují. I guess ta exkluzivní hrana musí být vodíková vazba (atom), ne celý edge... to asi fixnu, ale už se mi to nechce popisovat -->
 
 <!--
 ```sql

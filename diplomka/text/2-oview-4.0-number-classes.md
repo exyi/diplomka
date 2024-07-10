@@ -2,8 +2,9 @@
 
 ### Symmetry of L-W Classes
 
-As presented in the previous section, the L-W system theoretically distinguishes 156 distinct basepair conformations, when treating uracil as equivalent to thymine. <!--TODO this is maybe interesting-->
-On each side of the pair, there are three options for the edge and four options for the nucleotide, resulting in a total of twelve unique combinations.
+As presented in the previous section, the L-W system theoretically distinguishes 156 distinct classes of basepairs, when treating uracil as equivalent to thymine.
+On each side of the pair, there are three options for the edge and four options for the nucleotide, resulting in a total of twelve unique combinations -- the L-W families.
+
 We can create a $12 \times 12$ matrix of base-edge combinations.
 Assuming symmetry between pairs, such as **cWH A-G** being equivalent to its flipped counterpart **cHW G-A**, we count the number of elements in the lower triangular matrix, ignoring all entries above the diagonal.
 This results in $12 + 11 + \cdots + 1 = 78$ unique combinations.
@@ -24,7 +25,7 @@ Since both choices allow repetitions (`A` can pair with another `A`), we calcula
 Since the numbers are small, we can alternatively count the number of options using a simple table.
 
 However, we have to account for the fact that some pairs are symmetric to each other and avoid double counting these.
-For example, the `cWW GC` is the same pair as `cWW CG`.
+For example, the **cWW G-C** is the same pair as **cWW C-G**.
 Generally, we should avoid counting a pair if swapping the order of edges and the order of nucleotides yields a pair which was counted already.
 We will first avoid edge combinations marked as duplicate:
 
@@ -86,7 +87,7 @@ For instance, the exact H-bonds in **cWW A-A** pairs would be ambiguous, as thes
 □⎼▷
 ○⎼● -->
 
-### Alternative H-bond Sets
+### Alternative H-bond Sets {#sec:bp-terminology-lw-edgecase-a}
 
 In a few classes, it is possible that the bases can interact by two possible sets of H-bonds on the same edges and the same cis/trans orientation.
 We observe these _subclasses_ for in **cWW G-U**, **tWW C-C** and **tWW U-U**, but it is possible that other, less common ones, exist.
@@ -100,7 +101,7 @@ In this work, we follow the FR3D convention, although we have had debates on rev
 
 <!-- tWWa CC, cWWa GT. -->
 
-![The two alternatives of the tWW U-U pair. Although the only Watson-Crick edge is involved in both cases, two pairs of hydrogen bonds are possible and both options are well populated in PDB structures.](../img/tWW-U-U-vs-tWWa-U-U.png){#fig:tWW-U-U-vs-tWWa-U-U}
+![The two alternatives of the **tWW U-U** pair. Although the only Watson-Crick edge is involved in both cases, two pairs of hydrogen bonds are possible and both options are well populated in PDB structures.](../img/tWW-U-U-vs-tWWa-U-U.png){#fig:tWW-U-U-vs-tWWa-U-U}
 
 ### Bifurcated Hydrogen Bonds
 

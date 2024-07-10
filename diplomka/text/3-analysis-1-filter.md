@@ -18,8 +18,6 @@ We will call this filtered set the **"Reference Set"**.
 
 ### Summary of the filtration method
 
-<!-- TODO jirkův filtr popis: -->
-
 0. Selection of all nucleic acid crystal structures with resolution of 3.5 Å or better
 1. Clustering of sequentially redundant structures.
     * Sequences with more than 90% similarity are considered redundant.

@@ -29,7 +29,7 @@ For brevity, the list only includes ambiguous or uncommon abbreviations.
 
 **cWW**, **tWW**, **cWH**, **tWH**, **cWS**, **tWS**, **cHH**, **tHH**, **cHS**, **tHS**, **cSS**, **tSS** are abbreviated basepair families according to the Leontis-Westhof terminology. See @sec:bp-terminology-lw or <https://doi.org/10.1017/s1355838201002515> for explanation.
 
-### Single Letter Abbreviations {.unnumbered}
+## Single Letter Abbreviations {.unnumbered}
 
 Single letters are special category because of their ambiguity.
 In this work, we use the letters **A**, **T**, **U**, **G**, **C** as the DNA and RNA bases -- adenine, thymine, uracil, guanine and cytosine.
