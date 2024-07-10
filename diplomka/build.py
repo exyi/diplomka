@@ -27,7 +27,8 @@ class CitationInfo:
     title: str
     authors: list[list[str]]
     journal: ty.Optional[list[str]]
-    url: ty.Optional[str]
+    url: ty.Optional[str] = None
+    isbn: ty.Optional[str] = None
     id: ty.Optional[str] = None
     seq: ty.Optional[int] = None
 def get_doi_from_url(url: str) -> ty.Optional[str]:
@@ -206,17 +207,21 @@ def generate_references(cit_map: dict[str, CitationInfo]):
         pf.Header(1, ["references", [], []], [pf.Str("References")]),
     ]
     for id, cit in cits:
-        link = f'<span class="references-doi"><a href="https://doi.org/{html.escape(cit.doi)}">DOI: <span class="references-doi-body">{html.escape(cit.doi)}</span></a></span>' \
-            if cit.doi else \
-            f'<span class="references-url"><a href="{html.escape(cit.url)}">Available at: <span class="references-url-body">{html.escape(cit.url)}</span></a></span>' \
-            if cit.url else ""
+        links = []
+        if cit.doi:
+            links.append(f'<span class="references-link references-doi"><a href="https://doi.org/{html.escape(cit.doi)}">DOI: <span class="references-doi-body">{html.escape(cit.doi)}</span></a></span>')
+        if cit.url and cit.url != cit.doi:
+            links.append(f'<span class="references-link references-url"><a href="{html.escape(cit.url)}">Available at: <span class="references-url-body">{html.escape(cit.url)}</span></a></span>')
+        if cit.isbn:
+            links.append(f'<span class="references-link references-isbn"><a href="https://isbnsearch.org/isbn/{html.escape(cit.isbn)}">ISBN: <span class="references-isbn-body">{html.escape(cit.isbn)}</span></a></span>')
         authors = cit.authors
         if len(authors) > 20 or ["", "???"] in authors:
             authors = [a for a in authors if a[1] != "???"]
             authors = authors[:5] + [["", "et al."]]
         authors = ", ".join(format_author(a, shorten_first_name=len(authors) > 3) for a in authors)
         if cit.journal and len(cit.journal) > 0:
-            journal = f'<span class="references-journal">{html.escape(re.sub(r"(\s|[,])+$", "", cit.journal[0]))}</span>'
+            j = cit.journal if isinstance(cit.journal, str) else cit.journal[0]
+            journal = f'<span class="references-journal">{html.escape(re.sub(r"(\s|[,])+$", "", j))}</span>'
         else:
             journal = ""
         body = f"""
@@ -224,7 +229,7 @@ def generate_references(cit_map: dict[str, CitationInfo]):
             <span class="references-date">{format_date(cit.published_date_parts)}</span>
             <span class="references-title">{cit.title}</span>
             {journal}
-            {link}
+            {"\n".join(links)}
         """
         row = f"""
             <div class="references-table-row" id="ref-{html.escape(id)}">
@@ -236,6 +241,12 @@ def generate_references(cit_map: dict[str, CitationInfo]):
             """
         blocks.append(pf.RawBlock("html", row))
     return {"pandoc-api-version": [1, 23, 1], "meta": {}, "blocks": blocks}
+
+def alter_file(file, actions, format=""):
+    with open(file) as f:
+        altered = pf.applyJSONFilters(actions, f.read(), format)
+    with open(file, "w") as f:
+        f.write(altered)
 
 def process_links(files: list[str], out_dir):
     links: dict[str, list[str]] = dict()
@@ -253,15 +264,23 @@ def process_links(files: list[str], out_dir):
 
     phase2 = [convert_links(citations)]
     for file in files:
-        with open(file) as f:
-            altered = pf.applyJSONFilters(phase2, f.read(), "")
-        with open(file, "w") as f:
-            f.write(altered)
+        alter_file(file, phase2)
 
     references = generate_references(cit_map)
     with open(os.path.join(out_dir, "references.json"), "w") as f:
         json.dump(references, f, indent=4)
     files.append(os.path.join(out_dir, "references.json"))
+
+def sentence_spacing(key, val, fmt, meta):
+    pass
+
+def process_typography(files: list[str]):
+    actions = [
+        sentence_spacing
+    ]
+    
+    for file in files:
+        alter_file(file, actions)
 
 @dataclasses.dataclass
 class RunResult:

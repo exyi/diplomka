@@ -12,4 +12,4 @@ Westhof
 stereochemical
 Basepairs
 coplanarity
-deduplicate
+PyMOL

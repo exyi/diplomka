@@ -21,9 +21,15 @@
         "published_date_parts": [
             2024
         ],
-        "title": "ImageMagick - a collection of command-line tools that can be used to modify and manipulate images",
+        "title": "ImageMagick 7.1.1 - a collection of command-line tools that can be used to modify and manipulate images",
         "authors": [
-            [ "", "ImageMagick Studio LLC" ]
+            [ "John", "Cristy" ],
+            [ "Dirk", "Lemstra" ],
+            [ "Bastien", "Roucariès" ],
+            [ "Fred", "Weinhaus" ],
+            [ "Glenn", "Randers-Pehrson" ],
+            [ "", "ImageMagick Studio LLC" ],
+            [ "", "other ImageMagick contributors" ]
         ],
         "journal": null,
         "url": "https://imagemagick.org",
@@ -113,6 +119,17 @@
             [ "Jarrett", "Johnson" ],
             ["", "Schrödinger, LLC."],
             ["", "other PyMOL contributors"]
+        ]
+    },
+    "https://archive.org/details/introductiontohy0000jeff": {
+        "doi": null,
+        "url": null,
+        "isbn": "978-0195095494",
+        "published_date_parts": [ 1997 ],
+        "title": "An Introduction to Hydrogen Bonding",
+        "journal": [ "Oxford university press New York" ],
+        "authors": [
+            [ "George A.", "Jeffrey" ]
         ]
     }
 }

@@ -29,6 +29,37 @@
             "Angewandte Chemie International Edition"
         ],
         "url": null,
+        "isbn": null,
+        "id": null,
+        "seq": null
+    },
+    "https://doi.org/10.1002/cphc.200900687": {
+        "doi": "10.1002/cphc.200900687",
+        "published_date_parts": [
+            2010,
+            2,
+            15
+        ],
+        "title": "The Protonated Guanine\u2013Cytosine Base Pair",
+        "authors": [
+            [
+                "Hongyan",
+                "Wang"
+            ],
+            [
+                "Jun D.",
+                "Zhang"
+            ],
+            [
+                "Henry F.",
+                "Schaefer"
+            ]
+        ],
+        "journal": [
+            "ChemPhysChem"
+        ],
+        "url": null,
+        "isbn": null,
         "id": null,
         "seq": null
     },
@@ -118,20 +149,21 @@
             "Protein Science"
         ],
         "url": null,
+        "isbn": null,
         "id": null,
         "seq": null
     },
     "https://doi.org/10.1002/qua.560120704": {
         "doi": "10.1002/qua.560120704",
         "published_date_parts": [
-            2009,
-            6,
-            18
+            1977,
+            1,
+            12
         ],
         "title": "Non-watson-crick base pairs in ribonucleic acids",
         "authors": [
             [
-                "M.",
+                "Muttaiya",
                 "Sundaralingam"
             ]
         ],
@@ -139,6 +171,7 @@
             "International Journal of Quantum Chemistry"
         ],
         "url": null,
+        "isbn": null,
         "id": null,
         "seq": null
     },
@@ -163,6 +196,7 @@
             "Journal of Molecular Biology"
         ],
         "url": null,
+        "isbn": null,
         "id": null,
         "seq": null
     },
@@ -243,6 +277,7 @@
             "Journal of Molecular Biology"
         ],
         "url": null,
+        "isbn": null,
         "id": null,
         "seq": null
     },
@@ -262,6 +297,7 @@
             "Springer Advanced Texts in Chemistry"
         ],
         "url": null,
+        "isbn": null,
         "id": null,
         "seq": null
     },
@@ -286,6 +322,7 @@
             "RNA 3D Structure Analysis and Prediction"
         ],
         "url": null,
+        "isbn": null,
         "id": null,
         "seq": null
     },
@@ -307,6 +344,7 @@
             "Mathematical Programming Computation"
         ],
         "url": null,
+        "isbn": null,
         "id": null,
         "seq": null
     },
@@ -328,6 +366,7 @@
             "FEBS Letters"
         ],
         "url": null,
+        "isbn": null,
         "id": null,
         "seq": null
     },
@@ -356,6 +395,7 @@
             "Trends in Chemistry"
         ],
         "url": null,
+        "isbn": null,
         "id": null,
         "seq": null
     },
@@ -380,6 +420,7 @@
             "RNA"
         ],
         "url": null,
+        "isbn": null,
         "id": null,
         "seq": null
     },
@@ -405,6 +446,7 @@
             "Nature"
         ],
         "url": null,
+        "isbn": null,
         "id": null,
         "seq": null
     },
@@ -450,6 +492,7 @@
             "Nature Chemical Biology"
         ],
         "url": null,
+        "isbn": null,
         "id": null,
         "seq": null
     },
@@ -474,6 +517,7 @@
             "Nature Protocols"
         ],
         "url": null,
+        "isbn": null,
         "id": null,
         "seq": null
     },
@@ -939,6 +983,7 @@
             "Nature Methods"
         ],
         "url": null,
+        "isbn": null,
         "id": null,
         "seq": null
     },
@@ -1000,6 +1045,7 @@
             "Bioinformatics"
         ],
         "url": null,
+        "isbn": null,
         "id": null,
         "seq": null
     },
@@ -1013,14 +1059,65 @@
         "title": "The Protein Data Bank",
         "authors": [
             [
-                "H. M.",
+                "Helen M.",
                 "Berman"
+            ],
+            [
+                "John",
+                "Westbrook"
+            ],
+            [
+                "Zukang",
+                "Feng"
+            ],
+            [
+                "Gary",
+                "Gilliland"
+            ],
+            [
+                "T. N.",
+                "Bhat"
+            ],
+            [
+                "Helge",
+                "Weissig"
+            ],
+            [
+                "Ilya N.",
+                "Shindyalov"
+            ],
+            [
+                "Philip E.",
+                "Bourne"
             ]
         ],
         "journal": [
             "Nucleic Acids Research"
         ],
         "url": null,
+        "isbn": null,
+        "id": null,
+        "seq": null
+    },
+    "https://doi.org/10.1093/nar/29.24.5067": {
+        "doi": "10.1093/nar/29.24.5067",
+        "published_date_parts": [
+            2001,
+            12,
+            15
+        ],
+        "title": "A protonated base pair participating in rRNA tertiary structural interactions",
+        "authors": [
+            [
+                "A. V.",
+                "Kubarenko"
+            ]
+        ],
+        "journal": [
+            "Nucleic Acids Research"
+        ],
+        "url": null,
+        "isbn": null,
         "id": null,
         "seq": null
     },
@@ -1054,6 +1151,7 @@
             "Nucleic Acids Research"
         ],
         "url": null,
+        "isbn": null,
         "id": null,
         "seq": null
     },
@@ -1083,6 +1181,7 @@
             "Nucleic Acids Research"
         ],
         "url": null,
+        "isbn": null,
         "id": null,
         "seq": null
     },
@@ -1128,6 +1227,7 @@
             "Nucleic Acids Research"
         ],
         "url": null,
+        "isbn": null,
         "id": null,
         "seq": null
     },
@@ -1153,6 +1253,7 @@
             "Nucleic Acids Research"
         ],
         "url": null,
+        "isbn": null,
         "id": null,
         "seq": null
     },
@@ -1186,6 +1287,7 @@
             "Nucleic Acids Research"
         ],
         "url": null,
+        "isbn": null,
         "id": null,
         "seq": null
     },
@@ -1223,6 +1325,7 @@
             "Nucleic Acids Research"
         ],
         "url": null,
+        "isbn": null,
         "id": null,
         "seq": null
     },
@@ -1252,6 +1355,7 @@
             "Nucleic Acids Research"
         ],
         "url": null,
+        "isbn": null,
         "id": null,
         "seq": null
     },
@@ -1289,6 +1393,7 @@
             "Nucleic Acids Research"
         ],
         "url": null,
+        "isbn": null,
         "id": null,
         "seq": null
     },
@@ -1322,6 +1427,7 @@
             "Nucleic Acids Research"
         ],
         "url": null,
+        "isbn": null,
         "id": null,
         "seq": null
     },
@@ -1343,6 +1449,7 @@
             "Acta Crystallographica Section A"
         ],
         "url": null,
+        "isbn": null,
         "id": null,
         "seq": null
     },
@@ -1384,6 +1491,7 @@
             "Acta Crystallographica Section D Structural Biology"
         ],
         "url": null,
+        "isbn": null,
         "id": null,
         "seq": null
     },
@@ -1433,6 +1541,7 @@
             "Acta Crystallographica Section D Structural Biology"
         ],
         "url": null,
+        "isbn": null,
         "id": null,
         "seq": null
     },
@@ -1445,7 +1554,7 @@
         "title": "Fast Flexible Modeling of RNA Structure Using Internal Coordinates",
         "authors": [
             [
-                "S. C.",
+                "Samuel C.",
                 "Flores"
             ],
             [
@@ -1453,15 +1562,15 @@
                 "Sherman"
             ],
             [
-                "C. M.",
+                "Christopher M.",
                 "Bruns"
             ],
             [
-                "P.",
+                "Peter",
                 "Eastman"
             ],
             [
-                "R. B.",
+                "Russ B.",
                 "Altman"
             ]
         ],
@@ -1469,6 +1578,7 @@
             "IEEE/ACM Transactions on Computational Biology and Bioinformatics"
         ],
         "url": null,
+        "isbn": null,
         "id": null,
         "seq": null
     },
@@ -1512,6 +1622,7 @@
         ],
         "journal": [],
         "url": null,
+        "isbn": null,
         "id": null,
         "seq": null
     },
@@ -1545,6 +1656,7 @@
             "RNA"
         ],
         "url": null,
+        "isbn": null,
         "id": null,
         "seq": null
     },
@@ -1574,6 +1686,7 @@
             "RNA"
         ],
         "url": null,
+        "isbn": null,
         "id": null,
         "seq": null
     },
@@ -1607,6 +1720,7 @@
             "RNA"
         ],
         "url": null,
+        "isbn": null,
         "id": null,
         "seq": null
     },
@@ -1620,23 +1734,23 @@
         "title": "Coplanar and coaxial orientations of RNA bases and helices",
         "authors": [
             [
-                "A.",
+                "Alain",
                 "Laederach"
             ],
             [
-                "J. M.",
+                "Joseph M.",
                 "Chan"
             ],
             [
-                "A.",
+                "Armin",
                 "Schwartzman"
             ],
             [
-                "E.",
+                "Eric",
                 "Willgohs"
             ],
             [
-                "R. B.",
+                "Russ B.",
                 "Altman"
             ]
         ],
@@ -1644,6 +1758,7 @@
             "RNA"
         ],
         "url": null,
+        "isbn": null,
         "id": null,
         "seq": null
     },
@@ -1665,6 +1780,7 @@
             "Journal of Open Source Software"
         ],
         "url": null,
+        "isbn": null,
         "id": null,
         "seq": null
     }
