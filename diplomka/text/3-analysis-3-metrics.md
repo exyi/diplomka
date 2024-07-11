@@ -1,8 +1,13 @@
 ## New Basepair Parameters {#sec:basepair-params}
 
-The objective of this work is to find and compare decent measures of basepairing, so we shall finally specify the main qualities of the desired parameters are:
+The objective of this work is to find and compare robust measures of basepairing.
+It is essential that humans can understand why the computer did or did not assign a particular basepair, either for debugging the software or refining molecular structures.
+Thus, we want the parameters to be reasonably simple and interpretable.
 
-* **Interpretability** — Can we easily tell what the number means? Can we easily guess the number by looking at the 3D structure?
+Parameters suitable for basepair assignment should have the following
+main qualities:
+
+* **Interpretability** — Can we easily tell what the parameter means in geometrical sense? Can we estimate the paramater value by looking at the 3D structure?
 * **Simplicity** — The ideal parameter is easy to define and calculate algorithmically.
 * **Stability** — It should have low variance for good quality basepairs.
 * **Universality** — It should have similar value or similar variance in different basepair classes.
@@ -10,82 +15,82 @@ The objective of this work is to find and compare decent measures of basepairing
 
 <!-- We need to define basepairs in such a way, that humans can easily understand the results of computer calculations. -->
 
-It is essential that humans can understand why the computer did or didn't assign a particular basepair, either for debugging the software or refining molecular structures.
-Thus, we want the parameters to be reasonably simple and interpretable.
-
 In order to be useful, each parameter must have a sharp enough distribution to help in identifying the specific basepair class.
-In @fig:cWH-G-G-yaw-hbond, we show that the **yaw** angle performs relatively well on the **cWH G-G** class, while the H-bond length has a relatively long tail where it is quickly amassing false positives.
-For similar reasons, we entirely ruled out using ZXZ Euler angles in @sec:basepair-params-ypr, because the values span the entire range of $[-180°, +180°)$.
+In @fig:cWH-G-G-yaw-hbond, we show that the **yaw** angle performs relatively well on the **cWH G-G** class, while the H-bond length has a comparatively long tail.
+Extending an allowed range of the H-bond length would still find new FR3D pairs, but would also quickly amass false positives
+For similar reasons, we entirely ruled out using ZXZ Euler angles in @sec:basepair-params-ypr, because their values span indiscriminatively the entire range of $[-180°, +180°)$.
 
-![“Selectivity” of **yaw** angle (@sec:basepair-params-ypr) and **H-bond length** (@sec:basepair-params-hbonds) demonstrated on **cWH G-G**. Basepairs annotated by FR3D on the reference set (@sec:filter), compared with all close contacts (one of the defined H-bonds is ≤ 4.2 Å).](../img/cWH-G-G-yaw-hbond.svg){#fig:cWH-G-G-yaw-hbond}
+![“Selectivity” of one of our proposed parameters (the yaw angle, @sec:basepair-params-ypr) and H-bond length (@sec:basepair-params-hbonds) demonstrated on **cWH G-G** pairs. Basepairs annotated by FR3D on the reference set (@sec:filter), compared with all close contacts (one of the defined H-bonds is ≤ 4.2 Å). We can see that, in this comparison, it is easier to select pairs based on the yaw angle.](../img/cWH-G-G-yaw-hbond.svg){#fig:cWH-G-G-yaw-hbond}
 
 
 ### The Number of Parameters
 
-If we assume that the molecules are not deformed, then we can describe the relative position of two bases by six numbers.
+If we assume that the molecules have an ideal valence geometry the relative position of two bases is completely determined by six numbers.
 The standard basepair parameters (@sec:std-base-parameters) can be one such description — essentially, we only need three translation coordinates and three angles of relative rotation.
-However, we may not be able to characterize all the basepair types using simple numeric ranges of this minimal set of parameters.
+However, we are not able to characterize all the basepair types using simple numeric ranges of this minimal set of parameters.
 
 Additionally, we consider it more elegant to avoid “hard cuts” in the data distributions.
-In the words of Craig Zirbel, "we would prefer to have gentle limits on many parameters, rather than few uncompromising cutoffs".
-FR3D indeed performs very well regarding this — we did not find many unnatural-looking lines in any of our scatter plots and histograms.
-Since each of the gentle limits cuts out a small fraction of the potential basepairs, the exact value of the limits isn't as sensitive.
+In the words of Craig Zirbel, the author of the FR3D program: "we would prefer to allow broad ranges on many parameters, rather than smaller number of uncompromising cutoffs".
+FR3D indeed performs very well regarding this — we did not find many unnatural-looking lines in any of our scatter plots and histograms when plotting our new parameter values for FR3D-determined basepairs.
+Since each of the limits cuts out a small fraction of the potential basepairs, the exact value of the limits is not as sensitive.
 That makes it easier to set the limit and also allows us to share the same conditions across all classes of a given basepairing family.
 
-<!-- Since we do not  -->
-We would rather avoid more complex constraints than a set of one dimensional numeric ranges.
 Generalizing the constraints into two or more dimensions is similar to inventing additional parameters by linearly combining the existing ones, except that the potential new parameter is easier to share across the ~120 basepair classes.
+Therefore, we avoid more complex constraints than one dimensional numeric ranges.
 
 
 ### Hydrogen bond lengths and angles {#sec:basepair-params-hbonds}
 
-A good starting point is simply measuring the distance between atoms forming each of the hydrogen bonds.
-Ideally, we would measure a hydrogen bond between the hydrogen and the acceptor heavy atom.
-Since the exact hydrogen positions are often unknown, we will instead only consider the distance between heavy atoms (oxygen, nitrogen, or carbon).
+A physically meaningful starting set of parameters are distances between atoms forming hydrogen bonds or other contacts between atoms of the paired bases defining basepairs in the Leontis-Westhof classification.
+We will call all of these contacts "hydrogen bonds" or "H-bonds". 
+Ideally, we would measure a hydrogen bond between the hydrogen and the
+acceptor heavy atom.
+Since the exact hydrogen positions are rarely known, we will instead only consider the distance between heavy atoms (oxygen, nitrogen, or carbon).
 Despite the availability of many algorithms for completing PDB structures with missing hydrogens, there are tricky cases where automatic the completion fails.
-Specifically, some bases may hold a charge and thus have an additional hydrogen, such as those in [in i-Motif cytosine pairs](https://doi.org/10.1002/anie.202309327).
+This happens for instance in cases when a base holds charge and thus have an additional hydrogen, such as those in [in i-Motif cytosine pairs](https://doi.org/10.1002/anie.202309327).
 Alternatively, the base may be in an unusual tautomeric form where its hydrogens are on different atoms than usual.
 Although it is not very common, it is crucial in some basepair classes, and it is biologically relevant in a number of cases.
 We have already discussed the anionic form of **cWW G-U** (@sec:bp-terminology-lw-edgecase-a, <https://doi.org/10.1261/rna.079583.123>), but we can also [find a protonated **cWW C-U** in the ribosomes of some species](https://doi.org/10.1093/nar/29.24.5067) and even a [charged _"canonical"_ **cWW G-C** pair may exist](https://doi.org/10.1002/cphc.200900687).
 
 <!-- maybe cWH-A-G ?? -->
 
-In addition to distance measurements, we can determine an angle between the two heavy atoms and a third atom situated on each base.
-Depending on whether we select the third atom next to the acceptor or donor, we get what we will call "Donor angle" or "Acceptor angle".
+In addition to distance measurements, we need to use other parameters defining geometry of hydrogen bonds.
+We used two angles between the two heavy atoms forming the H-bond and a neighboring atom situated on each base.
+Depending on whether we select the third atom next to the acceptor or donor, we call the parameter "Donor angle" or "Acceptor angle".
 For consistency, we will always select the last neighbor when ordered lexicographically by PDB atom name as the third atom.
 
 <!-- fetch 3Lz0
 select pair, 3Lz0 and (chain J and resi 21 or chain I and resi \-20) -->
 
-
-Unfortunately, our problem isn't as simple as measuring few distances.
-Even if we set strict limits on them, we will still get many false positives.
-As shown in figure [-@fig:cWW-GC-length-and-covalent-angles], an ideal **cWW G-C** pair should have h-bond lengths of about 2.9 Å and all angles at about 120°.
-We must allow some slack, as no ideal pair exists in reality — a 0.5 Å and 20° tolerance is quite conservative.
+The H-bond distances and angles do not suffice to assign a pair. 
+Even if we set strict limits on these parameters, we get many false positives.
+As shown in figure [-@fig:cWW-GC-length-and-covalent-angles], an ideal **cWW G-C** pair should have H-bond lengths of about 2.9 Å and all angles at about 120°.
+We must allow some deviations, as no ideal pair exists in reality, and 0.5 Å and 20° tolerance is very conservative.
 Yet, we still find false positives like the one shown in @fig:cWW-GC-false-positive-hbond-lengthsangles.
-Tightening the limits slightly would dismiss this case, but we are already dropping many good examples, as we can see using the
+Tightening the limits slightly would dismiss this case, but we are hitting the other limit of this simple approach as we already loose many good pairs, as we can see using the
 [basepairs.datmos.org](https://basepairs.datmos.org/#cWW-G-C/hb0_L=..3.4&hb0_DA=100..140&hb0_AA=100..140&hb1_L=..3.4&hb1_DA=100..140&hb1_AA=100..140&hb2_L=..3.4&hb2_DA=100..140&hb2_AA=100..140&baseline_ds=fr3d-f) web application.
 
 
-![A canonical **cWW G-C** basepair (3cpw A1103:A1240). The distance between O2 and N2 is indicated, in addition to the donor and acceptor angles of the other four involved atoms. Note that the hydrogens are not considered in the calculation, they were added in PyMOL to easily recognize donors and acceptors.](../img/cWW-GC-length-and-covalent-angles.png){#fig:cWW-GC-length-and-covalent-angles}
+![A canonical **cWW G-C** basepair (3cpw A1103:A1240). The distance between O2 and N2 is indicated together with the donor and acceptor angles of the other four involved atoms. Note that the hydrogens are not considered in the calculation, they were added in PyMOL to easily recognize donors and acceptors.](../img/cWW-GC-length-and-covalent-angles.png){#fig:cWW-GC-length-and-covalent-angles}
 
-![A false positive found (3Lz0 J21:I-20) in the **cWW G-C** class using solely the basic H-bond parameters. We can see that the distances and angles are adequate, but the bases are shifted by almost one step.](../img/cWW-GC-false-positive-hbond-lengthsangles.png){#fig:cWW-GC-false-positive-hbond-lengthsangles}
+![A false positive found (3Lz0 J21:I-20) in the **cWW G-C** class using solely the basic H-bond parameters. The distances and angles are adequate but the bases are shifted by almost one step.](../img/cWW-GC-false-positive-hbond-lengthsangles.png){#fig:cWW-GC-false-positive-hbond-lengthsangles}
 
 <!-- fetch 3Lz0
 select pair, 3Lz0 and (chain J and resi 21 or chain I and resi \-20) -->
 
-### Hydrogen bond planarity
+### Angle Between Bases Forming a Pair
 
 After hydrogen bonds, the second most important feature of pairing bases is their coplanarity.
-Coplanarity is not easily defined by a single measurement, but it essentially means that the planes of the two bases are not overly different.
-One of our proposals is to measure how much do the hydrogen bonds deviate from the plane, as the counterexample from @fig:cWW-GC-false-positive-hbond-lengthsangles has almost perpendicular H-bonds to both of the planes.
+Coplanarity is not easily defined by a single parameter. 
+The first of our proposed parameters measuring coplanarity is the deviation of hydrogen bonds the base planes.
+Indeed, false "basepair" from @fig:cWW-GC-false-positive-hbond-lengthsangles has H-bonds almost perpendicular to both base planes.
 
-First, we must obtain the base planes.
-All common bases are planar in principle, but they might be slightly deformed both in practice.
+First, we must determine the base planes.
+All natural nucleic acid bases are close-to-planar aromatic rings but they might be slightly deformed.
 Therefore, we find the best fitting plane according to the least squared distance.
-Each hydrogen bond forms a line segment between the two heavy atoms, which we project onto the plane and calculate is the angle between the projection and the original line segment.
+Each hydrogen bond forms a line segment between the two heavy atoms, which we project onto the plane and calculate the angle between the projection and the original line segment.
 
-Each base has its own plane, giving us two separate numbers, similar to the donor and acceptor angles.
+As each base plane is different, we get two separate numbers, in analogy to the donor and acceptor angles.
 We could name these parameters "Donor Plane Angle" and "Acceptor Plane Angle", but the conceptual relation to the hydrogens is less important than the relation with the particular base planes.
 We will therefore name the parameters **"Left Plane Angle"** and **"Right Plane Angle"**, assuming the first base is placed on the left, as in left-to-right text.
 
@@ -93,19 +98,19 @@ We will therefore name the parameters **"Left Plane Angle"** and **"Right Plane 
 
 ### Plane to plane comparison
 
-We have a number of options for comparing the relative orientation of the base planes.
+We have a number of other options for comparing the relative orientation of the base planes.
 The obvious choice is the angle between the planes, more specifically the angle between their normal vectors as used for example in <https://doi.org/10.1261/rna.381407>.
 We will simply call this number the **Coplanarity angle**.
-That does not capture the vertical distance, but also cannot distinguish "bent" from "twisted" basepairs.
-In the language of the standard basepair parameters, we cannot currently differentiate large propeller from large buckle.
+That does not capture the vertical distance and also cannot distinguish "bent" from "twisted" basepairs.
+In the language of the standard basepair parameters (@sec:std-base-parameters), using these parameters we cannot differentiate large propeller from large buckle.
 
-To discern this, we define two new parameters utilizing information about the pairing edge.
-For each basepair class, we know which atoms form the hydrogen bonds and also the atoms of its edge in the Leontis-Westhof nomenclature.
-The **Edge to plane distance** is the minimal distance of atoms in the first residue pairing edge to the plane of the second residue.
+To discriminate between these two types of base-base nonplanarities, we define two new parameters utilizing information about the pairing edge.
+For each basepair class, we know which atoms form the hydrogen bonds and we also know which atoms form the Watson-Crick/Hoogsteen/Sugar edges in the Leontis-Westhof nomenclature.
+The **Edge to plane distance** is the minimal distance of atoms of the first base pairing edge to the plane of the second base.
 The **Edge to plane angle** is the angle between the line of first residue pairing edge and the plane of the second residue.
-Each edge always has at least two atoms in RNA, allowing us to calculate the angle even if only one hydrogen bond is defined.
+Each edge has at least two atoms in RNA, allowing us to calculate the angle even if only one hydrogen bond defines the L-W class. 
 Both of these parameters depend on the order of bases --
-the two **Edge to plane angles** are usually very similar, but **Edge to plane distances** might be very different, if the basepair is sufficiently "bent".
+the two **Edge to plane angles** are usually very similar, but **Edge to plane distances** can be very different when the basepair is "bent".
 <!-- A symmetric alternative would be to take center point of both edges, project it onto both planes the distance between the center -->
 
 <!--
@@ -127,44 +132,55 @@ hide everything, not %pair-->
 ![**Edge to plane distance** shown on another **tHW A-C** basepair (4dv6 A1200:A1055). Parts A and B show the two possible orientations of the same basepair -- in this case, we observe substantial difference between the distance of right edge to left plane (part A, about 0 Å), and the distance from left edge to right plane (part B, over 1 Å).](../img/metrics-edge2plane-distance-4dv6-1-A_1200-A_1055.svg){#fig:metrics-edge2plane-distance-4dv6-1-A_1200-A_1055}
 
 
+The above-defined parameters work well on most basepair classes.
+As described in @sec:testing-basepair-params, we can verify that
+by calculating the parameters for all close contacts found in PDB and bounding them by the maximum range observed in basepairs reported by FR3D.
+When we do that with the five H-bond parameters and the five coplanarity measures, we are able to reproduce the FR3D reported set with sufficient fidelity on most classes. 
+For instance, in the **cWW U-U** class, we have about 60 _false positives_ out of 750 total basepairs, most of which look "close enough".
 
----
-
-The above-mentioned measures already work well on most basepair classes.
-As described in @sec:testing-basepair-params, we can verify that by calculating the parameters for all close contacts found in PDB and bounding them by the maximum range observed in basepairs reported by FR3D.
-When we do that with the five H-bond parameters and the five coplanarity measures, we are able to reproduce the FR3D reported set to a decent degree.
-For instance, in the **cWW U-U** class, we have about 60 false positives out of 750 total basepairs, which are all debatable.
 <!-- Out of which, we claim that the vast majority of false positives are valid basepairs of this category, albeit slightly stretched or shifted.
 We would like to encourage the readers to [judge for themselves in the basepairs.datmos.org web application.](https://basepairs.datmos.org/#cWw-U-U/hb0_L=..4&hb0_DA=85..145&hb0_AA=95..155&hb0_OOPA1=-45..35&hb0_OOPA2=-45..60&hb1_L=..4.1&hb1_DA=85..140&hb1_AA=90..155&hb1_OOPA1=-40..35&hb1_OOPA2=-50..35&min_bond_length=..3.8&coplanarity_a=135..&coplanarity_edge_angle1=-30..45&coplanarity_edge_angle2=-35..45&coplanarity_shift1=-1.6..1.7&coplanarity_shift2=-1.1..1.5&baseline_ds=fr3d-f) -->
 
 ### Relative base rotation {#sec:basepair-params-ypr}
 
-However, the weak spot of this approach are basepair classes with only a single hydrogen bond.
-Such a basepair is free to rotate along H-bonded atoms, as long as it is planar.
+The remaining weak point of our parameter set is the assignment of basepair classes defined by only a single hydrogen bond.
+Such a basepair is free to rotate by 180 degrees around the H-bonded atoms, remaining planar, but at the same time changing the Leontis-Westhof class. 
 An example of this issue is shown in figure @fig:metrics-ypr-necessity-tHH-GG-misassignment, and the [web application demonstrates this issue interactively](https://basepairs.datmos.org/#tHH-A-G/hb0_L=..4&hb0_DA=100..150&hb0_AA=100..165&hb0_OOPA1=-25..35&hb0_OOPA2=-10..35&min_bond_length=..3.8&coplanarity_a=..40&coplanarity_edge_angle1=-10..25&coplanarity_edge_angle2=-10..30&coplanarity_shift1=-0.2..1.5&coplanarity_shift2=-0.3..1.3&baseline_ds=fr3d-f).
 
 ![**A.** An example of a correctly assigned **tHH A-G** basepair (3cd6 913:1071 in chain 0). **B.** The **tHH A-G** candidates also includes a clear Watson-Crick/Hoogsteen basepair (7osm 407:390 in chain 18S). The coplanarity is perfect and the N6 ··· O6 H-bond cannot distinguish it either, as both of these two classes define it.](../img/metrics-ypr-necessity-tHH-GG-misassignment.svg){#fig:metrics-ypr-necessity-tHH-GG-misassignment}
 
+Utilizing the [euler angles](https://en.wikipedia.org/wiki/Euler_angles), we can describe the relative rotation of two planes by three angular parameters.
 
----
-
-We can describe the relative rotation of two bases by three angular parameters -- either as a variant of [euler angles](https://en.wikipedia.org/wiki/Euler_angles), or as the angles of projected axes (similarly as in @sec:std-base-parameters).
-In order to determine that, we need to define a coordinate system for each base.
+Their definition requires definition of coordinate systems for both bases is a potential pair.
 Although the choice of coordinate system significantly affects the calculated angles, it has little impact on the variance and the exact values are irrelevant for our use case.
-The choice of coordinate system is thus essentially arbitrary, and therefore we choose the simplest option.
+The choice of the coordinate system is thus essentially arbitrary, and we choose a simple option.
 
-The relative position of the pairing bases can be trivially described as the translation vector of the two coordinate systems, but this is already covered reasonably well by the hydrogen-bond parameters.
+<!-- {????? The relative position of the pairing bases can be trivially described as the translation vector of the two coordinate systems, but this is already covered reasonably well by the hydrogen-bond parameters.} -->
 
 We choose to place the origin in the N1 or N9 atom, and align the glycosidic bond with the negative Y axis, as illustrated in figure [-@fig:MMB_reference_frame-purinepluspyrimidine].
-The C6 / C8 atom is placed in negative X with zero Z coordinate, uniquely determining the new coordinate system.
-The coordinate system is similar to that used in [MMB (formerly RNABuilder)](https://doi.org/10.1109/TCBB.2010.104), except for that the X and Y axis are swapped and negated.
-The modification was proposed by Craig Zirbel to roughly align the coordinate system with the one used in FR3D, as it conveniently places the Watson-Crick edge in positive X and Y coordinates.
+The C6 pyrimidine or C8 purine atom is placed in negative X direction with zero Z coordinate, uniquely determining the new coordinate system.
+The coordinate system is similar to that used in [MMB (formerly RNABuilder)](https://doi.org/10.1109/TCBB.2010.104), except that the X and Y axis are swapped and negated.
+These modifications were proposed by Craig Zirbel to roughly align the coordinate system with the one used in FR3D, as it conveniently places the Watson-Crick edge in positive X and Y coordinates.
 
-We will calculate the **ZYX intrinsic Euler angles** between the coordinate systems.
-It offers a good interpretability as the **Yaw**, **Pitch**, and **Roll** angles of an aircraft going from the first glycosidic bond to the second one, with its wings aligned along the base plane.
+We will calculate the **ZYX intrinsic Euler angles**
+between the coordinate systems.
+It offers a good interpretability as [so called "aircraft angles" **Yaw**, **Pitch**, and **Roll**](https://en.wikipedia.org/wiki/Aircraft_principal_axes).
+The three angles essentially describe the necessary manuevers of an aircraft going from the first glycosidic bond to the second one, with its wings aligned along the base plane.
+
+
+ <!-- decribing the plane orientation relative to the Earth surface.
+In our case, "the aircraft", i.e. the base, is pointing from the glycosidic bond of the first base to the second base, with the "wings" aligned along the plane of the first base. -->
+{TODO TO BYCH VYNECHAL:}
 It is also easy to demonstrate or verify the angles by three subsequent `turn` commands in PyMOL.
 
 ![A purine (A) and a pyrimidine (C) nucleotides overlaid over the base coordinate system for Yaw/Pitch/Roll angle calculation.](../img/MMB_reference_frame-purinepluspyrimidine.svg){#fig:MMB_reference_frame-purinepluspyrimidine}
 
 
+<!-- TODO {UKAZAL BYCH TO NEJDRIV NA DVOU LETADLECH:} -->
+
 ![Performing yaw (Z axis), pitch (Y), and roll (X) rotations on the 3diL A68:A126 **cWH G-A** basepair. Part A shows the starting position with the adenine aligned with axes. Parts B and C show the intermediary steps, while part D shows the final rotation with the guanine aligned opposite to the original adenine position.](../img/metrics-yaw-pitch-roll-3dil_A68_126_cWH-G-A.svg)
+
+
+### Summary of New Base Parameters
+
+TODO odrazkovy seznam

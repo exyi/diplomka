@@ -36,7 +36,7 @@ def hbond_geometry(res1: Residue, res2: Residue, hbond):
     return length, donor_angle, acceptor_angle
 ```
 
-### Hydrogen bond planarity
+### Angle Between Bases Forming a Pair
 
 The second set of parameters requires determination of the base planes, represented as a translation vector and an orthonormal basis of the new coordinate system.
 It is important to note that we are looking for optimal plane by least squared Euclidean (L2) distance, instead of the distance along the Y coordinate.
@@ -47,7 +47,7 @@ The first two columns of the matrix are the plane basis, while the last one is t
 The other two matrices would allow us to map the atom position into the new vector space, but that is unnecessary for this algorithm.
 <!-- We also define a projection function, which will be useful in the next step. -->
 
-Listing: Fit a plane to the base atoms using SVD (credit https://math.stackexchange.com/q/99317) {#lst:code-calc-base-plane-fit}
+Listing: Fit a plane to the base atoms using SVD (credit <https://math.stackexchange.com/q/99317>) {#lst:code-calc-base-plane-fit}
 
 ```python
 def fit_plane(res: Residue):

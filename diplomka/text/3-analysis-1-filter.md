@@ -1,35 +1,34 @@
-## Data Selection {#sec:filter}
+## Filtration of Structural Data {#sec:filter}
 
 In order to get useful statistics, we need a sufficient quantity of data samples.
-However, it is equally important to ensure a high level of data quality, particularly eliminate potential biases.
-A degree of unbiased noise may be tolerated, as statistical methods can account for variance provided enough observations.
+However, it is equally important to ensure a high level of data quality to eliminate potential bias.
+A degree of unbiased noise may be tolerated, as statistical methods can account for variance.
 
 <!-- Even when working with small sample sizes, the uncertainty arising from the noise can be characterized using confidence intervals.
 However, the resulting intervals may be deemed _overconfident_ if the observations are not independent of one another. -->
 ![Canonical GC pairs, filtered (left) and unfiltered (right). Without the filter, the plot illustrates a large effect from 2.89 Å hydrogen-bond restraints used in model refining.](../img/hbonds-hist-filter-comparison-GConly.png)
 
-Since multiple entries in the PDB often share a common refined structure with only varying ligands, we also need to remove all redundant structures to avoid the bias.
-Moreover, nucleotides not satisfying MolProbity and DNATCO criteria are filtered out, as well as nucleotides with poor electron density fit.
-
-The filtration methodology was prepared by Jiří Černý's laboratory and will be published in TODO??.
-In this project, we simply utilized the prepared lists of about 180 000 nucleotides.
+Since multiple entries in the PDB often share a common refined structure with only varying ligands, we need to remove all redundant structures to avoid the bias.
+Moreover, nucleotides must satisfy other quality criteria to be useful for further analysis.
+The filtration methodology was prepared by Jiří Černý's laboratory and will be published in a prepared manuscript detailing the entire procedure.
+In this project, we utilized the prepared list of about 180 000 nucleotides that were selected from the PDB archive using the quality filters as described in the following section.
 Given that the nucleotide filter is rather selective, any basepair with at least one passing nucleotide will be accepted.
 We will call this filtered set the **"Reference Set"**.
 
 ### Summary of the filtration method
 
-0. Selection of all nucleic acid crystal structures with resolution of 3.5 Å or better
-1. Clustering of sequentially redundant structures.
+1. Selection of all nucleic acid crystal structures with resolution of 3.5 Å or better
+2. Clustering of sequentially redundant structures.
     * Sequences with more than 90% similarity are considered redundant.
     * However, sequences are considered non-redundant, if one is part of a protein complex and the other is not.
-2. Selection of the highest quality chain from each cluster of redundancy
-    * The score is similar to [“BGSU RNA score”](https://doi.org/10.1093/nar/gkw453), a weighted sum of resolution, Rfree, clashscore, per-residue value of RSCC, and a fraction of unobserved residues.
-3. Selection of residues with sufficiently high quality, defined as:
+3. Selection of the highest quality chain from each cluster of redundancy
+    * The score is based on the filter used in [“BGSU RNA score”](https://doi.org/10.1093/nar/gkw453), a weighted sum of resolution, Rfree, clashscore, per-residue value of RSCC, and a fraction of unobserved residues.
+4. Selection of residues with sufficiently high quality, defined as:
     * All atoms must have RSCC (real-space correlation coefficient) ≥ 0.7, and backbone atoms must have harmonic of RSCC ≥ 0.8
     * [MolProbity criteria](https://doi.org/10.1002/pro.3330) are satisfied: no steric clashes ≥ 0.5 Å, and no sugar-pucker outliers are allowed.
-    * The nucleotide conforms to one of NtCs ([sugar-phosphate backbone conformations](https://doi.org/10.1093/nar/gkaa383)) with confal score (TODO cite?) ≥ 60% and RMSD ≤ 0.5 Å.
+    * The nucleotide conforms to one of the NtCs ([sugar-phosphate backbone conformations](https://doi.org/10.1093/nar/gkaa383)) with confal score (TODO cite?) ≥ 60% and RMSD ≤ 0.5 Å.
 
-The list of residues and detailed description (from TODO cite) is included as an attachment.
+The list of selected residues <!--and detailed description (from Jiří Černý's the manuscript)--> is included as an attachment.
 
 <!-- 
 

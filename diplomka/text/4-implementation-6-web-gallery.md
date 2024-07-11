@@ -18,3 +18,4 @@ SELECT * FROM read_parquet('cWW-*')
 ```
 
 
+<!-- The trick why re-running FR3D takes 3 hours on 16 CPU cores while we can adjust the parameters interactively is the precomputation and DuckDB -->

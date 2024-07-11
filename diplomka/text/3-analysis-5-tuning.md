@@ -1,4 +1,4 @@
-## Interactive Application for Parameter Tuning {#sec:tuning-app}
+## Interactive Web Application for Parameter Tuning {#sec:tuning-app}
 
 In the preceding section [-@sec:testing-basepair-params], we have seen how each class of basepairs behaves somewhat differently.
 We have the need to assess the individual differences in assignment and allow us to tune the allowed boundaries in each basepairing family.

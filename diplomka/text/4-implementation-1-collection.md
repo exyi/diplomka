@@ -86,7 +86,6 @@ To avoid redundancy, we deduplicate the pair using the following rules:
 * uspořádání je přes symetrické elementy -->
 
 Crystals are made of the same molecule repeated many times but not necessarily always in the same orientation.
-<!-- Crystallographers have a comprehensive theory for describing these repetitions, it is crucial for resolving the molecular structures from diffraction patterns. -->
 The X-Ray structures in PDB only contain coordinates for one of the repeating fragments, we refer to it as the **asymmetric unit**.
 If the molecule of interest forms a symmetric dimer, interactions between the asymmetric units are potentially relevant for biology.
 In nucleic acids, double helices and tetraplexes may be completely symmetric, with the pairs forming between symmetry-related molecules.

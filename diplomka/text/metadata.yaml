@@ -10,14 +10,13 @@ lstPrefix: 'listing' # listing is obscure enough
 abstract: |-
     (TODO)
 abstract-cs: |-
-    Struktura nukleových kyselin je do značné míry určena párovými interakcemi mezi bázemi nukleotidů.
-    Tyto párové interakce se dají relativně dobře rozřadit do kategorií, z čehož nejčastějším a nejprostudovanějším typem jsou kanonické "Watson-Crickovské" G-C a A-T páry.
-    Univerzálním a všeobecně přijímaným způsobem kategorizace párů je systém Leontise a Westhofa, kteří na začátku tisíciletí na příkladech ukázali přes sto nekanonických párů.
-    Nicméně, dodnes neexistují všeobecně uznávané formální definice těchto kategorií.
+    Struktura nukleových kyselin je do značné míry určena párovými interakcemi mezi bázemi nukleotidů, z čehož nejčastějším a nejprostudovanějším typem jsou kanonické "Watson-Crickovské" G-C a A-T páry.
+    Na začátku tisíciletí ukázali Leontis a Westhof na reálných příkladech, že existuje přes sto druhů dalších nekanonických párů a zároveň nadefinovali univerzální a dnes široce používaný terminologický systém.
+    Nicméně, dodnes neexistují všeobecně uznávané formální definice všech kategorií párů.
 
-    V této práci představujeme systém několika geometrických parametrů, pomocí kterých lze všechny třídy párů formálně nadefinovat a následně je automaticky hledat v molekulárních strukturách.
-    Součástí práce také je referenční implementace výpočtu těchto parametrů i program na výběr párů odpovídající daným podmínkám.
-    Protože precizně nadefinovat všechny typy párů vyžaduje spoustu pečlivé práce, jsme se zároveň vyvinuli aplikaci, která umožňuje kritéria měnit a zvládá interaktivně v prohlížeči hledat odpovídající páry z celé databáze PDB.
+    V této práci představujeme systém několika geometrických parametrů, pomocí kterých lze všechny třídy párů formálně nadefinovat a následně je automaticky hledat ve strukturách molekul.
+    Součástí práce je referenční implementace výpočtu těchto parametrů, i program na výběr párů odpovídající daným podmínkám.
+    Protože precizně nadefinovat všechny typy párů vyžaduje spoustu pečlivé práce, jsme zároveň vyvinuli aplikaci, která umožňuje kritéria měnit a zvládá interaktivně ve webovém prohlížeči hledat odpovídající páry z celé databáze PDB.
 acknowledgement: |-
     First and foremost, I'd like to express my gratitude to my supervisor Bohdan Schneider for his helpfulness and staunch patience.
     From providing overall project guidance, to correcting my grammatical errors, his support has been invaluable to the completion of the thesis.
