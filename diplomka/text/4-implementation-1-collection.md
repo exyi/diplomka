@@ -13,12 +13,10 @@ The UnitID is a unique identifier for nucleotides and other residues -- it is a 
 The components are separated by a vertical bar character (`|`).
 [Detailed definition is at BGSU website](https://www.bgsu.edu/research/rna/help/rna-3d-hub-help/unit-ids.html)
 
-Alternatively, the input file may be a table (CSV/Parquet) with columns `pdbid`, `model`, `chain1`, `res1`, `nr1`, `ins1`, `alt1`, `chain2`, `res2`, `nr2`, `ins2`, `alt2`, and optionally `family`.
+Alternatively, the input file may be a table (CSV/Parquet) with columns `pdbid`, `model`, `chain1`, `res1`, `nr1`, `ins1`, `alt1`, `chain2`, `res2`, `nr2`, `ins2`, `alt2`, and `family`.
 Other columns are allowed and preserved on the output.
 This data format provides compatibility with other software tools used at IBT.
 The same columns identify the basepairs in the output files.
-<!-- TODO `--pair-type` option, rename to family? -->
-
 
 ### Produced Information
 
@@ -124,7 +122,7 @@ _pdbx_struct_oper_list.vector[3]
 ``` -->
 
 Technically, the implementation is still slightly tricky, because the **BioPython** library provide an API to access the `pdbx_struct_oper_list` category.
-Another Python library - [**Gemmi**](https://doi.org/10.21105/joss.04200), has a very good support for crystallographic symmetry.
+Another Python library -- [**Gemmi**](https://doi.org/10.21105/joss.04200), has a very good support for crystallographic symmetry.
 It, however, exposes the information in terms of space groups, instead of the PDB symmetry operation codes.
 Since **FR3D** uses the PDB codes in its output, we need to use these to map the basepairs into atomic coordinates.
 Therefore, we utilize the [**mmcif**](https://github.com/rcsb/py-mmcif) library to get this information.

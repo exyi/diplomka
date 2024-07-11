@@ -1529,6 +1529,9 @@ if __name__ == "__main__":
     parser.add_argument("--override-pair-family", type=str, required=False, help="Ignore the pair family from the input and assume the specified one instead. Experimental: may specify multiple overrides separated by comma.")
     args = parser.parse_args()
 
+    if args.override_pair_family == "all":
+        args.override_pair_family = "cWW,cWWa,tWW,tWWa,cWH,tWH,cWS,tWS,cHH,cHHa,tHH,cHS,tHS,cSS,tSS,cWB"
+
     for x in args.pdbcache or []:
         pdb_utils.pdb_cache_dirs.append(os.path.abspath(x))
     os.environ["PDB_CACHE_DIR"] = ';'.join(pdb_utils.pdb_cache_dirs)

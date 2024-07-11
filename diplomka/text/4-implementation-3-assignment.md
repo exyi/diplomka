@@ -7,9 +7,11 @@ With the table of allowed ranges, the assignment procedure is fairly straightfor
 First, we have to identify all potential basepairs to calculate the parameters.
 This can, in principle, be all pairs of residues in a given structure, but is advantageous to first prune the list by searching for residues with atoms at ≤ 4 Å distance.
 This can be done efficiently using a grid or a [**_k_-d** tree](https://en.wikipedia.org/wiki/K-d_tree) while reduces the algorithmic cost from $\mathcal{O}(n^2)$ to \mathcal{O}(n) or $\mathcal{O}(n\log{}n)$, assuming there can only be a constant number of residues in the vicinity of another one.
+We performed this search using NeighborSearch functionality of the [Gemmi library](https://doi.org/10.21105/joss.04200).
 
-For each pair candidate, we calculate the specified parameters for each of the twelve Leontis-Westhof families.
-With that, we check that all the parameters lie in the defined ranges and if it does, we report it as a basepair.
+For each pair candidate, we calculate the specified parameters for each of the twelve Leontis-Westhof families using the `pairs.py` script.
+We omit the `family` column in the input table of all close residues, and substitute it by using the `--override-pair-family=all` CLI option to analyze how each pair fits into all families.
+In a third step, we check that all the parameters lie in the defined ranges using the `apply_filter.py` script.
 
 
 ### Whole Structure Invariants
