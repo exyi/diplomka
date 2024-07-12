@@ -4,6 +4,11 @@ author: 'Stanislav Lukeš'
 supervizor: 'prof. Ing. Bohdan Schneider, CSc.'
 numberSections: true
 linkReferences: true
+nameInLink: true
+figureTitle: "<span class='fig-title crossref-title'>Figure"
+tableTitle: "<span class='table-title crossref-title'>Table"
+listingTitle: "<span class='listing-title crossref-title'>Listing"
+titleDelim: ":</span>"
 # https://lierdakil.github.io/pandoc-crossref/#table-style-captions
 codeBlockCaptions: true
 lstPrefix: 'listing' # listing is obscure enough

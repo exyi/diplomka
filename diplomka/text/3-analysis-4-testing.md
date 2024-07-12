@@ -1,6 +1,6 @@
 ## Testing Basepair Parameters {#sec:testing-basepair-params}
 
-To verify that the parameters proposed in the previous section [-@sec:basepair-params] are sufficient to define basepairs, we will try to replicate FR3D annotations using them.
+To verify that the parameters proposed in [the previous section @sec:basepair-params] are sufficient to define basepairs, we will try to replicate FR3D annotations using them.
 We deliberately use a different set parameter than FR3D (except for H-bond lengths), to ensure that this experiment yields sensible results.
 Notably, compared to FR3D, we lack constraints on relative translation of the pairing bases.
 Translational constraints are powerful, but because they are hard to generalize even across a single family, we simplify our model significantly by avoiding them.
@@ -15,7 +15,7 @@ H-bond lengths do not have a lower limit, and we always set the upper limit to 4
 We set the 4 Å limit as [Jeffrey (1997)](https://archive.org/details/introductiontohy0000jeff) also identifies “weak, electrostatic” H-bonds up to 4 Å.
 The strict limit also enables an efficient search for basepair candidates, for instance using [NeighborSearch in Gemmi](https://gemmi.readthedocs.io/en/latest/analysis.html).
 
-Table [-@tbl:fr3d-autoboundaries-comparison] shows the results for a selection of basepairing with over 500 samples on our reference set.
+[Table @tbl:fr3d-autoboundaries-comparison] shows the results for a selection of basepairing with over 500 samples on our reference set.
 The _False negatives_ column shows the number of pair identified by FR3D, but not included by our scheme (i.e., _missed_); and _False positives_ is the opposite (i.e., _misidentified_).
 We can see, that most classes are re-identified well enough and the few _misidentified_ or _missed_ percents are generally debatable “borderline basepairs”, hard to classify even manually.
 To examine the individual differences we used the basepairs.datmos.org web application, as described in the next section.

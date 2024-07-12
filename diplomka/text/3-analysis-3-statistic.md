@@ -55,7 +55,7 @@ We will measure the **accuracy** as the mean absolute difference between the sta
 We will use the sample size of 100 observations for the test, given that it is a typical number of instances of a non-canonical basepair.
 We have slightly over 50 000 datapoints in the canonical classes, so 1000 sampled batches should provide an ample coverage the available dataset.
 
-The figure [-@fig:KDE_bandwidth_golden_length_deviation] compares various bandwidth adjustments of the default Scott's factor.
+[The figure @fig:KDE_bandwidth_golden_length_deviation] compares various bandwidth adjustments of the default Scott's factor.
 It is clear that the general optimum is in the range from 1.0 to 1.5, although we can see that different hydrogen bonds length have slightly different optimal bandwidths.
 
 ![[Reference H-bond lengths](https://doi.org/10.1107/S2059798321007610) / KDE mode with bandwidth adjustment from 0.5 to 3.0](../img/KDE_bandwidth_golden_length_deviation.svg){#fig:KDE_bandwidth_golden_length_deviation}
@@ -73,7 +73,7 @@ We will measure the statistic across the entire dataset and compare its mean abs
 In this case, it is not necessary to use only the H-bond lengths, we can use all the other parameters we are currently working with (@sec:basepair-params).
 
 Since the parameters are not in the same numerical intervals, we will normalize the deviations by their standard deviation.
-As shown in figure [-@fig:percentile_kdemode_stability_GC_AU], the percentiles are significantly more stable when compared to the KDE mode, but the difference gets smaller with higher bandwidth factors.
+As [shown in figure @fig:percentile_kdemode_stability_GC_AU], the percentiles are significantly more stable when compared to the KDE mode, but the difference gets smaller with higher bandwidth factors.
 The absolute effect size is about 0.01 Å, somewhat lower than the effect in @fig:KDE_bandwidth_golden_length_deviation.
 <!-- Instead, we will first divide each deviation by the average deviation for a specific parameter.
 Given a $n \times m$ matrix $D$ containing deviations for each parameter and each statistic, we can calculate the matrix $R$ of relative deviations:
@@ -86,7 +86,7 @@ The overall performance of a statistic is then calculated as a mean of a column 
 
 The third consideration, **stability on skewed samples** is easy to test by including _“near basepairs”_ reported by FR3D.
 Those are usually pairs which are a bit too much out of plane, a bit too stretched or otherwise deformed.
-Figure [-@fig:relative_stability_ncRR] shows another relative deviation plot, comparing the calculated modes and percentiles on the **cWW G-C** basepairs with the same set with 20% mixed in _near basepairs_.
+[Figure @fig:relative_stability_ncRR] shows another relative deviation plot, comparing the calculated modes and percentiles on the **cWW G-C** basepairs with the same set with 20% mixed in _near basepairs_.
 Absolute magnitude of this effect on H-bond length is again as in the previous point, at about 0.02 Å.
 
 ![Deviance of modes and percentiles on various parameters of canonical G-C pairs when 20% FR3D _near pairs_ are. The error bars show the variance for different measured parameters.](../img/relative_stability_ncRR.svg){#fig:relative_stability_ncRR}

@@ -25,7 +25,7 @@ The Leontis-Westhof (L-W) naming system labels one such conformation **cis** and
 Generally, **cis** pairs have the glycosidic bonds pointing in a similar direction, while **trans** pairs orient these bonds in opposite directions.
 However, there is not a strict 90° limit on the angle between two glycosidic bonds;
 instead, we label a conformation as **cis** if it has a more acute angle than the corresponding **trans** conformation (see example of **cHH A-G** / **tHH A-G**, or the **cWS C-A** / **tWS C-A** pairs in @fig:LW-cis-trans-examples).
-The L-W system leads to 12 basepair families in total; all are shown in figure [-@fig:LWS-all-families-G-G].
+The L-W system leads to 12 basepair families in total; all are shown [in figure @fig:LWS-all-families-G-G].
 The order in which the basepairs are listed is determined by a historically based priority rule: Watson–Crick edge > Hoogsteen edge > Sugar edge <https://doi.org/10.1017/s1355838201002515>.
 Each family has up to 10 or 16 individual basepairing classes.
 
@@ -51,7 +51,7 @@ For example, we refer to the pairs in @fig:LWS-all-families-G-G as **cWW G-G**, 
 However, to pair in **cis**, the bases must be flipped -->
 
 Note that “Sugar” refers to the name of a purine or pyrimidine edge, which does not necessarily imply interaction with the ribose sugar **O2'** oxygen, although involvement of this atom is common in RNA pairs.
-Fig. [-@fig:tSS-GG-DNA-6n4g-A_2-B_2-no-oxygens] shows an example of **DNA** Sugar/Sugar pair without any ribose interaction.
+[Fig. @fig:tSS-GG-DNA-6n4g-A_2-B_2-no-oxygens] shows an example of **DNA** Sugar/Sugar pair without any ribose interaction.
 In RNA, the ribose O2' oxygen can interact with the other base or even the other O2' oxygen.
 Since it is an OH group, it can function both as a hydrogen bond donor and acceptor, for instance in the **cSS G-G** class (@fig:LWS-all-families-G-G).
 
@@ -92,7 +92,7 @@ The following block is an example DSSR output -- we can see the `-`/`+` and triv
 
 Some classes of basepairs have trivial (popular) names, which generally predate any attempts to systematize the terminology.
 Apart from the Watson-Crick canonical pairs, important ones include the Wobble (**cWW G-U**), Hoogsteen (**cWH U-A**), and Reverse Hoogsteen (**tWH U-A**, **tWH U-C**) basepairs.
-For a complete translation table between the trivial, Leontis-Westhof, and Saenger names, refer to Table 2 in <https://doi.org/10.1017/s1355838201002515>; we apologize for omitting it, due to its large size.
+For a complete translation table between the trivial, Leontis-Westhof, and Saenger names, refer to Table 2 in <https://doi.org/10.1017/s1355838201002515>; we apologize for omitting it due to its large size.
 
 ### Comparison
 

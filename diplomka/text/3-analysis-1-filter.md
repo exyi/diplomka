@@ -2,11 +2,12 @@
 
 In order to get useful statistics, we need a sufficient quantity of data samples.
 However, it is equally important to ensure a high level of data quality to eliminate potential bias.
+An example of a problematic bias is shown in @fig:hbonds-hist-filter-comparison-GConly where the H-bond lengths are influenced by restraints.
 A degree of unbiased noise may be tolerated, as statistical methods can account for variance.
 
 <!-- Even when working with small sample sizes, the uncertainty arising from the noise can be characterized using confidence intervals.
 However, the resulting intervals may be deemed _overconfident_ if the observations are not independent of one another. -->
-![Canonical GC pairs, filtered (left) and unfiltered (right). Without the filter, the plot illustrates a large effect from 2.89 Å hydrogen-bond restraints used in model refining.](../img/hbonds-hist-filter-comparison-GConly.png)
+![Canonical GC pairs, filtered (left) and unfiltered (right). Without the filter, the plot illustrates a large effect from 2.89 Å hydrogen-bond restraints used in model refining.](../img/hbonds-hist-filter-comparison-GConly.png){#fig:hbonds-hist-filter-comparison-GConly}
 
 Since multiple entries in the PDB often share a common refined structure with only varying ligands, we need to remove all redundant structures to avoid the bias.
 Moreover, nucleotides must satisfy other quality criteria to be useful for further analysis.

@@ -1110,8 +1110,8 @@ def calculate_boundaries(df: pl.DataFrame, pair_type: PairType):
 
 def main(argv):
     import argparse
-    parser = argparse.ArgumentParser(description="Generate histogram plots")
-    parser.add_argument("input_file", help="Input file", nargs="+")
+    parser = argparse.ArgumentParser(description="Compute KDE densities for the provided basepair classes, generate histogram plot")
+    parser.add_argument("input_file", help="Input file", nargs="+", help="An input Parquet table. May be multiple files, but it must be partitioned by pair class (one file may contain multiple classes, but one class must be in a single file). We do not load multiple files into memory, making it an effective way to reduce RAM cravings")
     parser.add_argument("--residue-directory", help="Directory with residue lists, used to select representative set residues. Currently, lists RNA-1.8-3.5, RNA-0-1.8, DNA-1.8-3.5, DNA-0-1.8 are expected.")
     parser.add_argument("--reexport", default='none', choices=['none', 'partitioned'], help="Write out parquet files with calculated statistics columns (log likelihood, mode deviations)")
     parser.add_argument("--include-nears", default=False, action="store_true", help="If FR3D is run in basepair_detailed mode, it reports near basepairs (denoted as ncWW). By default, we ignore them, but this option includes them in the output.")
@@ -1232,6 +1232,7 @@ def main(argv):
             output_files.extend(
                 make_bond_pages(dff, args.output_dir, pair_type, rmsd_histogram_defs, highlights=dna_rna_highlights, title_suffix= " - RMSD to nicest BP")
             )
+            # Uncomment to generate KDE pairplots (takes forever, you have been warned)
             # output_files.extend(
             #     make_pairplot_page(dff, args.output_dir, pair_type, variables=[
             #         pl.col(f"C1_C1_euler_phi").alias("Euler Φ"),

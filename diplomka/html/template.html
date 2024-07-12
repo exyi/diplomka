@@ -210,6 +210,11 @@
         }
         figure figcaption {
             text-align: center; text-align-last: center;
+            font-size: 0.8rem;
+        }
+
+        .crossref-title {
+            font-weight: bold;
         }
 
         table {
@@ -222,8 +227,9 @@
             text-wrap: balance;
         }
         table caption {
-            text-align: center; text-align-last: center;
-            text-wrap: balance;
+            text-align: justify; text-align-last: left;
+            /* text-wrap: balance; */
+            border-top: solid 2px black;
         }
 
  
@@ -351,6 +357,7 @@
             float: right;
             text-align: right;
             text-align-last: initial;
+            font-size: 0.8rem;
         }
         .references-table-row .references-date::before {
             content: " (";

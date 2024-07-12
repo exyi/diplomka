@@ -1,6 +1,6 @@
 ## Calculation of the Proposed Basepair Parameters {#sec:sw-calculation}
 
-In section [-@sec:basepair-params], we have _informally_ described the basepairing measures we experimented with.
+[In section @sec:basepair-params], we have _informally_ described the basepairing measures we experimented with.
 The section is dedicated to the exact definitions, including simplified Python code.
 
 ### Hydrogen bond lengths and angles
@@ -67,7 +67,7 @@ def fit_plane(res: Residue):
 #     tpoint = point - origin
 #     return tpoint @ projection_matrix + origin-->
 
-The listing [-@lst:code-calc-bond-to-plane] shows that we can now calculate the dot product of the H-bond vector and the plane normal, getting the cosine of their angle.
+[The listing @lst:code-calc-bond-to-plane] shows that we can now calculate the dot product of the H-bond vector and the plane normal, getting the cosine of their angle.
 The angle to the plane is the same as the angle to the normal, except shifted from the $[0°, 180°]$ range to $[-90°, 90°]$; in other words, $\mathrm{sin}^{-1} (<h_D - h_A,n>)$ of the dot product, instead of $\mathrm{cos}^{-1}$.
 
 Listing: H-bond to plane angle calculation {#lst:code-calc-bond-to-plane}

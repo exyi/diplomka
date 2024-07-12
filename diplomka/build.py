@@ -144,12 +144,15 @@ def convert_links(citations: dict[str, CitationInfo]):
             if ['data-footnote-link', 'true'] in attr[2]:
                 pass
             elif url in citations:
+                cit = citations[url]
                 citation_ref = pf.Span(
-                        ['', ["citation-ref"], [ ["data-citation-id", str(citations[url].id)], ["data-citation-seq", str(citations[url].seq)] ] ],
-                        [pf.Space(),  pf.Str(f"[{citations[url].id}]")])
-                print(f"Reference: {url} -> {content_text} [{citations[url].id}]")
+                        ['', ["citation-ref"], [ ["data-citation-id", str(cit.id)], ["data-citation-seq", str(cit.seq)] ] ],
+                        [pf.Space(),  pf.Str(f"[{cit.id}]")])
+                print(f"Reference: {url} -> {content_text} [{cit.id}]")
                 new_content = [ *content, citation_ref ] if content_text.lower() != url.lower() else [ citation_ref ]
-                return pf.Link(attr, new_content,[ url, ''])
+                new_url = url
+                new_url = f"#ref-{cit.id}"
+                return pf.Link(attr, new_content,[ new_url, ''])
             elif url.startswith("http:") or url.startswith("https:"):
                 print(f"External link: {url} -> {content_text} ({repr(attr)})")
                 # print(f"External link: {url} -> {content_text} ({repr(content)})")
@@ -169,7 +172,7 @@ def convert_links(citations: dict[str, CitationInfo]):
                     ]
                 )
                 new_content = [ *content, footnote ]
-                link = pf.Link([ attr[0], attr[1], attr[2] + [ ['data-footnote-link', 'true'] ]], content, [url, ''])
+                link = pf.Link([ attr[0], attr[1], attr[2] + [ ['data-footnote-link', 'true'], ['target', '_blank'], ['rel', 'noopener noreferrer'] ]], content, [url, ''])
                 # return link
                 return pf.Span(
                     ['', [], []],
@@ -210,12 +213,20 @@ def generate_references(cit_map: dict[str, CitationInfo]):
     ]
     for id, cit in cits:
         links = []
+        link_attr = 'target=_blank rel="noopener noreferrer"'
         if cit.doi:
-            links.append(f'<span class="references-link references-doi"><a href="https://doi.org/{html.escape(cit.doi)}">DOI: <span class="references-doi-body">{html.escape(cit.doi)}</span></a></span>')
+            links.append(f'<span class="references-link references-doi"><a {link_attr} href="https://doi.org/{html.escape(cit.doi)}">DOI: <span class="references-doi-body">{html.escape(cit.doi)}</span></a></span>')
         if cit.url and cit.url != cit.doi:
-            links.append(f'<span class="references-link references-url"><a href="{html.escape(cit.url)}">Available at: <span class="references-url-body">{html.escape(cit.url)}</span></a></span>')
+            links.append(f'''
+                <span class="references-link references-url">
+                    <a {link_attr} href="{html.escape(cit.url)}">Available at: <span class="references-url-body">{html.escape(cit.url)}</span></a>
+                    <br>(<a {link_attr} href="https://web.archive.org/web/20240712120000/{html.escape(cit.url)}">web.archive.org</a>)
+                </span>''')
+            
         if cit.isbn:
-            links.append(f'<span class="references-link references-isbn"><a href="https://isbnsearch.org/isbn/{html.escape(cit.isbn)}">ISBN: <span class="references-isbn-body">{html.escape(cit.isbn)}</span></a></span>')
+            links.append(f'<span class="references-link references-isbn"><a {link_attr} href="https://isbnsearch.org/isbn/{html.escape(cit.isbn)}">ISBN: <span class="references-isbn-body">{html.escape(cit.isbn)}</span></a></span>')
+        if cit.doi:
+            links.append(f'<span class="references-link references-doi"><a {link_attr} href="https://sci-hub.se/{html.escape(cit.doi)}">sci-hub: <span class="references-doi-body">{html.escape(cit.doi)}</span></a></span>')
         authors = cit.authors
         if len(authors) > 20 or ["", "???"] in authors:
             authors = [a for a in authors if a[1] != "???"]
@@ -503,7 +514,7 @@ def pandoc_render(files, output_file):
            "--lua-filter=html/shift-headings.lua",
            "--toc", "--toc-depth=4",
            "--number-sections", "--section-divs"]
-    run(f"Render {output_file} with Pandoc", *cmd, "--to=html", "--webtex", "--output=" + output_file + ".html", *files)
+    run(f"Render {output_file} with Pandoc", *cmd, "--to=html", "--katex", "--output=" + output_file + ".html", *files)
     # run(f"Render {output_file}.epub with Pandoc", *cmd, "--to=epub", "--output=" + output_file + ".epub", "--webtex", *files)
 
 def main(argv):

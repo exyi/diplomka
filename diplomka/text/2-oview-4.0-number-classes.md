@@ -74,7 +74,7 @@ Note that only the sugar edge has an asymmetric symbol, intuitively indicating i
 
 #### FR3D Family Lowercasing {#sec:bp-fr3d-lowercasing}
 
-Section [-@sec:software] discusses available software tools more thoroughly; however, it is worth noting here how the FR3D program disambiguates the two **cSS** cases by lowering the second **S** letter.
+[Section @sec:software] discusses available software tools more thoroughly; however, it is worth noting here how the FR3D program disambiguates the two **cSS** cases by lowering the second **S** letter.
 For easier lookup by nucleotide number, FR3D reports all basepairs in both orientations, e.g., **cWW G-C** is also reported as **cWW C-G**.
 If this would lead to ambiguities due to asymmetry, the second edge letter is lowered.
 For instance, a **cSs A-C** pair is also reported as the corresponding **csS C-A** pair, both meaning **cSS A-C** in the Leontis-Westhof terminology.

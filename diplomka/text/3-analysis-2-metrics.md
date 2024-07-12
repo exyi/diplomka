@@ -64,7 +64,7 @@ select pair, 3Lz0 and (chain J and resi 21 or chain I and resi \-20) -->
 
 The H-bond distances and angles do not suffice to assign a pair. 
 Even if we set strict limits on these parameters, we get many false positives.
-As shown in figure [-@fig:cWW-GC-length-and-covalent-angles], an ideal **cWW G-C** pair should have H-bond lengths of about 2.9 Å and all angles at about 120°.
+As shown [in figure @fig:cWW-GC-length-and-covalent-angles], an ideal **cWW G-C** pair should have H-bond lengths of about 2.9 Å and all angles at about 120°.
 We must allow some deviations, as no ideal pair exists in reality, and 0.5 Å and 20° tolerance is very conservative.
 Yet, we still find false positives like the one shown in @fig:cWW-GC-false-positive-hbond-lengthsangles.
 Tightening the limits slightly would dismiss this case, but we are hitting the other limit of this simple approach as we already loose many good pairs, as we can see using the
@@ -157,7 +157,7 @@ The choice of the coordinate system is thus essentially arbitrary, and we choose
 
 <!-- {????? The relative position of the pairing bases can be trivially described as the translation vector of the two coordinate systems, but this is already covered reasonably well by the hydrogen-bond parameters.} -->
 
-We choose to place the origin in the N1 or N9 atom, and align the glycosidic bond with the negative Y axis, as illustrated in figure [-@fig:MMB_reference_frame-purinepluspyrimidine].
+We choose to place the origin in the N1 or N9 atom, and align the glycosidic bond with the negative Y axis, as illustrated in [figure @fig:MMB_reference_frame-purinepluspyrimidine].
 The C6 pyrimidine or C8 purine atom is placed in negative X direction with zero Z coordinate, uniquely determining the new coordinate system.
 The coordinate system is similar to that used in [MMB (formerly RNABuilder)](https://doi.org/10.1109/TCBB.2010.104), except that the X and Y axis are swapped and negated.
 These modifications were proposed by Craig Zirbel to roughly align the coordinate system with the one used in FR3D, as it conveniently places the Watson-Crick edge in positive X and Y coordinates.
@@ -176,7 +176,7 @@ In our case, "the aircraft", i.e. the base, is pointing from the glycosidic bond
 
 <!-- TODO {UKAZAL BYCH TO NEJDRIV NA DVOU LETADLECH:} -->
 
-![Performing yaw (Z axis), pitch (Y), and roll (X) rotations on the 3diL A68:A126 **cWH G-A** basepair. Part A shows the starting position with the adenine aligned with axes. Parts B and C show the intermediary steps, while part D shows the final rotation with the guanine aligned opposite to the original adenine position.](../img/metrics-yaw-pitch-roll-3dil_A68_126_cWH-G-A.svg)
+![Performing yaw (Z axis), pitch (Y), and roll (X) rotations on the 3diL A68:A126 **cWH G-A** basepair. Part A shows the starting position with the adenine aligned with axes. Parts B and C show the intermediary steps, while part D shows the final rotation with the guanine aligned opposite to the original adenine position.](../img/metrics-yaw-pitch-roll-3dil_A68_126_cWH-G-A.svg){#fig:metrics-yaw-pitch-roll-3dil_A68_126_cWH-G-A}
 
 
 ### Summary of New Base Parameters

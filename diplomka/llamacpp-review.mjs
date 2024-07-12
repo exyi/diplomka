@@ -6,6 +6,20 @@ import { readFileSync } from 'node:fs'
 
 const args = process.argv.slice(2);
 
+if (args.includes("--help") || args.includes("-h") || args.includes("-?") || args.length == 0) {
+    console.log("Usage: node llamacpp-review.mjs out/for_review.md [options] | tee out/reviewed.md")
+    console.log()
+    console.log("* --api-url URL        HTTP endpoint where llama.cpp is running. By default it is expected to run on 127.0.0.1:8080")
+    console.log("* --no-cache-prompt    Send cache_prompt: false to the server")
+    console.log("* --model X            Specifies which format of instruction separation tokens to use (only affects chat mode). Available options are:")
+    console.log("  --model mistral      Mistral/Mixtral using [INSTR] and [/INSTR] tags")
+    console.log("  --model llama3       Llama3 family using <|start_header_id|> and <|end_header_id|> tags")
+    console.log("* --mode doc           Let the model complete a 'reviewed document', where each paragraph is quoted out and is followed by review comments")
+    console.log("* --mode chat          Run an interactive conversation with a reviewed. The document is rewieved paragraph by paragraph.")
+    console.log("* --mode grammar       Similar to doc, but we review sentence-by-sentence and prompt the model to only correct grammatical mistakes.")
+    console.log("* --mode grammar-chat  Similar to grammar, but run interactively as a chat conversation")
+}
+
 const no_cached_prompt = args.find(
     (_, index) => args[index - 1] === "--no-cache-prompt"
 ) ?? "false";
@@ -23,6 +37,10 @@ const model = args.find(
 if (!['mistral', 'llama3'].includes(model)) {
     throw new Error(`Invalid model family: ${model}, must be mistral/llama3`)
 }
+const API_URL = args.find(
+    (_, index) => args[index - 1] === "--api-url"
+) ?? 'http://127.0.0.1:8080'
+
 
 const fullContext = true
 const debug = args.some(a => a === "--debug")
@@ -32,7 +50,6 @@ const inputFile = args.find((_, index) => args[index - 1] === "--input");
 // for cached prompt
 let slot_id = -1;
 
-const API_URL = 'http://127.0.0.1:8080'
 
 const rollingContextSize = 10
 
