@@ -2,7 +2,7 @@
 
 
 Given the inherent variability of biological structures, we have to respect the fact that a basepair class cannot be reduced into a single optimal value for any measured parameter.
-Under identical conditions, a single geometry with minimal energy most likely exists, but basepairs in biological structures are seldom found in exactly the same conditions (TODO?? so that the concept of the lowest energy is not easily applicable).
+Under identical conditions, a single geometry with minimal energy most likely exists, but basepairs in biological structures are seldom found in exactly the same conditions and the concept of the lowest energy is therefore not easily applicable.
 We therefore aim to demonstrate that a basepair class is better represented by a distribution, rather than an idealized example.
 By insisting on the optimal conformation, we risk either observing the nucleic acid interactions infrequently, or classifying most PDB structures as erroneous.
 

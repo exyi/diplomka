@@ -99,6 +99,8 @@
 
         body.nopagedjs .link-footnote {
             float: none;
+            padding-left: 0;
+            text-indent: 0;
         }
 
         body.nopagedjs .link-footnote::before {
@@ -394,8 +396,8 @@
     $endfor$
 
 </head>
-<body class="pagedjs">
-<!-- <body class="nopagedjs"> -->
+<!-- <body class="pagedjs"> -->
+<body class="nopagedjs">
     <!-- Pandoc include-before: -->
     $for(include-before)$
         $include-before$
@@ -438,7 +440,7 @@
         </div>
     </div>
 
-    <div class="full-page" style="position: relative;">
+    <div class="full-page" style="position: relative; min-height: 50vh;">
         <div style="position: absolute; left:0; bottom: 0;">
             <p>I declare that I carried out this master thesis independently, and only with the cited sources,
                 literature, and other professional sources. It has not been used to obtain another or the same

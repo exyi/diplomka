@@ -18,7 +18,7 @@ main qualities:
 In order to be useful, each parameter must have a sharp enough distribution to help in identifying the specific basepair class.
 In @fig:cWH-G-G-yaw-hbond, we show that the **yaw** angle performs relatively well on the **cWH G-G** class, while the H-bond length has a comparatively long tail.
 Extending an allowed range of the H-bond length would still find new FR3D pairs, but would also quickly amass false positives
-For similar reasons, we entirely ruled out using ZXZ Euler angles in @sec:basepair-params-ypr, because their values span indiscriminatively the entire range of $[-180°, +180°)$.
+For similar reasons, we entirely ruled out using ZXZ Euler angles in @sec:basepair-params-ypr, because their values span indiscriminately the entire range of $[-180°, +180°)$.
 
 ![“Selectivity” of one of our proposed parameters (the yaw angle, @sec:basepair-params-ypr) and H-bond length (@sec:basepair-params-hbonds) demonstrated on **cWH G-G** pairs. Basepairs annotated by FR3D on the reference set (@sec:filter), compared with all close contacts (one of the defined H-bonds is ≤ 4.2 Å). We can see that, in this comparison, it is easier to select pairs based on the yaw angle.](../img/cWH-G-G-yaw-hbond.svg){#fig:cWH-G-G-yaw-hbond}
 
@@ -165,13 +165,11 @@ These modifications were proposed by Craig Zirbel to roughly align the coordinat
 We will calculate the **ZYX intrinsic Euler angles**
 between the coordinate systems.
 It offers a good interpretability as [so called "aircraft angles" **Yaw**, **Pitch**, and **Roll**](https://en.wikipedia.org/wiki/Aircraft_principal_axes).
-The three angles essentially describe the necessary manuevers of an aircraft going from the first glycosidic bond to the second one, with its wings aligned along the base plane.
+If we image an aircraft flying over the first glycosidic bond with its wings aligned along the base plane, the three angles describe the necessary maneuvers to align itself with the glycosidic bond of the second nucleotide.
+We can also easily to demonstrate these angles by issuing three subsequent `turn` commands in PyMOL.
 
-
- <!-- decribing the plane orientation relative to the Earth surface.
+<!-- decribing the plane orientation relative to the Earth surface.
 In our case, "the aircraft", i.e. the base, is pointing from the glycosidic bond of the first base to the second base, with the "wings" aligned along the plane of the first base. -->
-{TODO TO BYCH VYNECHAL:}
-It is also easy to demonstrate or verify the angles by three subsequent `turn` commands in PyMOL.
 
 ![A purine (A) and a pyrimidine (C) nucleotides overlaid over the base coordinate system for Yaw/Pitch/Roll angle calculation.](../img/MMB_reference_frame-purinepluspyrimidine.svg){#fig:MMB_reference_frame-purinepluspyrimidine}
 

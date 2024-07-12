@@ -118,7 +118,9 @@ def get_str_content(pandoc_json: dict) -> list[str]:
         elif key == "Code":
             assert isinstance(val[1], str)
             result.append(val[1])
-    pf.walk(pandoc_json, core, "", {})
+    # if isinstance(pandoc_json, dict)
+    #     core(pandoc_json['t'], pandoc_json.get('c'), "", {})
+    pf.walk([pandoc_json], core, "", {})
     return result
 
 def collect_links(out: dict[str, list[str]]):
@@ -271,8 +273,28 @@ def process_links(files: list[str], out_dir):
         json.dump(references, f, indent=4)
     files.append(os.path.join(out_dir, "references.json"))
 
-def sentence_spacing(key, val, fmt, meta):
-    pass
+def sentence_spacing(key: str, val: ty.Any, fmt, meta):
+    if val and not isinstance(val, (str)):
+        # print(key, val)
+        if key == 'Para':
+            new_val = [*val]
+            content = new_val
+        elif key == "Image":
+            content = [*val[1]]
+            new_val = [*val]
+            new_val[1] = content
+        else:
+            return None
+        str_c = ""
+        for i in range(len(content)):
+            if i > 0 and (content[i]['t'] == 'SoftBreak'):
+                # print(str_c)
+                if str_c.strip().endswith("."):
+                    content[i] = { 't': 'Str', 'c': '\u2005 ' }
+
+            str_c += re.sub(r"\[\w+\]", "", "".join(get_str_content(content[i])))
+
+        return { 't': key, 'c': new_val }
 
 def process_typography(files: list[str]):
     actions = [
@@ -448,15 +470,29 @@ def reexport_pandoc_for_review(files, output_file):
     """
     run(f"Pandoc reexport for review", "pandoc", "--to=markdown", "--wrap=preserve", "--output=" + output_file, *files)
 
+def reexport_docx(files, out_dir, output_file):
+    """
+    """
+    args = [
+        "--data-dir=./"+out_dir,
+        "--standalone",
+        "--resource-path=text:html:images",
+        "--metadata-file=text/metadata.yaml",
+        "-F", "pandoc-crossref",
+        "--toc", "--toc-depth=4",
+        "--number-sections"
+    ]
+    # run(f"Pandoc export docx", "pandoc", *args, "--to=docx", "--output=" + output_file + ".docx", *files)
+    # run(f"Pandoc export odt", "pandoc", *args, "--to=odt", "--output=" + output_file + ".odt", *files)
+
 def pandoc_render(files, output_file):
     commit = run(f"git current commit", "git", "rev-parse", "--short", "HEAD", check=False, capture_output=True).stdout.strip()
     commit_num = run(f"git commit number", "git", "rev-list", "--count", "HEAD", check=False, capture_output=True).stdout.strip()
     cmd = ["pandoc",
-           "--from=json", "--to=html",
+           "--from=json",
            "-F", "pandoc-crossref",
         #    "--embed-resources",
            "--resource-path=text:html:images",
-           "--output=" + output_file,
            "--metadata-file=text/metadata.yaml",
            f"--metadata=generated_at:{str(datetime.datetime.now(tzlocal.get_localzone()))}",
            f"--metadata=generated_from_commit:{commit}",
@@ -466,10 +502,9 @@ def pandoc_render(files, output_file):
         #    "--shift-heading-level-by=1",
            "--lua-filter=html/shift-headings.lua",
            "--toc", "--toc-depth=4",
-           "--number-sections", "--section-divs", "--katex"]
-    for file in files:
-        cmd.append(file)
-    run(f"Render {output_file} with Pandoc", *cmd)
+           "--number-sections", "--section-divs"]
+    run(f"Render {output_file} with Pandoc", *cmd, "--to=html", "--webtex", "--output=" + output_file + ".html", *files)
+    # run(f"Render {output_file}.epub with Pandoc", *cmd, "--to=epub", "--output=" + output_file + ".epub", "--webtex", *files)
 
 def main(argv):
     parser = argparse.ArgumentParser(description='Build the thesis')
@@ -488,7 +523,9 @@ def main(argv):
     files = pandoc_parse("text", "out/parsed")
     reexport_pandoc_for_review(files, "out/for_review.md")
     process_links(files, "out/parsed")
-    pandoc_render(files, "out/thesis.html")
+    process_typography(files)
+    reexport_docx(files, "out", "out/thesis")
+    pandoc_render(files, "out/thesis")
 
     if not options.skip_pdf:
         build_pdf("out/thesis.html")

@@ -6,7 +6,7 @@ TODO zapracovat Bohdanovo review
 
 Nucleic acids are some of the most important biological molecules, and the study of their structure and function is critical to understanding the fundamental principles of life.
 The [well known double-stranded helix](https://doi.org/10.1038/171737a0) dominates the structure of DNA, protecting its valuable information content.
-On the other hand, RNA molecules often form complicated structures, often with dynamic catalytic domains such as those in the ribosome <https://doi.org/10.1201/9781315735368> TODO cit The_Ribosome_Is_a_Ribozyme page 346.
+On the other hand, RNA molecules often form complicated structures, often with dynamic catalytic domains such as those in the ribosome <https://doi.org/10.1201/9781315735368> <!-- TODO cit The_Ribosome_Is_a_Ribozyme page 346 -->.
 A number of RNAs can even have catalytic activity independent on proteins (<https://doi.org/10.1261/rna.031401.111>, <https://doi.org/10.1038/nchembio.1846>).
 Similarly to the DNA helices, these complex structures are also driven by the pairwise interaction of nucleotide bases.
 However, these interactions have more diverse forms than the two most common basepairs described by Watson and Crick.
