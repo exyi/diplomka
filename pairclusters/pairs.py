@@ -797,8 +797,8 @@ def hbond_stats(
 
     dist = get_distance(atom1, atom2)
 
-    # assert dist > 1.55, f"atoms too close for h-bond: {atom1.full_id} {atom2.full_id} ({np.linalg.norm(atom1.coord - atom2.coord)} < 2, {atom1.coord} {atom2.coord})"
-    assert dist < 20, f"atoms too far for h-bond: ({np.linalg.norm(atom1.coord - atom2.coord)} > 20, {atom1.coord} {atom2.coord}, {atom1.full_id} {atom2.full_id})"
+    # assert dist > 1.55, f"atoms too close for H-bond: {atom1.full_id} {atom2.full_id} ({np.linalg.norm(atom1.coord - atom2.coord)} < 2, {atom1.coord} {atom2.coord})"
+    assert dist < 20, f"atoms too far for H-bond: ({np.linalg.norm(atom1.coord - atom2.coord)} > 20, {atom1.coord} {atom2.coord}, {atom1.full_id} {atom2.full_id})"
 
     result = HBondStats(
         length=dist,
@@ -824,7 +824,7 @@ def get_hb_atom(n, r1: AltResidue, r2: AltResidue):
         raise ValueError(f"Invalid atom name: {n}")
 
 def pair_hbonds_stats(pair: PairInformation) -> Optional[List[Optional[HBondStats]]]:
-    """Returns stats for all h-bonds in the given basepair (assuming the `pair.type`)"""
+    """Returns stats for all H-bonds in the given basepair (assuming the `pair.type`)"""
     r1, r2 = pair.res1, pair.res2
     rp1, rp2 = pair.position1, pair.position2
     # if r1.resname > r2.resname:
@@ -1061,7 +1061,7 @@ def remove_duplicate_pairs_phase1(df: pl.DataFrame):
 def remove_duplicate_pairs(df: pl.DataFrame):
     """
     Removes duplicate symmetric pairs - i.e. cHS-AG and cHS-GA.
-    If the order is ambiguous according to `remove_duplicate_pairs_phase1`, keeps the one with shorter h-bonds, or with lower left residue number
+    If the order is ambiguous according to `remove_duplicate_pairs_phase1`, keeps the one with shorter H-bonds, or with lower left residue number
     """
     df = remove_duplicate_pairs_phase1(df)
 

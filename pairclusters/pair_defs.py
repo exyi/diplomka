@@ -416,7 +416,7 @@ my_hbonding_atoms: dict[tuple[str, str], list[tuple[str, str, str, str]]] = {
 hbonding_atoms = read_pair_definitions()
 
 def is_ch_bond(pair_type: PairType, b: tuple[str, str, str, str]) -> bool:
-    """Does the h-bond involve a carbon atom?"""
+    """Does the H-bond involve a carbon atom?"""
     return b[1][1] == 'C' or b[2][1] == 'C'
 
 def is_bond_to_sugar(pair_type: PairType, b: tuple[str, str, str, str]) -> bool:
