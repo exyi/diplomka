@@ -50,7 +50,7 @@ On the other hand, the source code of [3DNA was made public in 2016](https://x3d
 <!-- Given unavailability its source code, we do not know what exactly are the base determination rules in DSSR.
 It appears to be a set of rules based on the standard basepair parameters. -->
 
-#### Basepair Parameters {#sec:software-DSSR-basepair-params}
+#### Basepair parameters {#sec:software-DSSR-basepair-params}
 
 DSSR is capable of calculating standard base parameters as discussed in @sec:std-base-parameters.
 To obtain the parameter values, DSSR must be executed with the `--analyze` flag, which results in the generation of multiple files containing lists of identified pairs and their calculated parameters.

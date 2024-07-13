@@ -1,4 +1,4 @@
-# Software Implementation
+# Software implementation
 
 This section outlines how we are implementing the data processing and presentation pipeline.
 The aim is to facilitate reproducibility of the results, explain some technical decisions, as well as provide a place to acknowledge and cite other software this project relies on.

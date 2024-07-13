@@ -8,7 +8,7 @@ For better clarity, we will use the following conventions, unless noted otherwis
 * To avoid the ambiguity of letters and numbers, PDB identifiers (codes) are written in lowercase letters, except for the letter L.
 * If a figure of a molecule isn't representative of its 3D structure, we use a chemical diagram. If it is planar projection of real 3D structure, we show a 3D render (from PyMOL).
 
-## List of Abbreviations {.unnumbered}
+## List of abbreviations {.unnumbered}
 
 For brevity, the list only includes ambiguous or uncommon abbreviations.
 
@@ -29,7 +29,7 @@ For brevity, the list only includes ambiguous or uncommon abbreviations.
 
 **cWW**, **tWW**, **cWH**, **tWH**, **cWS**, **tWS**, **cHH**, **tHH**, **cHS**, **tHS**, **cSS**, **tSS** are abbreviated basepair families according to the Leontis-Westhof terminology. See @sec:bp-terminology-lw or <https://doi.org/10.1017/s1355838201002515> for explanation.
 
-## Single Letter Abbreviations {.unnumbered}
+## Single letter abbreviations {.unnumbered}
 
 Single letters are special category because of their ambiguity.
 In this work, we use the letters **A**, **T**, **U**, **G**, **C** as the DNA and RNA bases -- adenine, thymine, uracil, guanine and cytosine.

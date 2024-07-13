@@ -16,7 +16,7 @@ This section outlines the basic use cases, while notes about implementation can 
 It should be noted that it was developed primarily as a tool for internal use, with more emphasis on flexibility and comprehensive functionality than a gentle learning curve.
 Also note that the application is rather gluttonous when it comes to network bandwidth and system memory (it runs the database in the browser).
 
-### Browsing Basepairs
+### Browsing basepairs
 
 Upon first visit, we are greeted with a home page listing all basepair classes in a table format, reminiscent of <https://doi.org/10.1093/nar/gkf481>.
 We are expected to select a class of interest, either by clicking a cell in the table, or using the menu at the top of the screen.
@@ -41,7 +41,7 @@ Regardless, we can click on each basepair to display detailed description:
 
 TODO screenshot modalu
 
-### Comparing Sets
+### Comparing sets
 
 When we switch to the **Pairs Selected by New Parameters** data source, we get the option to "**Enable FR3D Comparison**".
 We get a union of the basepairs returned by FR3D and the set returned by our proposed criteria.
@@ -55,7 +55,7 @@ TODO screenshot diff
 At the time of writing and submission of the thesis, the criteria are still subject to change and are dynamically loaded from a shared Google Sheet.
 The exact results will likely be different from the ones presented here.
 
-### Filtering Basepairs
+### Filtering basepairs
 
 To examine the behavior of the parameters from @sec:basepair-params, we can switch from **Basic** to **Parameter Ranges**, and try filtering out basepairs with certain parameter values.
 A frequent request is to see whether we should include basepairs with overly stretched H-bonds -- given that such interaction typically exhibits minimal energies at 4.0 Å [TODO co kde citovat?], which FR3D usually permits:
@@ -70,7 +70,7 @@ Upon inspection, two of these look arguably borderline, while one case is surpri
 
 TODO screenshot https://basepairs.datmos.org/#tWW-A-A/ds=fr3d-f&hb0_L=3.6..&hb1_L=3.6..
 
-### Editing the Criteria
+### Editing the criteria
 
 Most importantly, the application enables interactive editing of the selection criteria.
 For demonstration, we can try to improve (or impair) the annotation of the **cWH C-C** class.

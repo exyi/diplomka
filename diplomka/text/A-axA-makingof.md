@@ -1,4 +1,4 @@
-# Making Of {.unnumbered}
+# B. Making Of {.unnumbered}
 
 ## The Research Group {.unnumbered}
 
@@ -13,7 +13,7 @@ The notable exceptions are:
 
 All active research group members were: B. Schneider, J. Černý, L. Biedermannová, H. M. Berman, E. Westhof, C. Zirbel, M. Magnus, and R. Joosten.
 
-## Use of Large Language Models
+## Use of Large Language Models {.unnumbered}
 
 Charles University has an official statement on AI use: [ai.cuni.cz/AI-17.html](https://ai.cuni.cz/AI-17.html){.link-no-footnote} and also a set of informal recommendations for students: [ai.cuni.cz/AI-11.html](https://ai.cuni.cz/AI-11.html){.link-no-footnote}, which essentially allows the use of tools with advanced artificial intelligence.
 However, we students have to be transparent about how we used the tools, and we cannot rely solely on AI to do the science or learning for us.

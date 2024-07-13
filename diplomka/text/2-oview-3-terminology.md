@@ -1,6 +1,6 @@
 ## Classification of Basepairs{#sec:bp-terminology}
 
-### The Saenger System {#sec:bp-terminology-seanger}
+### The Saenger system {#sec:bp-terminology-seanger}
 
 ![Saenger's system of basepair types, [from the](https://doi.org/10.1007/978-1-4612-5190-3) book, page 120](../img/saenger-system-merged.png){#fig:saenger-system-merged}
 
@@ -9,7 +9,7 @@ The first such scheme we are aware of was described by [W. Saenger in the book '
 The Saenger's classes are identified using a single ordinal number and are grouped into five higher-level categories based on geometrical symmetry and pairing bases.
 
 
-### The Leontis-Westhof System of Three Edges {#sec:bp-terminology-lw}
+### The Leontis-Westhof system of three edges {#sec:bp-terminology-lw}
 
 [N. B. Leontis and E. Westhof proposed a more systematic approach in a 2001 paper](https://doi.org/10.1017/s1355838201002515).
 The authors identified that each nucleotide interacts with one of its three edges (@fig:LW-3-edges-UG).
@@ -68,7 +68,7 @@ Some basepairs defined by Westhof and Leontis do bind exclusively to the O2' rib
 
 <!-- SVGčko nefunguje?? -->
 
-### Basepair Classification by the DSSR Program
+### Basepair classification by the DSSR program
 
 The software tool X3DNA DSSR (see also @sec:software-DSSR) employs a distinct scheme for differentiating **cis** and **trans** orientations.
 Instead of discrimination the cis and trans orientations in the L-W system, [DSSR considers whether the bases are flipped relative to their **Z** axis](https://x3dna.org/articles/specification-of-base-pairs-in-3dna).
@@ -88,7 +88,7 @@ The following block is an example DSSR output -- we can see the `-`/`+` and triv
 16   59  # o  30 A.H2U16  A.U59  u+U  --
 ```
 
-### Trivial Basepair Names
+### Trivial basepair names
 
 Some classes of basepairs have trivial (popular) names, which generally predate any attempts to systematize the terminology.
 Apart from the Watson-Crick canonical pairs, important ones include the Wobble (**cWW G-U**), Hoogsteen (**cWH U-A**), and Reverse Hoogsteen (**tWH U-A**, **tWH U-C**) basepairs.

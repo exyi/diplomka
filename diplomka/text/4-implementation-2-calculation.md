@@ -36,7 +36,7 @@ def hbond_geometry(res1: Residue, res2: Residue, hbond):
     return length, donor_angle, acceptor_angle
 ```
 
-### Angle Between Bases Forming a Pair
+### Angle between bases forming a pair
 
 The second set of parameters requires determination of the base planes, represented as a translation vector and an orthonormal basis of the new coordinate system.
 It is important to note that we are looking for optimal plane by least squared Euclidean (L2) distance, instead of the distance along the Y coordinate.

@@ -11,7 +11,7 @@ Specifically in <https://doi.org/10.1006/jmbi.1998.2390>, Lu and Olson claim rig
 The rest of the publication backs the premise, and we agree that it is the case for canonical basepairs (and all pure Watson-Crick edge pairs).
 <!-- The discrepancies have been resolved for the Watson-Crick / Watson-Crick pairs (<https://doi.org/10.1006/jmbi.1998.2390>, <https://doi.org/10.1006/jmbi.2001.4987>), but  -->
 
-### The Standard Reference Frame
+### The standard reference frame
 
 [A standard reference frame was defined as the “Tsukuba convention”](https://doi.org/10.1006/jmbi.2001.4987), few years after the <https://doi.org/10.1006/jmbi.1998.2390> publication.
 The reference frame essentially defines a coordinate system for each of the five common nucleotides -- the Tsukuba convention includes a table of coordinates for each heavy atom in each base.
@@ -43,7 +43,7 @@ However, for reasonable practical cases, this difference should be small.
 It could also be easily remedied by averaging the two possible results, or defining that purine is always the base nucleobase.
 We do not know exactly how DSSR handles this problem, but Curves+ claims to take the average.
 
-### Non-canonical Basepairs in the Standard Reference Frame
+### Non-canonical basepairs in the standard reference frame
 
 When the standard reference frame is applied to all types of basepairs, the meaning of the basepair parameters is somewhat distorted.
 The values can still be useful, but we need to be cautious in their intuitive interpretation.

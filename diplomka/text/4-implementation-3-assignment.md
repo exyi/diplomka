@@ -14,7 +14,7 @@ We omit the `family` column in the input table of all close residues, and substi
 In a third step, we check that all the parameters lie in the defined ranges using the `apply_filter.py` script.
 
 
-### Whole Structure Invariants
+### Whole structure invariants
 
 While the above-mentioned procedure works, we can do further post-processing to make sure that the reported basepairs satisfy the following invariants:
 

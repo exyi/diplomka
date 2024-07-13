@@ -13,7 +13,7 @@ In this work, we will generally not focus on canonical Watson-Crick A-U and G-C 
 However, they will serve as valuable references in calibrating our measurements to the well-known optimal canonical basepair parameters.
 We will use the [hydrogen-bond lengths provided as restraints for building nucleic acid structures](https://doi.org/10.1107/S2059798321007610) as the reference values for the comparison.
 
-### Choice of a Summary Statistic
+### Choice of a summary statistic
 
 There are several options available for calculating the _middle value_ of a distribution.
 Obvious choices are the arithmetic mean and the median (the 50th percentile).
@@ -21,7 +21,7 @@ However, other percentiles, such as the 45th percentile, could potentially offer
 Calculating the mean of a measured hydrogen bond length will likely be sensitive to outliers at the high end.
 To mitigate this issue, we could, for instance, use a trimmed mean, choosing to filter out $X$ percentiles from each end before the calculation.
 
-#### KDE Mode
+#### KDE mode
 
 A more sophisticated option involves using [the Kernel Density Estimate (KDE)](https://en.wikipedia.org/wiki/Kernel_density_estimation) of the distribution and measuring its mode, i.e., finding the maximum of the KDE function.
 The density estimate requires a bandwidth parameter which has a large impact on the resulting distribution.
@@ -42,7 +42,7 @@ However, since this usage is slightly uncommon, it is crucial to verify its stab
 It is also worth noting that using KDE has a significantly higher computational cost than a simple mean or median, a naive implementation of the mode calculation has a quadratic algorithmic complexity.
 Furthermore, the determination of a confidence interval requires some form of resampling, instead of a simpler application of the central limit theorem.
 
-#### Comparing the Methods
+#### Comparing the methods
 
 We can conduct a simple experiment to choose a _middle value_ statistic which performs well.
 The evaluation criteria will be:
@@ -95,7 +95,7 @@ On the grounds of this evaluation, we will primarily utilize the KDE mode with b
 Although it does not appear to be substantially better than the alternatives, it generalizes well onto modular arithmetic, necessary for some angles.
 
 
-### Circular Mean
+### Circular mean
 
 A significant number of the measured parameters are angles, ranging from $-180°$ to $180°$ where $-180° = 180°$.
 An arithmetic average does not take into account that $-180° = 180°$, producing useless results if the distribution spans this boundary.
@@ -127,7 +127,7 @@ Please note that the interval upper bound may be numerically lower than the lowe
 For instance, an interval $[160°, -170°]$ means the same as $[160°, 180°] \cup [-180°, -170°]$.
 
 
-### The Most Typical Basepair {#sec:opt-params-exemplar}
+### The most typical basepair {#sec:opt-params-exemplar}
 
 For presentations and a basic RMSD distance based validation, it is convenient to find geometrically the most typical basepair in each class.
 After we calculate the KDE mode and normalize all parameters by their standard deviations, we

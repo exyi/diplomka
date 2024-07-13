@@ -21,7 +21,7 @@ However, in RNA the total cardinality of all non-canonical pairs is actually lar
 Even in DNA structures, 25% of all basepairs are non-canonical, notable biologically relevant structures are the [i-Motif](https://doi.org/10.1093/nar/gky735) and the [G-quadruplex](https://doi.org/10.1016/j.trechm.2019.07.002).
 <!-- However, it must be noted that the PDB is heavily biased towards _interesting_ structures -->
 
-## Aims of the Project
+## Aims of the project
 
 
 The higher-level objective of our working group is to provide unambiguous definitions for the basepair classes of the Leontis-Westhof system.

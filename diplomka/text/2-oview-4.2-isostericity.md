@@ -1,4 +1,4 @@
-## Basepair Isostericity
+## Basepair isostericity
 
 One of the primary motivations for studying basepairs is to improve our understanding the biological role of mutations in nucleic acid structures.
 It is widely known that the canonical **G-C** and **A-U** pairs are similar in their overall shape with nearly identical distance and angle between the two glycosidic bonds.

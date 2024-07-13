@@ -23,7 +23,7 @@ For similar reasons, we entirely ruled out using ZXZ Euler angles in @sec:basepa
 ![“Selectivity” of one of our proposed parameters (the yaw angle, @sec:basepair-params-ypr) and H-bond length (@sec:basepair-params-hbonds) demonstrated on **cWH G-G** pairs. Basepairs annotated by FR3D on the reference set (@sec:filter), compared with all close contacts (one of the defined H-bonds is ≤ 4.2 Å). We can see that, in this comparison, it is easier to select pairs based on the yaw angle.](../img/cWH-G-G-yaw-hbond.svg){#fig:cWH-G-G-yaw-hbond}
 
 
-### The Number of Parameters
+### The number of parameters
 
 If we assume that the molecules have an ideal valence geometry the relative position of two bases is completely determined by six numbers.
 The standard basepair parameters (@sec:std-base-parameters) can be one such description — essentially, we only need three translation coordinates and three angles of relative rotation.
@@ -78,7 +78,7 @@ Tightening the limits slightly would dismiss this case, but we are hitting the o
 <!-- fetch 3Lz0
 select pair, 3Lz0 and (chain J and resi 21 or chain I and resi \-20) -->
 
-### Angle Between Bases Forming a Pair
+### Angle between bases forming a pair
 
 After hydrogen bonds, the second most important feature of pairing bases is their coplanarity.
 Coplanarity is not easily defined by a single parameter. 
@@ -179,6 +179,6 @@ In our case, "the aircraft", i.e. the base, is pointing from the glycosidic bond
 ![Performing yaw (Z axis), pitch (Y), and roll (X) rotations on the 3diL A68:A126 **cWH G-A** basepair. Part A shows the starting position with the adenine aligned with axes. Parts B and C show the intermediary steps, while part D shows the final rotation with the guanine aligned opposite to the original adenine position.](../img/metrics-yaw-pitch-roll-3dil_A68_126_cWH-G-A.svg){#fig:metrics-yaw-pitch-roll-3dil_A68_126_cWH-G-A}
 
 
-### Summary of New Base Parameters
+### Summary of new base parameters
 
 TODO odrazkovy seznam

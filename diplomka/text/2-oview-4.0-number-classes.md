@@ -1,6 +1,6 @@
 ## Special Cases of the Leontis-Westhof Naming Scheme {#sec:bp-terminology-lw-edgecase}
 
-### Symmetry of L-W Classes
+### Symmetry of L-W classes
 
 As presented in the previous section, the L-W system theoretically distinguishes 156 distinct classes of basepairs, when treating uracil as equivalent to thymine.
 On each side of the pair, there are three options for the edge and four options for the nucleotide, resulting in a total of twelve unique combinations -- the L-W families.
@@ -50,7 +50,7 @@ When we add these and multiply by 2 to account for the **cis** or **trans** choi
 
 $$2 \cdot \left( 16 \cdot 3 + 10 \cdot 3 \right) = 156$$ -->
 
-### Sugar-Sugar Symmetry
+### Sugar-Sugar symmetry
 
 ![The C-A pair is different from A-C -- it is shifted by ~3 Å horizontally, resulting in a different set of H-bonds <https://doi.org/10.1093/nar/gkf481>](../img/cSS-CA-vs-AC.png){#fig:cSS-CA-vs-AC}
 
@@ -72,7 +72,7 @@ If the basepair is **cis**, it is represented with filled symbols (`●`, `■`,
 The resulting basepair families are then represented as `⎼○⎼` (or `○⎼○`) for **tWW**, `●⎼▶` for **cWS**, and `⎼▶⎼` for **cSS**.
 Note that only the sugar edge has an asymmetric symbol, intuitively indicating its asymmetry and allowing placing of the symbol on a diagram in any orientation.
 
-#### FR3D Family Lowercasing {#sec:bp-fr3d-lowercasing}
+#### FR3D family lowercasing {#sec:bp-fr3d-lowercasing}
 
 [Section @sec:software] discusses available software tools more thoroughly; however, it is worth noting here how the FR3D program disambiguates the two **cSS** cases by lowering the second **S** letter.
 For easier lookup by nucleotide number, FR3D reports all basepairs in both orientations, e.g., **cWW G-C** is also reported as **cWW C-G**.
@@ -87,7 +87,7 @@ For instance, the exact H-bonds in **cWW A-A** pairs would be ambiguous, as thes
 □⎼▷
 ○⎼● -->
 
-### Alternative H-bond Sets {#sec:bp-terminology-lw-edgecase-a}
+### Alternative H-bond sets {#sec:bp-terminology-lw-edgecase-a}
 
 In a few classes, it is possible that the bases can interact by two possible sets of H-bonds on the same edges and the same cis/trans orientation.
 We observe these _subclasses_ for in **cWW G-U**, **tWW C-C** and **tWW U-U**, but it is possible that other, less common ones, exist.
@@ -103,7 +103,7 @@ In this work, we follow the FR3D convention, although we have had debates on rev
 
 ![The two alternatives of the **tWW U-U** pair. Although the only Watson-Crick edge is involved in both cases, two pairs of hydrogen bonds are possible and both options are well populated in PDB structures.](../img/tWW-U-U-vs-tWWa-U-U.png){#fig:tWW-U-U-vs-tWWa-U-U}
 
-### Bifurcated Hydrogen Bonds
+### Bifurcated hydrogen bonds
 
 Finally, to underline the saying that [in biology, there is a thousand
 exceptions to each rule](https://tandy.cs.illinois.edu/Hunter_MolecularBiology.pdf), a special category for basepairs between the three edges also exists.

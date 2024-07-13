@@ -2,7 +2,7 @@
 
 The script `pairs.py` analyzes all classes of basepairs and computes the geometric parameters (@sec:basepair-params) from mmCIF files downloaded from [the RCSB PDB](https://doi.org/10.1093/nar/28.1.235).
 
-### Input Format
+### Input format
 
 This program does not determine which nucleotides are base-pairing by itself; this information must be provided as input.
 Since we calculate the list of pairs using the fr3d-python package, the input format is identical to FR3D output.
@@ -18,7 +18,7 @@ Other columns are allowed and preserved on the output.
 This data format provides compatibility with other software tools used at IBT.
 The same columns identify the basepairs in the output files.
 
-### Produced Information
+### Produced information
 
 The script loads all PDB structures from the input table using the [BioPython library](https://doi.org/10.1093/bioinformatics/btp163) and computes the following:
 
@@ -31,7 +31,7 @@ The script loads all PDB structures from the input table using the [BioPython li
 * An `is_parallel` column indicating if the pair is part of a parallel or an antiparallel chain.
 * Structure Name (`structure_name`), Determination Method (`structure_method`), Structure Deposition Date (`deposition_date`), and Resolution (`resolution`) metadata columns.
 
-### Output Format
+### Output format
 
 The output is a single table with a row for each basepair and a column for each computed parameter.
 The `pairs.py` script outputs two files — a CSV table and an equivalent Parquet table.
@@ -145,7 +145,7 @@ DSSR provides a machine-readable JSON output format using the `--json` option, b
 Since DDSR only calculates the base parameters when the `--analyze` is specified, we have to parse the values from the loosely formatted text files. -->
 
 
-### Partitioning and Parallelism
+### Partitioning and parallelism
 
 By default, the `pairs.py` script loads all basepairs into memory to group them by PDB ID and subsequently process each structure individually.
 This enables straightforward parallel processing using the Python `multiprocessing` module: we group the table of pairs by PDB ID and use `multiprocessing.Pool.map(...)` to process each structure.
