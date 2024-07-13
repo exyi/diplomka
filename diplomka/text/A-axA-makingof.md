@@ -23,7 +23,7 @@ First I thought that it would be easier to just avoid using LLMs, avoid this dis
 Then I realized, I already have half of the software done, with Github Copilot enabled.
 With the **Avoid** option greyed out, I might as well try all other models and maybe learn something from it. -->
 
-Github Copilot had probably the largest impact on this work, although it didn't write a single word in this PDF.
+Github Copilot had probably the largest impact on this work, although it did not write a single word in this PDF.
 It is a service developed by Github, owned by Microsoft, and it is a code autocompletion tool, based on OpenAI's LLMs.
 I did not utilize the "Copilot chat" feature.
 

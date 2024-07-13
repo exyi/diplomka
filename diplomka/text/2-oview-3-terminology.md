@@ -104,7 +104,7 @@ For instance, the **tWS C-G** basepair shown in @fig:tWS-CG-1jj2-9_46-9_4 satisf
 ![**tWS G-C**: two polar base-to-base H-bonds, but not accounted for in the Saenger system](../img/tWS-CG-1jj2-9_46-9_4.png){#fig:tWS-CG-1jj2-9_46-9_4 .img-width50}
 
 <!-- We have not seen a recent publication using the Saenger's scheme, but the neither the Leontis-Westhof system is universally adopted.
-It is more general and maybe more importantly it is systematic -- we don't need to remember 28 numbers to be able to identify the basepair type when viewing a molecular structure. -->
+It is more general and maybe more importantly it is systematic -- we do not need to remember 28 numbers to be able to identify the basepair type when viewing a molecular structure. -->
 
 <!-- Being more general, the L-W system includes pairs which some might not want to call "base pairs".
 A number of described basepairs only bind with a single hydrogen bonds or requires binding to ribose O2', restricting the class to RNA.

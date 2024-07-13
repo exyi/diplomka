@@ -170,6 +170,13 @@
             [ "George A.", "Jeffrey" ]
         ]
     },
+    "isbn:978-0815340812": {
+        "url": null,
+        "isbn": "978-0815340812",
+        "published_date_parts": [ 2009,10,20 ],
+        "title": "Biomolecular Crystallography: Principles, Practice, and Application to Structural Biology",
+        "authors": [ [ "Bernhard", "Rupp" ] ]
+    },
     "https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.gaussian_kde.html": {
         "title": "scipy.stats.gaussian_kde — SciPy v1.13.0 Manual",
         "authors":  [ [ "", "SciPy contributors" ] ]

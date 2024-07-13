@@ -73,28 +73,24 @@ To avoid redundancy, we deduplicate the pair using the following rules:
     * The referred families are **WH**, **WS**, **HS** (cis or trans),
     * while **HW**, **SW**, **SH** pairs are always dropped.
 2. If FR3D lowercased the first family edge letter (@sec:bp-fr3d-lowercasing), we drop the pair.
-3. If the pair nucleotides aren't equal, we keep the variant ordered according to the **A** > **G** > **C** > **U** = **T** rule.
+3. If the pair nucleotides are not equal, we keep the variant ordered according to the **A** > **G** > **C** > **U** = **T** rule.
     * For instance, **cWW G-C** is preferred to **cWW C-G**, as `C` is before `G` in the ordering.
-4. Otherwise, the pair type name is completely symmetric (e.g., **cWW G-G**).
+4. Otherwise, the pair type name is completely symmetric (`cWW G-G`).
     * We exclude the pair with longer H-bonds.
     * If the H-bonds are the same, we keep the pair with lower UnitID of the first nucleotide.
 
-### Pairs between asymmetric unit {#sec:impl-collection-symmetry}
+### Pairs between symmetry-related nucleotides {#sec:impl-collection-symmetry}
 
-<!-- TODO: přepsat asi
+Asymmetric unit, the smallest part of the crystal [from which the
+whole crystal can re-built](isbn:978-0815340812), does not in all crystal structures contain the whole biologically relevant <!-- molecule or --> molecular complex.
+As an example, double-helical DNA or RNA of a palindromic sequence can have only one nucleotide strand in the asymmetric unit while the biologically relevant is the duplex.
+Because PDB files contain coordinates only for one asymmetric unit we have to consider possibility for the basepair assignment across the symmetry operation as two bases forming the pair can be symmetry-related. 
 
-* uspořádání je přes symetrické elementy -->
+![The asymmetric unit of [`6ros`](https://www.rcsb.org/structure/6ROS) structure is formed by a single strand, but the **biological assembly** is a duplex. The mmCIF file contains the coordinates of only one strand, and the second one is its symmetric copy. All basepairs are formed between the two strands.](../img/6ros-symmetry-illustration.png)
 
-Crystals are made of the same molecule repeated many times but not necessarily always in the same orientation.
-The X-Ray structures in PDB only contain coordinates for one of the repeating fragments, we refer to it as the **asymmetric unit**.
-If the molecule of interest forms a symmetric dimer, interactions between the asymmetric units are potentially relevant for biology.
-In nucleic acids, double helices and tetraplexes may be completely symmetric, with the pairs forming between symmetry-related molecules.
-
-![The asymmetric unit of [`6ros`](https://www.rcsb.org/structure/6ROS) structure is formed by a single strand, but the **biological assembly** is a duplex. The mmCIF file contains the coordinates of only one strand, and the second one is a symmetric copy. All basepairs are formed between the two strands.](../img/6ros-symmetry-illustration.png)
-
-PDBx/mmCIF files include the complete description of the crystal symmetry as the crystal space group, and the files also encode the biologically relevant symmetry operation as [a rotation matrix and a translation in the `pdbx_struct_oper_list` CIF category](https://mmcif.wwpdb.org/dictionaries/mmcif_pdbx_v50.dic/Categories/pdbx_struct_oper_list.html).
-This category may contain any number of transformations, labeled by the [PDB symmetry operation code](http://www.bmsc.washington.edu/CrystaLinks/man/pdb/part_74.html).
-We thus avoid handling the space group operations and rely on the provided transformation matrices.
+PDBx/mmCIF files include the information to complete the biological unit as [a rotation matrix and a translation vector in the `pdbx_struct_oper_list` mmCIF category](https://mmcif.wwpdb.org/dictionaries/mmcif_pdbx_v50.dic/Categories/pdbx_struct_oper_list.html).
+This category may contain any number of transformations, labeled by the [PDB symmetry operation code] (http://www.bmsc.washington.edu/CrystaLinks/man/pdb/part_74.html).
+We thus do not have to handle the space group operations and solely rely on the provided transformation matrices.
 
 <!-- ```
 loop_                                                                                                                          

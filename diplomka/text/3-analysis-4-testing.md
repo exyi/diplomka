@@ -87,7 +87,7 @@ The underlying issue in **cSS A-C**, **cHH A-G** and many other smaller classes 
 A single H-bond does not provide enough spatial constraint on the relative position, and the same problem occurs when both H-bonds involve a single **O2'** atom.
 We intend to solve this by adding a spatial distance constraint (a “virtual H-bond”), for instance, ensuring that the six-membered rings do not drift too far apart.
 
-In the case of **cSS C-A** and **tSS A-G** classes, we'd argue that the FR3D assignment is not the ideal target, and therefore, we do not intent to match it perfectly.
+In the case of **cSS C-A** and **tSS A-G** classes, we would argue that the FR3D assignment is not the ideal target, and therefore, we do not intent to match it perfectly.
 The current disparity is not substantial (20%), but our _“false positives”_ often look better than other basepairs identified by FR3D.
 It is hard to demonstrate without multiple pages of figures, but figure TODO shows a single example of a "good false positive" and one example of a "good false negative".
 Unfortunately, we do not have an objective way of comparing which assignment is indeed better, but the differences may be examined manually at TODO vyrobit link
