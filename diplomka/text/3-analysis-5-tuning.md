@@ -11,7 +11,7 @@ Therefore, we need a tool to speed up: -->
 2. Compare the differences between basepairs assigned by FR3D and by a set of our selection criteria;
 3. And finally, interactively tuning the selection criteria. -->
 
-The application which answers these requests to a certain extent is running at https://basepairs.datmos.org (and is attached to the thesis).
+The application which answers these requests to a certain extent is running at [basepairs.datmos.org](https://basepairs.datmos.org){.link-no-footnote} (and is attached to the thesis).
 This section outlines the basic use cases, while notes about implementation can be found in @sec:impl-webapp.
 It should be noted that it was developed primarily as a tool for internal use, with more emphasis on flexibility and comprehensive functionality than a gentle learning curve.
 Also note that the application is rather gluttonous when it comes to network bandwidth and system memory (it runs the database in the browser).

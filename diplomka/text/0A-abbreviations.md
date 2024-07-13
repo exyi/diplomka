@@ -10,8 +10,6 @@ For better clarity, we will use the following conventions, unless noted otherwis
 
 ## List of abbreviations {.unnumbered}
 
-For brevity, the list only includes ambiguous or uncommon abbreviations.
-
 * **TODO** — means that the part of the work is incomplete
 * **API** - Application Programming Interface (an interface of a software library)
 * **CIF** / **mmCIF** - \[**m**acro**m**olecular\] Crystallographic Information File (standard file format for molecular structures)
@@ -28,6 +26,8 @@ For brevity, the list only includes ambiguous or uncommon abbreviations.
 * **DDSR** - "Dissecting the Spatial Structure of RNA" (nucleic acid analysis program, see @sec:software-DSSR)
 
 **cWW**, **tWW**, **cWH**, **tWH**, **cWS**, **tWS**, **cHH**, **tHH**, **cHS**, **tHS**, **cSS**, **tSS** are abbreviated basepair families according to the Leontis-Westhof terminology. See @sec:bp-terminology-lw or <https://doi.org/10.1017/s1355838201002515> for explanation.
+
+Very common abbreviations such as DNA are omitted for brevity.
 
 ## Single letter abbreviations {.unnumbered}
 

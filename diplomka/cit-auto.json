@@ -1121,6 +1121,36 @@
         "id": null,
         "seq": null
     },
+    "https://doi.org/10.1093/nar/gkaa1125": {
+        "doi": "10.1093/nar/gkaa1125",
+        "published_date_parts": [
+            2020,
+            12,
+            3
+        ],
+        "title": "On the lifetime of bioinformatics web services",
+        "authors": [
+            [
+                "Fabian",
+                "Kern"
+            ],
+            [
+                "Tobias",
+                "Fehlmann"
+            ],
+            [
+                "Andreas",
+                "Keller"
+            ]
+        ],
+        "journal": [
+            "Nucleic Acids Research"
+        ],
+        "url": null,
+        "isbn": null,
+        "id": null,
+        "seq": null
+    },
     "https://doi.org/10.1093/nar/gkaa383": {
         "doi": "10.1093/nar/gkaa383",
         "published_date_parts": [
@@ -1145,6 +1175,64 @@
             [
                 "Bohdan",
                 "Schneider"
+            ]
+        ],
+        "journal": [
+            "Nucleic Acids Research"
+        ],
+        "url": null,
+        "isbn": null,
+        "id": null,
+        "seq": null
+    },
+    "https://doi.org/10.1093/nar/gkab314": {
+        "doi": "10.1093/nar/gkab314",
+        "published_date_parts": [
+            2021,
+            5,
+            6
+        ],
+        "title": "Mol* Viewer: modern web app for 3D visualization and analysis of large biomolecular structures",
+        "authors": [
+            [
+                "David",
+                "Sehnal"
+            ],
+            [
+                "Sebastian",
+                "Bittrich"
+            ],
+            [
+                "Mandar",
+                "Deshpande"
+            ],
+            [
+                "Radka",
+                "Svobodov\u00e1"
+            ],
+            [
+                "Karel",
+                "Berka"
+            ],
+            [
+                "V\u00e1clav",
+                "Bazgier"
+            ],
+            [
+                "Sameer",
+                "Velankar"
+            ],
+            [
+                "Stephen K",
+                "Burley"
+            ],
+            [
+                "Jaroslav",
+                "Ko\u010da"
+            ],
+            [
+                "Alexander S",
+                "Rose"
             ]
         ],
         "journal": [
@@ -1756,6 +1844,28 @@
         ],
         "journal": [
             "RNA"
+        ],
+        "url": null,
+        "isbn": null,
+        "id": null,
+        "seq": null
+    },
+    "https://doi.org/10.1371/journal.pcbi.1011920": {
+        "doi": "10.1371/journal.pcbi.1011920",
+        "published_date_parts": [
+            2024,
+            3,
+            15
+        ],
+        "title": "For long-term sustainable software in bioinformatics",
+        "authors": [
+            [
+                "Luis Pedro",
+                "Coelho"
+            ]
+        ],
+        "journal": [
+            "PLOS Computational Biology"
         ],
         "url": null,
         "isbn": null,

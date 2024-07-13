@@ -32,7 +32,6 @@
             [ "", "other ImageMagick contributors" ]
         ],
         "journal": null,
-        "url": "https://imagemagick.org",
         "id": "IM"
     },
     "https://math.stackexchange.com/q/99317": {
@@ -40,17 +39,12 @@
         "published_date_parts": [ 2012, 1, 15 ],
         "title": "Best Fitting Plane given a Set of Points",
         "authors": [ ["Felix", "Pahl (joriki)" ] ],
-        "journal": [ "Mathematics Stack Exchange" ],
-        "url": "https://math.stackexchange.com/q/99317"
+        "journal": [ "Mathematics Stack Exchange" ]
     },
 
     "https://doi.org/10.1093/nar/gky949": {
         "doi": "10.1093/nar/gky949",
-        "published_date_parts": [
-            2018,
-            10,
-            24
-        ],
+        "published_date_parts": [ 2018, 10, 24 ],
         "title": "Protein Data Bank: the single global archive for 3D macromolecular structure data",
         "authors": [
             [ "", "wwPDB consortium" ]
@@ -73,7 +67,6 @@
     },
     "https://pymolwiki.org/index.php/Assembly": {
         "doi": null,
-        "url": "https://pymolwiki.org/index.php/Assembly",
         "published_date_parts": [
             2016, 9, 1
         ],
@@ -81,11 +74,10 @@
             [ "Thomas", "Holder" ]
         ],
         "journal": null,
-        "title": "PyMOL Wiki: Assembly"
+        "title": "Assembly — PyMOL Wiki"
     },
-    "http://www.bmsc.washington.edu/CrystaLinks/man/pdb/": {
+    "http://www.bmsc.washington.edu/CrystaLinks/man/pdb/part_74.html": {
         "doi": null,
-        "url": "http://www.bmsc.washington.edu/CrystaLinks/man/pdb/part_74.html",
         "published_date_parts": [
             2001, 9
         ],
@@ -97,19 +89,48 @@
     },
     "https://github.com/rcsb/py-mmcif": {
         "doi": null,
-        "url": "https://github.com/rcsb/py-mmcif",
         "published_date_parts": [ 2024, 2, 26 ],
-        "title": "rcsb/py-mmcif 0.86 - mmCIF Core Access Library",
+        "title": "rcsb/py-mmcif 0.86 — mmCIF Core Access Library",
         "journal": null,
         "authors": [
             [ "John", "Westbrook" ],
             [ "Dennis", "Piehl" ],
-            [ "other py-mmcif contributors", "" ]
+            [ "other contributors", "" ]
+        ]
+    },
+    "https://github.com/duckdb/duckdb-wasm": {
+        "doi": null,
+        "published_date_parts": [2023, 10, 27],
+        "title": "WebAssembly version of DuckDB, version 0.28",
+        "journal": null,
+        "id": "DDB",
+        "authors": [
+            [ "André", "Kohn" ],
+            [ "Carlo", "Piovesan" ],
+            [ "Mark", "Raasveldt" ],
+            [ "Hannes", "Mühleisen" ],
+            [ "Thijs", "" ],
+            [ "Pedro", "Holanda" ],
+            [ "Laurens", "Kuiper" ],
+            [ "", "other contributors"]
+        ]
+    },
+    "https://​svelte.dev/​": {
+        "doi": null,
+        "published_date_parts": [ 2023, 1, 10 ],
+        "title": "Svelte, Cybernetically enhanced web apps, version 3.55",
+        "id": "SV",
+        "authors": [
+            [ "Rich", "Harris" ],
+            [ "Alan", "Faubert" ],
+            [ "Tan", "Li Hau" ],
+            [ "Ben", "McCann" ],
+            [ "Simon", "Holthausen" ],
+            [ "", "other contributors" ]
         ]
     },
     "https://github.com/schrodinger/pymol-open-source": {
         "doi": null,
-        "url": "https://github.com/schrodinger/pymol-open-source",
         "published_date_parts": [ 2024, 4, 25 ],
         "title": "The PyMOL Molecular Graphics System, Version 3.0 (Open Source)",
         "journal": null,
@@ -118,11 +139,28 @@
             [ "Thomas", "Holder" ],
             [ "Jarrett", "Johnson" ],
             ["", "Schrödinger, LLC."],
-            ["", "other PyMOL contributors"]
+            ["", "other contributors"]
         ]
     },
-    "https://archive.org/details/introductiontohy0000jeff": {
+    "https://github.com/BGSU-RNA/fr3d-python/blob/master/pyproject.toml#L10": {
+        "title": "FR3D GitHub repository — pyproject.toml, line 10",
+        "authors": [ [ "Craig", "Zirbel"] ]
+    },
+    "http://rna.bgsu.edu/experiments/annotations/compare_v7_cWW_A,G_3.0A.html": {
+        "title": "Basepair annotation comparison — cWW A,G 3.0A",
+        "authors": [ [ "Craig", "Zirbel"] ],
+        "webarchive": "https://web.archive.org/web/20240713205916/http://rna.bgsu.edu/experiments/annotations/compare_v7_cWW_A,G_3.0A.html"
+    },
+    "https://inventions.techventures.columbia.edu/technologies/dssr-an-integrated--CU20391": {
+        "title": "DSSR: an integrated software tool for dissecting the spatial structure of RNA",
+        "authors": [ [ "", "Columbia Technology Ventures" ] ]
+    },
+    "https://www.bgsu.edu/research/rna/help/rna-3d-hub-help/unit-ids.html": {
         "doi": null,
+        "title": "Unit IDs — BGSU RNA Structural Bioinformatics",
+        "authors": [ [ "", "unknown authors" ] ]
+    },
+    "https://archive.org/details/introductiontohy0000jeff": {
         "url": null,
         "isbn": "978-0195095494",
         "published_date_parts": [ 1997 ],
@@ -131,5 +169,61 @@
         "authors": [
             [ "George A.", "Jeffrey" ]
         ]
+    },
+    "https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.gaussian_kde.html": {
+        "title": "scipy.stats.gaussian_kde — SciPy v1.13.0 Manual",
+        "authors":  [ [ "", "SciPy contributors" ] ]
+    },
+    "https://gemmi.readthedocs.io/en/latest/analysis.html": {
+        "title": "Structure analysis — Gemmi 0.6.5 documentation",
+        "authors":  [[ "Marcin", "Wojdyr" ]]
+    },
+    "https://x3dna.org/articles/specification-of-base-pairs-in-3dna": {
+        "title": "Specification of base pairs in 3DNA",
+        "authors": [ [ "Xiang-Jun", "Lu" ] ]
+    },
+    "https://x3dna.org/highlights/details-on-the-simple-base-pair-parameters": {
+        "title": "Details on the simple base-pair parameters",
+        "authors": [ [ "Xiang-Jun", "Lu" ] ]
+    },
+    "http://x3dna.org/highlights/how-to-calculate-torsion-angle": {
+        "title": "How to calculate torsion angle?",
+        "authors": [ [ "Xiang-Jun", "Lu" ] ]
+    },
+    "https://x3dna.org/highlights/3dna-c-source-code-is-available": {
+        "title": "3DNA C source code is available",
+        "authors": [ [ "Xiang-Jun", "Lu" ] ]
+    },
+    "https://en.wikipedia.org/wiki/Circular_mean": {
+        "title": "Circular mean",
+        "authors": null
+    },
+    "https://en.wikipedia.org/wiki/Euler_angles": {
+        "title": "Euler angles",
+        "authors": null
+    },
+    "https://en.wikipedia.org/wiki/Aircraft_principal_axes": {
+        "title": "Aircraft principal axes",
+        "authors": null
+    },
+    "https://en.wikipedia.org/wiki/Kernel_density_estimation": {
+        "title": "Kernel density estimation",
+        "authors": null
+    },
+    "https://en.wikipedia.org/wiki/Apache_Parquet": {
+        "title": "Apache Parquet",
+        "authors": null
+    },
+    "https://en.wikipedia.org/wiki/Singular_value_decomposition": {
+        "title": "Singular value decomposition",
+        "authors": null
+    },
+    "https://en.wikipedia.org/wiki/K-d_tree": {
+        "title": "<em>k</em>-d tree",
+        "authors": null
+    },
+    "https://en.wikipedia.org/wiki/SQL_injection": {
+        "title": "SQL injection",
+        "authors": null
     }
 }

@@ -22,15 +22,19 @@ def eprint(*args, **kwargs):
 
 @dataclasses.dataclass
 class CitationInfo:
-    doi: ty.Optional[str]
-    published_date_parts: list[int]
     title: str
-    authors: list[list[str]]
-    journal: ty.Optional[list[str]]
+    authors: ty.Sequence[list[str]]
+    doi: ty.Optional[str] = None
+    published_date_parts: ty.Optional[list[int]] = None
+    journal: ty.Optional[list[str]] = None
     url: ty.Optional[str] = None
     isbn: ty.Optional[str] = None
+    downloaded_date_parts: ty.Optional[list[int]] = None
+    webarchive: ty.Optional[str] = None
     id: ty.Optional[str] = None
     seq: ty.Optional[int] = None
+
+
 def get_doi_from_url(url: str) -> ty.Optional[str]:
     m = re.match(r"https?://doi.org/(.+)", url)
     if m is not None:
@@ -55,7 +59,17 @@ def load_citations(file):
     with open(file) as f:
         data = json.load(f)
         for id in data:
-            map[id] = CitationInfo(**data[id])
+            cit = CitationInfo(**{"url":id, **data[id]})
+            if cit.url and cit.url.startswith("https://en.wikipedia.org"):
+                if not cit.authors:
+                    cit.authors = [ ["", "Wikipedia contributors"]]
+                if not cit.journal:
+                    cit.journal = [ "Wikipedia, the free encyclopedia" ]
+
+            if not cit.published_date_parts and not cit.downloaded_date_parts:
+                cit.downloaded_date_parts = [ 2024 ]
+
+            map[id] = cit
     return map
 
 def get_citations_somehow(url_list: list[str]) -> dict[str, CitationInfo]:
@@ -86,12 +100,17 @@ def assign_citation_ids(citations: dict[str, CitationInfo]) -> dict[str, Citatio
             assigned_ids[cit.id] = cit
 
     for url, cit in citations.items():
+        datepart = f'{cit.published_date_parts[0] % 100:02d}' if cit.published_date_parts else '-'
         if cit.id:
             preferred_id = cit.id
+        elif cit.url and cit.url.startswith("https://en.wikipedia.org"):
+            preferred_id = "WK"
         elif len(cit.authors) > 3:
-            preferred_id = f"{cit.authors[0][1][0]}{cit.published_date_parts[0] % 100:02d}"
+            preferred_id = f"{cit.authors[0][1][0]}{datepart}"
+        elif len(cit.authors) == 1:
+            preferred_id = f"{cit.authors[0][0][0:1]}{cit.authors[0][1][0]}{datepart}"
         else:
-            preferred_id = f"{''.join(author[1][0:1] for author in cit.authors)}{cit.published_date_parts[0] % 100:02d}"
+            preferred_id = f"{''.join(author[1][0:1] for author in cit.authors)}{datepart}"
         if preferred_id in assigned_ids and assigned_ids[preferred_id] != cit:
             for i in range(ord('b'), ord('z')+1):
                 if f'{preferred_id}{chr(i)}' not in assigned_ids:
@@ -102,7 +121,7 @@ def assign_citation_ids(citations: dict[str, CitationInfo]) -> dict[str, Citatio
         cit.id = preferred_id
         assigned_ids[preferred_id] = cit
 
-    ss = sorted(citations.values(), key=lambda c: tuple(c.published_date_parts + [ 3000, 3000, 3000 ])[0:3])
+    ss = sorted(citations.values(), key=lambda c: (*tuple([*(c.published_date_parts or []), 3000, 3000, 3000 ])[0:3], c.url, c.authors))
     for i, s in enumerate(ss):
         s.seq = i
     return assigned_ids
@@ -206,7 +225,7 @@ def format_date(date_parts: list[int]) -> str:
     return f"{month_names[date_parts[1]-1]} {date_parts[0]}"
 
 def generate_references(cit_map: dict[str, CitationInfo]):
-    cits = sorted(cit_map.items(), key=lambda c: (c[1].published_date_parts, c[1].seq))
+    cits = sorted(cit_map.items(), key=lambda c: ("?", c[1].seq, c[1].id))
 
     blocks = [
         pf.Header(1, ["references", [], []], [pf.Str("References")]),
@@ -216,12 +235,12 @@ def generate_references(cit_map: dict[str, CitationInfo]):
         link_attr = 'target=_blank rel="noopener noreferrer"'
         if cit.doi:
             links.append(f'<span class="references-link references-doi"><a {link_attr} href="https://doi.org/{html.escape(cit.doi)}">DOI: <span class="references-doi-body">{html.escape(cit.doi)}</span></a></span>')
-        if cit.url and cit.url != cit.doi:
+        if cit.url and cit.url != cit.doi and cit.url != f"https://doi.org/{cit.doi}":
             links.append(f'''
                 <span class="references-link references-url">
                     <a {link_attr} href="{html.escape(cit.url)}">Available at: <span class="references-url-body">{html.escape(cit.url)}</span></a>
-                    <br>(<a {link_attr} href="https://web.archive.org/web/20240712120000/{html.escape(cit.url)}">web.archive.org</a>)
                 </span>''')
+                    # <br>(<a {link_attr} href="{f'https://web.archive.org/web/20240712120000/{html.escape(cit.url)}' if cit.webarchive is None else html.escape(cit.webarchive)}">web.archive.org</a>)
             
         if cit.isbn:
             links.append(f'<span class="references-link references-isbn"><a {link_attr} href="https://isbnsearch.org/isbn/{html.escape(cit.isbn)}">ISBN: <span class="references-isbn-body">{html.escape(cit.isbn)}</span></a></span>')
@@ -239,7 +258,7 @@ def generate_references(cit_map: dict[str, CitationInfo]):
             journal = ""
         body = f"""
             <span class="references-authors">{html.escape(authors)}</span>
-            <span class="references-date">{format_date(cit.published_date_parts)}</span>
+            <span class="references-date">{"read" if cit.published_date_parts is None else ""}{format_date(cit.published_date_parts or cit.downloaded_date_parts or [2024])}</span>
             <span class="references-title">{cit.title}</span>
             {journal}
             {"\n".join(links)}

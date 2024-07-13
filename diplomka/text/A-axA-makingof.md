@@ -30,6 +30,6 @@ I did not utilize the "Copilot chat" feature.
 For editing the text of the thesis, I mostly utilized Mixtral 8x7B Instruct run locally using llama.cpp after some initial testing with other <del>open</del> downloadable weights model.
 I also used OpenAI GPT-4 and later 4o for "brainstorming", as a fuzzy search tool, and for helping with troubleshooting of certain issues I am not very familiar with (i.e., ghostscript and PDF/A).
 
-My favorite Mixtral prompt is "Rewrite the following to formal (academic) English: ", followed by an unpolished sentence full of typos.
+My favorite Mixtral prompt is "Rewrite the following to formal (academic) English: ", followed by an unpolished sentence in plain informal English (and full of typos).
 The LLM provides me with a significantly better starting point for subsequent editing, and comes up with fancier vocabulary than "then, and, but, nice, ...".
 Finally, I attempted to utilize LLM to perform a review of the entire manuscript sentence-by-sentence, the relevant script is included in the attachment (`llamacpp-review.mjs`).
