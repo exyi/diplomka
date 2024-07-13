@@ -23,11 +23,14 @@ for (const pairMeta of metadata) {
   if (pairMeta.count != 0) {
     // parquetFiles[`${family}-${bases}`] = `${nf}-${bases}.parquet${cacheBuster}`
     parquetFiles[`${nf}-${bases}`] = `${nf}-${bases}.parquet${cacheBuster}`
+    parquetFiles[`${nf}-${bases}-unfiltered`] = `${nf}-${bases}.parquet${cacheBuster}`
     // parquetFiles[`${family}-${bases}-filtered`] = `${nf}-${bases}-filtered.parquet${cacheBuster}`
     parquetFiles[`${nf}-${bases}-filtered`] = `${nf}-${bases}-filtered.parquet${cacheBuster}`
     parquetFiles[`${nf}-${bases}-filtered-allcontacts`] = `${nf}-${bases}-filtered-allcontacts.parquet${cacheBuster}`
     parquetFiles[`${nf}-${bases}-allcontacts`] = `${nf}-${bases}-allcontacts.parquet${cacheBuster}`
+    parquetFiles[`${nf}-${bases}-unfiltered-allcontacts`] = `${nf}-${bases}-allcontacts.parquet${cacheBuster}`
     parquetFiles[`n${nf}-${bases}`] = `n${nf}-${bases}.parquet${cacheBuster}`
+    parquetFiles[`n${nf}-${bases}-unfiltered`] = `n${nf}-${bases}.parquet${cacheBuster}`
     parquetFiles[`${nf}-${bases}_n`] = `n${nf}-${bases}.parquet${cacheBuster}`
   }
 }
