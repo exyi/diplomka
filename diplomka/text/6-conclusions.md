@@ -1,19 +1,20 @@
 # Conclusions
 
-We defined and implemented a set of parameters comprehensively describing the basepairs (@sec:basepair-params).
-These parameters demonstrably work as a method for basepair assignment (@sec:testing-basepair-params), although it requires further tuning of the selection criteria to be accepted by the structural biology community.
+We defined a set of geometric parameters (@sec:basepair-params) that discriminate between basepair classes as defined in the Leontis-Westhof system.
+Application of these parameters can therefore be basepair assignment in molecular structures, as we have shown in [section @sec:testing-basepair-params].
+TODO ehhh The parameter limits assigning the optimal sets of base pairs in the References set of quality-checked structures {REF} as well as in all nucleic acid containing structures in the whole PDB archive are in final phases of their testing.
 
-To assist in the manual work of parameter tuning, we have implemented a tool for interactive visualization of the parameter distributions and for comparing the selected sets of basepairs (@sec:tuning-app).
-After the initial batch processing, it is a web-based application hosted as a set of static files, with the computation happening client-side -- making it easily executable on users' computers and also unlikely to be a maintenance burden on the web administrator.
-The application is running at https://basepairs.datmos.org, 
+To facilitate the testing and tuning, we developed a web-based application (@sec:tuning-app) that allows iterative manipulation of the upper and lower limits of all parameters.
+The application is running at [basepairs.datmos.org](https://basepairs.datmos.org]{.link-no-footnote}.
+The basepair reassignment is visualized in real time making the process interactive.
 
+After the initial batch processing, it is a purely client-side web application hosted as a set of static files --
+making it easily executable on users' computers and also unlikely to be a hard to keep operational (@sec:impl-webapp-sustainability).
+## Ongoing work
 
-## Future work
+Our team currently works on finishing the basepair class definitions for the process of basepair assignment and prepares a manuscript describing the assignment process.
 
-Our team is already busy expanding the work in @sec:testing-basepair-params, and defining all basepair classes using the proposed new parameters.
-This will allow us to create new method for basepair assignment.
-
-The web-based basepair browser primarily for exploring various types of basepairs in the entire database.
-We also plan to integrate the basepairing information into the [DNATCO web server](https://dnatco.datmos.org), designed to [explore and validate individual structures](https://doi.org/10.1107/S2059798318000050).
-DNATCO currently focuses on the nucleic acid backbone structure, disregarding the importance of base interactions.
-This work, on the other hand, ignores the sugar and phosphate conformation, but merging the understanding of both will hopefully lead to new insights into the nucleic acid structural biology.
+As the next step, we plan to integrate the new basepair assignment
+into the [DNATCO web server](https://dnatco.datmos.org),
+designed to [explore and validate individual structures](https://doi.org/10.1107/S2059798318000050).
+Merging the understanding of nucleic acid backbone structure and the basepair interactions will hopefully lead to new insights into the nucleic acid structural biology.
