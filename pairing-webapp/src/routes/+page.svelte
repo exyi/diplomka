@@ -436,7 +436,7 @@
       }}><b>{selectedFamily == null ? p.family + "-" : ""}{p.bases}</b>{#if m && location.host != "xxbasepairs.datmos.org"}&nbsp;({m.med_quality + m.high_quality}){/if}</a>
   {/each}
 </nav>
-{#if selectedPairing && selectedPairing[1] == selectedPairing[2] && selectedPairing.slice(1, 3) != 'SS'}
+{#if selectedPairing && selectedPairing[1] == selectedPairing[2] && selectedPairing.slice(1, 3) != 'SS' && selectedPairing.slice(4) != selectedPairing.slice(4).split('-').toReversed().join('-')}
   <div class="buttons-help">The {selectedFamily} family is symmetrical, <b>{selectedPairing.slice(4)}</b> is equivalent to <b>{selectedPairing.slice(4).split('-').toReversed().join('-')}</b></div>
 {/if}
 {/if}
