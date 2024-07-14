@@ -258,7 +258,7 @@ def generate_references(cit_map: dict[str, CitationInfo]):
             journal = ""
         body = f"""
             <span class="references-authors">{html.escape(authors)}</span>
-            <span class="references-date">{"read" if cit.published_date_parts is None else ""}{format_date(cit.published_date_parts or cit.downloaded_date_parts or [2024])}</span>
+            <span class="references-date">{"retrieved " if cit.published_date_parts is None else ""}{format_date(cit.published_date_parts or cit.downloaded_date_parts or [2024])}</span>
             <span class="references-title">{cit.title}</span>
             {journal}
             {"\n".join(links)}

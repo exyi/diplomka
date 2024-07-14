@@ -1,11 +1,5 @@
 {
     "https://doi.org/10.1002/anie.202309327": {
-        "doi": "10.1002/anie.202309327",
-        "published_date_parts": [
-            2023,
-            9,
-            4
-        ],
         "title": "A Screening Protocol for Exploring Loop Length Requirements for the Formation of a Three Cytosine\u2010Cytosine<sup>+</sup> Base\u2010Paired i\u2010Motif",
         "authors": [
             [
@@ -25,21 +19,23 @@
                 "Sissi"
             ]
         ],
+        "doi": "10.1002/anie.202309327",
+        "published_date_parts": [
+            2023,
+            9,
+            4
+        ],
         "journal": [
             "Angewandte Chemie International Edition"
         ],
         "url": null,
         "isbn": null,
+        "downloaded_date_parts": null,
+        "webarchive": null,
         "id": null,
         "seq": null
     },
     "https://doi.org/10.1002/cphc.200900687": {
-        "doi": "10.1002/cphc.200900687",
-        "published_date_parts": [
-            2010,
-            2,
-            15
-        ],
         "title": "The Protonated Guanine\u2013Cytosine Base Pair",
         "authors": [
             [
@@ -55,21 +51,23 @@
                 "Schaefer"
             ]
         ],
+        "doi": "10.1002/cphc.200900687",
+        "published_date_parts": [
+            2010,
+            2,
+            15
+        ],
         "journal": [
             "ChemPhysChem"
         ],
         "url": null,
         "isbn": null,
+        "downloaded_date_parts": null,
+        "webarchive": null,
         "id": null,
         "seq": null
     },
     "https://doi.org/10.1002/pro.3330": {
-        "doi": "10.1002/pro.3330",
-        "published_date_parts": [
-            2017,
-            11,
-            27
-        ],
         "title": "MolProbity: More and better reference data for improved all\u2010atom structure validation",
         "authors": [
             [
@@ -145,21 +143,23 @@
                 "Richardson"
             ]
         ],
+        "doi": "10.1002/pro.3330",
+        "published_date_parts": [
+            2017,
+            11,
+            27
+        ],
         "journal": [
             "Protein Science"
         ],
         "url": null,
         "isbn": null,
+        "downloaded_date_parts": null,
+        "webarchive": null,
         "id": null,
         "seq": null
     },
     "https://doi.org/10.1002/qua.560120704": {
-        "doi": "10.1002/qua.560120704",
-        "published_date_parts": [
-            1977,
-            1,
-            12
-        ],
         "title": "Non-watson-crick base pairs in ribonucleic acids",
         "authors": [
             [
@@ -167,20 +167,23 @@
                 "Sundaralingam"
             ]
         ],
+        "doi": "10.1002/qua.560120704",
+        "published_date_parts": [
+            1977,
+            1,
+            12
+        ],
         "journal": [
             "International Journal of Quantum Chemistry"
         ],
         "url": null,
         "isbn": null,
+        "downloaded_date_parts": null,
+        "webarchive": null,
         "id": null,
         "seq": null
     },
     "https://doi.org/10.1006/jmbi.1998.2390": {
-        "doi": "10.1006/jmbi.1998.2390",
-        "published_date_parts": [
-            1999,
-            1
-        ],
         "title": "Resolving the discrepancies among nucleic acid conformational analyses 1 1Edited by I. Tinoco",
         "authors": [
             [
@@ -192,20 +195,22 @@
                 "Olson"
             ]
         ],
+        "doi": "10.1006/jmbi.1998.2390",
+        "published_date_parts": [
+            1999,
+            1
+        ],
         "journal": [
             "Journal of Molecular Biology"
         ],
         "url": null,
         "isbn": null,
+        "downloaded_date_parts": null,
+        "webarchive": null,
         "id": null,
         "seq": null
     },
     "https://doi.org/10.1006/jmbi.2001.4987": {
-        "doi": "10.1006/jmbi.2001.4987",
-        "published_date_parts": [
-            2001,
-            10
-        ],
         "title": "A standard reference frame for the description of nucleic acid base-pair geometry",
         "authors": [
             [
@@ -273,19 +278,22 @@
                 "Berman"
             ]
         ],
+        "doi": "10.1006/jmbi.2001.4987",
+        "published_date_parts": [
+            2001,
+            10
+        ],
         "journal": [
             "Journal of Molecular Biology"
         ],
         "url": null,
         "isbn": null,
+        "downloaded_date_parts": null,
+        "webarchive": null,
         "id": null,
         "seq": null
     },
     "https://doi.org/10.1007/978-1-4612-5190-3": {
-        "doi": "10.1007/978-1-4612-5190-3",
-        "published_date_parts": [
-            1984
-        ],
         "title": "Principles of Nucleic Acid Structure",
         "authors": [
             [
@@ -293,19 +301,21 @@
                 "Saenger"
             ]
         ],
+        "doi": "10.1007/978-1-4612-5190-3",
+        "published_date_parts": [
+            1984
+        ],
         "journal": [
             "Springer Advanced Texts in Chemistry"
         ],
         "url": null,
         "isbn": null,
+        "downloaded_date_parts": null,
+        "webarchive": null,
         "id": null,
         "seq": null
     },
     "https://doi.org/10.1007/978-3-642-25740-7_13": {
-        "doi": "10.1007/978-3-642-25740-7_13",
-        "published_date_parts": [
-            2012
-        ],
         "title": "Nonredundant 3D Structure Datasets for RNA Knowledge Extraction and Benchmarking",
         "authors": [
             [
@@ -317,22 +327,22 @@
                 "Zirbel"
             ]
         ],
+        "doi": "10.1007/978-3-642-25740-7_13",
+        "published_date_parts": [
+            2012
+        ],
         "journal": [
             "Nucleic Acids and Molecular Biology",
             "RNA 3D Structure Analysis and Prediction"
         ],
         "url": null,
         "isbn": null,
+        "downloaded_date_parts": null,
+        "webarchive": null,
         "id": null,
         "seq": null
     },
     "https://doi.org/10.1007/s12532-009-0002-8": {
-        "doi": "10.1007/s12532-009-0002-8",
-        "published_date_parts": [
-            2009,
-            4,
-            21
-        ],
         "title": "Blossom V: a new implementation of a minimum cost perfect matching algorithm",
         "authors": [
             [
@@ -340,21 +350,23 @@
                 "Kolmogorov"
             ]
         ],
+        "doi": "10.1007/s12532-009-0002-8",
+        "published_date_parts": [
+            2009,
+            4,
+            21
+        ],
         "journal": [
             "Mathematical Programming Computation"
         ],
         "url": null,
         "isbn": null,
+        "downloaded_date_parts": null,
+        "webarchive": null,
         "id": null,
         "seq": null
     },
     "https://doi.org/10.1016/j.febslet.2014.06.031": {
-        "doi": "10.1016/j.febslet.2014.06.031",
-        "published_date_parts": [
-            2014,
-            6,
-            17
-        ],
         "title": "Isostericity and tautomerism of base pairs in nucleic acids",
         "authors": [
             [
@@ -362,20 +374,23 @@
                 "Westhof"
             ]
         ],
+        "doi": "10.1016/j.febslet.2014.06.031",
+        "published_date_parts": [
+            2014,
+            6,
+            17
+        ],
         "journal": [
             "FEBS Letters"
         ],
         "url": null,
         "isbn": null,
+        "downloaded_date_parts": null,
+        "webarchive": null,
         "id": null,
         "seq": null
     },
     "https://doi.org/10.1016/j.trechm.2019.07.002": {
-        "doi": "10.1016/j.trechm.2019.07.002",
-        "published_date_parts": [
-            2020,
-            2
-        ],
         "title": "The Structure and Function of DNA G-Quadruplexes",
         "authors": [
             [
@@ -391,20 +406,22 @@
                 "Balasubramanian"
             ]
         ],
+        "doi": "10.1016/j.trechm.2019.07.002",
+        "published_date_parts": [
+            2020,
+            2
+        ],
         "journal": [
             "Trends in Chemistry"
         ],
         "url": null,
         "isbn": null,
+        "downloaded_date_parts": null,
+        "webarchive": null,
         "id": null,
         "seq": null
     },
     "https://doi.org/10.1017/s1355838201002515": {
-        "doi": "10.1017/s1355838201002515",
-        "published_date_parts": [
-            2001,
-            4
-        ],
         "title": "Geometric nomenclature and classification of RNA base pairs",
         "authors": [
             [
@@ -416,21 +433,22 @@
                 "Westhof"
             ]
         ],
+        "doi": "10.1017/s1355838201002515",
+        "published_date_parts": [
+            2001,
+            4
+        ],
         "journal": [
             "RNA"
         ],
         "url": null,
         "isbn": null,
+        "downloaded_date_parts": null,
+        "webarchive": null,
         "id": null,
         "seq": null
     },
     "https://doi.org/10.1038/171737a0": {
-        "doi": "10.1038/171737a0",
-        "published_date_parts": [
-            1953,
-            4,
-            25
-        ],
         "title": "Molecular Structure of Nucleic Acids: A Structure for Deoxyribose Nucleic Acid",
         "authors": [
             [
@@ -442,21 +460,23 @@
                 "CRICK"
             ]
         ],
+        "doi": "10.1038/171737a0",
+        "published_date_parts": [
+            1953,
+            4,
+            25
+        ],
         "journal": [
             "Nature"
         ],
         "url": null,
         "isbn": null,
+        "downloaded_date_parts": null,
+        "webarchive": null,
         "id": null,
         "seq": null
     },
     "https://doi.org/10.1038/nchembio.1846": {
-        "doi": "10.1038/nchembio.1846",
-        "published_date_parts": [
-            2015,
-            7,
-            13
-        ],
         "title": "New classes of self-cleaving ribozymes revealed by comparative genomics analysis",
         "authors": [
             [
@@ -488,20 +508,23 @@
                 "Breaker"
             ]
         ],
+        "doi": "10.1038/nchembio.1846",
+        "published_date_parts": [
+            2015,
+            7,
+            13
+        ],
         "journal": [
             "Nature Chemical Biology"
         ],
         "url": null,
         "isbn": null,
+        "downloaded_date_parts": null,
+        "webarchive": null,
         "id": null,
         "seq": null
     },
     "https://doi.org/10.1038/nprot.2008.104": {
-        "doi": "10.1038/nprot.2008.104",
-        "published_date_parts": [
-            2008,
-            7
-        ],
         "title": "3DNA: a versatile, integrated software system for the analysis, rebuilding and visualization of three-dimensional nucleic-acid structures",
         "authors": [
             [
@@ -513,21 +536,22 @@
                 "Olson"
             ]
         ],
+        "doi": "10.1038/nprot.2008.104",
+        "published_date_parts": [
+            2008,
+            7
+        ],
         "journal": [
             "Nature Protocols"
         ],
         "url": null,
         "isbn": null,
+        "downloaded_date_parts": null,
+        "webarchive": null,
         "id": null,
         "seq": null
     },
     "https://doi.org/10.1038/s41592-019-0686-2": {
-        "doi": "10.1038/s41592-019-0686-2",
-        "published_date_parts": [
-            2020,
-            2,
-            3
-        ],
         "title": "SciPy 1.0: fundamental algorithms for scientific computing in Python",
         "authors": [
             [
@@ -979,21 +1003,23 @@
                 "???"
             ]
         ],
+        "doi": "10.1038/s41592-019-0686-2",
+        "published_date_parts": [
+            2020,
+            2,
+            3
+        ],
         "journal": [
             "Nature Methods"
         ],
         "url": null,
         "isbn": null,
+        "downloaded_date_parts": null,
+        "webarchive": null,
         "id": null,
         "seq": null
     },
     "https://doi.org/10.1093/bioinformatics/btp163": {
-        "doi": "10.1093/bioinformatics/btp163",
-        "published_date_parts": [
-            2009,
-            3,
-            20
-        ],
         "title": "Biopython: freely available Python tools for computational molecular biology and bioinformatics",
         "authors": [
             [
@@ -1041,21 +1067,23 @@
                 "de Hoon"
             ]
         ],
+        "doi": "10.1093/bioinformatics/btp163",
+        "published_date_parts": [
+            2009,
+            3,
+            20
+        ],
         "journal": [
             "Bioinformatics"
         ],
         "url": null,
         "isbn": null,
+        "downloaded_date_parts": null,
+        "webarchive": null,
         "id": null,
         "seq": null
     },
     "https://doi.org/10.1093/nar/28.1.235": {
-        "doi": "10.1093/nar/28.1.235",
-        "published_date_parts": [
-            2000,
-            1,
-            1
-        ],
         "title": "The Protein Data Bank",
         "authors": [
             [
@@ -1091,21 +1119,23 @@
                 "Bourne"
             ]
         ],
+        "doi": "10.1093/nar/28.1.235",
+        "published_date_parts": [
+            2000,
+            1,
+            1
+        ],
         "journal": [
             "Nucleic Acids Research"
         ],
         "url": null,
         "isbn": null,
+        "downloaded_date_parts": null,
+        "webarchive": null,
         "id": null,
         "seq": null
     },
     "https://doi.org/10.1093/nar/29.24.5067": {
-        "doi": "10.1093/nar/29.24.5067",
-        "published_date_parts": [
-            2001,
-            12,
-            15
-        ],
         "title": "A protonated base pair participating in rRNA tertiary structural interactions",
         "authors": [
             [
@@ -1113,21 +1143,23 @@
                 "Kubarenko"
             ]
         ],
+        "doi": "10.1093/nar/29.24.5067",
+        "published_date_parts": [
+            2001,
+            12,
+            15
+        ],
         "journal": [
             "Nucleic Acids Research"
         ],
         "url": null,
         "isbn": null,
+        "downloaded_date_parts": null,
+        "webarchive": null,
         "id": null,
         "seq": null
     },
     "https://doi.org/10.1093/nar/gkaa1125": {
-        "doi": "10.1093/nar/gkaa1125",
-        "published_date_parts": [
-            2020,
-            12,
-            3
-        ],
         "title": "On the lifetime of bioinformatics web services",
         "authors": [
             [
@@ -1143,21 +1175,23 @@
                 "Keller"
             ]
         ],
+        "doi": "10.1093/nar/gkaa1125",
+        "published_date_parts": [
+            2020,
+            12,
+            3
+        ],
         "journal": [
             "Nucleic Acids Research"
         ],
         "url": null,
         "isbn": null,
+        "downloaded_date_parts": null,
+        "webarchive": null,
         "id": null,
         "seq": null
     },
     "https://doi.org/10.1093/nar/gkaa383": {
-        "doi": "10.1093/nar/gkaa383",
-        "published_date_parts": [
-            2020,
-            5,
-            14
-        ],
         "title": "A unified dinucleotide alphabet describing both RNA and DNA structures",
         "authors": [
             [
@@ -1177,21 +1211,23 @@
                 "Schneider"
             ]
         ],
+        "doi": "10.1093/nar/gkaa383",
+        "published_date_parts": [
+            2020,
+            5,
+            14
+        ],
         "journal": [
             "Nucleic Acids Research"
         ],
         "url": null,
         "isbn": null,
+        "downloaded_date_parts": null,
+        "webarchive": null,
         "id": null,
         "seq": null
     },
     "https://doi.org/10.1093/nar/gkab314": {
-        "doi": "10.1093/nar/gkab314",
-        "published_date_parts": [
-            2021,
-            5,
-            6
-        ],
         "title": "Mol* Viewer: modern web app for 3D visualization and analysis of large biomolecular structures",
         "authors": [
             [
@@ -1235,21 +1271,23 @@
                 "Rose"
             ]
         ],
+        "doi": "10.1093/nar/gkab314",
+        "published_date_parts": [
+            2021,
+            5,
+            6
+        ],
         "journal": [
             "Nucleic Acids Research"
         ],
         "url": null,
         "isbn": null,
+        "downloaded_date_parts": null,
+        "webarchive": null,
         "id": null,
         "seq": null
     },
     "https://doi.org/10.1093/nar/gkf481": {
-        "doi": "10.1093/nar/gkf481",
-        "published_date_parts": [
-            2002,
-            8,
-            15
-        ],
         "title": "The non-Watson-Crick base pairs and their associated isostericity matrices",
         "authors": [
             [
@@ -1265,21 +1303,23 @@
                 "Westhof"
             ]
         ],
+        "doi": "10.1093/nar/gkf481",
+        "published_date_parts": [
+            2002,
+            8,
+            15
+        ],
         "journal": [
             "Nucleic Acids Research"
         ],
         "url": null,
         "isbn": null,
+        "downloaded_date_parts": null,
+        "webarchive": null,
         "id": null,
         "seq": null
     },
     "https://doi.org/10.1093/nar/gkg529": {
-        "doi": "10.1093/nar/gkg529",
-        "published_date_parts": [
-            2003,
-            7,
-            1
-        ],
         "title": "Tools for the automatic identification and classification of RNA base pairs",
         "authors": [
             [
@@ -1311,21 +1351,23 @@
                 "Westhof"
             ]
         ],
+        "doi": "10.1093/nar/gkg529",
+        "published_date_parts": [
+            2003,
+            7,
+            1
+        ],
         "journal": [
             "Nucleic Acids Research"
         ],
         "url": null,
         "isbn": null,
+        "downloaded_date_parts": null,
+        "webarchive": null,
         "id": null,
         "seq": null
     },
     "https://doi.org/10.1093/nar/gkg680": {
-        "doi": "10.1093/nar/gkg680",
-        "published_date_parts": [
-            2003,
-            9,
-            1
-        ],
         "title": "3DNA: a software package for the analysis, rebuilding and visualization of three-dimensional nucleic acid structures",
         "authors": [
             [
@@ -1337,21 +1379,23 @@
                 "Olson"
             ]
         ],
+        "doi": "10.1093/nar/gkg680",
+        "published_date_parts": [
+            2003,
+            9,
+            1
+        ],
         "journal": [
             "Nucleic Acids Research"
         ],
         "url": null,
         "isbn": null,
+        "downloaded_date_parts": null,
+        "webarchive": null,
         "id": null,
         "seq": null
     },
     "https://doi.org/10.1093/nar/gkp011": {
-        "doi": "10.1093/nar/gkp011",
-        "published_date_parts": [
-            2009,
-            2,
-            24
-        ],
         "title": "Frequency and isostericity of RNA base pairs",
         "authors": [
             [
@@ -1371,21 +1415,23 @@
                 "Leontis"
             ]
         ],
+        "doi": "10.1093/nar/gkp011",
+        "published_date_parts": [
+            2009,
+            2,
+            24
+        ],
         "journal": [
             "Nucleic Acids Research"
         ],
         "url": null,
         "isbn": null,
+        "downloaded_date_parts": null,
+        "webarchive": null,
         "id": null,
         "seq": null
     },
     "https://doi.org/10.1093/nar/gkp608": {
-        "doi": "10.1093/nar/gkp608",
-        "published_date_parts": [
-            2009,
-            7,
-            22
-        ],
         "title": "Conformational analysis of nucleic acids revisited: Curves+",
         "authors": [
             [
@@ -1409,21 +1455,23 @@
                 "Zakrzewska"
             ]
         ],
+        "doi": "10.1093/nar/gkp608",
+        "published_date_parts": [
+            2009,
+            7,
+            22
+        ],
         "journal": [
             "Nucleic Acids Research"
         ],
         "url": null,
         "isbn": null,
+        "downloaded_date_parts": null,
+        "webarchive": null,
         "id": null,
         "seq": null
     },
     "https://doi.org/10.1093/nar/gkv716": {
-        "doi": "10.1093/nar/gkv716",
-        "published_date_parts": [
-            2015,
-            7,
-            15
-        ],
         "title": "DSSR: an integrated software tool for dissecting the spatial structure of RNA",
         "authors": [
             [
@@ -1439,21 +1487,23 @@
                 "Olson"
             ]
         ],
+        "doi": "10.1093/nar/gkv716",
+        "published_date_parts": [
+            2015,
+            7,
+            15
+        ],
         "journal": [
             "Nucleic Acids Research"
         ],
         "url": null,
         "isbn": null,
+        "downloaded_date_parts": null,
+        "webarchive": null,
         "id": null,
         "seq": null
     },
     "https://doi.org/10.1093/nar/gkw453": {
-        "doi": "10.1093/nar/gkw453",
-        "published_date_parts": [
-            2016,
-            5,
-            27
-        ],
         "title": "JAR3D Webserver: Scoring and aligning RNA loop sequences to known 3D motifs",
         "authors": [
             [
@@ -1477,21 +1527,23 @@
                 "Leontis"
             ]
         ],
+        "doi": "10.1093/nar/gkw453",
+        "published_date_parts": [
+            2016,
+            5,
+            27
+        ],
         "journal": [
             "Nucleic Acids Research"
         ],
         "url": null,
         "isbn": null,
+        "downloaded_date_parts": null,
+        "webarchive": null,
         "id": null,
         "seq": null
     },
     "https://doi.org/10.1093/nar/gky735": {
-        "doi": "10.1093/nar/gky735",
-        "published_date_parts": [
-            2018,
-            8,
-            16
-        ],
         "title": "i-Motif DNA: structural features and significance to cell biology",
         "authors": [
             [
@@ -1511,21 +1563,23 @@
                 "Damha"
             ]
         ],
+        "doi": "10.1093/nar/gky735",
+        "published_date_parts": [
+            2018,
+            8,
+            16
+        ],
         "journal": [
             "Nucleic Acids Research"
         ],
         "url": null,
         "isbn": null,
+        "downloaded_date_parts": null,
+        "webarchive": null,
         "id": null,
         "seq": null
     },
     "https://doi.org/10.1107/S0567739476001873": {
-        "doi": "10.1107/S0567739476001873",
-        "published_date_parts": [
-            1976,
-            9,
-            1
-        ],
         "title": "A solution for the best rotation to relate two sets of vectors",
         "authors": [
             [
@@ -1533,21 +1587,23 @@
                 "Kabsch"
             ]
         ],
+        "doi": "10.1107/S0567739476001873",
+        "published_date_parts": [
+            1976,
+            9,
+            1
+        ],
         "journal": [
             "Acta Crystallographica Section A"
         ],
         "url": null,
         "isbn": null,
+        "downloaded_date_parts": null,
+        "webarchive": null,
         "id": null,
         "seq": null
     },
     "https://doi.org/10.1107/S2059798318000050": {
-        "doi": "10.1107/S2059798318000050",
-        "published_date_parts": [
-            2018,
-            1,
-            1
-        ],
         "title": "A DNA structural alphabet provides new insight into DNA flexibility",
         "authors": [
             [
@@ -1575,21 +1631,67 @@
                 "\u010cern\u00fd"
             ]
         ],
+        "doi": "10.1107/S2059798318000050",
+        "published_date_parts": [
+            2018,
+            1,
+            1
+        ],
         "journal": [
             "Acta Crystallographica Section D Structural Biology"
         ],
         "url": null,
         "isbn": null,
+        "downloaded_date_parts": null,
+        "webarchive": null,
+        "id": null,
+        "seq": null
+    },
+    "https://doi.org/10.1107/S2059798320009389": {
+        "title": "Structural alphabets for conformational analysis of nucleic acids available at dnatco.datmos.org",
+        "authors": [
+            [
+                "Ji\u0159\u00ed",
+                "\u010cern\u00fd"
+            ],
+            [
+                "Paul\u00edna",
+                "Bo\u017e\u00edkov\u00e1"
+            ],
+            [
+                "Michal",
+                "Mal\u00fd"
+            ],
+            [
+                "Michal",
+                "Tyka\u010d"
+            ],
+            [
+                "Lada",
+                "Biedermannov\u00e1"
+            ],
+            [
+                "Bohdan",
+                "Schneider"
+            ]
+        ],
+        "doi": "10.1107/S2059798320009389",
+        "published_date_parts": [
+            2020,
+            8,
+            17
+        ],
+        "journal": [
+            "Acta Crystallographica Section D Structural Biology"
+        ],
+        "url": null,
+        "isbn": null,
+        "downloaded_date_parts": null,
+        "webarchive": null,
         "id": null,
         "seq": null
     },
     "https://doi.org/10.1107/S2059798321007610": {
-        "doi": "10.1107/S2059798321007610",
-        "published_date_parts": [
-            2021,
-            8,
-            24
-        ],
         "title": "New restraints and validation approaches for nucleic acid structures in PDB-REDO",
         "authors": [
             [
@@ -1625,20 +1727,23 @@
                 "Joosten"
             ]
         ],
+        "doi": "10.1107/S2059798321007610",
+        "published_date_parts": [
+            2021,
+            8,
+            24
+        ],
         "journal": [
             "Acta Crystallographica Section D Structural Biology"
         ],
         "url": null,
         "isbn": null,
+        "downloaded_date_parts": null,
+        "webarchive": null,
         "id": null,
         "seq": null
     },
     "https://doi.org/10.1109/TCBB.2010.104": {
-        "doi": "10.1109/TCBB.2010.104",
-        "published_date_parts": [
-            2011,
-            9
-        ],
         "title": "Fast Flexible Modeling of RNA Structure Using Internal Coordinates",
         "authors": [
             [
@@ -1662,21 +1767,22 @@
                 "Altman"
             ]
         ],
+        "doi": "10.1109/TCBB.2010.104",
+        "published_date_parts": [
+            2011,
+            9
+        ],
         "journal": [
             "IEEE/ACM Transactions on Computational Biology and Bioinformatics"
         ],
         "url": null,
         "isbn": null,
+        "downloaded_date_parts": null,
+        "webarchive": null,
         "id": null,
         "seq": null
     },
     "https://doi.org/10.1261/rna.031401.111": {
-        "doi": "10.1261/rna.031401.111",
-        "published_date_parts": [
-            2012,
-            3,
-            27
-        ],
         "title": "The ubiquitous hammerhead ribozyme",
         "authors": [
             [
@@ -1696,21 +1802,23 @@
                 "de la Pe\u00f1a"
             ]
         ],
+        "doi": "10.1261/rna.031401.111",
+        "published_date_parts": [
+            2012,
+            3,
+            27
+        ],
         "journal": [
             "RNA"
         ],
         "url": null,
         "isbn": null,
+        "downloaded_date_parts": null,
+        "webarchive": null,
         "id": null,
         "seq": null
     },
     "https://doi.org/10.1261/rna.039438.113": {
-        "doi": "10.1261/rna.039438.113",
-        "published_date_parts": [
-            2013,
-            8,
-            22
-        ],
         "title": "Automated classification of RNA 3D motifs and the RNA 3D Motif Atlas",
         "authors": [
             [
@@ -1726,21 +1834,23 @@
                 "Leontis"
             ]
         ],
+        "doi": "10.1261/rna.039438.113",
+        "published_date_parts": [
+            2013,
+            8,
+            22
+        ],
         "journal": [
             "RNA"
         ],
         "url": null,
         "isbn": null,
+        "downloaded_date_parts": null,
+        "webarchive": null,
         "id": null,
         "seq": null
     },
     "https://doi.org/10.1261/rna.079583.123": {
-        "doi": "10.1261/rna.079583.123",
-        "published_date_parts": [
-            2023,
-            4,
-            17
-        ],
         "title": "Anionic G\u2022U pairs in bacterial ribosomal rRNAs",
         "authors": [
             [
@@ -1760,21 +1870,23 @@
                 "Cate"
             ]
         ],
+        "doi": "10.1261/rna.079583.123",
+        "published_date_parts": [
+            2023,
+            4,
+            17
+        ],
         "journal": [
             "RNA"
         ],
         "url": null,
         "isbn": null,
+        "downloaded_date_parts": null,
+        "webarchive": null,
         "id": null,
         "seq": null
     },
     "https://doi.org/10.1261/rna.381407": {
-        "doi": "10.1261/rna.381407",
-        "published_date_parts": [
-            2007,
-            5,
-            1
-        ],
         "title": "Coplanar and coaxial orientations of RNA bases and helices",
         "authors": [
             [
@@ -1798,21 +1910,23 @@
                 "Altman"
             ]
         ],
+        "doi": "10.1261/rna.381407",
+        "published_date_parts": [
+            2007,
+            5,
+            1
+        ],
         "journal": [
             "RNA"
         ],
         "url": null,
         "isbn": null,
+        "downloaded_date_parts": null,
+        "webarchive": null,
         "id": null,
         "seq": null
     },
     "https://doi.org/10.1371/journal.pcbi.1011920": {
-        "doi": "10.1371/journal.pcbi.1011920",
-        "published_date_parts": [
-            2024,
-            3,
-            15
-        ],
         "title": "For long-term sustainable software in bioinformatics",
         "authors": [
             [
@@ -1820,21 +1934,23 @@
                 "Coelho"
             ]
         ],
+        "doi": "10.1371/journal.pcbi.1011920",
+        "published_date_parts": [
+            2024,
+            3,
+            15
+        ],
         "journal": [
             "PLOS Computational Biology"
         ],
         "url": null,
         "isbn": null,
+        "downloaded_date_parts": null,
+        "webarchive": null,
         "id": null,
         "seq": null
     },
     "https://doi.org/10.21105/joss.04200": {
-        "doi": "10.21105/joss.04200",
-        "published_date_parts": [
-            2022,
-            5,
-            4
-        ],
         "title": "GEMMI: A library for structural biology",
         "authors": [
             [
@@ -1842,11 +1958,19 @@
                 "Wojdyr"
             ]
         ],
+        "doi": "10.21105/joss.04200",
+        "published_date_parts": [
+            2022,
+            5,
+            4
+        ],
         "journal": [
             "Journal of Open Source Software"
         ],
         "url": null,
         "isbn": null,
+        "downloaded_date_parts": null,
+        "webarchive": null,
         "id": null,
         "seq": null
     }

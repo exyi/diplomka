@@ -26,8 +26,7 @@ This will display images of all basepairs of this class which were reported by F
 If we are looking for the most typical cases, we should switch "**Order by**" to the "**Smallest Edge RMSD**".
 The edge RMSD is the distance to the most typical basepairs (@sec:opt-params-exemplar), computed as the mean distance of edge (@sec:bp-terminology-lw) atoms, when aligned on all atoms of the second nucleobase.
 
-TODO screenshot - select FR3D
-https://basepairs.datmos.org/#tWS-A-A/ds=fr3d-f
+![TODO screenshot - select FR3D https://basepairs.datmos.org/#tWS-A-A/ds=fr3d-f](../img/screenshot-app-fr3dpairs.png){#fig:screenshot-app-fr3dpairs}
 
 
 If the reference set is too small, we have the option to select "FR3D -- Entire PDB".
@@ -39,7 +38,7 @@ Regardless, we can click on each basepair to display detailed description:
 * A [PyMOL](https://github.com/schrodinger/pymol-open-source) script which displays the pair, when pasted to PyMOL command line. We use this to display basepairs which image could not load.
 * The calculated parameters (@sec:basepair-params) with a short description.
 
-TODO screenshot modalu
+![TODO screenshot modalu](../img/screenshot-app-modal-fr3dpair.png){#fig:screenshot-app-modal-fr3dpair}
 
 ### Comparing sets
 
@@ -50,7 +49,7 @@ If the data is still **Ordered by** the **Smallest Edge RMSD**, the screen is un
 To see the disparities, we can either switch to **Largest Edge RMSD** or select the **Show only differences** option, instead of **Show all matches**.
 Pairs annotated by FR3D and not annotated by our new system are highlighted _red_, while the ones reported exclusively by us are highlighted in _green_ (the positive connotation of green).
 
-TODO screenshot diff
+![TODO screenshot diff](../img/screenshot-app-comparison-tWS-AA.png){#fig:screenshot-app-comparison-tWS-AA}
 
 At the time of writing and submission of the thesis, the criteria are still subject to change and are dynamically loaded from a shared Google Sheet.
 The exact results will likely be different from the ones presented here.
@@ -68,7 +67,7 @@ To find the _bad_ examples, we set the minimum to 3.6 Å, a threshold for instan
 Typically, only a small fraction of basepairs have all H-bonds >= 3.6 Å, but we found three cases in the reference set for **tWW A-A**.
 Upon inspection, two of these look arguably borderline, while one case is surprisingly well-structured.
 
-TODO screenshot https://basepairs.datmos.org/#tWW-A-A/ds=fr3d-f&hb0_L=3.6..&hb1_L=3.6..
+![TODO screenshot https://basepairs.datmos.org/#tWW-A-A/ds=fr3d-f&hb0_L=3.6..&hb1_L=3.6..](../img/screenshot-app-hb-filters.png){#fig:screenshot-app-hb-filters}
 
 ### Editing the criteria
 

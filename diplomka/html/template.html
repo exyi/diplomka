@@ -40,7 +40,7 @@
         }
         @media print {
             @page {
-                margin: 0.5in 0.98in 1in 0.98in;
+                margin: 0.75in 1in 1in 1in;
                 size: 210mm 297mm;
                 /* @bottom-left {
                     content: counter(page) ' of ' counter(pages);
@@ -53,14 +53,14 @@
                 }
 
             }
-            @page:left {
+            /* @page:left {
                 margin: 0.75in 1.5in 1.5in 1in;
             }
             @page:right {
                 margin: 0.75in 1in 1.5in 1.5in;
-            }
+            } */
             @page:first {
-                margin: 0.5in 0.98in;
+                margin: 0.5in 1in;
             }
             body {
                 /* --full-width: 100vw;
@@ -81,7 +81,7 @@
                 /* --full-width: calc(100vw - 2 * var(--body-margin-x));
                 --full-height: calc(100vh - 2 * var(--body-margin-y)); */
 
-                /* max-width: 1200px; */
+                max-width: calc(var(--a4-width) - 2in)
             }
             .full-page, #titlchrepage1, #titlepage2 {
                 margin-top: var(--body-margin-y);
@@ -262,6 +262,9 @@
             text-align: justify;
             text-align-last: left;
         }
+        section p[data-split-original] {
+            text-align-last: justify;
+        }
 
         h1, h2, h3, h4, h5, h6 {
             text-align: left;
@@ -383,6 +386,10 @@
             font-size: 100%;
             line-height: inherit;
             font-variant-position: super;
+        }
+
+        * {
+            box-sizing: border-box;
         }
 
 
@@ -537,9 +544,11 @@
 
         document.addEventListener("DOMContentLoaded", function() {
             if (document.body.classList.contains("pagedjs")) {
-                const scripttag = document.createElement("script");
-                scripttag.setAttribute("src", "https://unpkg.com/pagedjs/dist/paged.polyfill.js");
-                document.head.appendChild(scripttag);
+                setTimeout(() => {
+                    const scripttag = document.createElement("script");
+                    scripttag.setAttribute("src", "https://unpkg.com/pagedjs/dist/paged.polyfill.js");
+                    document.head.appendChild(scripttag);
+                }, 1200)
             }
         })
     </script>
