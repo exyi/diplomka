@@ -1670,50 +1670,6 @@
         "id": null,
         "seq": null
     },
-    "https://doi.org/10.1201/9781315735368": {
-        "doi": "10.1201/9781315735368",
-        "published_date_parts": [
-            2017,
-            8,
-            7
-        ],
-        "title": "Molecular Biology of the Cell",
-        "authors": [
-            [
-                "Bruce",
-                "Alberts"
-            ],
-            [
-                "Alexander",
-                "Johnson"
-            ],
-            [
-                "Julian",
-                "Lewis"
-            ],
-            [
-                "David",
-                "Morgan"
-            ],
-            [
-                "Martin",
-                "Raff"
-            ],
-            [
-                "Keith",
-                "Roberts"
-            ],
-            [
-                "Peter",
-                "Walter"
-            ]
-        ],
-        "journal": [],
-        "url": null,
-        "isbn": null,
-        "id": null,
-        "seq": null
-    },
     "https://doi.org/10.1261/rna.031401.111": {
         "doi": "10.1261/rna.031401.111",
         "published_date_parts": [

@@ -146,6 +146,11 @@
         "title": "FR3D GitHub repository — pyproject.toml, line 10",
         "authors": [ [ "Craig", "Zirbel"] ]
     },
+    "https://xkcd.com/927/": {
+        "title": "XKCD #927: Standards",
+        "authors": [ [ "Randall", "Munroe" ] ],
+        "published_date_parts": [ 2011 ]
+    },
     "http://rna.bgsu.edu/experiments/annotations/compare_v7_cWW_A,G_3.0A.html": {
         "title": "Basepair annotation comparison — cWW A,G 3.0A",
         "authors": [ [ "Craig", "Zirbel"] ],
@@ -176,6 +181,42 @@
         "published_date_parts": [ 2009,10,20 ],
         "title": "Biomolecular Crystallography: Principles, Practice, and Application to Structural Biology",
         "authors": [ [ "Bernhard", "Rupp" ] ]
+    },
+    "https://doi.org/10.1201/9781315735368#The_Ribosome_Is_a_Ribozyme": {
+        "doi": "10.1201/9781315735368",
+        "published_date_parts": [ 2017, 8, 7 ],
+        "isbn": "978-1315735368",
+        "title": "Molecular Biology of the Cell, chapter The Ribosome Is a Ribozyme, p. 346",
+        "authors": [
+            [
+                "Bruce",
+                "Alberts"
+            ],
+            [
+                "Alexander",
+                "Johnson"
+            ],
+            [
+                "Julian",
+                "Lewis"
+            ],
+            [
+                "David",
+                "Morgan"
+            ],
+            [
+                "Martin",
+                "Raff"
+            ],
+            [
+                "Keith",
+                "Roberts"
+            ],
+            [
+                "Peter",
+                "Walter"
+            ]
+        ]
     },
     "https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.gaussian_kde.html": {
         "title": "scipy.stats.gaussian_kde — SciPy v1.13.0 Manual",

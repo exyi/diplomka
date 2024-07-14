@@ -1,15 +1,16 @@
 # Conclusions
 
 We defined a set of geometric parameters (@sec:basepair-params) that discriminate between basepair classes as defined in the Leontis-Westhof system.
-Application of these parameters can therefore be basepair assignment in molecular structures, as we have shown in [section @sec:testing-basepair-params].
-TODO ehhh The parameter limits assigning the optimal sets of base pairs in the References set of quality-checked structures {REF} as well as in all nucleic acid containing structures in the whole PDB archive are in final phases of their testing.
+Application of these parameters can therefore be basepair assignment in molecular structures, as we have verified in [section @sec:testing-basepair-params] both on the References set of quality-checked structures (@sec:filter) as well as in all nucleic acid containing structures in the whole PDB archive
 
+TODO ehhh The parameter limits assigning the optimal sets of base pairs in the  are in final phases of their testing.
 To facilitate the testing and tuning, we developed a web-based application (@sec:tuning-app) that allows iterative manipulation of the upper and lower limits of all parameters.
-The application is running at [basepairs.datmos.org](https://basepairs.datmos.org]{.link-no-footnote}.
+The application is running at [basepairs.datmos.org](https://basepairs.datmos.org){.link-no-footnote}.
 The basepair reassignment is visualized in real time making the process interactive.
 
 After the initial batch processing, it is a purely client-side web application hosted as a set of static files --
 making it easily executable on users' computers and also unlikely to be a hard to keep operational (@sec:impl-webapp-sustainability).
+
 ## Ongoing work
 
 Our team currently works on finishing the basepair class definitions for the process of basepair assignment and prepares a manuscript describing the assignment process.

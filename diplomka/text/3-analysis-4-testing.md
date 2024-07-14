@@ -89,5 +89,7 @@ We intend to solve this by adding a spatial distance constraint (a “virtual H-
 
 In the case of **cSS C-A** and **tSS A-G** classes, we would argue that the FR3D assignment is not the ideal target, and therefore, we do not intent to match it perfectly.
 The current disparity is not substantial (20%), but our _“false positives”_ often look better than other basepairs identified by FR3D.
-It is hard to demonstrate without multiple pages of figures, but figure TODO shows a single example of a "good false positive" and one example of a "good false negative".
-Unfortunately, we do not have an objective way of comparing which assignment is indeed better, but the differences may be examined manually at TODO vyrobit link
+It is hard to demonstrate without multiple pages of figures, and we unfortunately do not have an objective way of comparing which assignment is indeed better.
+The differences may be examined manually in the application, when we enable FR3D comparison after selecting the [**tSS A-G**](https://basepairs.datmos.org/#tSs-A-G/ds=allcontacts-boundaries-f&baseline_ds=fr3d-f) or [**cSS C-A**](https://basepairs.datmos.org/#cSs-C-A/ds=allcontacts-boundaries-f&baseline_ds=fr3d-f) class.
+
+<!-- but figure TODO shows a single example of a _"good false positive"_ and one example of a _"good false negative"_. -->

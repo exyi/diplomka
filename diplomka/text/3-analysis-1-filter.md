@@ -27,7 +27,7 @@ We will call this filtered set the **"Reference Set"**.
 4. Selection of residues with sufficiently high quality, defined as:
     * All atoms must have RSCC (real-space correlation coefficient) ≥ 0.7, and backbone atoms must have harmonic of RSCC ≥ 0.8
     * [MolProbity criteria](https://doi.org/10.1002/pro.3330) are satisfied: no steric clashes ≥ 0.5 Å, and no sugar-pucker outliers are allowed.
-    * The nucleotide conforms to one of the NtCs ([sugar-phosphate backbone conformations](https://doi.org/10.1093/nar/gkaa383)) with confal score (TODO cite?) ≥ 60% and RMSD ≤ 0.5 Å.
+    * The nucleotide conforms to one of the NtCs ([sugar-phosphate backbone conformations](https://doi.org/10.1093/nar/gkaa383)) with [confal score](https://doi.org/10.1107/S2059798320009389) ≥ 60% and RMSD ≤ 0.5 Å.
 
 The list of selected residues <!--and detailed description (from Jiří Černý's the manuscript)--> is included as an attachment.
 
