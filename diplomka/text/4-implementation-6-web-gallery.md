@@ -11,9 +11,9 @@ And [DuckDB-wasm](https://github.com/duckdb/duckdb-wasm).
 We pre-compute the parameters for all close contacts and then only perform filtering in the interactive session.
 The web itself is a purely client-side JavaScript application developed using the [Svelte](https://svelte.dev/) framework.
 Rather unconventionally, we run the [DuckDB database](https://github.com/duckdb/duckdb-wasm) in the web browser to query the statically hosted Parquet tables.
-This approach results in a resource-intensive application, but it significantly simplifies the process of implementing flexible filters, even allowing power-users compose their own SQL queries without the necessity for safeguards against [SQL injection](https://en.wikipedia.org/wiki/SQL_injection).
+This approach results in a resource-intensive application, but it significantly simplifies the process of implementing flexible filters, even allowing power-users to compose their own SQL queries without the necessity for safeguards against [SQL injection](https://en.wikipedia.org/wiki/SQL_injection).
 
-Internal state such as the selected pair, selected data source and filter is persisted into the URL, making it simple to share
+Internal state such as the selected pair, selected data source and filter is persisted into the URL, making it simple to share with colleagues.
 
 #### Basepair images {#sec:impl-webapp-images}
 
@@ -33,7 +33,7 @@ to je asi blbost popisovat -->
 
 [Bioinformatics is plagued with unreliable web services](https://doi.org/10.1093/nar/gkaa1125) or services which are no longer operational, [which is partially rooted in the lack of long-term support grants](https://doi.org/10.1371/journal.pcbi.1011920).
 We do not have a silver bullet solution to the issue, but we can say we tried to lessen the maintenance cost in the hope of extending the website's longevity.
-After the initial batch processing, our service may be hosted any static file web server, and it has been verified to function on both Apache and nginx.
+After the initial batch processing, our service may be hosted on any static file web server, and it has been verified to function on both Apache and nginx.
 The website can hardly be hosted for free, as it relies on hundreds of gigabytes of pre-rendered basepair images.
 However, the absence of any server-side code alleviates the much higher cost of fixing security bugs and updating vulnerable dependencies.
 While the cost of fast storage is steadily decreasing, the cost of maintaining a codebase usually increases rapidly with its age.
@@ -41,7 +41,7 @@ The web is also an excellent platform for longevity, as it has strong commitment
 
 ### Querying using SQL
 
-When we switch the filter editor to the **SQL** mode, we gain the freedom to query basepairs or basepair candidates using any expression based on calculated basepair parameters.
+When we switch the filter editor to **SQL** mode, we gain the freedom to query basepairs or basepair candidates using any expression based on calculated basepair parameters.
 The application supports SQL syntax and functions supported by DuckDB 0.9, which includes most of standard SQL with many extensions.
 
 For effective use, we recommend setting a _closest desired filter_ in the **Parameter ranges** mode and then switching to the **SQL** mode.

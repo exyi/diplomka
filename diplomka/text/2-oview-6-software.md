@@ -63,7 +63,7 @@ In other words, it cannot provide complementary information to basepairs identif
 ### RNAView {#sec:software-RNAview}
 
 Similarly to FR3D, [RNAView](https://doi.org/10.1093/nar/gkg529) identifies basepairs the molecular structure and uses the naming L-W system.
-First published in 2003, it has received recent activity in development; notably, it has got a support for mmCIF files few months ago.
+First published in 2003, it has received recent activity in development; notably, it has got support for mmCIF files a few months ago.
 [The current version is published on GitHub](https://github.com/rcsb/RNAView) and available under the Apache 2 license.
 
 Somewhat uniquely, [Yang et al.](https://doi.org/10.1093/nar/gkg529) detail the used basepair determination algorithm.

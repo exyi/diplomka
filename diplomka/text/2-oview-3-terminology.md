@@ -5,7 +5,7 @@
 ![Saenger's system of basepair types, [from the](https://doi.org/10.1007/978-1-4612-5190-3) book, page 120](../img/saenger-system-merged.png){#fig:saenger-system-merged}
 
 Since many different non-canonical basepairs exist, a systematic naming scheme is necessary.
-The first such scheme we are aware of was described by [W. Saenger in the book 'Principles of Nucleic Acid Structure' (1984)](https://doi.org/10.1007/978-1-4612-5190-3), where he identified and classified possible basepairs with at least two hydrogen bonds into 28 distinct classes.
+The first such scheme we are aware of was described by [W. Saenger in the book 'Principles of Nucleic Acid Structure'](https://doi.org/10.1007/978-1-4612-5190-3) where he identified and classified possible basepairs with at least two hydrogen bonds into 28 distinct classes.
 The Saenger's classes are identified using a single ordinal number and are grouped into five higher-level categories based on geometrical symmetry and pairing bases.
 
 
@@ -43,17 +43,17 @@ Further, some basepair types may appear in both parallel and antiparallel strand
 The [“Strand Orientation” table at NAKB](https://www.nakb.org/basics/basepairs.html#LW/) is thus not entirely accurate, as it only indicates typical cases. 
 
 Basepair names are commonly abbreviated using 3-letter codes -- **c** or **t** for cis or trans, and **W**, **H** or **S** for each of the two edges (**W**atson-Crick, **H**oogsteen, and **S**ugar).
-Since pairing conformation also depends on the bases involved, we include the base letters (A, T, U, G, C) to specify the sequence.
+Since the pairing conformation also depends on the bases involved, we include the base letters (A, T, U, G, C) to specify the sequence.
 For example, we refer to the pairs in @fig:LWS-all-families-G-G as **cWW G-G**, **tWW G-G**, ... **tSS G-G**.
 
 <!-- **Cis** basepairs have the pairing edge arrows oriented in parallel, while **trans** basepairs have edges in opposing direction.
 
 However, to pair in **cis**, the bases must be flipped -->
 
-Note that “Sugar” refers to the name of a purine or pyrimidine edge, which does not necessarily imply interaction with the ribose sugar **O2'** oxygen, although involvement of this atom is common in RNA pairs.
-[Fig. @fig:tSS-GG-DNA-6n4g-A_2-B_2-no-oxygens] shows an example of **DNA** Sugar/Sugar pair without any ribose interaction.
+Note that “Sugar” refers to the name of a purine or pyrimidine edge which does not necessarily imply an interaction with the ribose sugar **O2'** oxygen, although this atom is commonly involved in RNA pairs.
+[Fig. @fig:tSS-GG-DNA-6n4g-A_2-B_2-no-oxygens] shows an example of **DNA** Sugar/Sugar pair without any ribose interactions.
 In RNA, the ribose O2' oxygen can interact with the other base or even the other O2' oxygen.
-Since it is an OH group, it can function both as a hydrogen bond donor and acceptor, for instance in the **cSS G-G** class (@fig:LWS-all-families-G-G).
+Since it is an OH group, it can function both as a hydrogen bond donor and an acceptor, for instance in the **cSS G-G** class (@fig:LWS-all-families-G-G).
 
 ![A trans Sugar/Sugar G-G **DNA** pair (5uc6 B4:B17) -- The "Sugar-Sugar" basepair does not involve the ribose at all.](../img/tSS-GG-DNA-5uc6-B_4-B_17-no-oxygens2.png){#fig:tSS-GG-DNA-6n4g-A_2-B_2-no-oxygens .img-width50}
 

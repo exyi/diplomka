@@ -8,7 +8,7 @@ However, since PyMOL is not published on the PyPI repository (the official Pytho
 The Polars library must be also installed globally, other dependencies are unnecessary for this script.
 
 For efficiency, the script is written to process basepairs in batches.
-In a given Parquet table, it identifies all PDB structures, load each structure and generates the image for each basepair in the structure.
+In a given Parquet table, it identifies all PDB structures, loads each structure and generates the image for each basepair in the structure.
 Different PDB structures are processed in parallel if the `--threads=X` option is specified.
 
 The following steps are applied for each basepair and can be used to replicate a similar view in an interactive PyMOL session.
@@ -39,7 +39,7 @@ The commands are rewritten into the PyMOL scripting language and slightly simpli
 
     a) In the first case, we use PyMOL built-in `orient` command to optimize for screen use. It aligns the plane with the image, and makes it as wide as possible.
 
-        Listing: Alight the nucleotide base with the screen (X, Y axes) {#lst:pymol-orient-pair}
+        Listing: Alight the nucleotide base with the screen (**X**, **Y** axes) {#lst:pymol-orient-pair}
 
         ```
         orient %pair not (name C2' or name C3' or name C4' or
@@ -51,7 +51,7 @@ The commands are rewritten into the PyMOL scripting language and slightly simpli
         First, make sure that the right nucleotide plane is aligned with the screen using the code from @lst:pymol-orient-pair, only substituting `%pair` for `%rightnt`.
         Then we proceed by orienting the glycosidic bond (C1'-N9/N1) with the vertical axis:
 
-        Listing: PyMOL Python code to orient the glycosidic bond with Y axis by a single Z rotation {#lst:py-orient-glycobond}
+        Listing: PyMOL Python code to orient the glycosidic bond with **Y** axis by a single **Z** rotation {#lst:py-orient-glycobond}
 
         ```python
         def transform_to_camera_space(coords):
@@ -77,7 +77,7 @@ The commands are rewritten into the PyMOL scripting language and slightly simpli
         cmd.turn("z", math.degrees(angle))
         ```
 
-        Last, we make sure that the "right" nucleotide is indeed on the right side. If it is not, the image is rotated 180° along Y axis ("flipped left to right").
+        Last, we make sure that the "right" nucleotide is indeed on the right side. If it is not, the image is rotated 180° along the **Y** axis ("flipped left to right").
 
 4. Center the image on the screen, using the `zoom %pair` command.
 5. Highlight hydrogen bonds using the `distance` command and label the interacting atoms by their name (using `label {atom}, name` command). For each hydrogen bond, we apply the [script @lst:pymol-label-hbond]:

@@ -27,7 +27,7 @@ The script loads all PDB structures from the input table using the [BioPython li
     * Donor and acceptor angles
     * The coplanarity metrics (distances and angles between base planes)
     * Relative base orientation - the yaw, pitch, and roll angles and also the relative translation
-* An `is_dinucleotide` column indicating if the basepair is a di-nucleotide (i.e., are covalently bonded though the phosphodiester bond)
+* An `is_dinucleotide` column indicating if the basepair is a di-nucleotide (i.e., are covalently bonded through the phosphodiester bonds)
 * An `is_parallel` column indicating if the pair is part of a parallel or an antiparallel chain.
 * Structure Name (`structure_name`), Determination Method (`structure_method`), Structure Deposition Date (`deposition_date`), and Resolution (`resolution`) metadata columns.
 
@@ -42,9 +42,9 @@ In further processing, we currently exclusively use the Parquet file, but the CS
 [Apache Parquet](https://en.wikipedia.org/wiki/Apache_Parquet) is a modern binary format for tabular data, comparable to a compressed CSV.
 Usually, Parquet is praised for being fast to process; for us, the main reason for choosing the format is the strongly-typed schema.
 Parquet, compared to CSV, specifies the data type of each column — integer / floating-point number / text.
-At first, it might seem easy to infer the data type from the CSV data — we can see if the column contains letters or only number.
-However, the inference might fail on empty table, or on short files which coincidentally have valid numbers in a text column.
-For instance, grouping the entries by the PDB structure causes the latter, since the PDB Identifiers may be valid numbers in the exponential format (`5e95` = $5\times10^{95}$).
+At first, it might seem easy to infer the data type from the CSV data — we can see if the column contains letters or only digits.
+However, the inference will inevitably fail on empty tables, or on short files which coincidentally solely have valid numbers in a text column.
+For instance, grouping the entries by the PDB structure causes the latter issue, since the PDB Identifiers may be valid numbers in the exponential format (`5e95` = $5\times10^{95}$).
 The DuckDB database then formats the number differently when converting it back to text, leading to issues further down the line.
 
 ```sql
@@ -66,7 +66,7 @@ Since we never have more than four defined bonds, it is not a significant issue.
 
 ### Deduplication
 
-FR3D reports each pairs twice, in both orientations -- if a **cWH G-C** pair is reported, a corresponding **cHW C-G** pair is also reported.
+FR3D reports each pair twice, in both orientations -- if a **cWH G-C** pair is reported, a corresponding **cHW C-G** pair is also reported.
 To avoid redundancy, we deduplicate the pair using the following rules:
 
 1. If the pair family is asymmetric, we keep the variant shown in <https://doi.org/10.1093/nar/gkf481>.
@@ -81,8 +81,8 @@ To avoid redundancy, we deduplicate the pair using the following rules:
 
 ### Pairs between symmetry-related nucleotides {#sec:impl-collection-symmetry}
 
-Asymmetric unit, the smallest part of the crystal [from which the whole crystal can re-built](isbn:978-0815340812), does not in all crystal structures contain the whole biologically relevant <!-- molecule or --> molecular complex.
-As an example, double-helical DNA or RNA of a palindromic sequence can have only one nucleotide strand in the asymmetric unit while the biologically relevant is the duplex.
+Asymmetric unit, the smallest part of the crystal [from which the whole crystal can be re-built](isbn:978-0815340812), does not in all crystal structures contain the whole biologically relevant <!-- molecule or --> molecular complex.
+As an example, double-helical DNA or RNA of a palindromic sequence can have only one nucleotide strand in the asymmetric unit while the biologically relevant structure is the duplex.
 Because PDB files contain coordinates only for one asymmetric unit we have to consider possibility for the basepair assignment across the symmetry operation as two bases forming the pair can be symmetry-related. 
 
 ![The asymmetric unit of [`6ros`](https://www.rcsb.org/structure/6ROS) structure is formed by a single strand, but the **biological assembly** is a duplex. The mmCIF file contains the coordinates of only one strand, and the second one is its symmetric copy. All basepairs are formed between the two strands.](../img/6ros-symmetry-illustration.png)
@@ -115,7 +115,7 @@ _pdbx_struct_oper_list.vector[3]
 0.0000000000 38.4400000000 0.0000000000 0.0000000000 -1.0000000000 0.0000000000
 ``` -->
 
-Technically, the implementation is still slightly tricky, because the **BioPython** library provide an API to access the `pdbx_struct_oper_list` category.
+Technically, the implementation is still slightly tricky, because the **BioPython** library provides an API to access the `pdbx_struct_oper_list` category.
 Another Python library -- [**Gemmi**](https://doi.org/10.21105/joss.04200), has a very good support for crystallographic symmetry.
 It, however, exposes the information in terms of space groups, instead of the PDB symmetry operation codes.
 Since **FR3D** uses the PDB codes in its output, we need to use these to map the basepairs into atomic coordinates.
@@ -129,7 +129,7 @@ As **mmcif** simply parses the CIF without any additional abstraction, we curren
 Optionally, the basepair parameters computed by DSSR are added (see @sec:std-base-parameters), `pairs.py` runs DSSR when `--dssr-binary` option is specified.
 However, as far as we know, it is not possible to force DSSR to compute basepair parameters for an arbitrary selection of basepairs, it will only report the parameters for basepairs it determined by itself.
 This unfortunately means that some basepairs might be missing the parameters.
-Although DSSR should recognize all basepairs types reported by FR3D, sometimes almost all the parameter values are missing (TODO specific example, also in ./2-oview-6-software.md).
+Although DSSR should recognize all basepairs types reported by FR3D, sometimes almost all the parameter values are missing (xxxxxxxxxxxxxxxxxx specific example, also in ./2-oview-6-software.md).
 
 The rationale for executing DSSR within the `pairs.py` script, instead of running it on all structures beforehand like we do with FR3D, is the complexity of DSSR's output format.
 While FR3D generates a single "PDBID_basepair.txt" file, DSSR generates a collection of files such as "dssr-dsStepPars.txt", "dssr-dsStepPars.txt", "dssr-dsHelixPars.txt", and "dssr-basepairs.txt".

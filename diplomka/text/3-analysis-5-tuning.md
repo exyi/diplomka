@@ -26,7 +26,7 @@ As shown in @fig:screenshot-app-fr3dpairs, this displays images of all basepairs
 If we are looking for the most typical cases, we should switch "**Order by**" to the "**Smallest Edge RMSD**".
 The edge RMSD is the distance to the most typical basepairs (@sec:opt-params-exemplar), computed as the mean distance of edge (@sec:bp-terminology-lw) atoms, when aligned on all atoms of the second nucleobase.
 
-![The web application showing **tWH A-A** basepairs identified by FR3D on the reference set. In the menu on top allows us to switch between classes, the data source and ordering. https://basepairs.datmos.org/#tWS-A-A/ds=fr3d-f](../img/screenshot-app-fr3dpairs.png){#fig:screenshot-app-fr3dpairs}
+![The web application showing **tWH A-A** basepairs identified by FR3D on the reference set. The menu on top allows us to switch the class, data source and ordering. https://basepairs.datmos.org/#tWS-A-A/ds=fr3d-f](../img/screenshot-app-fr3dpairs.png){#fig:screenshot-app-fr3dpairs}
 
 
 If the reference set is too small, we have the option to select "FR3D -- Entire PDB".
@@ -36,7 +36,7 @@ Regardless, we can click on any basepair to display detailed description, first 
 
 * Identity of the basepair (PDB structure ID, chains, residue numbers).
 * Two images from different angles, if it was pre-generated.
-* A [PyMOL](https://github.com/schrodinger/pymol-open-source) script which displays the pair, when pasted to PyMOL command line. We use this to display basepairs which image could not load.
+* A [PyMOL](https://github.com/schrodinger/pymol-open-source) script which displays the pair, when pasted to PyMOL command line. It may be used to display basepairs for which the image did not load.
 * The calculated parameters (@sec:basepair-params) with a short description.
 
 ![The detailed information about a given basepair instance includes two images rotated along the X axis to quickly see the planarity, information about the source structure, instruction to display it interactively in PyMOL and below the screenshot is a table of all calculated parameters.](../img/screenshot-app-modal-fr3dpair.png){#fig:screenshot-app-modal-fr3dpair}
@@ -50,7 +50,7 @@ If the data is still **Ordered by** the **Smallest Edge RMSD**, the screen is un
 To see the disparities, we can either switch to **Largest Edge RMSD** or select the **Show only differences** option, instead of **Show all matches**.
 Pairs annotated by FR3D and not annotated by our new system are highlighted _red_, while the ones reported exclusively by us are highlighted in _green_ (the positive connotation of green).
 
-![Comparison between FR3D assignment and the assignment according to our new criteria (current in development). The basepairs highlighed in green are _false positives_, i.e., not reported by FR3D.](../img/screenshot-app-comparison-tWS-AA.png){#fig:screenshot-app-comparison-tWS-AA}
+![Comparison between FR3D assignment and the assignment according to our new criteria (current in development). The basepairs highlighted in green are _false positives_, i.e., not reported by FR3D.](../img/screenshot-app-comparison-tWS-AA.png){#fig:screenshot-app-comparison-tWS-AA}
 
 At the time of writing and submission of the thesis, the criteria are still subject to change and are dynamically loaded from a shared Google Sheet.
 The exact results will likely be different from the ones presented here.
@@ -62,7 +62,7 @@ A frequent request is to see whether we should include basepairs with overly str
 
 Firstly, the website remembers its state when navigating to another basepair class (selected data source, filters, comparison are kept), but the state can be reset at any time by clicking the **Home** button in the top menu.
 We can select any populated class of basepairs, and switch to **Parameter Ranges**, prompting the display of several numeric input fields.
-For each defined H-bond, we get a column of input fields, with a row for each parameter; each cell allows to limit its minimum and maximum allowed value.
+For each defined H-bond, we get a column of input fields, with a row for each parameter; each cell represents the minimum and maximum allowed value.
 Our focus is on the first row, which controls the limits on distance between heavy atoms.
 To find the _bad_ examples, we set the minimum to 3.6 Å, a threshold for instance used in PyMOL default settings.
 Typically, only a small fraction of basepairs have all H-bonds >= 3.6 Å, but in @fig:screenshot-app-hb-filters we received three cases in the reference set for the **tWW A-A** class.
@@ -74,7 +74,7 @@ Upon inspection, two of these look arguably borderline, while one case is surpri
 
 Most importantly, the application enables interactive editing of the selection criteria.
 For demonstration, we can try to improve (or impair) the annotation of the **cWH C-C** class.
-Firstly, we will reset current state, navigate to **cWH C-C**, switch to **Parameter Ranges**, and select **Pairs Selected by New Parameters** data source.
+Firstly, we will reset the current state, navigate to **cWH C-C**, switch to **Parameter Ranges**, and select **Pairs Selected by New Parameters** data source.
 Subsequently, we set the comparison baseline to **FR3D** assignments, and click on **Edit the selection boundaries**.
 By this action, the data source switches to **All Contacts**, and filtering ranges get populated with pre-defined limiting values from the Google Sheet.
 

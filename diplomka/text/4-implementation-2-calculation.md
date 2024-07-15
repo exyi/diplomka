@@ -39,7 +39,7 @@ def hbond_geometry(res1: Residue, res2: Residue, hbond):
 ### Angle between bases forming a pair
 
 The second set of parameters requires determination of the base planes, represented as a translation vector and an orthonormal basis of the new coordinate system.
-It is important to note that we are looking for optimal plane by least squared Euclidean (L2) distance, instead of the distance along the Y coordinate.
+It is important to note that we are looking for the optimal plane by least squared Euclidean (L2) distance, instead of the distance along the Y coordinate.
 This makes the procedure more similar to Principal Component Analysis (PCA) or [Kabsch algorithm (_"RMSD alignment"_)](https://doi.org/10.1107/S0567739476001873) than to linear regression.
 The plane fitting implementation in @lst:code-calc-base-plane-fit uses [singular value decomposition (SVD)](https://en.wikipedia.org/wiki/Singular_value_decomposition), a good explanation of [the math can be found on the StackExchange forum.](https://math.stackexchange.com/q/99317)
 The SVD decomposes a rectangular matrix into three matrices, the first of which is an orthogonal matrix.
@@ -83,8 +83,8 @@ def hbond_plane_angle(plane_normal, res1: Residue, res2: Residue, hbond):
 ### Plane to plane comparison
 
 In this block, we calculate the overall **Coplanarity angle**, and the **Edge to plane distance** with the **Edge to plane angle**.
-The **Coplanarity angle** a trivial dot product, and the **Edge to plane angle** is calculated similarly to the **H-Bond to plane angle** above --
-instead of the hydrogen bond atoms, we take first and last atom of the edge.
+The **Coplanarity angle** is a trivial dot product, and the **Edge to plane angle** is calculated similarly to the **H-Bond to plane angle** above --
+instead of the hydrogen bond atoms, we take the first and last atom of the edge.
 The code in @lst:code-calc-edge-to-plane assumes that the `edge1` list contains the pairing edge atom coordinates of the first residue.
 
 The **Edge to plane distance** is calculated by projecting the atom coordinates onto the plane and measuring their distance.
@@ -157,7 +157,7 @@ def N_coordinate_system(res: Bio.PDB.Residue.Residue):
 ```
 
 For the calculation of yaw/pitch/roll angles, we use the [SciPy](https://doi.org/10.1038/s41592-019-0686-2) `Rotation` class, as shown in @lst:code-calc-YPR-angles.
-The [`as_euler` method](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.transform.Rotation.as_euler.html#r72d546869407-1){.link-no-footnote} can produce any kind of Euler angles, and the `"ZYX"` argument specifies that we want ZYX intrinsic angles.
+The [`as_euler` method](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.transform.Rotation.as_euler.html#r72d546869407-1){.link-no-footnote} can produce any kind of Euler angles, and the `"ZYX"` argument specifies that we want **ZYX intrinsic** angles.
 Using the function from @lst:code-calc-fit-YPR-coord, we determine the coordinate systems of the two nucleotides, most importantly, the rotation matrices.
 The point of interest is the difference between the two matrices.
 To preserve the intuitive notion of the aircraft going from the first nucleotide's glycosidic bond to the second one, the second nucleotide is rotated 180° along the Z axis.

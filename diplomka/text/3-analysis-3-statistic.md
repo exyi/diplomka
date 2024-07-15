@@ -53,10 +53,10 @@ The evaluation criteria will be:
 
 We will measure the **accuracy** as the mean absolute difference between the statistics derived on small samples with respect to the reference hydrogen bond lengths of canonical basepairs.
 We will use the sample size of 100 observations for the test, given that it is a typical number of instances of a non-canonical basepair.
-We have slightly over 50 000 datapoints in the canonical classes, so 1000 sampled batches should provide an ample coverage the available dataset.
+We have slightly over 50 000 datapoints in the canonical classes, so 1000 sampled batches should provide ample coverage of the available dataset.
 
 [The figure @fig:KDE_bandwidth_golden_length_deviation] compares various bandwidth adjustments of the default Scott's factor.
-It is clear that the general optimum is in the range from 1.0 to 1.5, although we can see that different hydrogen bonds length have slightly different optimal bandwidths.
+It is clear that the general optimum is in the range from 1.0 to 1.5, although we can see that the length of different H-bonds have slightly different optimal bandwidths.
 
 ![[Reference H-bond lengths](https://doi.org/10.1107/S2059798321007610) / KDE mode with bandwidth adjustment from 0.5 to 3.0](../img/KDE_bandwidth_golden_length_deviation.svg){#fig:KDE_bandwidth_golden_length_deviation}
 
@@ -110,10 +110,10 @@ def circular_mean(observations):
     return np.angle(np.mean(circle), deg=True)
 ```
 
-![Histograms of a distribution including the -180°/180° point, its circular mean, and the naive arithmetic mean. On the left, the distribution is shown using polar coordinates, on right using standard cartesian coordinates. (The value is the roll angle of **tSS A-G** pairs, explained in @sec:basepair-params-ypr)](../img/angular-stats-polar-vs-cartesian-means.svg){#fig:angular-stats-polar-vs-cartesian-means}
+![Histograms of a distribution including the -180°/180° point, its circular mean, and the naive arithmetic mean. On the left, the distribution is shown using polar coordinates; on the right using standard Cartesian coordinates. (The value is the roll angle of **tSS A-G** pairs, explained in @sec:basepair-params-ypr)](../img/angular-stats-polar-vs-cartesian-means.svg){#fig:angular-stats-polar-vs-cartesian-means}
 
 The kernel density estimate can be also computed in two dimensions or in one dimension with the datapoints duplicated.
-Although both methods seem to work well, computing two-dimensional KDE when all points are on unit circle severely violates the assumption of normal distribution.
+Although both methods seem to work well, computing two-dimensional KDE when all points are on a unit circle severely violates the assumption of normal distribution.
 We thus choose to compute the one dimensional KDE on range of $[-360°, 360°)$, and then use only the $[-180°, 180°)$ range.
 
 Unfortunately, other basic statistics like the median, maximum, and minimum cannot be well-defined, because we have no notion of comparison in modular (circular) arithmetic.

@@ -7,7 +7,7 @@ Thus, we want the parameters to be reasonably simple and interpretable.
 Parameters suitable for basepair assignment should have the following
 main qualities:
 
-* **Interpretability** — Can we easily tell what the parameter means in geometrical sense? Can we estimate the paramater value by looking at the 3D structure?
+* **Interpretability** — Can we easily tell what the parameter means in a geometrical sense? Can we estimate the parameter value by looking at the 3D structure?
 * **Simplicity** — The ideal parameter is easy to define and calculate algorithmically.
 * **Stability** — It should have low variance for good quality basepairs.
 * **Universality** — It should have similar value or similar variance in different basepair classes.
@@ -30,7 +30,7 @@ The standard basepair parameters (@sec:std-base-parameters) can be one such desc
 However, we are not able to characterize all the basepair types using simple numeric ranges of this minimal set of parameters.
 
 Additionally, we consider it more elegant to avoid “hard cuts” in the data distributions.
-In the words of Craig Zirbel, the author of the FR3D program: "we would prefer to allow broad ranges on many parameters, rather than smaller number of uncompromising cutoffs".
+In the words of Craig Zirbel, the author of the FR3D program: "we would prefer to allow broad ranges on many parameters, rather than a smaller number of uncompromising cutoffs".
 FR3D indeed performs very well regarding this — we did not find many unnatural-looking lines in any of our scatter plots and histograms when plotting our new parameter values for FR3D-determined basepairs.
 Since each of the limits cuts out a small fraction of the potential basepairs, the exact value of the limits is not as sensitive.
 That makes it easier to set the limit and also allows us to share the same conditions across all classes of a given basepairing family.
@@ -46,15 +46,15 @@ We will call all of these contacts "hydrogen bonds" or "H-bonds".
 Ideally, we would measure a hydrogen bond between the hydrogen and the
 acceptor heavy atom.
 Since the exact hydrogen positions are rarely known, we will instead only consider the distance between heavy atoms (oxygen, nitrogen, or carbon).
-Despite the availability of many algorithms for completing PDB structures with missing hydrogens, there are tricky cases where automatic the completion fails.
-This happens for instance in cases when a base holds charge and thus have an additional hydrogen, such as those in [in i-Motif cytosine pairs](https://doi.org/10.1002/anie.202309327).
+Despite the availability of many algorithms for completing PDB structures with missing hydrogens, there are tricky cases where the automatic completion fails.
+This happens for instance in cases when a base holds charge and thus has an additional hydrogen, such as those [in i-Motif cytosine pairs](https://doi.org/10.1002/anie.202309327).
 Alternatively, the base may be in an unusual tautomeric form where its hydrogens are on different atoms than usual.
 Although it is not very common, it is crucial in some basepair classes, and it is biologically relevant in a number of cases.
 We have already discussed the anionic form of **cWW G-U** (@sec:bp-terminology-lw-edgecase-a, <https://doi.org/10.1261/rna.079583.123>), but we can also [find a protonated **cWW C-U** in the ribosomes of some species](https://doi.org/10.1093/nar/29.24.5067) and even a [charged _"canonical"_ **cWW G-C** pair may exist](https://doi.org/10.1002/cphc.200900687).
 
 <!-- maybe cWH-A-G ?? -->
 
-In addition to distance measurements, we need to use other parameters defining geometry of hydrogen bonds.
+In addition to distance measurements, we need to use other parameters defining the geometry of hydrogen bonds.
 We used two angles between the two heavy atoms forming the H-bond and a neighboring atom situated on each base.
 Depending on whether we select the third atom next to the acceptor or donor, we call the parameter "Donor angle" or "Acceptor angle".
 For consistency, we will always select the last neighbor when ordered lexicographically by PDB atom name as the third atom.
@@ -67,7 +67,7 @@ Even if we set strict limits on these parameters, we get many false positives.
 As shown [in figure @fig:cWW-GC-length-and-covalent-angles], an ideal **cWW G-C** pair should have H-bond lengths of about 2.9 Å and all angles at about 120°.
 We must allow some deviations, as no ideal pair exists in reality, and 0.5 Å and 20° tolerance is very conservative.
 Yet, we still find false positives like the one shown in @fig:cWW-GC-false-positive-hbond-lengthsangles.
-Tightening the limits slightly would dismiss this case, but we are hitting the other limit of this simple approach as we already loose many good pairs, as we can see using the
+Tightening the limits slightly would dismiss this case, but we are hitting the other limit of this simple approach as we already lose many good pairs, as we can see using the
 [basepairs.datmos.org](https://basepairs.datmos.org/#cWW-G-C/hb0_L=..3.4&hb0_DA=100..140&hb0_AA=100..140&hb1_L=..3.4&hb1_DA=100..140&hb1_AA=100..140&hb2_L=..3.4&hb2_DA=100..140&hb2_AA=100..140&baseline_ds=fr3d-f) web application.
 
 
@@ -147,11 +147,11 @@ The remaining weak point of our parameter set is the assignment of basepair clas
 Such a basepair is free to rotate by 180 degrees around the H-bonded atoms, remaining planar, but at the same time changing the Leontis-Westhof class. 
 An example of this issue is shown in figure @fig:metrics-ypr-necessity-tHH-GG-misassignment, and the [web application demonstrates this issue interactively](https://basepairs.datmos.org/#tHH-A-G/hb0_L=..4&hb0_DA=100..150&hb0_AA=100..165&hb0_OOPA1=-25..35&hb0_OOPA2=-10..35&min_bond_length=..3.8&coplanarity_a=..40&coplanarity_edge_angle1=-10..25&coplanarity_edge_angle2=-10..30&coplanarity_shift1=-0.2..1.5&coplanarity_shift2=-0.3..1.3&baseline_ds=fr3d-f).
 
-![**A.** An example of a correctly assigned **tHH A-G** basepair (3cd6 913:1071 in chain 0). **B.** The **tHH A-G** candidates also includes a clear Watson-Crick/Hoogsteen basepair (7osm 407:390 in chain 18S). The coplanarity is perfect and the N6 ··· O6 H-bond cannot distinguish it either, as both of these two classes define it.](../img/metrics-ypr-necessity-tHH-GG-misassignment.svg){#fig:metrics-ypr-necessity-tHH-GG-misassignment}
+![**A.** An example of a correctly assigned **tHH A-G** basepair (3cd6 913:1071 in chain 0). **B.** The **tHH A-G** candidates also include a clear Watson-Crick/Hoogsteen basepair (7osm 407:390 in chain 18S). The coplanarity is perfect and the N6 ··· O6 H-bond cannot distinguish it either, as both of these two classes define it.](../img/metrics-ypr-necessity-tHH-GG-misassignment.svg){#fig:metrics-ypr-necessity-tHH-GG-misassignment}
 
 Utilizing the [euler angles](https://en.wikipedia.org/wiki/Euler_angles), we can describe the relative rotation of two planes by three angular parameters.
 
-Their definition requires definition of coordinate systems for both bases is a potential pair.
+Their definition requires the definition of coordinate systems for both bases in a potential pair.
 Although the choice of coordinate system significantly affects the calculated angles, it has little impact on the variance and the exact values are irrelevant for our use case.
 The choice of the coordinate system is thus essentially arbitrary, and we choose a simple option.
 
@@ -164,9 +164,9 @@ These modifications were proposed by Craig Zirbel to roughly align the coordinat
 
 We will calculate the **ZYX intrinsic Euler angles**
 between the coordinate systems.
-It offers a good interpretability as [so called "aircraft angles" **Yaw**, **Pitch**, and **Roll**](https://en.wikipedia.org/wiki/Aircraft_principal_axes).
-If we image an aircraft flying over the first glycosidic bond with its wings aligned along the base plane, the three angles describe the necessary maneuvers to align itself with the glycosidic bond of the second nucleotide.
-We can also easily to demonstrate these angles by issuing three subsequent `turn` commands in PyMOL.
+It offers a good interpretability as [so-called "aircraft angles" **Yaw**, **Pitch**, and **Roll**](https://en.wikipedia.org/wiki/Aircraft_principal_axes).
+If we imagine an aircraft flying over the first glycosidic bond with its wings aligned along the base plane, the three angles describe the necessary maneuvers to align itself with the glycosidic bond of the second nucleotide.
+We can also easily demonstrate these angles by issuing three subsequent `turn` commands in PyMOL.
 
 <!-- decribing the plane orientation relative to the Earth surface.
 In our case, "the aircraft", i.e. the base, is pointing from the glycosidic bond of the first base to the second base, with the "wings" aligned along the plane of the first base. -->
@@ -181,4 +181,12 @@ In our case, "the aircraft", i.e. the base, is pointing from the glycosidic bond
 
 ### Summary of new base parameters
 
-TODO odrazkovy seznam
+TODO kecy ještě?
+
+* **"H-bond length"** -- The distance between heavy atoms of each H-bond
+* **"H-bond acceptor/donor angle"** -- The angle H-bond acceptor, donor a third atom on each base
+* **"H-bond to plane angle"** -- The angles between the H-bond and each base plane
+* **"Coplanarity angle"** -- The angle between base planes
+* **"Edge to plane angle"** -- The angles between each base plane and the other base interacting edge
+* **"Edge to plane distance"** -- The shortest distances between each base plane and an atom of the other base interacting edge
+* **"Yaw, Pitch, Roll angles"** -- The 3D rotation between the bases, rooted in the glycosidic bond.

@@ -1,6 +1,6 @@
 ## Basepair isostericity
 
-One of the primary motivations for studying basepairs is to improve our understanding the biological role of mutations in nucleic acid structures.
+One of the primary motivations for studying basepairs is to improve our understanding of the biological role of mutations in nucleic acid structures.
 It is widely known that the canonical **G-C** and **A-U** pairs are similar in their overall shape with nearly identical distance and angle between the two glycosidic bonds.
 Consequently, a mutation from **G** to **A** can be effectively reversed by mutating the complementary **C** to **U**, without significant change in the sugar-phosphate backbone.
 Even non-canonical basepairing classes form groups with equivalent geometric configurations, we call this equivalence [**isostericity**](https://doi.org/10.1016/j.febslet.2014.06.031).

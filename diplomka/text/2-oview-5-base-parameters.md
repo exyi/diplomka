@@ -13,7 +13,7 @@ The rest of the publication backs the premise, and we agree that it is the case 
 
 ### The standard reference frame
 
-[A standard reference frame was defined as the “Tsukuba convention”](https://doi.org/10.1006/jmbi.2001.4987), few years after the <https://doi.org/10.1006/jmbi.1998.2390> publication.
+[A standard reference frame was defined as the “Tsukuba convention”](https://doi.org/10.1006/jmbi.2001.4987), a few years after the <https://doi.org/10.1006/jmbi.1998.2390> publication.
 The reference frame essentially defines a coordinate system for each of the five common nucleotides -- the Tsukuba convention includes a table of coordinates for each heavy atom in each base.
 We can fit it onto an observed molecule using the [Kabsch algorithm](https://doi.org/10.1107/S0567739476001873) and then apply translation and rotation to align the reference frame.
 The reference frame **X** axis is defined to be parallel with the Watson-Crick edge, **Y** axis run alongside the rest of the base.
@@ -35,14 +35,6 @@ The angular parameters are calculated by comparison of axes, we directly quote t
 * Similarly, **buckle** is defined as the ‘torsion’ angle of `z2` to `z1` with reference to the **X**-axis.
 * **Opening** is defined as the angle from `y2` to `y1` with reference to the **Z**-axis.
 
-{{{TOMUTO SE TEDY MOC ROZUMET NEDA:}}}
-We are always using one reference frame as the coordinate system for the other, which can lead to issues if the coordinate systems have a significant relative rotation.
-If we had a highly deformed basepair and the reference frame was rotated by 90° along the **X** axis (**buckle = 90°**), we cannot expect the parameters origin **A** coordinates in system **B** be equal to the coordinates of the origin **B** in the system **A**.
-In this extreme case, **X** coordinate of **A** in **B** will be equal to the coordinate **Z** of **B** in **A**, effectively interchanging **stagger** with **stretch**.
-However, for reasonable practical cases, this difference should be small.
-It could also be easily remedied by averaging the two possible results, or defining that purine is always the base nucleobase.
-We do not know exactly how DSSR handles this problem, but Curves+ claims to take the average.
-
 ### Non-canonical basepairs in the standard reference frame
 
 When the standard reference frame is applied to all types of basepairs, the meaning of the basepair parameters is somewhat distorted.
@@ -55,7 +47,7 @@ Indeed, DSSR reports an **opening** of 103°.
 Normally, **stretch** of **-1.9 Å** would mean that the bases clash with each other, but we can observe **shear** of value **-4.1 Å**.
 This means that the reference frames overlap, but the uracil is on the side of the adenine, avoiding the clash.
 
-Generally, we should expect negative **strech** in pairs involving the Hoogsteen or Sugar edge.
+Generally, we should expect a negative **stretch** in pairs involving the Hoogsteen or Sugar edge.
 Since these pairs are approximately rotated **90°**, **propeller** and **buckle** have interchanged meaning.
 
 ![The [1ehz](https://www.rcsb.org/structure/1EHZ) A8:A14 **tWH U-A** pair with the fitted reference basepair. First, we split the reference basepair and fit each base separately on the matching residues. This gives us two coordinate systems, allowing us to examine their relative positions and orientations (see the continuation in @fig:1ehz-A8-A14-dssrexample-translation-measure-comparison).](../img/1ehz-A8-A14-dssrexample-reframe-fit.svg){#fig:1ehz-A8-A14-dssrexample-reframe-fit}
@@ -83,9 +75,18 @@ Since these pairs are approximately rotated **90°**, **propeller** and **buckle
 
 
 Notably, this example demonstrates that the base parameters as calculated by DSSR are not symmetric when pushed to such extremes.
+We are always using one reference frame as the coordinate system for the other, which can lead to issues if the coordinate systems have a significant relative rotation.
 In this instance, the adenine origin is examined relative to the uracil reference frame.
 If it was inverted, we would observe a positive **stretch** -- the adenine origin has a positive Y coordinate in the uracil reference frame as shown in @fig:1ehz-A8-A14-dssrexample-translation-measure-comparison.
-It could be interesting to observe how does DSSR decide which nucleotide is the primary reference frame in each basepair.
+It could be interesting to observe how DSSR decides which nucleotide is the primary reference frame in each basepair.
+
+<!-- 
+Generally, if we have a highly deformed basepair (compared to a canonical one) and the reference frame was rotated by 90° along the **X** axis (**buckle = 90°**), we cannot expect the parameters origin **A** coordinates in system **B** to be equal to the coordinates of the origin **B** in system **A**.
+In this extreme case, the **X** coordinate of **A** in **B** will be equal to the coordinate **Z** of **B** in **A**, effectively interchanging **stagger** with **stretch**.
+However, for reasonable practical cases, this difference should be small.
+It could also knowbe easily remedied by averaging the two possible results, or defining that purine is always the base nucleobase.
+We do not  exactly how DSSR handles this problem, but Curves+ claims to take the average. -->
+
 
 ![A) Adenine origin (green) position in the uracil reference frame (brown) - **x = shear ≈ -4.1 Å**, and **y = stretch ≈ -1.9 Å**. B) Uracil origin position in adenine reference frame - **x = shear ≈ 1 Å**, and **y = stretch ≈ 4.4 Å**. Shown on the basepair from @fig:1ehz-A8-A14-dssrexample-reframe-fit](../img/1ehz-A8-A14-dssrexample-translation-measure-comparison.svg){#fig:1ehz-A8-A14-dssrexample-translation-measure-comparison}
 

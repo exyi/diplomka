@@ -11,7 +11,7 @@ This results in $12 + 11 + \cdots + 1 = 78$ unique combinations.
 Given that each base-edge couple can pair in either **cis** or in **trans** conformation, we multiply this by an additional two options, resulting in a total of **156** possibilities.
 
 It is evident that not all theoretically possible pairs can make sense chemically.
-For instance, the Hoogsteen edge of cytosine consists of single NH<sub>2</sub> group, which can only act as hydrogen bond donor.
+For instance, the Hoogsteen edge of cytosine consists of a single NH<sub>2</sub> group, which can only act as a hydrogen bond donor.
 Thus, a **cHH C-C** basepair, involving only this edge, cannot provide a stabilizing base interaction.
 
 <!-- The conformation is different for each of the four nucleotides.
@@ -92,7 +92,7 @@ For instance, the exact H-bonds in **cWW A-A** pairs would be ambiguous, as thes
 In a few classes, it is possible that the bases can interact by two possible sets of H-bonds on the same edges and the same cis/trans orientation.
 We observe these _subclasses_ for in **cWW G-U**, **tWW C-C** and **tWW U-U**, but it is possible that other, less common ones, exist.
 The **cWW G-U** pair is especially interesting, because
-[one of the subclasses is anionic. One of the bases is charged by loosing a hydrogen leading to an atypical donor positions.](https://doi.org/10.1261/rna.079583.123)
+[one of the subclasses is anionic. One of the bases is charged by losing a hydrogen leading to an atypical donor positions.](https://doi.org/10.1261/rna.079583.123)
 
 In these cases, FR3D appends an **“a”** to the family name to distinguish subclasses.
 For instance, the standard **cWW G-U** is labeled as **cWW**, and the anionic form is labeled **cWWa**.
@@ -105,7 +105,7 @@ In this work, we follow the FR3D convention, although we have had debates on rev
 
 ### Bifurcated hydrogen bonds
 
-Finally, to underline the saying that [in biology, there is a thousand
+Finally, to underline the saying that [in biology, there are a thousand
 exceptions to each rule](https://tandy.cs.illinois.edu/Hunter_MolecularBiology.pdf), a special category for basepairs between the three edges also exists.
 In these pairs, two hydrogen bonds are formed onto the single _corner_ atom.
 Specifically, two donors may share a single acceptor, or a NH<sub>2</sub> group can have both hydrogens bound.

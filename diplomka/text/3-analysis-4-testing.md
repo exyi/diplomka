@@ -80,14 +80,14 @@ The adjustment brings the _false negative_ rate down to at most 12% (in **cSS A-
 More importantly, the remaining false negatives again are from the “borderline basepair” camp.
 The number of _false positives_ did not increase significantly, as the two other H-bonds sufficiently constrain the overall geometry.
 
-![**cSS A-G** (left, 3cpw 0-1259:0-1074) and **tHS A-G** (right, 3ccm 0-1606:0-1589) basepairs: In both cases, insisting on presence of the **O2'** related H-bond is too limiting. We thus lift the length limit on few specific H-bonds.](../img/testing-missed-cases.svg){#fig:testing-missed-cases}
+![**cSS A-G** (left, 3cpw 0-1259:0-1074) and **tHS A-G** (right, 3ccm 0-1606:0-1589) basepairs: In both cases, insisting on presence of the **O2'** related H-bond is too limiting. We thus lift the length limit on a few specific H-bonds.](../img/testing-missed-cases.svg){#fig:testing-missed-cases}
 
 Classes with too many false positives are a tougher nut to crack.
 The underlying issue in **cSS A-C**, **cHH A-G** and many other smaller classes is the lack of hydrogen bonds.
 A single H-bond does not provide enough spatial constraint on the relative position, and the same problem occurs when both H-bonds involve a single **O2'** atom.
 We intend to solve this by adding a spatial distance constraint (a “virtual H-bond”), for instance, ensuring that the six-membered rings do not drift too far apart.
 
-In the case of **cSS C-A** and **tSS A-G** classes, we would argue that the FR3D assignment is not the ideal target, and therefore, we do not intent to match it perfectly.
+In the case of **cSS C-A** and **tSS A-G** classes, we would argue that the FR3D assignment is not the ideal target, and therefore, we do not intend to match it perfectly.
 The current disparity is not substantial (20%), but our _“false positives”_ often look better than other basepairs identified by FR3D.
 It is hard to demonstrate without multiple pages of figures, and we unfortunately do not have an objective way of comparing which assignment is indeed better.
 The differences may be examined manually in the application, when we enable FR3D comparison after selecting the [**tSS A-G**](https://basepairs.datmos.org/#tSs-A-G/ds=allcontacts-boundaries-f&baseline_ds=fr3d-f) or [**cSS C-A**](https://basepairs.datmos.org/#cSs-C-A/ds=allcontacts-boundaries-f&baseline_ds=fr3d-f) class.
