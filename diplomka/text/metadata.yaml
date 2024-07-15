@@ -21,11 +21,11 @@ abstract-cs: |-
 
     V této práci představujeme systém několika geometrických parametrů, pomocí kterých lze všechny třídy párů formálně nadefinovat a následně je automaticky hledat ve strukturách molekul.
     Součástí práce je referenční implementace výpočtu těchto parametrů, i program na výběr párů odpovídající daným podmínkám.
-    Protože precizně nadefinovat všechny typy párů vyžaduje spoustu pečlivé práce, jsme zároveň vyvinuli aplikaci, která umožňuje kritéria měnit a zvládá interaktivně ve webovém prohlížeči hledat odpovídající páry z celé databáze PDB.
+    Precizně nadefinovat všechny typy párů vyžaduje spoustu pečlivé práce, proto jsme také vyvinuli aplikaci, která umožňuje kritéria měnit a zvládá interaktivně hledat odpovídající páry z celé databáze PDB ve webovém prohlížeči.
 acknowledgement: |-
     First and foremost, I'd like to express my gratitude to my supervisor Bohdan Schneider for his helpfulness and staunch patience.
     From providing overall project guidance, to correcting my grammatical errors, his support has been invaluable to the completion of the thesis.
-    My heartfelt thanks also belong to the other member of research group, most notably Lada Biedermannová, Jiří Černý, and Craig Zirbel for sharing their ideads, providing technical advice, and reviewing my software and data.
+    My heartfelt thanks also belong to the other members of our research group, most notably Lada Biedermannová, Jiří Černý, and Craig Zirbel for sharing their ideads, providing technical advice, and reviewing my software and data.
 
     <hr />
 

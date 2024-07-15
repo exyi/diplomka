@@ -81,8 +81,7 @@ To avoid redundancy, we deduplicate the pair using the following rules:
 
 ### Pairs between symmetry-related nucleotides {#sec:impl-collection-symmetry}
 
-Asymmetric unit, the smallest part of the crystal [from which the
-whole crystal can re-built](isbn:978-0815340812), does not in all crystal structures contain the whole biologically relevant <!-- molecule or --> molecular complex.
+Asymmetric unit, the smallest part of the crystal [from which the whole crystal can re-built](isbn:978-0815340812), does not in all crystal structures contain the whole biologically relevant <!-- molecule or --> molecular complex.
 As an example, double-helical DNA or RNA of a palindromic sequence can have only one nucleotide strand in the asymmetric unit while the biologically relevant is the duplex.
 Because PDB files contain coordinates only for one asymmetric unit we have to consider possibility for the basepair assignment across the symmetry operation as two bases forming the pair can be symmetry-related. 
 

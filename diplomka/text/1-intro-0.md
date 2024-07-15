@@ -25,7 +25,7 @@ Even in DNA structures, 25% of all basepairs are non-canonical, notable biologic
 
 
 The higher-level objective of our working group is to provide unambiguous definitions for the basepair classes of the Leontis-Westhof system.
-At present, a number of rigorous definitions exists, as each computer program capable to annotating basepairs requires one.
+At present, a number of rigorous definitions exist, as each computer program capable of annotating basepairs requires one.
 However, with the exception of few overly simplistic algorithms, the exact selection criteria are not published outside the source codes, rendering it largely inaccessible to a significant portion of structural biologists.
 
 In this work, we establish a framework necessary for achieving the objective.

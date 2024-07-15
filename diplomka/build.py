@@ -512,7 +512,7 @@ def reexport_docx(files, out_dir, output_file):
         "--toc", "--toc-depth=4",
         "--number-sections"
     ]
-    # run(f"Pandoc export docx", "pandoc", *args, "--to=docx", "--output=" + output_file + ".docx", *files)
+    run(f"Pandoc export docx", "pandoc", *args, "--to=docx", "--output=" + output_file + ".docx", *files)
     # run(f"Pandoc export odt", "pandoc", *args, "--to=odt", "--output=" + output_file + ".odt", *files)
 
 def pandoc_render(files, output_file):

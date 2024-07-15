@@ -4,7 +4,7 @@
 
 ![Saenger's system of basepair types, [from the](https://doi.org/10.1007/978-1-4612-5190-3) book, page 120](../img/saenger-system-merged.png){#fig:saenger-system-merged}
 
-Since many different non-canonical basepairs exists, a systematic naming scheme is necessary.
+Since many different non-canonical basepairs exist, a systematic naming scheme is necessary.
 The first such scheme we are aware of was described by [W. Saenger in the book 'Principles of Nucleic Acid Structure' (1984)](https://doi.org/10.1007/978-1-4612-5190-3), where he identified and classified possible basepairs with at least two hydrogen bonds into 28 distinct classes.
 The Saenger's classes are identified using a single ordinal number and are grouped into five higher-level categories based on geometrical symmetry and pairing bases.
 
@@ -14,7 +14,7 @@ The Saenger's classes are identified using a single ordinal number and are group
 [N. B. Leontis and E. Westhof proposed a more systematic approach in a 2001 paper](https://doi.org/10.1017/s1355838201002515).
 The authors identified that each nucleotide interacts with one of its three edges (@fig:LW-3-edges-UG).
 The _front edge_ was named **“Watson-Crick”**, since this is the only edge involved in the canonical basepairing.
-The two _side edges_ are called **“Hoogsteen”** and **“Sugar”** -- the former is involved in the Hoogsteen pairs and the latter covalently bonds with the ribose sugar.
+The two _side edges_ are called **“Hoogsteen”** and **“Sugar”** -- the former is involved in the Hoogsteen pairs and the latter covalently binds to the ribose sugar.
 The basepairs are classified based on the two interacting edges and their relative orientation (cis or trans).
 
 ![The three L-W edges of a pyrimidine (U) and a purine (G)](../img/purine-pyrimidine-edges.svg){#fig:LW-3-edges-UG}
@@ -71,7 +71,7 @@ Some basepairs defined by Westhof and Leontis do bind exclusively to the O2' rib
 ### Basepair classification by the DSSR program
 
 The software tool X3DNA DSSR (see also @sec:software-DSSR) employs a distinct scheme for differentiating **cis** and **trans** orientations.
-Instead of discrimination the cis and trans orientations in the L-W system, [DSSR considers whether the bases are flipped relative to their **Z** axis](https://x3dna.org/articles/specification-of-base-pairs-in-3dna).
+Instead of differentiating between the **cis** and **trans** orientations in the L-W system, [DSSR considers whether the bases are flipped relative to their **Z** axis](https://x3dna.org/articles/specification-of-base-pairs-in-3dna).
 If the base **Z** axes are aligned, DSSR labels the basepair as `M+N`; if the bases are flipped, it is labeled `M-N`.
 `M` and `N` are placeholders for any combination of A, T, U, G, C -- for example, the canonical pairs are labeled `G-C` and `A-U`.
 In terms of the three edges discussed earlier, a basepair is classified as `M-N` if the edge arrows in @fig:LW-3-edges-UG point in the same direction; if they are opposite, it is classified as `M+N`.

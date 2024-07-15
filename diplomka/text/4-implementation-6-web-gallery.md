@@ -8,17 +8,17 @@ In this section, we would like to uncover some inner workings, software design c
 <!-- The trick why re-running FR3D takes 3 hours on 16 CPU cores while we can adjust the parameters interactively is the precomputation and DuckDB -->
 The trick why we can adjust the parameters interactively on a website, while re-running FR3D takes about two CPU-days is the pre-computation done in @sec:sw-collection.
 And [DuckDB-wasm](https://github.com/duckdb/duckdb-wasm).
-We precompute the parameters for all close contacts and perform the filtering later.
+We pre-compute the parameters for all close contacts and then only perform filtering in the interactive session.
 The web itself is a purely client-side JavaScript application developed using the [Svelte](https://svelte.dev/) framework.
-Rather unconventionally, we run the [DuckDB-wasm database](https://github.com/duckdb/duckdb-wasm) in the web browser to query the statically hosted Parquet tables.
+Rather unconventionally, we run the [DuckDB database](https://github.com/duckdb/duckdb-wasm) in the web browser to query the statically hosted Parquet tables.
 This approach results in a resource-intensive application, but it significantly simplifies the process of implementing flexible filters, even allowing power-users compose their own SQL queries without the necessity for safeguards against [SQL injection](https://en.wikipedia.org/wiki/SQL_injection).
 
 Internal state such as the selected pair, selected data source and filter is persisted into the URL, making it simple to share
 
 #### Basepair images {#sec:impl-webapp-images}
 
-The displayed basepair image are pre-render for the entire reference set using the procedure described in @sec:impl-basepair-img.
-The rendered structures are essential for effective browsing of the basepair examples, as the users can quickly identify what does.
+The basepair image are pre-rendered for the entire reference set using the procedure described in @sec:impl-basepair-img.
+The visual structures are essential for effective browsing of the basepair examples, as the users can quickly identify what does.
 Although it is possible to render molecules directly in the browser, loading a bitmap image is an order of magnitude faster even if the molecule is small.
 A large fraction of basepairs occur in huge ribosomal structures, making it essentially impossible to render tens of them on one screen even on premium hardware and despite the fact that [MolStar](https://doi.org/10.1093/nar/gkab314) is a comparatively performant renderer.
 
