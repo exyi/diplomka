@@ -2,37 +2,39 @@
 
 <!-- Since the [initial discovery of DNA structure](https://doi.org/10.1038/171737a0),  -->
 
-TODO zapracovat Bohdanovo review
-
 Nucleic acids are some of the most important biological molecules, and the study of their structure and function is critical to understanding the fundamental principles of life.
 The [well known double-stranded helix](https://doi.org/10.1038/171737a0) dominates the structure of DNA, protecting its valuable information content.
-On the other hand, RNA molecules often form complicated structures, often with dynamic catalytic domains such as those in the ribosome <https://doi.org/10.1201/9781315735368#The_Ribosome_Is_a_Ribozyme>.
-A number of RNAs can even have catalytic activity independent on proteins (<https://doi.org/10.1261/rna.031401.111>, <https://doi.org/10.1038/nchembio.1846>).
-Similarly to the DNA helices, these complex structures are also driven by the pairwise interaction of nucleotide bases.
-However, these interactions have more diverse forms than the two most common basepairs described by Watson and Crick.
+On the other hand, RNA molecules often form complicated spatial structures, often with dynamic catalytic domains such as those in the ribosome <https://doi.org/10.1201/9781315735368#The_Ribosome_Is_a_Ribozyme>.
+RNA molecules can even have catalytic activity independent on proteins (<https://doi.org/10.1261/rna.031401.111>, <https://doi.org/10.1038/nchembio.1846>), and similarly to the DNA double helices, these complex structures are also stabilized by the pairwise interaction of nucleotide bases.
+Despite the fact that most of these base-base interactions are the same as the coding A/T and C/G pairs described by Watson and Crick,
+basepair interactions in RNA and to some extent also in DNA acquire much more diverse forms of so-called non-canonical basepairs.
+<!-- Given the diversity of non-canonical basepairs, it is unsurprising that they require more research than their canonical counterparts.-->
 
-Given the diversity of non-canonical basepairs, it is unsurprising that they require more research than their canonical counterparts.
-A significant step towards addressing the gap is the [Leontis-Westhof classification system](https://doi.org/10.1017/s1355838201002515), introduced in 2001, which provides a framework for categorizing and naming non-canonical basepairs.
-A [subsequent publication](https://doi.org/10.1093/nar/gkf481) shows more than a hundred different basepairing conformations in experimental structures archived in the [PDB database](https://doi.org/10.1093/nar/gky949).
-Today, with the availability of about 17 000 nucleic acid structures, we are in a better position to properly describe even the rarer basepair kinds.
+The diversity of non-canonical basepairs requires robust and general schema for their description.
+A significant step towards this objective is the [Leontis-Westhof classification system](https://doi.org/10.1017/s1355838201002515), introduced in 2001.
+It provides a framework for categorizing and naming of all basepair types including both canonical (coding) and non-canonical basepairs.
+A [subsequent publication of the same team](https://doi.org/10.1093/nar/gkf481) shows more than a hundred different basepairing conformations in experimental structures archived in the [PDB database](https://doi.org/10.1093/nar/gky949) at the time.
+Today, with the availability of about 17 000 experimental structures in the PDB containing nucleic acids, we are at even better position to properly describe all potentially existing basepair types, including the rarer classes. 
 
-If we analyze the entire PDB database with one of the available basepair assignment programs (FR3D, @sec:software-FR3D), we can see that Watson-Crick pairs dominate all other basepair classes.
-However, in RNA the total cardinality of all non-canonical pairs is actually larger than the canonical ones; meaning that canonical pairs represent slightly below 50% of the total.
-Even in DNA structures, 25% of all basepairs are non-canonical, notable biologically relevant structures are the [i-Motif](https://doi.org/10.1093/nar/gky735) and the [G-quadruplex](https://doi.org/10.1016/j.trechm.2019.07.002).
-<!-- However, it must be noted that the PDB is heavily biased towards _interesting_ structures -->
+After the publication of the Leontis-Westhof classification, several computer programs have been developed for finding basepairs in structures.
+If we analyze the entire database with one of the available basepair assignment programs (FR3D, @sec:software-FR3D), we can see that Watson-Crick pairs dominate all other basepair classes.
+However, in RNA structures, the canonical pairs represent slightly below 50% of the total number of all basepairs.
+Even in available DNA structures, 25% of all basepairs are non-canonical.
+Of notable biological interest are [i-Motif](https://doi.org/10.1093/nar/gky735) and [G-quadruplex](https://doi.org/10.1016/j.trechm.2019.07.002) architectures. 
 
-## Aims of the project
+## Aims of the Project
 
 
-The higher-level objective of our working group is to provide unambiguous definitions for the basepair classes of the Leontis-Westhof system.
-At present, a number of rigorous definitions exist, as each computer program capable of annotating basepairs requires one.
-However, with the exception of few overly simplistic algorithms, the exact selection criteria are not published outside the source codes, rendering it largely inaccessible to a significant portion of structural biologists.
+The higher-level objective of our working group is to provide unambiguous and interpretable definitions for the basepair classes of the Leontis-Westhof system.
+At present, each computer program capable of annotating basepairs uses its own definition that is typically undocumented, with
+the exception of a few overly simplistic algorithms.
+The exact selection criteria are not published outside the source codes, rendering it largely inaccessible to a significant portion of structural biologists and the basepair assignment is to a large part not easily reproduced.
 
-In this work, we establish a framework necessary for achieving the objective.
-We define and implement the measurable parameters which will be subsequently utilized to define the basepairs (@sec:basepair-params).
+In this work, we establish a framework necessary for finding new definitions which will be possible to [standardize](https://xkcd.com/927/).
+We define and implement measurable parameters (@sec:basepair-params) which are subsequently utilized to define classes of basepairs in experimental or computed 3D models.
 Additionally, we develop an interactive application that enables the tuning of selection criteria for each basepairing class (@sec:tuning-app).
 
-![Our plan to improve the shortcomings of existing programs for basepair assignment. [XKCD #927 by Randall Munroe](https://xkcd.com/927/)](../img/xkcd_standards_2x.png){#fig:xkcd_standards_2x}
+<!-- ![Our plan to improve the shortcomings of existing programs for basepair assignment. XKCD #927 by Randall Munroe](../img/xkcd_standards_2x.png){#fig:xkcd_standards_2x} -->
 
 
 <!-- Even though the number of solved nucleic acid structures is significantly lower than the number of known protein structures,  -->
