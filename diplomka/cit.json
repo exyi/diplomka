@@ -38,7 +38,7 @@
         "doi": null,
         "published_date_parts": [ 2012, 1, 15 ],
         "title": "Best Fitting Plane given a Set of Points",
-        "authors": [ ["Felix", "Pahl (joriki)" ] ],
+        "authors": [ ["Felix “joriki”", "Pahl" ] ],
         "journal": [ "Mathematics Stack Exchange" ]
     },
 
@@ -115,7 +115,7 @@
             [ "", "other contributors"]
         ]
     },
-    "https://​svelte.dev/​": {
+    "https://svelte.dev": {
         "doi": null,
         "published_date_parts": [ 2023, 1, 10 ],
         "title": "Svelte, Cybernetically enhanced web apps, version 3.55",
@@ -185,37 +185,35 @@
     "https://doi.org/10.1201/9781315735368#The_Ribosome_Is_a_Ribozyme": {
         "doi": "10.1201/9781315735368",
         "published_date_parts": [ 2017, 8, 7 ],
+        "url": null,
         "isbn": "978-1315735368",
         "title": "Molecular Biology of the Cell, chapter The Ribosome Is a Ribozyme, p. 346",
         "authors": [
-            [
-                "Bruce",
-                "Alberts"
-            ],
-            [
-                "Alexander",
-                "Johnson"
-            ],
-            [
-                "Julian",
-                "Lewis"
-            ],
-            [
-                "David",
-                "Morgan"
-            ],
-            [
-                "Martin",
-                "Raff"
-            ],
-            [
-                "Keith",
-                "Roberts"
-            ],
-            [
-                "Peter",
-                "Walter"
-            ]
+            [ "Bruce", "Alberts" ],
+            [ "Alexander", "Johnson" ],
+            [ "Julian", "Lewis" ],
+            [ "David", "Morgan" ],
+            [ "Martin", "Raff" ],
+            [ "Keith", "Roberts" ],
+            [ "Peter", "Walter" ]
+        ]
+    },
+    "https://doi.org/10.5281/zenodo.7697217": {
+        "doi": "10.5281/zenodo.7697217",
+        "published_date_parts": [ 2024, 7, 7 ],
+        "title": "pola-rs/polars: Python Polars 1.1.0",
+        "journal": [ "Zenodo" ],
+        "authors": [
+            [ "Ritchie", "Vink" ],
+            [ "Stijn", "de Gooijer" ],
+            [ "Alexander", "Beedie" ],
+            [ "Marco E.", "Gorelli" ],
+            [ "Weijie", "Guo" ],
+            [ "J", "van Zundert" ],
+            [ "Orson", "Peters" ],
+            [ "Gert", "Hulselmans" ],
+            [ "Cory", "Grinstead"],
+            [ "", "other contributors" ]
         ]
     },
     "https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.gaussian_kde.html": {

@@ -64,6 +64,8 @@ However, we choose to avoid using composite data types to keep the Parquet and C
 Instead of an array of structures `{ length: Float64, donor_angle: Float64, ... }`, we have multiple columns `hb_0_length`, `hb_0_donor_angle`, …, `hb_1_length`, `hb_1_donor_angle`, ….
 Since we never have more than four defined bonds, it is not a significant issue.
 
+We use the [Polars DataFrame library](https://doi.org/10.5281/zenodo.7697217) in Python code and [DuckDB-wasm](https://github.com/duckdb/duckdb-wasm) in the web application as the Parquet reader and writer, and we can recommend both implementations.
+
 ### Deduplication
 
 FR3D reports each pair twice, in both orientations -- if a **cWH G-C** pair is reported, a corresponding **cHW C-G** pair is also reported.
@@ -88,7 +90,7 @@ Because PDB files contain coordinates only for one asymmetric unit we have to co
 ![The asymmetric unit of [`6ros`](https://www.rcsb.org/structure/6ROS) structure is formed by a single strand, but the **biological assembly** is a duplex. The mmCIF file contains the coordinates of only one strand, and the second one is its symmetric copy. All basepairs are formed between the two strands.](../img/6ros-symmetry-illustration.png)
 
 PDBx/mmCIF files include the information to complete the biological unit as [a rotation matrix and a translation vector in the `pdbx_struct_oper_list` mmCIF category](https://mmcif.wwpdb.org/dictionaries/mmcif_pdbx_v50.dic/Categories/pdbx_struct_oper_list.html).
-This category may contain any number of transformations, labeled by the [PDB symmetry operation code] (http://www.bmsc.washington.edu/CrystaLinks/man/pdb/part_74.html).
+This category may contain any number of transformations, labeled by the [PDB symmetry operation code](http://www.bmsc.washington.edu/CrystaLinks/man/pdb/part_74.html).
 We thus do not have to handle the space group operations and solely rely on the provided transformation matrices.
 
 <!-- ```

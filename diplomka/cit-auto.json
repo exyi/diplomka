@@ -184,7 +184,7 @@
         "seq": null
     },
     "https://doi.org/10.1006/jmbi.1998.2390": {
-        "title": "Resolving the discrepancies among nucleic acid conformational analyses 1 1Edited by I. Tinoco",
+        "title": "Resolving the discrepancies among nucleic acid conformational analyses",
         "authors": [
             [
                 "Xiang-Jun",
@@ -452,12 +452,12 @@
         "title": "Molecular Structure of Nucleic Acids: A Structure for Deoxyribose Nucleic Acid",
         "authors": [
             [
-                "J. D.",
-                "WATSON"
+                "James D.",
+                "Watson"
             ],
             [
-                "F. H. C.",
-                "CRICK"
+                "Francis H. C.",
+                "Crick"
             ]
         ],
         "doi": "10.1038/171737a0",

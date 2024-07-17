@@ -1,7 +1,10 @@
 # title: 'Analysis of Nucleic Acid Base Pairing or Something'
 title: 'Methods of&nbsp;determination of&nbsp;base&nbsp;pairs in&nbsp;nucleic acids'
+title-cs: 'Methods of determination of base pairs in nucleic acids'
 author: 'Stanislav Lukeš'
 supervizor: 'prof. Ing. Bohdan Schneider, CSc.'
+keywords: molecular structure, nucleic acids, RNA, DNA, base pairing, non-canonical base pairs, structural databases
+keywords-cs: molekulární struktura, nukleové kyseliny, RNA, DNA, párování bází, nekanonické páry, strukturní databáze
 numberSections: true
 linkReferences: true
 nameInLink: true
@@ -18,16 +21,17 @@ abstract-cs: |-
     Struktura nukleových kyselin je do značné míry určena párovými interakcemi mezi bázemi nukleotidů, z čehož nejčastějším a nejprostudovanějším typem jsou kanonické "Watson-Crickovské" G-C a A-T páry.
     Na začátku tisíciletí ukázali Leontis a Westhof na reálných příkladech, že existuje přes sto druhů dalších nekanonických párů a zároveň nadefinovali univerzální a dnes široce používaný terminologický systém.
     Nicméně, dodnes neexistují všeobecně uznávané formální definice všech kategorií párů.
-
+    <br />
+    <br />
     V této práci představujeme systém několika geometrických parametrů, pomocí kterých lze všechny třídy párů formálně nadefinovat a následně je automaticky hledat ve strukturách molekul.
     Součástí práce je referenční implementace výpočtu těchto parametrů, i program na výběr párů odpovídající daným podmínkám.
-    Precizně nadefinovat všechny typy párů vyžaduje spoustu pečlivé práce, proto jsme také vyvinuli aplikaci, která umožňuje kritéria měnit a zvládá interaktivně hledat odpovídající páry z celé databáze PDB ve webovém prohlížeči.
+    ?? Precizně nadefinovat všechny typy párů vyžaduje spoustu pečlivé práce, proto jsme také vyvinuli aplikaci, která umožňuje kritéria měnit a zvládá interaktivně hledat odpovídající páry z celé databáze PDB přímo ve webovém prohlížeči.
+    ?? Dále jsme vyvinuli webovou aplikaci, která umožňuje interaktivně prohledávat páry z celé databáze PDB, což nám umožňuje najít nejvhodnější definici pro každý druh páru.
 acknowledgement: |-
     First and foremost, I'd like to express my gratitude to my supervisor Bohdan Schneider for his helpfulness and staunch patience.
     From providing overall project guidance, to correcting my grammatical errors, his support has been invaluable to the completion of the thesis.
     My heartfelt thanks also belong to the other members of our research group, most notably Lada Biedermannová, Jiří Černý, and Craig Zirbel for sharing their ideads, providing technical advice, and reviewing my software and data.
 
-    <hr />
-
+acknowledgement-technical: |-
     A significant portion of computational resources were provided by the e-INFRA CZ project (ID:90254), supported by the Ministry of Education, Youth and Sports of the Czech Republic.
 

@@ -93,7 +93,7 @@ def get_citations_somehow(url_list: list[str]) -> dict[str, CitationInfo]:
                 os.remove("cit-auto.json.new")
     return {**auto, **manual}
 
-def assign_citation_ids(citations: dict[str, CitationInfo]) -> dict[str, CitationInfo]:
+def assign_citation_ids(citations: dict[str, CitationInfo], links: dict[str, list[tuple[int, str]]]) -> dict[str, CitationInfo]:
     assigned_ids = dict()
     for url, cit in citations.items():
         if cit.id is not None:
@@ -121,9 +121,17 @@ def assign_citation_ids(citations: dict[str, CitationInfo]) -> dict[str, Citatio
         cit.id = preferred_id
         assigned_ids[preferred_id] = cit
 
-    ss = sorted(citations.values(), key=lambda c: (*tuple([*(c.published_date_parts or []), 3000, 3000, 3000 ])[0:3], c.url, c.authors))
+    # ss = list(sorted(citations.values(), key=lambda c: (*tuple([*(c.published_date_parts or []), 3000, 3000, 3000 ])[0:3], c.url, c.authors)))
+    for link, c in citations.items():
+        if link not in links:
+            print(f"WARNING: Unreferenced citation {link} {c.title}")
+            c.seq = None
+        else:
+            c.seq = min(a[0] for a in links[link])
+
+    ss = list(sorted(citations.values(), key=lambda c: (c.seq, [ x[1] for x in c.authors ])))
     for i, s in enumerate(ss):
-        s.seq = i
+        s.seq = i + 1
     return assigned_ids
 
 def get_str_content(pandoc_json: dict) -> list[str]:
@@ -142,14 +150,17 @@ def get_str_content(pandoc_json: dict) -> list[str]:
     pf.walk([pandoc_json], core, "", {})
     return result
 
-def collect_links(out: dict[str, list[str]]):
+def collect_links(out: dict[str, list[tuple[int, str]]]):
+    seq = 0
     def core(key, val, fmt, meta):
+        nonlocal seq
         if key == "Link":
             attr, content, [url, wtf] = val
             assert not wtf, wtf
-            if url.startswith("http:") or url.startswith("https:"):
+            if re.match(r"^\w+:", url):
                 data = "".join(get_str_content(content))
-                out[url] = out.get(url, []) + [ data ]
+                out[url] = out.get(url, []) + [ (seq, data) ]
+                seq += 1
 
     return core
 
@@ -166,8 +177,8 @@ def convert_links(citations: dict[str, CitationInfo]):
                 cit = citations[url]
                 citation_ref = pf.Span(
                         ['', ["citation-ref"], [ ["data-citation-id", str(cit.id)], ["data-citation-seq", str(cit.seq)] ] ],
-                        [pf.Space(),  pf.Str(f"[{cit.id}]")])
-                print(f"Reference: {url} -> {content_text} [{cit.id}]")
+                        [pf.Space(),  pf.Str(f"[{cit.seq}]")])
+                print(f"Reference: {url} -> {content_text} [{cit.id} {cit.seq}]")
                 new_content = [ *content, citation_ref ] if content_text.lower() != url.lower() else [ citation_ref ]
                 new_url = url
                 new_url = f"#ref-{cit.id}"
@@ -238,14 +249,14 @@ def generate_references(cit_map: dict[str, CitationInfo]):
         if cit.url and cit.url != cit.doi and cit.url != f"https://doi.org/{cit.doi}":
             links.append(f'''
                 <span class="references-link references-url">
-                    <a {link_attr} href="{html.escape(cit.url)}">Available at: <span class="references-url-body">{html.escape(cit.url)}</span></a>
+                    <a {link_attr} href="{html.escape(cit.url)}"><span class="references-url-body">{html.escape(cit.url)}</span></a>
                 </span>''')
                     # <br>(<a {link_attr} href="{f'https://web.archive.org/web/20240712120000/{html.escape(cit.url)}' if cit.webarchive is None else html.escape(cit.webarchive)}">web.archive.org</a>)
             
         if cit.isbn:
             links.append(f'<span class="references-link references-isbn"><a {link_attr} href="https://isbnsearch.org/isbn/{html.escape(cit.isbn)}">ISBN: <span class="references-isbn-body">{html.escape(cit.isbn)}</span></a></span>')
-        if cit.doi:
-            links.append(f'<span class="references-link references-doi"><a {link_attr} href="https://sci-hub.se/{html.escape(cit.doi)}">sci-hub: <span class="references-doi-body">{html.escape(cit.doi)}</span></a></span>')
+        # if cit.doi:
+        #     links.append(f'<span class="references-link references-doi"><a {link_attr} href="https://sci-hub.se/{html.escape(cit.doi)}">sci-hub: <span class="references-doi-body">{html.escape(cit.doi)}</span></a></span>')
         authors = cit.authors
         if len(authors) > 20 or ["", "???"] in authors:
             authors = [a for a in authors if a[1] != "???"]
@@ -253,19 +264,19 @@ def generate_references(cit_map: dict[str, CitationInfo]):
         authors = ", ".join(format_author(a, shorten_first_name=len(authors) > 3) for a in authors)
         if cit.journal and len(cit.journal) > 0:
             j = cit.journal if isinstance(cit.journal, str) else cit.journal[0]
-            journal = f'<span class="references-journal">{html.escape(re.sub(r"(\s|[,])+$", "", j))}</span>'
+            journal = f'<span class="references-journal">{html.escape(re.sub(r"(\s|[,])+$", "", j))}.</span>'
         else:
             journal = ""
         body = f"""
-            <span class="references-authors">{html.escape(authors)}</span>
-            <span class="references-date">{"retrieved " if cit.published_date_parts is None else ""}{format_date(cit.published_date_parts or cit.downloaded_date_parts or [2024])}</span>
-            <span class="references-title">{cit.title}</span>
+            <span class="references-authors">{html.escape(authors)}</span>.
+            <span class="references-date">{"retrieved " if cit.published_date_parts is None else ""}{format_date(cit.published_date_parts or cit.downloaded_date_parts or [2024])}</span>.
+            <span class="references-title">{cit.title}.</span>
             {journal}
             {"\n".join(links)}
         """
         row = f"""
             <div class="references-table-row" id="ref-{html.escape(id)}">
-                <div class="references-table-id">[{html.escape(id)}]</div>
+                <div class="references-table-id">[{cit.seq}]</div>
                 <div class="references-table-body">
                     {body}
                 </div>
@@ -281,16 +292,16 @@ def alter_file(file, actions, format=""):
         f.write(altered)
 
 def process_links(files: list[str], out_dir):
-    links: dict[str, list[str]] = dict()
+    links: dict[str, list[tuple[int, str]]] = dict()
     phase1 = [
         collect_links(links)
     ]
     for file in files:
         with open(file) as f:
             pf.applyJSONFilters(phase1, f.read(), "")
-    
+
     citations = get_citations_somehow(list(links.keys()))
-    cit_map = assign_citation_ids(citations)
+    cit_map = assign_citation_ids(citations, links)
     for _, cit in sorted({ cit.seq: cit for l in links.items() if (cit:=citations.get(l[0])) is not None}.items()):
         print(f" {(cit.seq+1 if cit.seq is not None else -4086200234935): 3d} {cit.id:5s}: {cit.title} ({cit.doi or cit.url})")
 
@@ -326,9 +337,15 @@ def sentence_spacing(key: str, val: ty.Any, fmt, meta):
 
         return { 't': key, 'c': new_val }
 
+def bpclass_nobreak(key: str, val: ty.Any, fmt, meta):
+    if key == "Str":
+        if (m:=re.match(r"([ATCGU])[-]([ATCGU])", val)):
+            return pf.Str(f"{m.group(1)}\u2060-\u2060{m.group(2)}")
+
 def process_typography(files: list[str]):
     actions = [
-        sentence_spacing
+        sentence_spacing,
+        bpclass_nobreak
     ]
     
     for file in files:
@@ -512,7 +529,7 @@ def reexport_docx(files, out_dir, output_file):
         "--toc", "--toc-depth=4",
         "--number-sections"
     ]
-    run(f"Pandoc export docx", "pandoc", *args, "--to=docx", "--output=" + output_file + ".docx", *files)
+    # run(f"Pandoc export docx", "pandoc", *args, "--to=docx", "--output=" + output_file + ".docx", *files)
     # run(f"Pandoc export odt", "pandoc", *args, "--to=odt", "--output=" + output_file + ".odt", *files)
 
 def pandoc_render(files, output_file):

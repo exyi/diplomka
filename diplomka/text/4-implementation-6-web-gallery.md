@@ -9,7 +9,7 @@ In this section, we would like to uncover some inner workings, software design c
 The trick why we can adjust the parameters interactively on a website, while re-running FR3D takes about two CPU-days is the pre-computation done in @sec:sw-collection.
 And [DuckDB-wasm](https://github.com/duckdb/duckdb-wasm).
 We pre-compute the parameters for all close contacts and then only perform filtering in the interactive session.
-The web itself is a purely client-side JavaScript application developed using the [Svelte](https://svelte.dev/) framework.
+The web itself is a purely client-side JavaScript application developed using the [Svelte](https://svelte.dev) framework.
 Rather unconventionally, we run the [DuckDB database](https://github.com/duckdb/duckdb-wasm) in the web browser to query the statically hosted Parquet tables.
 This approach results in a resource-intensive application, but it significantly simplifies the process of implementing flexible filters, even allowing power-users to compose their own SQL queries without the necessity for safeguards against [SQL injection](https://en.wikipedia.org/wiki/SQL_injection).
 

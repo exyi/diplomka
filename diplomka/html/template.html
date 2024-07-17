@@ -34,13 +34,18 @@
             --a4-height: 297mm;
 
             text-wrap: pretty;
+            
+            --page-margin-top: 0.75in;
+            --page-margin-right: 1in;
+            --page-margin-bottom: 1in;
+            --page-margin-left: 1in;
 
             /* --full-width: calc(var(--a4-width) - 2 * var(--body-margin-x));
             --full-height: calc(var(--a4-height) - 2 * 0.98in); */
         }
         @media print {
             @page {
-                margin: 0.75in 1in 1in 1in;
+                margin: var(--page-margin-top) var(--page-margin-right) var(--page-margin-bottom) var(--page-margin-left);
                 size: 210mm 297mm;
                 /* @bottom-left {
                     content: counter(page) ' of ' counter(pages);
@@ -180,7 +185,8 @@
         }
 
         .flex-columns > * {
-            flex-grow: 1;
+            /* flex-grow: 1; */
+            flex: 1 0 0;
             padding: 0.1cm;
         }
 
@@ -227,6 +233,7 @@
             text-wrap: balance;
         }
         table caption {
+            width: calc(210mm - var(--page-margin-left) - var(--page-margin-right));
             text-align: justify; text-align-last: left;
             /* text-wrap: balance; */
             border-top: solid 2px black;
@@ -264,6 +271,7 @@
         }
         section p[data-split-original] {
             text-align-last: justify;
+            font-size: 0.995em; /* hack to make sure that the browser does not break the last line into two after the paragraph is split */
         }
 
         h1, h2, h3, h4, h5, h6 {
@@ -341,7 +349,7 @@
             page-break-inside: avoid;
         }
         .references-table-row .references-table-id {
-            flex: 0 0 5rem;
+            flex: 0 0 3rem;
         }
         .references-table-row .references-table-body {
             flex-grow: 1;
@@ -410,8 +418,8 @@
     $endfor$
 
 </head>
-<!-- <body class="pagedjs"> -->
-<body class="nopagedjs">
+<body class="pagedjs">
+<!-- <body class="nopagedjs"> -->
     <!-- Pandoc include-before: -->
     $for(include-before)$
         $include-before$
@@ -428,7 +436,8 @@
         <img src="../html/prf-uk-znak-en.svg" style="max-width: 100%;" alt="Charles University, Faculty of Science">
         <p style="font-size: 20pt; font-variant: small-caps; font-weight: bold;">Diploma Thesis</p>
         <p style="font-size: 20pt;">$author$</p>
-        <h1 style="font-size: 24pt;">$title$</h1>
+        <h1 style="font-size: 24pt; margin-bottom: 0px; flex-grow: 0;">$title$</h1>
+        <p style="text-align: center; text-wrap: balance; margin-bottom: 3rem; margin-top: 0px;">$title-cs$</p>
 
         <!-- <p>
             Department of I don't know what
@@ -447,7 +456,8 @@
             </div>
         </div>
         <div style="flex-grow: 0;">
-            Prague, 2024
+            <!-- Prague 12024 HE -->
+            Prague 2024
         </div>
         <div style="flex-grow: 0; color: red">
             Draft $generated_at$, git $generated_from_commit$ #$generated_from_commit_num$
@@ -484,14 +494,18 @@
     <div class="full-page">
         <h2>Acknowledgement</h3>
         <p style="text-align: justify;">$acknowledgement$</p>
+        <hr />
+        <p style="text-align: justify;">$acknowledgement-technical$</p>
     </div>
     $endif$
     <div class="full-page">
         <h2>Abstract (English)</h3>
         <p style="text-align: justify;">$abstract$</p>
+        <p>Keywords: $keywords$</p>
         <div style="flex-grow: 1;"></div>
         <h2>Abstrakt (česky)</h3>
         <p style="text-align: justify;">$abstract-cs$</p>
+        <p>Klíčová slova: $keywords$</p>
         <div style="flex-grow: 1;"></div>
     </div>
     $if(toc)$
