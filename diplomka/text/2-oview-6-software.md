@@ -1,6 +1,6 @@
 ## Software for Base Pair Annotation {#sec:software}
 
-A number of software packages exist for determining which nucleotides are pairing within a given PDB or mmCIF structure.
+Several software packages exist for determining which nucleotides are pairing within a given PDB or mmCIF structure.
 However, due to the absence of universally agreed-upon definitions for all basepair types, different programs usually give slightly different results.
 <!-- The differences are mostly constrained to non-typical basepairs and near  -->
 

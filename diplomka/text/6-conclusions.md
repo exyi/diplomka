@@ -1,7 +1,7 @@
 # Conclusions {#sec:concl}
 
 In this thesis, we defined a set of clear and unambiguous geometric parameters (@sec:basepair-params) that discriminate between basepair classes as defined in the Leontis-Westhof system.
-Application of these parameters can therefore be basepair assignment in molecular structures, as we have verified in [section @sec:testing-basepair-params] both on the References set of quality-checked structures (@sec:filter) as well as in all nucleic acid containing structures in the whole PDB archive.
+These parameters can therefore be used for basepair assignment in molecular structures, as we have verified in [section @sec:testing-basepair-params] both on the References set of quality-checked structures (@sec:filter) as well as in all nucleic acid containing structures in the whole PDB archive.
 
 The exact basepair class definitions using these parameters are in the final phase of testing.
 To facilitate the testing and tuning, we developed a web-based application (@sec:tuning-app) that allows iterative manipulation of the upper and lower limits of all parameters.
@@ -13,7 +13,7 @@ making it easily executable on users' computers and also making it easier to kee
 
 ## Ongoing work {#sec:concl-future}
 
-Our team currently works on finishing the basepair class definitions for the process of basepair assignment and prepares a manuscript describing the assignment procedure.
+The working group currently work on finishing the basepair class definitions for the process of basepair assignment and prepares a manuscript describing the assignment procedure.
 We are also expanding the process to include an approximate assessment of each basepair quality.
 
 As the next step, we plan to integrate the new basepair assignment into the [DNATCO web server](https://dnatco.datmos.org), designed to [explore and validate individual structures](https://doi.org/10.1107/S2059798318000050).

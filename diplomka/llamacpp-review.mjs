@@ -121,7 +121,7 @@ const bullshitSentencePrompts = [
     `> The largest city is Europe is Moscow, the capital of Russia.\n\nSeems out of place.\n\n`,
 ]
 const fineBullshits = [
-    `> TODO zkontrolovat tuto blbost`,
+    `> TODO zkontrolovat`,
     `> <!-- returning 8,783 PDB IDs (as of 16 Oct 2022) -->`,
 ]
 

@@ -59,6 +59,8 @@ def load_citations(file):
     with open(file) as f:
         data = json.load(f)
         for id in data:
+            if data[id].get("ignore", False):
+                continue
             cit = CitationInfo(**{"url":id, **data[id]})
             if cit.url and cit.url.startswith("https://en.wikipedia.org"):
                 if not cit.authors:

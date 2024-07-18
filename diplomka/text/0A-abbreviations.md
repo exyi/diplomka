@@ -32,11 +32,11 @@ Very common abbreviations such as DNA are omitted for brevity.
 ## Single letter abbreviations {.unnumbered}
 
 Single letters are special category because of their ambiguity.
-In this work, we use the letters **A**, **T**, **U**, **G**, **C** as the DNA and RNA bases -- adenine, thymine, uracil, guanine and cytosine.
+In this work, we use the letters **A**, **T**, **U**, **G**, **C** as the DNA and RNA bases -- adenine, thymine, uracil, guanine, and cytosine.
 The letters **N**, **O**, **P**, **C**, **H** represent atom names.
 **X**, **Y**, **Z** are the axes in three-dimensional space.
 
-
+<!-- 
 ```
 rg '\b[A-Z]{2,}\b' text/ --type md -o --no-filename --no-line-number | sort | uniq -c
-```
+``` -->

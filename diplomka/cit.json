@@ -54,6 +54,7 @@
         "id": "PDB"
     },
     "https://tandy.cs.illinois.edu/Hunter_MolecularBiology.pdf": {
+        "ignore": true,
         "doi": null,
         "url": "https://tandy.cs.illinois.edu/Hunter_MolecularBiology.pdf",
         "published_date_parts": [

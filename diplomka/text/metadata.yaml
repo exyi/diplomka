@@ -1,6 +1,6 @@
 # title: 'Analysis of Nucleic Acid Base Pairing or Something'
 title: 'Methods of&nbsp;determination of&nbsp;base&nbsp;pairs in&nbsp;nucleic acids'
-title-cs: 'Methods of determination of base pairs in nucleic acids'
+title-cs: 'Metody stanovení párů bazí v nukleových kyselinách'
 author: 'Stanislav Lukeš'
 supervizor: 'prof. Ing. Bohdan Schneider, CSc.'
 keywords: molecular structure, nucleic acids, RNA, DNA, base pairing, non-canonical base pairs, structural databases
@@ -14,24 +14,41 @@ listingTitle: "<span class='listing-title crossref-title'>Listing"
 titleDelim: ":</span>"
 # https://lierdakil.github.io/pandoc-crossref/#table-style-captions
 codeBlockCaptions: true
-lstPrefix: 'listing' # listing is obscure enough
+lstPrefix: 'Listing' # listing is obscure enough
+figPrefix: 'Figure'
+tblPrefix: 'Table'
+secPrefix: 'section'
 abstract: |-
-    (TODO)
+    Nucleic acid structure is largely determined by pairwise interactions between nucleotide bases, from which the most common type of this interaction are the canonical "Watson-Crick" G-C and A-T pairs.
+    Over two decades ago, Leontis and Westhof have shown on practical examples over a hundred other "non-canonical" classes of basepairs and defined a universal terminological system, which is currently widely used.
+    However, there still does not exist a set of universaly accepted formal definitions of the basepair classes.
+    <br />
+    <br />
+    In this work, we introduce a system of geometrical parameters which can be used to formally define all classes of basepairs and find matching basepairs in molecular structures.
+    The work includes a reference implementation of the parameter calculation from 3D strcutures, and a program for selecting basepairs matching given definitions.
+    We have also developed a web-based application which can interactivelly search through all basepairs in the PDB database, which allows us to iteratively improve the basepair definitions.
 abstract-cs: |-
     Struktura nukleových kyselin je do značné míry určena párovými interakcemi mezi bázemi nukleotidů, z čehož nejčastějším a nejprostudovanějším typem jsou kanonické "Watson-Crickovské" G-C a A-T páry.
-    Na začátku tisíciletí ukázali Leontis a Westhof na reálných příkladech, že existuje přes sto druhů dalších nekanonických párů a zároveň nadefinovali univerzální a dnes široce používaný terminologický systém.
+    Na začátku tisíciletí ukázali Leontis a Westhof na reálných příkladech, že existuje přes sto druhů dalších nekanonických párů a zároveň nadefinovali <del>elegantní</del> univerzální a dnes široce používaný terminologický systém.
     Nicméně, dodnes neexistují všeobecně uznávané formální definice všech kategorií párů.
     <br />
     <br />
-    V této práci představujeme systém několika geometrických parametrů, pomocí kterých lze všechny třídy párů formálně nadefinovat a následně je automaticky hledat ve strukturách molekul.
-    Součástí práce je referenční implementace výpočtu těchto parametrů, i program na výběr párů odpovídající daným podmínkám.
-    ?? Precizně nadefinovat všechny typy párů vyžaduje spoustu pečlivé práce, proto jsme také vyvinuli aplikaci, která umožňuje kritéria měnit a zvládá interaktivně hledat odpovídající páry z celé databáze PDB přímo ve webovém prohlížeči.
+    V této práci představujeme systém geometrických parametrů, pomocí kterých lze všechny třídy párů formálně definovat na základě geometrie páru.
+    Následně je lze pomocí těchto definici automaticky hledat páry v molekulárních strukturách.
+    Součástí práce je referenční implementace výpočtu těchto parametrů z 3D struktur, i program na výběr párů odpovídající daným definicím.
+    Dále jsme vyvinuli webovou aplikaci, která umožňuje interaktivně prohledávat páry z celé databáze PDB, což nám umožňuje iterativně najít <del>nejvhodnější</del> robustní definici pro každý druh páru.
+
+    ?? Správná definice vyžaduje nalézt pro každý pár kombinaci , proto jsme také vyvinuli aplikaci, která umožňuje kritéria měnit a zvládá interaktivně hledat odpovídající páry z celé databáze PDB přímo ve webovém prohlížeči.
     ?? Dále jsme vyvinuli webovou aplikaci, která umožňuje interaktivně prohledávat páry z celé databáze PDB, což nám umožňuje najít nejvhodnější definici pro každý druh páru.
+
+    ??  robustních sadu geometricky definovanýcj
 acknowledgement: |-
     First and foremost, I'd like to express my gratitude to my supervisor Bohdan Schneider for his helpfulness and staunch patience.
     From providing overall project guidance, to correcting my grammatical errors, his support has been invaluable to the completion of the thesis.
-    My heartfelt thanks also belong to the other members of our research group, most notably Lada Biedermannová, Jiří Černý, and Craig Zirbel for sharing their ideads, providing technical advice, and reviewing my software and data.
+    My heartfelt thanks also belong to the other members of our working group, most notably Lada Biedermannová, Jiří Černý, and Craig Zirbel for sharing their ideads, providing technical advice, and reviewing my software and data.
 
 acknowledgement-technical: |-
     A significant portion of computational resources were provided by the e-INFRA CZ project (ID:90254), supported by the Ministry of Education, Youth and Sports of the Czech Republic.
+
+    My work was supported by the Institute of Biotechnology of the Czech Academy of Sciences. TODO?
 

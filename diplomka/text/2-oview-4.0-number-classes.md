@@ -90,7 +90,7 @@ For instance, the exact H-bonds in **cWW A-A** pairs would be ambiguous, as thes
 ### Alternative H-bond sets {#sec:bp-terminology-lw-edgecase-a}
 
 In a few classes, it is possible that the bases can interact by two possible sets of H-bonds on the same edges and the same cis/trans orientation.
-We observe these _subclasses_ for in **cWW G-U**, **tWW C-C** and **tWW U-U**, but it is possible that other, less common ones, exist.
+We observe these _subclasses_ for in **cWW G-U**, **tWW C-C** and **tWW U-U** (@fig:tWW-U-U-vs-tWWa-U-U), but it is possible that other, less common ones, exist.
 The **cWW G-U** pair is especially interesting, because
 [one of the subclasses is anionic. One of the bases is charged by losing a hydrogen leading to an atypical donor positions.](https://doi.org/10.1261/rna.079583.123)
 
@@ -101,9 +101,9 @@ In this work, we follow the FR3D convention, although we have had debates on rev
 
 <!-- tWWa CC, cWWa GT. -->
 
-![The two alternatives of the **tWW U-U** pair. Although the only Watson-Crick edge is involved in both cases, two pairs of hydrogen bonds are possible and both options are well populated in PDB structures.](../img/tWW-U-U-vs-tWWa-U-U.png){#fig:tWW-U-U-vs-tWWa-U-U}
+![The two alternatives of the **tWW U-U** pair. Although the only Watson-Crick edge is involved in both cases, two pairs of hydrogen bonds are possible and both options are well populated in PDB structures. TODO zmenšit pravou](../img/tWW-U-U-vs-tWWa-U-U.png){#fig:tWW-U-U-vs-tWWa-U-U}
 
-### Bifurcated hydrogen bonds
+<!-- ### Bifurcated hydrogen bonds
 
 Finally, to underline the saying that [in biology, there are a thousand
 exceptions to each rule](https://tandy.cs.illinois.edu/Hunter_MolecularBiology.pdf), a special category for basepairs between the three edges also exists.
@@ -111,7 +111,8 @@ In these pairs, two hydrogen bonds are formed onto the single _corner_ atom.
 Specifically, two donors may share a single acceptor, or a NH<sub>2</sub> group can have both hydrogens bound.
 Since bifurcated H-bonds require two adjacent acceptors or donors, they are only defined for the Watson-Crick edge.
 
-Our pipeline does process these pairs, there is nothing special about them, but we will not discuss this category in the following text further.
+Our pipeline does process these pairs, there is nothing special about them, but we will not discuss this category in the following text further. -->
+
 <!-- However, we will not discuss this category further here, as we are already getting lost in edge cases.
  -->
 

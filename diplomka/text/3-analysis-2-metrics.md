@@ -8,15 +8,15 @@ Parameters suitable for basepair assignment should have the following
 main qualities:
 
 * **Interpretability** — Can we easily tell what the parameter means in a geometrical sense? Can we estimate the parameter value by looking at the 3D structure?
-* **Simplicity** — The ideal parameter is easy to define and calculate algorithmically.
-* **Stability** — It should have low variance for good quality basepairs.
-* **Universality** — It should have similar value or similar variance in different basepair classes.
-* **Independence** — It is advantageous, if the distribution is uncorrelated with the other parameters we want to use.
+* **Simplicity** — The parameter is easy to define and calculate algorithmically.
+* **Stability** — The parameter should have low variance for good quality basepairs.
+* **Universality** — The parameter should have similar value or similar variance in different basepair classes.
+<!-- * **Independence** — Optimally, the parameter, if the distribution is uncorrelated with the other parameters we want to use. -->
 
 <!-- We need to define basepairs in such a way, that humans can easily understand the results of computer calculations. -->
 
 In order to be useful, each parameter must have a sharp enough distribution to help in identifying the specific basepair class.
-In @fig:cWH-G-G-yaw-hbond, we show that the **yaw** angle performs relatively well on the **cWH G-G** class, while the H-bond length has a comparatively long tail.
+In @fig:cWH-G-G-yaw-hbond, we show that the **yaw** angle (see @sec:basepair-params-ypr) performs relatively well on the **cWH G-G** class, while the H-bond length has a comparatively long tail.
 Extending an allowed range of the H-bond length would still find new FR3D pairs, but would also quickly amass false positives
 For similar reasons, we entirely ruled out using ZXZ Euler angles in @sec:basepair-params-ypr, because their values span indiscriminately the entire range of $[-180°, +180°)$.
 
@@ -45,8 +45,8 @@ A physically meaningful starting set of parameters are distances between atoms f
 We will call all of these contacts "hydrogen bonds" or "H-bonds". 
 Ideally, we would measure a hydrogen bond between the hydrogen and the
 acceptor heavy atom.
-Since the exact hydrogen positions are rarely known, we will instead only consider the distance between heavy atoms (oxygen, nitrogen, or carbon).
-Despite the availability of many algorithms for completing PDB structures with missing hydrogens, there are tricky cases where the automatic completion fails.
+Since the exact hydrogen positions are rarely known, we will instead only consider distances between heavy atoms (oxygen, nitrogen, or carbon).
+Despite the availability of algorithms for adding the hydrogen atoms to PDB structures, there are cases where the automatic completion fails.
 This happens for instance in cases when a base holds charge and thus has an additional hydrogen, such as those [in i-Motif cytosine pairs](https://doi.org/10.1002/anie.202309327).
 Alternatively, the base may be in an unusual tautomeric form where its hydrogens are on different atoms than usual.
 Although it is not very common, it is crucial in some basepair classes, and it is biologically relevant in a number of cases.
@@ -78,7 +78,7 @@ Tightening the limits slightly would dismiss this case, but we are hitting the o
 <!-- fetch 3Lz0
 select pair, 3Lz0 and (chain J and resi 21 or chain I and resi \-20) -->
 
-### Angle between bases forming a pair
+### Coplanarity of bases forming a pair
 
 After hydrogen bonds, the second most important feature of pairing bases is their coplanarity.
 Coplanarity is not easily defined by a single parameter. 
@@ -181,12 +181,12 @@ In our case, "the aircraft", i.e. the base, is pointing from the glycosidic bond
 
 ### Summary of new base parameters
 
-TODO kecy ještě?
+For clarity, this is the list of all parameters we defined above:
 
-* **"H-bond length"** -- The distance between heavy atoms of each H-bond
-* **"H-bond acceptor/donor angle"** -- The angle H-bond acceptor, donor a third atom on each base
-* **"H-bond to plane angle"** -- The angles between the H-bond and each base plane
-* **"Coplanarity angle"** -- The angle between base planes
-* **"Edge to plane angle"** -- The angles between each base plane and the other base interacting edge
-* **"Edge to plane distance"** -- The shortest distances between each base plane and an atom of the other base interacting edge
+* **"H-bond length"** -- The distance between heavy atoms of each H-bond.
+* **"H-bond acceptor/donor angle"** -- The angle H-bond acceptor, donor a third atom on each base.
+* **"H-bond to plane angle"** -- The angles between the H-bond and each base plane.
+* **"Coplanarity angle"** -- The angle between base planes.
+* **"Edge to plane angle"** -- The angles between each base plane and the other base interacting edge.
+* **"Edge to plane distance"** -- The shortest distances between each base plane and an atom of the other base interacting edge.
 * **"Yaw, Pitch, Roll angles"** -- The 3D rotation between the bases, rooted in the glycosidic bond.

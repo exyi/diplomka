@@ -19,7 +19,13 @@ The strict limit also enables an efficient search for basepair candidates, for i
 The _False negatives_ column shows the number of pair identified by FR3D, but not included by our scheme (i.e., _missed_); and _False positives_ is the opposite (i.e., _misidentified_).
 We can see, that most classes are re-identified well enough and the few _misidentified_ or _missed_ percents are generally debatable “borderline basepairs”, hard to classify even manually.
 To examine the individual differences we used the basepairs.datmos.org web application, as described in the next section.
-<!-- The terms _false negative_ and _false positive_ are an overstatement, as we do not have a ground truth. -->
+<!--
+
+The terms _false negative_ and _false positive_ are an overstatement, as we do not have a ground truth.
+
+TODO: missing from FR3D / only in FR3D, not in FR3D / newly assigned
+
+-->
 
 <!--
 family	bases	count_all	count_baseline	count_target	count_dropped	count_added	family_id	diff	diff_percent_p	diff_percent_n

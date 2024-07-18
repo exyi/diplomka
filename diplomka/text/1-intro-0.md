@@ -3,11 +3,12 @@
 <!-- Since the [initial discovery of DNA structure](https://doi.org/10.1038/171737a0),  -->
 
 Nucleic acids are some of the most important biological molecules, and the study of their structure and function is critical to understanding the fundamental principles of life.
-The [well known double-stranded helix](https://doi.org/10.1038/171737a0) dominates the structure of DNA, protecting its valuable information content.
-On the other hand, RNA molecules often form complicated spatial structures, often with dynamic catalytic domains such as those in the ribosome <https://doi.org/10.1201/9781315735368#The_Ribosome_Is_a_Ribozyme>.
-RNA molecules can even have catalytic activity independent on proteins (<https://doi.org/10.1261/rna.031401.111>, <https://doi.org/10.1038/nchembio.1846>), and similarly to the DNA double helices, these complex structures are also stabilized by the pairwise interaction of nucleotide bases.
-Despite the fact that most of these base-base interactions are the same as the coding A/T and C/G pairs described by Watson and Crick,
+The [well known double-stranded helix described by Watson and Crick](https://doi.org/10.1038/171737a0) dominates the structure of DNA, protecting its valuable information content.
+On the other hand, RNA molecules can form complicated spatial structures, often with dynamic catalytic domains such as those in the ribosome <https://doi.org/10.1201/9781315735368#The_Ribosome_Is_a_Ribozyme>.
+RNA molecules can even have catalytic activity independent on proteins <https://doi.org/10.1261/rna.031401.111>, <https://doi.org/10.1038/nchembio.1846>, and similarly to the DNA double helices, these complex structures are also stabilized by pairwise interactions of nucleotide bases.
+Despite the fact that most of these base-base interactions are the same as the coding A/T and C/G pairs,
 basepair interactions in RNA and to some extent also in DNA acquire much more diverse forms of so-called non-canonical basepairs.
+
 <!-- Given the diversity of non-canonical basepairs, it is unsurprising that they require more research than their canonical counterparts.-->
 
 The diversity of non-canonical basepairs requires robust and general schema for their description.
@@ -24,12 +25,12 @@ Of notable biological interest are [i-Motif](https://doi.org/10.1093/nar/gky735)
 
 ## Aims of the Project
 
-
-The higher-level objective of our working group is to provide unambiguous and interpretable definitions for the basepair classes of the Leontis-Westhof system.
-At present, each computer program capable of annotating basepairs uses its own definition that is typically undocumented, with
-the exception of a few overly simplistic algorithms.
+<!-- There exists several publicly available tools for assigning basepairs, including FR3D, but the results from the different programs are not consistent, and the assignment procedures are not sufficiently documented to be reproducible. -->
+At present, each computer program capable of annotating basepairs uses its own definition of each Leontis-Westhof class, which leads to inconsistent results.
 The exact selection criteria are not published outside the source codes, rendering it largely inaccessible to a significant portion of structural biologists and the basepair assignment is to a large part not easily reproduced.
+Therefore, the Elixir 3D-BioInfo Community formed working group to benchmark the publicly available programs and, if necessary, develop new algorithms for basepair assignment.
 
+The current objective of the working group is to provide unambiguous and interpretable definitions for the basepair classes of the Leontis-Westhof system.
 In this work, we establish a framework necessary for finding new definitions which will be possible to [standardize](https://xkcd.com/927/).
 We define and implement measurable parameters (@sec:basepair-params) which are subsequently utilized to define classes of basepairs in experimental or computed 3D models.
 Additionally, we develop an interactive application that enables the tuning of selection criteria for each basepairing class (@sec:tuning-app).
