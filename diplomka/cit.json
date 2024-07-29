@@ -66,6 +66,13 @@
         ],
         "journal": "Artificial intelligence and molecular biology"
     },
+    "https://commons.wikimedia.org/wiki/File:Non-canonical_base_pairing_Fig5.png": {
+        "doi": null,
+        "title": "Non-canonical base pairing: 6 rigid-body parameters",
+        "published_date_parts": [ 2021, 6, 2 ],
+        "journal": ["Wikimedia Commons" ],
+        "authors": [ ["Dhananjay", "Bhattacharyya" ], ["Abhijit", "Mitra" ] ]
+    },
     "https://pymolwiki.org/index.php/Assembly": {
         "doi": null,
         "published_date_parts": [

@@ -271,7 +271,7 @@
         }
         section p[data-split-original] {
             text-align-last: justify;
-            font-size: 0.995em; /* hack to make sure that the browser does not break the last line into two after the paragraph is split */
+            font-size: 0.999em; /* hack to make sure that the browser does not break the last line into two after the paragraph is split */
         }
 
         h1, h2, h3, h4, h5, h6 {
@@ -418,8 +418,8 @@
     $endfor$
 
 </head>
-<!-- <body class="pagedjs"> -->
-<body class="nopagedjs">
+<body class="pagedjs">
+<!-- <body class="nopagedjs"> -->
     <!-- Pandoc include-before: -->
     $for(include-before)$
         $include-before$
@@ -503,6 +503,8 @@
         <p style="text-align: justify;">$abstract$</p>
         <p>Keywords: $keywords$</p>
         <div style="flex-grow: 1;"></div>
+    </div>
+    <div class="full-page">
         <h2>Abstrakt (česky)</h3>
         <p style="text-align: justify;">$abstract-cs$</p>
         <p>Klíčová slova: $keywords$</p>

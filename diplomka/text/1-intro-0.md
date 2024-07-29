@@ -6,7 +6,7 @@ Nucleic acids are some of the most important biological molecules, and the study
 The [well known double-stranded helix described by Watson and Crick](https://doi.org/10.1038/171737a0) dominates the structure of DNA, protecting its valuable information content.
 On the other hand, RNA molecules can form complicated spatial structures, often with dynamic catalytic domains such as those in the ribosome <https://doi.org/10.1201/9781315735368#The_Ribosome_Is_a_Ribozyme>.
 RNA molecules can even have catalytic activity independent on proteins <https://doi.org/10.1261/rna.031401.111>, <https://doi.org/10.1038/nchembio.1846>, and similarly to the DNA double helices, these complex structures are also stabilized by pairwise interactions of nucleotide bases.
-Despite the fact that most of these base-base interactions are the same as the coding A/T and C/G pairs,
+Despite the fact that most of these base-base interactions are the same as the coding A-T and G-C pairs,
 basepair interactions in RNA and to some extent also in DNA acquire much more diverse forms of so-called non-canonical basepairs.
 
 <!-- Given the diversity of non-canonical basepairs, it is unsurprising that they require more research than their canonical counterparts.-->

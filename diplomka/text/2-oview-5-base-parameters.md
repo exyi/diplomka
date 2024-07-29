@@ -4,7 +4,7 @@ There is a set of standard basepair parameters primarily defined for helices of 
 The parameters can be calculated using the software tools DSSR or Curves+, more details in @sec:software-DSSR.
 Usually, the basepair parameters presented using the following figure:
 
-![Three angular and three translational basepair parameters, [image from Wikimedia, authored by D. Bhattacharyya, A. Mitra](https://commons.wikimedia.org/wiki/File:Non-canonical_base_pairing_Fig5.png) TODO std citace](../img/wiki-basepair-parameters.png)
+![Three angular and three translational basepair parameters <https://commons.wikimedia.org/wiki/File:Non-canonical_base_pairing_Fig5.png>](../img/wiki-basepair-parameters.png)
 
 The exact definition of these parameters is still ambiguous, despite efforts to standardize the definitions <https://doi.org/10.1006/jmbi.1998.2390>.
 Specifically in <https://doi.org/10.1006/jmbi.1998.2390>, Lu and Olson claim right in the abstract: "The choice of mathematics has only a limited effect on the computed parameters, even in highly deformed duplexes. The results are much more sensitive to the choice of reference frame".
@@ -23,7 +23,7 @@ As the authors state, they clearly optimized the coordinate system for the canon
 If we place the idealized purine over a pyrimidine with a flipped **Y** axis, we get an idealized Watson-Crick basepair.
 Without the **Y**-flip, all bases overlap in the same region, with the glycosidic bond approximately aligned.
 
-![Guanine reference frame and uracil (or thymine) frame with negated Y coordinates form a “perfect” GC canonical pair. The small cross shows the origin **(0, 0, 0)**. TODO upravit taky čáry](../img/reference-frame-GC-pair.png){#fig:reference-frame-GC-pair .img-width50}
+![Guanine reference frame and uracil (or thymine) frame with negated Y coordinates form a “perfect” GC canonical pair. The small cross shows the origin **(0, 0, 0)**.](../img/reference-frame-GC-pair.png){#fig:reference-frame-GC-pair .img-width50}
 
 This property allows us to easily judge an observed basepair by comparing the position and orientation of their reference frame -- comparing the coordinates of frame origins and the vectors of the X, Y, Z axes.
 The DSSR papers <https://doi.org/10.1093/nar/gkg680> and <https://doi.org/10.1038/nprot.2008.104> do not contain details on the parameters calculation, but [the DSSR webpage shows quite detailed description in a blog post](https://x3dna.org/highlights/details-on-the-simple-base-pair-parameters).

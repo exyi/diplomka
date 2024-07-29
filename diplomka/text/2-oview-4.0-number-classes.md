@@ -101,7 +101,7 @@ In this work, we follow the FR3D convention, although we have had debates on rev
 
 <!-- tWWa CC, cWWa GT. -->
 
-![The two alternatives of the **tWW U-U** pair. Although the only Watson-Crick edge is involved in both cases, two pairs of hydrogen bonds are possible and both options are well populated in PDB structures. TODO zmenšit pravou](../img/tWW-U-U-vs-tWWa-U-U.png){#fig:tWW-U-U-vs-tWWa-U-U}
+![The two alternatives of the **tWW U-U** pair. Although the only Watson-Crick edge is involved in both cases, two pairs of hydrogen bonds are possible and both options are well populated in PDB structures.](../img/tWW-U-U-vs-tWWa-U-U.png){#fig:tWW-U-U-vs-tWWa-U-U}
 
 <!-- ### Bifurcated hydrogen bonds
 
