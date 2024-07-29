@@ -1,3 +1,4 @@
 /out
 # blender caches are in the file dir
 /img/cache*
+/img/toobig

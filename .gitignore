@@ -1,8 +1,7 @@
 __pycache__
 /data
 /*-logs
-/pairclusters/out*
-/pairclusters/plots
-/pairclusters/*.cif
+/scripts/out*
+/scripts/plots
+/scripts/*.cif
 node_modules
-/rnacentral_pretrain/batches-sample/
