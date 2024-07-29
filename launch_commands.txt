@@ -1,9 +1,0 @@
-python launch.py --logname test-fm3-tinymodel torch-train --train_set /scratch/rna-data/ntcs/train_set_brokenmodels.tfrecord.gz --val_set /scratch/rna-data/ntcs/rna-puzzles-test.tfrecord.gz --rnn_size=64 --rnn_layers=1 --conv_channels 64 --epochs=20 --sample_weight=sqrtB+helix --batch_size=8 --external_embedding=rnafm;
-
-python launch.py --logname test-fm3-no torch-train --train_set /scratch/rna-data/ntcs/train_set_brokenmodels.tfrecord.gz --val_set /scratch/rna-data/ntcs/rna-puzzles-test.tfrecord.gz --rnn_size=680 --rnn_layers=0 --conv_channels 40 --epochs=20 --sample_weight=sqrtB+helix --batch_size=8 --external_embedding=rnafm;
-
-python launch.py --logname test-bigrnn torch-train --train_set /scratch/rna-data/ntcs/train_set_brokenmodels.tfrecord.gz --val_set /scratch/rna-data/ntcs/rna-puzzles-test.tfrecord.gz --rnn_size=640 --rnn_layers=3 --conv_channels 1024 1024 1024 --conv_kind=resnet --conv_dilation 8 --epochs=40 --sample_weight=log --batch_size=8;
-
-python launch.py --logname test-fm3-nNTC3 torch-train --train_set /scratch/rna-data/ntcs/train_set_brokenmodels.tfrecord.gz --val_set /scratch/rna-data/ntcs/rna-puzzles-test.tfrecord.gz --rnn_size=256 --rnn_layers=2 --conv_channels 64 --epochs=20 --sample_weight=sqrtB+helix --batch_size=8 --external_embedding=rnafm --nearest_ntc_threshold=0.3;
-
-python launch.py --logname test-fm3-LTplus torch-train --train_set /scratch/rna-data/ntcs/train_set_brokenmodels.tfrecord.gz --val_set /scratch/rna-data/ntcs/rna-puzzles-test.tfrecord.gz --rnn_size=256 --rnn_layers=2 --conv_channels 64 --epochs=40 --sample_weight=sqrtB+helix --batch_size=8 --learning_rate=0.003 --external_embedding=rnafm --nearest_ntc_threshold=0.3;
