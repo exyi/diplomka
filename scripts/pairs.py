@@ -1217,20 +1217,46 @@ def make_stats_columns(pdbid: str, df: pl.DataFrame, add_metadata_columns: bool,
 def df_hstack(columns: list[pl.DataFrame]) -> pl.DataFrame:
     return functools.reduce(pl.DataFrame.hstack, columns)
 
-def load_input_pdbids(args) -> list[str]:
+def load_input_pdbids(inputs: list[str]) -> list[str]:
     r = set()
-    for i in args.inputs:
+    i: str
+    for i in inputs:
         if i.endswith(".parquet"):
             r.update(pl.scan_parquet(i, cache=False, low_memory=True).select(pl.col("pdbid").str.to_lowercase()).unique().collect(streaming=True)["pdbid"].to_list())
         elif i.endswith(".csv"):
             r.update(pl.scan_parquet(i, cache=False, low_memory=True).select(pl.col("pdbid").str.to_lowercase()).unique().collect(streaming=True)["pdbid"].to_list())
         elif i.endswith("_basepair.txt") or i.endswith("_basepair_detail.txt"):
             r.add(os.path.basename(i).split("_")[0].lower())
+        elif (m := re.search(r"(\w{4})[.](pdb|cif|mmcif)([.](gz|zstd?))?$", i, re.IGNORECASE)):
+            r.add(m.group(1))
+        elif (m := re.match(r"\w{4}", i)):
+            r.add(i)
         else:
             raise ValueError(f"Unknown input file type: {i}")
     return list(sorted(r))
 
-def load_inputs(pool: Union[Pool, MockPool], args, pdbid_partition_str='') -> pl.DataFrame:
+def override_pair_family(df: pl.DataFrame, fam: Optional[str]) -> pl.DataFrame:
+    if not fam:
+        return df
+    df = df.drop("type", "family")
+    override: list[str] = fam.split(",")
+    print("override pair family: ", override)
+    if len(override) == 1:
+        df = df.select(
+            pl.lit(override[0]).alias("type"),
+            pl.lit(override[0]).alias("family"),
+            pl.col("*"))
+    else:
+        x = len(df)
+        df = df.join(
+            pl.DataFrame({"type": override, "family": override}),
+            how='cross'
+        )
+        assert x * len(override) == len(df)
+    
+    return df
+
+def load_inputs(pool: Union[Pool, MockPool], args, pdbid_partition_str='') -> tuple[pl.DataFrame, dict[str, Optional[str]]]:
     """Loads CSV/Parquet/FR3D files and returns a DataFrame with basepair identifiers"""
     inputs: list[str] = args.inputs
     if len(inputs) == 0:
@@ -1249,10 +1275,23 @@ def load_inputs(pool: Union[Pool, MockPool], args, pdbid_partition_str='') -> pl
             pdbid_filter = pl.col('pdbid').str.to_lowercase().str.starts_with(pdbid_partition_str.lower())
     else:
         pdbid_filter = pl.lit(True)
+
+    results = []
     
-    if inputs[0].endswith(".parquet") or inputs[0].endswith('.csv'):
+
+    in_fr3d = [ i for i in inputs if i.endswith("_basepair.txt") or i.endswith("_basepair_detail.txt") ]
+    in_pq = [ i for i in inputs if i.endswith(".parquet") or i.endswith(".csv") ]
+    in_pdb = [ i for i in inputs if re.search(r"(\w{4})[.](pdb|cif|mmcif)([.](gz|zstd?))?$", i, re.IGNORECASE) ]
+    in_pdbid = [ i for i in inputs if re.match(r"\w{4}", i) ]
+
+    pdbid_loads = {
+        **{ x: None for x in in_pdbid },
+        **{ load_input_pdbids([x])[0]: x for x in in_pdb }
+    }
+
+    if len(in_pq) > 0:
         print(f'Loading basepairing CSV files with filter: {pdbid_partition_str} -> {pdbid_filter}')
-        df = scan_pair_csvs(args.inputs)
+        df = scan_pair_csvs(in_pq)
         df = df.with_columns(pdbid = pl.col("pdbid").str.to_lowercase())
         df = df.filter(pdbid_filter)
         df = df.with_columns(
@@ -1272,35 +1311,25 @@ def load_inputs(pool: Union[Pool, MockPool], args, pdbid_partition_str='') -> pl
         # if "r11" in df.columns:
         df = df.collect(streaming=True)
         print(f"Loaded {len(df)} basepairs")
-    elif inputs[0].endswith("_basepair.txt") or inputs[0].endswith("_basepair_detail.txt"):
-        print(f"Loading {len(inputs)} basepair files")
+        results.append(df)
+    elif len(in_fr3d) > 0:
+        print(f"Loading {len(in_fr3d)} basepair files")
         import fr3d_parser
-        df = fr3d_parser.read_fr3d_files_df(pool, args.inputs,
+        df = fr3d_parser.read_fr3d_files_df(pool, in_fr3d,
             filter=pdbid_filter,
             # filter=(pl.col("symmetry_operation1").is_null() & pl.col("symmetry_operation2").is_null())
         ).sort('pdbid', 'model', 'nr1', 'nr2')
+        results.append(df)
     else:
         raise ValueError("Unknown input file type")
     if "type" not in df.columns and "family" not in df.columns:
         if not args.override_pair_family:
             raise ValueError("Input does not contain family column and --override-pair-family was not specified")
-    if args.override_pair_family:
-        df = df.drop("type", "family")
-        override: list[str] = args.override_pair_family.split(",")
-        print("override pair family: ", override)
-        if len(override) == 1:
-            df = df.select(
-                pl.lit(override[0]).alias("type"),
-                pl.lit(override[0]).alias("family"),
-                pl.col("*"))
-        else:
-            x = len(df)
-            df = df.join(
-                pl.DataFrame({"type": override, "family": override}),
-                how='cross'
-            )
-            assert x * len(override) == len(df)
-    return df
+        
+    df = results[0] if len(results) == 1 else pl.concat(results, how='diagonal_relaxed')
+
+    df = override_pair_family(df, args.override_pair_family)
+    return df, pdbid_loads
 
 def validate_missing_columns(chunks: list[pl.DataFrame]):
     all_columns = set(col for chunk in chunks for col in chunk.columns)
@@ -1309,7 +1338,9 @@ def validate_missing_columns(chunks: list[pl.DataFrame]):
             print(f"Chunk with {set(c['pdbid'].to_numpy())} is missing columns: {all_columns.difference(set(c.columns))}")
 
 def main_partition(pool: Union[Pool, MockPool], args, pdbid_partition='', ideal_basepairs: Optional[dict[pair_defs.PairType, PairInformation]] = None):
-    df = load_inputs(pool, args, pdbid_partition_str=pdbid_partition)
+    df, bootstrap_structures = load_inputs(pool, args, pdbid_partition_str=pdbid_partition)
+    if len(bootstrap_structures) > 0:
+        raise ValueError("Direct loading of PDB files is not supported, use pair_finding.py first")
     if args.export_only:
         print("Exporting metadata only")
         return df
@@ -1449,7 +1480,7 @@ def main(pool: Union[Pool, MockPool], args):
             df = main_partition(pool, args, partition, ideal_basepairs)
             save_output(args, df.lazy(), partition)
     else:
-        pdbids = load_input_pdbids(args)
+        pdbids = load_input_pdbids(args.inputs)
         partitions = {}
         for pdbid in pdbids:
             x = pdbid[:args.partition_input]
@@ -1511,7 +1542,7 @@ if __name__ == "__main__":
             * pairing_type, shear, stretch, stagger, buckle, propeller, opening, shift, slide, rise, tilt, roll, twist
         """,
         formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument("inputs", nargs="+")
+    parser.add_argument("inputs", nargs="+", help="Input file - Parquet with a list of basepairs; FR3D basepairing output; CIF/PDB file (all close contacts will be examined)")
     parser.add_argument("--pdbcache", nargs="+", help="Directories to search for PDB files in order to avoid downloading. Last directory will be written to, if the structure is not found and has to be downloaded from RCSB. Also can be specified as PDB_CACHE_DIR env variable.")
     parser.add_argument("--output", "-o", required=True, help="Output CSV/Parquet file name. Both CSV and Parquet are always written.")
     parser.add_argument("--threads", type=int, default=1, help="Number of worker processes to spawn. Does not affect Polars threading, at the start, the process might use more threads than specified.")
@@ -1521,6 +1552,7 @@ if __name__ == "__main__":
     parser.add_argument("--metadata", type=bool, default=True, help="Add deposition_date, resolution and structure_method columns")
     parser.add_argument("--dssr-binary", type=str, help="If specified, DSSR --analyze will be invoked for each structure and its results stored as 'dssr_' prefixed columns")
     parser.add_argument("--filter", default=False, action="store_true", help="Filter out rows for which the values could not be calculated")
+    parser.add_argument("--pdb-contact-threshold", default=4.0, type=float, help="When directly loading PDB/mmCIF files, use this as the minimum distance")
     parser.add_argument("--postfilter-hb", default=None, type=float, help="Only include rows with at least 1 hydrogen bond length < X Å")
     parser.add_argument("--postfilter-shift", default=None, type=float, help="Only include rows with abs(coplanarity_shift) < X Å (both left and right)")
     parser.add_argument("--dedupe", default=False, action="store_true", help="Remove duplicate pairs, keep the one with preferred family (W > H > S), FR3D ordering, preferred base order (A > G > C > U), shorter bonds, or lower chain1,nr1")
