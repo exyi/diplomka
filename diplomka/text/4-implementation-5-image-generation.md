@@ -1,6 +1,6 @@
 ## Basepair Image Generation {#sec:impl-basepair-img}
 
-In order to visualize how similar of different various basepairs are, we use a [PyMOL](https://github.com/schrodinger/pymol-open-source) Python API to generate images of all basepairs of interest.
+In order to visualize how similar or different various basepairs are, we use a [PyMOL](https://github.com/schrodinger/pymol-open-source) Python API to generate images of all basepairs of interest.
 
 This is implemented in the `gen_contact_images.py` Python script.
 The script loads PyMOL as a library; it can be executed directly using the Python interpreter.
@@ -35,7 +35,7 @@ The commands are rewritten into the PyMOL scripting language and slightly simpli
     /util.cba("gray70")
     ```
 
-3. We have two options for orienting the basepair on the image - either optimizing for best screen use or for a similar position of different basepairs.
+3. We have two options for orienting the basepair on the image --- either optimizing for best screen use or for a similar position of different basepairs.
 
     a) In the first case, we use PyMOL built-in `orient` command to optimize for screen use. It aligns the plane with the image, and makes it as wide as possible.
 
@@ -47,7 +47,7 @@ The commands are rewritten into the PyMOL scripting language and slightly simpli
             name O5' or name P or name OP1 or name OP2)
         ```
 
-    b) In the second case, we align the sugar—base bond of the right nucleotide with the vertical axis.
+    b) In the second case, we align the sugar-base bond of the right nucleotide with the vertical axis.
         First, make sure that the right nucleotide plane is aligned with the screen using the code from @lst:pymol-orient-pair, only substituting `%pair` for `%rightnt`.
         Then we proceed by orienting the glycosidic bond (C1'-N9/N1) with the vertical axis:
 

@@ -6,18 +6,19 @@ In this section, we would like to uncover some inner workings, software design c
 ### Software design {#sec:impl-webapp-design}
 
 <!-- The trick why re-running FR3D takes 3 hours on 16 CPU cores while we can adjust the parameters interactively is the precomputation and DuckDB -->
-The trick why we can adjust the parameters interactively on a website, while re-running FR3D takes about two CPU-days is the pre-computation done in @sec:sw-collection.
+Re-running FR3D to see the effect of a selection criteria modification takes about two CPU-days for all PDB structures.
+The trick why we can perform this interactively on a website is the pre-computation done in @sec:sw-collection.
 And [DuckDB-wasm](https://github.com/duckdb/duckdb-wasm).
 We pre-compute the parameters for all close contacts and then only perform filtering in the interactive session.
 The web itself is a purely client-side JavaScript application developed using the [Svelte](https://svelte.dev) framework.
-Rather unconventionally, we run the [DuckDB database](https://github.com/duckdb/duckdb-wasm) in the web browser to query the statically hosted Parquet tables.
+Rather unconventionally, we run the [DuckDB database](https://github.com/duckdb/duckdb-wasm) in the web browser, and it queries the statically hosted Parquet tables.
 This approach results in a resource-intensive application, but it significantly simplifies the process of implementing flexible filters, even allowing power-users to compose their own SQL queries without the necessity for safeguards against [SQL injection](https://en.wikipedia.org/wiki/SQL_injection).
 
 Internal state such as the selected pair, selected data source and filter is persisted into the URL, making it simple to share with colleagues.
 
 #### Basepair images {#sec:impl-webapp-images}
 
-The basepair image are pre-rendered for the entire reference set using the procedure described in @sec:impl-basepair-img.
+The basepair images are pre-rendered for the entire reference set using the procedure described in @sec:impl-basepair-img.
 The visual structures are essential for effective browsing of the basepair examples, as the users can quickly identify what does.
 Although it is possible to render molecules directly in the browser, loading a bitmap image is an order of magnitude faster even if the molecule is small.
 A large fraction of basepairs occur in huge ribosomal structures, making it essentially impossible to render tens of them on one screen even on premium hardware and despite the fact that [MolStar](https://doi.org/10.1093/nar/gkab314) is a comparatively performant renderer.
@@ -48,7 +49,7 @@ For effective use, we recommend setting a _closest desired filter_ in the **Para
 It will get prepopulated with the query, alleviating the need to remember (or lookup) the internal names of all columns and data sources.
 The available columns are displayed under the editor, or in the modal dialog when we click a basepair.
 
-The available tables (i.e., "data sources") are the following are also briefly described under the query editor.
+The available tables (i.e., "data sources") are briefly described under the query editor.
 In short, we use the `selectedpair` table to query basepairs of the selected class identified by FR3D, `selectedpair_allcontacts` to get all close contacts (≤ 4.2 Å) and `selectedpair_allcontacts_boundaries` to query basepairs identified by our new set of constraints.
 Usually, we append the `_f` suffix to the table name to constrain the query to the reference set (@sec:filter).
 Additionally, we can query any other class of basepairs by substituting `selectedpair` for the class name, such as `"tWW-A-A_f"` to select FR3D **tWW A-A** pairs from the reference set (the quotes are necessary).

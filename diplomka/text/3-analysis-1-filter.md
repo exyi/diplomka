@@ -9,7 +9,7 @@ A degree of unbiased noise may be tolerated, as statistical methods can account 
 However, the resulting intervals may be deemed _overconfident_ if the observations are not independent of one another. -->
 ![Canonical GC pairs, filtered (left) and unfiltered (right). Without the filter, the plot illustrates a large effect from 2.89 Å hydrogen-bond restraints used in model refining. TODO stejne meritko X osy](../img/hbonds-hist-filter-comparison-GConly.png){#fig:hbonds-hist-filter-comparison-GConly}
 
-Since multiple entries in the PDB often share a common refined structure with only varying ligands, we need to remove all redundant structures to avoid the bias.
+Since multiple entries in the PDB often share a common refined structure with only varying ligands, we need to remove all redundant structures to avoid sampling a single structure multiple times.
 Moreover, nucleotides must satisfy other quality criteria to be useful for further analysis.
 The filtration methodology was prepared by Jiří Černý's laboratory and will be published in a prepared manuscript detailing the entire procedure.
 In this project, we utilized the prepared list of about 180 000 nucleotides that were selected from the PDB archive using the quality filters as described in the following section.
@@ -21,7 +21,7 @@ We will call this filtered set the **"Reference Set"**.
 1. Selection of all nucleic acid crystal structures with resolution of 3.5 Å or better
 2. Clustering of sequentially redundant structures.
     * Sequences with more than 90% similarity are considered redundant.
-    * However, sequences are considered non-redundant, if one is part of a protein complex and the other is not.
+    * However, sequences are considered non-redundant if one is part of a protein complex and the other is not.
 3. Selection of the highest quality chain from each cluster of redundancy
     * The score is based on the filter used in [“BGSU RNA score”](https://doi.org/10.1093/nar/gkw453), a weighted sum of resolution, Rfree, clashscore, per-residue value of RSCC, and a fraction of unobserved residues.
 4. Selection of residues with sufficiently high quality, defined as:

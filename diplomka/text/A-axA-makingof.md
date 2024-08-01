@@ -5,7 +5,7 @@
 ## The Working Group {.unnumbered}
 
 The thesis is part of a larger team project and therefore has to include a statement detailing the proportion of work done by me.
-I largely only described my own work in the thesis, leaving out other parts of the project to be published later in a journal.
+I generally described my own work in the thesis, leaving out other parts of the project to be published later in a journal.
 The notable exceptions are:
 
 Below I list the contributions of other members of our group:

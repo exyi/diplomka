@@ -12,7 +12,7 @@ In this section, we will list and briefly overview the available tools used for 
 We have previously introduced FR3D, which will serve as our primary analysis tool.
 FR3D stands for “Find RNA 3D” and is pronounced “Fred”.
 [Initially, the software was developed to identify motifs comprised of multiple nucleotides](https://www.bgsu.edu/research/rna/software/fr3d.html).
-We will not cover that extensively, but it is relevant, because [the motif atlas](https://doi.org/10.1261/rna.039438.113) published by the FR3D authors relies on the determined basepairs as its source data.
+We will not cover that extensively, but it is relevant because [the motif atlas](https://doi.org/10.1261/rna.039438.113) published by the FR3D authors relies on the determined basepairs as its source data.
 
 First version of FR3D was written in MATLAB, but it was later rewritten to Python.
 We are using the Python version, downloaded from [github.com/BGSU-RNA/fr3d-python](https://github.com/BGSU-RNA/fr3d-python){.link-no-footnote}.
@@ -27,7 +27,7 @@ The primary advantages of FR3D for our use include:
 * Ease of use in execution and output processing.
 
 FR3D does not calculate the standard basepair parameters discussed in @sec:std-base-parameters, and it does not support writing out its own calculated parameters.
-Because of that, we have to modify FR3D or use other software to calculate them.
+Because of that, we would have to modify FR3D or use other software to calculate them.
 FR3D determines the basepairs based on a set of custom rules, distinct for each type of basepairs.
 The rules are not described in literature or documentation, but the rules are conveniently placed in a single source file: [`classifiers/class_limits.py`](https://github.com/BGSU-RNA/fr3d-python/blob/6f0a75ed547c7862d804a8a70ad73e04de89955f/fr3d/classifiers/class_limits.py#L340){.link-no-footnote}.
 
@@ -42,7 +42,7 @@ X3DNA was first [published over twenty years ago](https://doi.org/10.1093/nar/gk
 [DSSR, which stands for “Dissecting the Secondary Structure of RNA”](https://doi.org/10.1093/nar/gkv716) is a newer addition to the package specialized for RNA molecules with more complex structure.
 
 DSSR is a commercial product that is not available for free at the time of writing.
-[It requires licensing from the Columbia University at about \$200 for a basic academic license.](https://inventions.techventures.columbia.edu/technologies/dssr-an-integrated--CU20391)
+[It requires licensing from Columbia University at about \$200 for a basic academic license.](https://inventions.techventures.columbia.edu/technologies/dssr-an-integrated--CU20391)
 Conveniently, an older version, 1.9.9, is free for academic use to ensure reproducibility of the literature relying on DSSR analysis.
 The free version was later withdrawn citing the lack of governmental funding as the reason.
 On the other hand, the source code of [3DNA was made public in 2016](https://x3dna.org/highlights/3dna-c-source-code-is-available), although users are required to register on the X3DNA forum.
@@ -77,7 +77,7 @@ However, RNAView unfortunately does not perform that well in practice; although 
 While the algorithm may at first feel to be quite lax, RNAView has more problems identifying good basepairs than misidentifying bad ones.
 For instance, in the **tHS A-C** class, RNAView frequently misidentifies pairs as another family or misses them entirely -- we can see that [on BGSU experimental annotation comparison](http://rna.bgsu.edu/experiments/annotations/compare_v7_tHS_A,C_3.0A.html).
 
-![A clear trans Hoogsteen/Sugar A-C basepair as trans Watson/Sugar basepair misidentified by RNAView. The mistake is very understandable, as the adenine bound exclusively through the N6 atom, which is part of both Hoogsteen and Watson-Crick edges. See @sec:basepair-params-ypr for more discussion regarding this issue.](../img/rnaView-tHS-AC-misidentified.png){#fig:rnaView-tHS-AC-misidentified .img-width75}
+![A clear trans Hoogsteen/Sugar A-C basepair as trans Watson/Sugar basepair misidentified by RNAView. The mistake is very understandable, as the adenine is bound exclusively through the N6 atom, which is part of both Hoogsteen and Watson-Crick edges. See @sec:basepair-params-ypr for more discussion regarding this issue.](../img/rnaView-tHS-AC-misidentified.png){#fig:rnaView-tHS-AC-misidentified .img-width75}
 
 
 ### Curves+ {#sec:software-Curves}

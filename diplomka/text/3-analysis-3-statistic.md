@@ -7,7 +7,7 @@ We therefore aim to demonstrate that a basepair class is better represented by a
 By insisting on the optimal conformation, we risk either observing the nucleic acid interactions infrequently, or classifying most PDB structures as erroneous.
 
 We also acknowledge that the measured parameters are inherently noisy, especially considering the approximately 3 Å resolution of large parts of our dataset.
-Therefore, extracting the mean value from the data is useful, if only to determine the degree of deviation of a specific parameter.
+Therefore, extracting the mean value from the data is useful if only to determine the degree of deviation of a specific parameter.
 
 In this work, we will generally not focus on canonical Watson-Crick A-U and G-C basepairs, given that these pairs have been extensively studied.
 However, they will serve as valuable references in calibrating our measurements to the well-known optimal canonical basepair parameters.
@@ -63,14 +63,14 @@ It is clear that the general optimum is in the range from 1.0 to 1.5, although w
 In @fig:percentile_golden_length_deviation, we can see that percentiles are almost as accurate as the KDE mode.
 Interestingly, the 46th percentile is the closest to the [reference](https://doi.org/10.1107/S2059798321007610) values on average.
 However, as shown in the right plot, the optimal percentiles vary widely across the different hydrogen bonds.
-This indicates that observations do not exactly correspond with the reference values -- for instance, measurements of **GC N2 · · · O2** are generally shorter than the reference, making the 60th percentile the closest fit.
+This indicates that observations do not exactly correspond with the reference values --- for instance, measurements of **GC N2 · · · O2** are generally shorter than the reference, making the 60th percentile the closest fit.
 The variability of the optimal KDE bandwidth can be explained similarly, with the caveat that the bias direction is less straightforward.
 
 ![[Reference H-bond lengths](https://doi.org/10.1107/S2059798321007610) / percentile 30 … 70](../img/percentile_golden_length_deviation.svg){#fig:percentile_golden_length_deviation}
 
 The second criterion is the **stability in small samples**.
 We will measure the statistic across the entire dataset and compare its mean absolute deviation with that of 1000 randomly sampled subsets of size 100.
-In this case, it is not necessary to use only the H-bond lengths, we can use all the other parameters we are currently working with (@sec:basepair-params).
+In this case, we do not need the reference value, and therefore it is not necessary to use only the H-bond lengths --- we can use all the other parameters we are currently working with (@sec:basepair-params).
 
 Since the parameters are not in the same numerical intervals, we will normalize the deviations by their standard deviation.
 As [shown in figure @fig:percentile_kdemode_stability_GC_AU], the percentiles are significantly more stable when compared to the KDE mode, but the difference gets smaller with higher bandwidth factors.
@@ -112,11 +112,11 @@ def circular_mean(observations):
 
 ![Histograms of a distribution including the -180°/180° point, its circular mean, and the naive arithmetic mean. On the left, the distribution is shown using polar coordinates; on the right using standard Cartesian coordinates. (The value is the roll angle of **tSS A-G** pairs, explained in @sec:basepair-params-ypr)](../img/angular-stats-polar-vs-cartesian-means.svg){#fig:angular-stats-polar-vs-cartesian-means}
 
-The kernel density estimate can be also computed in two dimensions or in one dimension with the datapoints duplicated.
+The kernel density estimate can be also computed in two dimensions or in one dimension with duplicated datapoints.
 Although both methods seem to work well, computing two-dimensional KDE when all points are on a unit circle severely violates the assumption of normal distribution.
 We thus choose to compute the one dimensional KDE on range of $[-360°, 360°)$, and then use only the $[-180°, 180°)$ range.
 
-Unfortunately, other basic statistics like the median, maximum, and minimum cannot be well-defined, because we have no notion of comparison in modular (circular) arithmetic.
+Unfortunately, other basic statistics like the median, maximum, and minimum cannot be well-defined because we have no notion of comparison in modular (circular) arithmetic.
 However, we can take advantage of the fact that the distributions of our interest do not span the entire range of $360°$.
 In order to be a useful discriminator, any measured basepair parameter must be constrained to a relatively small range.
 If we assume this, we can use the circular mean to center the entire
@@ -129,7 +129,7 @@ For instance, an interval $[160°, -170°]$ means the same as $[160°, 180°] \c
 
 ### The most typical basepair {#sec:opt-params-exemplar}
 
-For presentations and a basic RMSD distance based validation, it is convenient to find geometrically the most typical basepair in each class.
+For presentation and a basic RMSD distance based validation, it is convenient to find geometrically the most typical basepair in each class.
 After we calculate the KDE mode and normalize all parameters by their standard deviations, we
 look for the basepair whose parameters are nearest to the modes. 
 

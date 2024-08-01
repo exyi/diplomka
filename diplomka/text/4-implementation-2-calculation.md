@@ -122,7 +122,7 @@ def plane_projection(basis: np.ndarray, point: np.ndarray) -> np.ndarray:
 ### Relative base rotation
 
 First, we need to obtain the coordinate system defined in @sec:basepair-params-ypr and illustrated in @fig:MMB_reference_frame-purinepluspyrimidine.
-Similarly to the base plane, the coordinate system is represented by the origin position and its orthonormal basis (a rotation matrix).
+Similarly to the base plane, the coordinate system is represented by its origin position and the orthonormal basis (a rotation matrix).
 In this case, three atoms — three points in space define the coordinate system, and it can therefore be computed directly, without least squares fitting.
 First, we set the origin to **N1** for pyrimidines or **N9** for purines.
 The first basis vector (**Y**) is the vector from **C1'** to **N1**/**N9**, normalized to length **1**.

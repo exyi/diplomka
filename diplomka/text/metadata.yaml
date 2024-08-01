@@ -23,7 +23,8 @@ abstract: |-
     The most important are the widely known "Watson-Crick" G-C and A-T pairs, which encode genetic information.
     These pairs, sometimes called canonical, are the most abundant pairs in both DNA and RNA.
     In addition to canonical pairs, there are several dozen other possible geometrical arrangements of base pairs. 
-    Over two decades ago, Leontis and Westhof defined an elegant, universal and today widely used pairing classification system. However, currently available computer programs classify pairs incompletely, and the basepair assignment is inconsistent between programs.
+    Over two decades ago, Leontis and Westhof defined an elegant, universal and today widely used pairing classification system.
+    However, currently available computer programs classify pairs incompletely, and the basepair assignment is inconsistent between programs.
     <!--However, there still does not exist a set of universaly accepted formal definitions of the basepair classes. -->
     <br />
     <br />

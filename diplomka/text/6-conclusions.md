@@ -6,14 +6,14 @@ These parameters can therefore be used for basepair assignment in molecular stru
 The exact basepair class definitions using these parameters are in the final phase of testing.
 To facilitate the testing and tuning, we developed a web-based application (@sec:tuning-app) that allows iterative manipulation of the upper and lower limits of all parameters.
 The basepair reassignment is visualized in real time making the process interactive.
-The application is publicly available at [basepairs.datmos.org](https://basepairs.datmos.org){.link-no-footnote} and may also be used to browse the diversity of non-canonical basepairs or lookup structures with interesting pairs.
+The application is publicly available at [basepairs.datmos.org](https://basepairs.datmos.org){.link-no-footnote} and may also be used to browse diversity of non-canonical basepairs or lookup structures with interesting pairs.
 
 After the initial batch processing of PDB structures, it is a purely client-side web application hosted as a set of static files --
 making it easily executable on users' computers and also making it easier to keep operational in the future (@sec:impl-webapp-sustainability).
 
 ## Ongoing work {#sec:concl-future}
 
-The working group currently work on finishing the basepair class definitions for the process of basepair assignment and prepares a manuscript describing the assignment procedure.
+The working group is currently finishing the basepair class definitions for the process of basepair assignment and prepares a manuscript describing the assignment procedure.
 We are also expanding the process to include an approximate assessment of each basepair quality.
 
 As the next step, we plan to integrate the new basepair assignment into the [DNATCO web server](https://dnatco.datmos.org), designed to [explore and validate individual structures](https://doi.org/10.1107/S2059798318000050).

@@ -5,7 +5,7 @@
 Nucleic acids are some of the most important biological molecules, and the study of their structure and function is critical to understanding the fundamental principles of life.
 The [well known double-stranded helix described by Watson and Crick](https://doi.org/10.1038/171737a0) dominates the structure of DNA, protecting its valuable information content.
 On the other hand, RNA molecules can form complicated spatial structures, often with dynamic catalytic domains such as those in the ribosome <https://doi.org/10.1201/9781315735368#The_Ribosome_Is_a_Ribozyme>.
-RNA molecules can even have catalytic activity independent on proteins <https://doi.org/10.1261/rna.031401.111>, <https://doi.org/10.1038/nchembio.1846>, and similarly to the DNA double helices, these complex structures are also stabilized by pairwise interactions of nucleotide bases.
+RNA molecules can even have catalytic activity independent of proteins <https://doi.org/10.1261/rna.031401.111>, <https://doi.org/10.1038/nchembio.1846>, and similarly to the DNA double helices, these complex structures are also stabilized by pairwise interactions of nucleotide bases.
 Despite the fact that most of these base-base interactions are the same as the coding A-T and G-C pairs,
 basepair interactions in RNA and to some extent also in DNA acquire much more diverse forms of so-called non-canonical basepairs.
 
@@ -15,9 +15,9 @@ The diversity of non-canonical basepairs requires robust and general schema for 
 A significant step towards this objective is the [Leontis-Westhof classification system](https://doi.org/10.1017/s1355838201002515), introduced in 2001.
 It provides a framework for categorizing and naming of all basepair types including both canonical (coding) and non-canonical basepairs.
 A [subsequent publication of the same team](https://doi.org/10.1093/nar/gkf481) shows more than a hundred different basepairing conformations in experimental structures archived in the [PDB database](https://doi.org/10.1093/nar/gky949) at the time.
-Today, with the availability of about 17 000 experimental structures in the PDB containing nucleic acids, we are at even better position to properly describe all potentially existing basepair types, including the rarer classes. 
+Today, with the availability of about 17 000 experimental structures in the PDB containing nucleic acids, we are in an even better position to properly describe all potentially existing basepair types, including the rarer classes. 
 
-After the publication of the Leontis-Westhof classification, several computer programs have been developed for finding basepairs in structures.
+After the publication of the Leontis-Westhof classification, several computer programs have been developed to find basepairs in structures.
 If we analyze the entire database with one of the available basepair assignment programs (FR3D, @sec:software-FR3D), we can see that Watson-Crick pairs dominate all other basepair classes.
 However, in RNA structures, the canonical pairs represent slightly below 50% of the total number of all basepairs.
 Even in available DNA structures, 25% of all basepairs are non-canonical.
@@ -28,7 +28,7 @@ Of notable biological interest are [i-Motif](https://doi.org/10.1093/nar/gky735)
 <!-- There exists several publicly available tools for assigning basepairs, including FR3D, but the results from the different programs are not consistent, and the assignment procedures are not sufficiently documented to be reproducible. -->
 At present, each computer program capable of annotating basepairs uses its own definition of each Leontis-Westhof class, which leads to inconsistent results.
 The exact selection criteria are not published outside the source codes, rendering it largely inaccessible to a significant portion of structural biologists and the basepair assignment is to a large part not easily reproduced.
-Therefore, the Elixir 3D-BioInfo Community formed working group to benchmark the publicly available programs and, if necessary, develop new algorithms for basepair assignment.
+Therefore, the Elixir 3D-BioInfo Community formed a working group to benchmark the publicly available programs and, if necessary, develop new algorithms for basepair assignment.
 
 The current objective of the working group is to provide unambiguous and interpretable definitions for the basepair classes of the Leontis-Westhof system.
 In this work, we establish a framework necessary for finding new definitions which will be possible to [standardize](https://xkcd.com/927/).

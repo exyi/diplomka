@@ -15,10 +15,10 @@ main qualities:
 
 <!-- We need to define basepairs in such a way, that humans can easily understand the results of computer calculations. -->
 
-In order to be useful, each parameter must have a sharp enough distribution to help in identifying the specific basepair class.
+In order to be useful, each parameter must have a sharp enough distribution to help with identifying specific basepair classes.
 In @fig:cWH-G-G-yaw-hbond, we show that the **yaw** angle (see @sec:basepair-params-ypr) performs relatively well on the **cWH G-G** class, while the H-bond length has a comparatively long tail.
 Extending an allowed range of the H-bond length would still find new FR3D pairs, but would also quickly amass false positives
-For similar reasons, we entirely ruled out using ZXZ Euler angles in @sec:basepair-params-ypr, because their values span indiscriminately the entire range of $[-180°, +180°)$.
+For similar reasons, we entirely ruled out using ZXZ Euler angles in @sec:basepair-params-ypr because their values span indiscriminately the entire range of $[-180°, +180°)$.
 
 ![“Selectivity” of one of our proposed parameters (the yaw angle, @sec:basepair-params-ypr) and H-bond length (@sec:basepair-params-hbonds) demonstrated on **cWH G-G** pairs. Basepairs annotated by FR3D on the reference set (@sec:filter), compared with all close contacts (one of the defined H-bonds is ≤ 4.2 Å). We can see that, in this comparison, it is easier to select pairs based on the yaw angle.](../img/cWH-G-G-yaw-hbond.svg){#fig:cWH-G-G-yaw-hbond}
 
@@ -55,8 +55,8 @@ We have already discussed the anionic form of **cWW G-U** (@sec:bp-terminology-l
 <!-- maybe cWH-A-G ?? -->
 
 In addition to distance measurements, we need to use other parameters defining the geometry of hydrogen bonds.
-We used two angles between the two heavy atoms forming the H-bond and a neighboring atom situated on each base.
-Depending on whether we select the third atom next to the acceptor or donor, we call the parameter "Donor angle" or "Acceptor angle".
+We use two angles between the two heavy atoms forming the H-bond and a third neighboring atom situated on each base.
+Depending on whether we select the third atom next to the acceptor or donor, we call the parameter "Acceptor angle" or "Donor angle".
 For consistency, we will always select the last neighbor when ordered lexicographically by PDB atom name as the third atom.
 
 <!-- fetch 3Lz0
@@ -65,9 +65,9 @@ select pair, 3Lz0 and (chain J and resi 21 or chain I and resi \-20) -->
 The H-bond distances and angles do not suffice to assign a pair. 
 Even if we set strict limits on these parameters, we get many false positives.
 As shown [in figure @fig:cWW-GC-length-and-covalent-angles], an ideal **cWW G-C** pair should have H-bond lengths of about 2.9 Å and all angles at about 120°.
-We must allow some deviations, as no ideal pair exists in reality, and 0.5 Å and 20° tolerance is very conservative.
+We must allow some deviations, as in reality, no ideal pair exists, and 0.5 Å and 20° tolerance is very conservative.
 Yet, we still find false positives like the one shown in @fig:cWW-GC-false-positive-hbond-lengthsangles.
-Tightening the limits slightly would dismiss this case, but we are hitting the other limit of this simple approach as we already lose many good pairs, as we can see using the
+Tightening the limits slightly would dismiss this example, but we are hitting the other limit of this simple approach as we are already losing many good pairs, as we can see using the
 [basepairs.datmos.org](https://basepairs.datmos.org/#cWW-G-C/hb0_L=..3.4&hb0_DA=100..140&hb0_AA=100..140&hb1_L=..3.4&hb1_DA=100..140&hb1_AA=100..140&hb2_L=..3.4&hb2_DA=100..140&hb2_AA=100..140&baseline_ds=fr3d-f) web application.
 
 
@@ -82,7 +82,7 @@ select pair, 3Lz0 and (chain J and resi 21 or chain I and resi \-20) -->
 
 After hydrogen bonds, the second most important feature of pairing bases is their coplanarity.
 Coplanarity is not easily defined by a single parameter. 
-The first of our proposed parameters measuring coplanarity is the deviation of hydrogen bonds the base planes.
+The first of our proposed parameters measuring coplanarity is the deviation of hydrogen bonds from the base planes.
 Indeed, false "basepair" from @fig:cWW-GC-false-positive-hbond-lengthsangles has H-bonds almost perpendicular to both base planes.
 
 First, we must determine the base planes.
@@ -157,13 +157,13 @@ The choice of the coordinate system is thus essentially arbitrary, and we choose
 
 <!-- {????? The relative position of the pairing bases can be trivially described as the translation vector of the two coordinate systems, but this is already covered reasonably well by the hydrogen-bond parameters.} -->
 
-We choose to place the origin in the N1 or N9 atom, and align the glycosidic bond with the negative Y axis, as illustrated in [figure @fig:MMB_reference_frame-purinepluspyrimidine].
+We place the origin in the N1 or N9 atom, and align the glycosidic bond with the negative Y axis, as illustrated in [figure @fig:MMB_reference_frame-purinepluspyrimidine].
 The C6 pyrimidine or C8 purine atom is placed in negative X direction with zero Z coordinate, uniquely determining the new coordinate system.
 The coordinate system is similar to that used in [MMB (formerly RNABuilder)](https://doi.org/10.1109/TCBB.2010.104), except that the X and Y axis are swapped and negated.
 These modifications were proposed by Craig Zirbel to roughly align the coordinate system with the one used in FR3D, as it conveniently places the Watson-Crick edge in positive X and Y coordinates.
 
 We will calculate the **ZYX intrinsic Euler angles**
-between the coordinate systems.
+between the coordinate systems defined by each base.
 It offers a good interpretability as [so-called "aircraft angles" **Yaw**, **Pitch**, and **Roll**](https://en.wikipedia.org/wiki/Aircraft_principal_axes).
 If we imagine an aircraft flying over the first glycosidic bond with its wings aligned along the base plane, the three angles describe the necessary maneuvers to align itself with the glycosidic bond of the second nucleotide.
 We can also easily demonstrate these angles by issuing three subsequent `turn` commands in PyMOL.

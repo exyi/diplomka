@@ -85,7 +85,7 @@ To avoid redundancy, we deduplicate the pair using the following rules:
 
 Asymmetric unit, the smallest part of the crystal [from which the whole crystal can be re-built](isbn:978-0815340812), does not in all crystal structures contain the whole biologically relevant <!-- molecule or --> molecular complex.
 As an example, double-helical DNA or RNA of a palindromic sequence can have only one nucleotide strand in the asymmetric unit while the biologically relevant structure is the duplex.
-Because PDB files contain coordinates only for one asymmetric unit we have to consider possibility for the basepair assignment across the symmetry operation as two bases forming the pair can be symmetry-related. 
+Because PDB files contain coordinates only for one asymmetric unit we have to consider the possibility for the basepair assignment across the symmetry operation as two bases forming the pair can be symmetry-related. 
 
 ![The asymmetric unit of [`6ros`](https://www.rcsb.org/structure/6ROS) structure is formed by a single strand, but the **biological assembly** is a duplex. The mmCIF file contains the coordinates of only one strand, and the second one is its symmetric copy. All basepairs are formed between the two strands.](../img/6ros-symmetry-illustration.png)
 
@@ -117,7 +117,7 @@ _pdbx_struct_oper_list.vector[3]
 0.0000000000 38.4400000000 0.0000000000 0.0000000000 -1.0000000000 0.0000000000
 ``` -->
 
-Technically, the implementation is still slightly tricky, because the **BioPython** library provides an API to access the `pdbx_struct_oper_list` category.
+Technically, the implementation is still slightly tricky because we are aware of **BioPython** API to access the `pdbx_struct_oper_list` category.
 Another Python library -- [**Gemmi**](https://doi.org/10.21105/joss.04200), has a very good support for crystallographic symmetry.
 It, however, exposes the information in terms of space groups, instead of the PDB symmetry operation codes.
 Since **FR3D** uses the PDB codes in its output, we need to use these to map the basepairs into atomic coordinates.

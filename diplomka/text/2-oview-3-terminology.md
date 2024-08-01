@@ -99,7 +99,7 @@ For a complete translation table between the trivial, Leontis-Westhof, and Saeng
 The Leontis-Westhof system is more general, we can observe 127 of the basepairs in high quality X-ray structures deposited in the PDB.
 The Saenger system is more restrictive, as it only includes the basepairs that have at least two hydrogen bonds between two polar base atoms.
 Although one could argue that the other pair types do not form “real” basepairs, it is noteworthy that the Saenger system also overlooks certain basepairs that meet its own criteria.
-For instance, the **tWS C-G** basepair shown in @fig:tWS-CG-1jj2-9_46-9_4 satisfies the condition, yet it is not included in @fig:saenger-system-merged.
+For instance, the **tWS C-G** basepair shown in @fig:tWS-CG-1jj2-9_46-9_4 satisfies the condition, yet it is not included in the Saenger system (@fig:saenger-system-merged).
 
 ![**tWS G-C**: two polar base-to-base H-bonds, but not accounted for in the Saenger system](../img/tWS-CG-1jj2-9_46-9_4.png){#fig:tWS-CG-1jj2-9_46-9_4 .img-width50}
 

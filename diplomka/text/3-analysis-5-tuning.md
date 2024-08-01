@@ -1,7 +1,7 @@
 ## Interactive Web Application for Parameter Tuning {#sec:tuning-app}
 
 In [the preceding section @sec:testing-basepair-params], we have seen how each class of basepairs behaves somewhat differently.
-We have the need to assess the individual differences in assignment and allow us to tune the allowed boundaries in each basepairing family.
+We have the need to assess the individual differences in the assignments and allow us to tune the allowed boundaries in each basepairing family.
 <!-- Moreover, it is far from ideal to establish different selection criteria for each class, based on the FR3D observations, the approach was only fit as a proof of concept.
 Instead, we would prefer to get simpler model, ideally with shared limits for most classes or within each basepairing family.
 This requires a significant amount of manual effort in selecting appropriate boundaries for each parameter in each class.
@@ -35,7 +35,7 @@ Regardless, we can click on any basepair to display detailed description, first 
 
 
 * Identity of the basepair (PDB structure ID, chains, residue numbers).
-* Two images from different angles, if it was pre-generated.
+* Two images from different angles if it was pre-generated.
 * A [PyMOL](https://github.com/schrodinger/pymol-open-source) script which displays the pair, when pasted to PyMOL command line. It may be used to display basepairs for which the image did not load.
 * The calculated parameters (@sec:basepair-params) with a short description.
 
@@ -53,12 +53,12 @@ Pairs annotated by FR3D and not annotated by our new system are highlighted _red
 ![Comparison between FR3D assignment and the assignment according to our new criteria (current in development). The basepairs highlighted in green are _false positives_, i.e., not reported by FR3D.](../img/screenshot-app-comparison-tWS-AA.png){#fig:screenshot-app-comparison-tWS-AA}
 
 At the time of writing and submission of the thesis, the criteria are still subject to change and are dynamically loaded from a shared Google Sheet.
-The exact results will likely be different from the ones presented here.
+The final results will likely be different from the ones presented here.
 
 ### Filtering basepairs
 
 To examine the behavior of the parameters from @sec:basepair-params, we can switch from **Basic** to **Parameter Ranges**, and try filtering out basepairs with certain parameter values.
-A frequent request is to see whether we should include basepairs with overly stretched H-bonds -- given that such interaction typically exhibits [minimal energies at 4.0 Å](https://archive.org/details/introductiontohy0000jeff):
+A frequent request is to see whether we should include basepairs with overly stretched H-bonds -- given that such an interaction typically exhibits [minimal energies at 4.0 Å](https://archive.org/details/introductiontohy0000jeff):
 
 Firstly, the website remembers its state when navigating to another basepair class (selected data source, filters, comparison are kept), but the state can be reset at any time by clicking the **Home** button in the top menu.
 We can select any populated class of basepairs, and switch to **Parameter Ranges**, prompting the display of several numeric input fields.

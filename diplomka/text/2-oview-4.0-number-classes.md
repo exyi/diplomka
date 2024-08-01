@@ -55,14 +55,14 @@ $$2 \cdot \left( 16 \cdot 3 + 10 \cdot 3 \right) = 156$$ -->
 ![The C-A pair is different from A-C -- it is shifted by ~3 Å horizontally, resulting in a different set of H-bonds <https://doi.org/10.1093/nar/gkf481>](../img/cSS-CA-vs-AC.png){#fig:cSS-CA-vs-AC}
 
 Unfortunately, the assumption of symmetry we made earlier is generally invalid, as Sugar/Sugar pairs are actually defined asymmetrically — for instance, **cSS A-C** is not a flipped version of **cSS C-A** (@fig:cSS-CA-vs-AC).
-In <https://doi.org/10.1017/s1355838201002515>, Leontis and Westhof only define **cis** Sugar/Sugar as non-symmetric, while **trans** Sugar/Sugar should be symmetric:
+[Leontis and Westhof](https://doi.org/10.1017/s1355838201002515) only define **cis** Sugar/Sugar as non-symmetric, while **trans** Sugar/Sugar should be symmetric:
 
 > The cis and trans W.C./W.C., the trans Hoogsteen/Hoogsteen, and the trans Sugar-edge/Sugar-edge geometries (…) are symmetric, with the interacting bases related by a twofold rotation about an axis passing either vertically or horizontally through the center of the basepair.
 > **The cis Sugar-edge/Sugar-edge geometry (…), however, is not symmetric.**
 > To illustrate this point, two different A-G cis Sugar-edge/Sugar-edge pairs are shown in Figure 7. [note: we show A-C in @fig:cSS-CA-vs-AC]
 
 In spite of that, the tables of examples in [their 2002 publication](https://doi.org/10.1093/nar/gkf481) do not treat Sugar/Sugar symmetrically either -- see @fig:tSS-CA-vs-AC.
-However, only the **tSS A-G** and **tSS G-A** classes are defined _in conflict_, and they only differ slightly.
+However, only the **tSS A-G** and **tSS G-A** classes are defined in such _conflict_, and they differ only slightly.
 
 ![In trans Sugar/Sugar, C-A is defined while A-C is left undefined. In contrast, in W/W and H/H the C-A and A-C show the same pair (turned upside down)](../img/tSS-CA-vs-AC.png){#fig:tSS-CA-vs-AC}
 
@@ -78,9 +78,9 @@ Note that only the sugar edge has an asymmetric symbol, intuitively indicating i
 For easier lookup by nucleotide number, FR3D reports all basepairs in both orientations, e.g., **cWW G-C** is also reported as **cWW C-G**.
 If this would lead to ambiguities due to asymmetry, the second edge letter is lowered.
 For instance, a **cSs A-C** pair is also reported as the corresponding **csS C-A** pair, both meaning **cSS A-C** in the Leontis-Westhof terminology.
-FR3D does not lower the second **S**, if the other orientation is left undefined.
+FR3D does not lower the second **S** if the other orientation is left undefined.
 
-FR3D also lowers the second edge letter, if the full class name is symmetric, but the defined hydrogen bonds are not identical when flipped.
+FR3D also lowers the second edge letter if the full class name is symmetric, but the defined hydrogen bonds are not identical when flipped.
 For instance, the exact H-bonds in **cWW A-A** pairs would be ambiguous, as these pairs bind from **N6** to **N1**, and from **N1** to **C2**.
 
 <!-- ■⎼▶
@@ -91,8 +91,8 @@ For instance, the exact H-bonds in **cWW A-A** pairs would be ambiguous, as thes
 
 In a few classes, it is possible that the bases can interact by two possible sets of H-bonds on the same edges and the same cis/trans orientation.
 We observe these _subclasses_ for in **cWW G-U**, **tWW C-C** and **tWW U-U** (@fig:tWW-U-U-vs-tWWa-U-U), but it is possible that other, less common ones, exist.
-The **cWW G-U** pair is especially interesting, because
-[one of the subclasses is anionic. One of the bases is charged by losing a hydrogen leading to an atypical donor positions.](https://doi.org/10.1261/rna.079583.123)
+The **cWW G-U** pair is especially interesting because
+[one of the subclasses is anionic. One of the bases is charged by losing a hydrogen atom leading to an atypical donor position.](https://doi.org/10.1261/rna.079583.123)
 
 In these cases, FR3D appends an **“a”** to the family name to distinguish subclasses.
 For instance, the standard **cWW G-U** is labeled as **cWW**, and the anionic form is labeled **cWWa**.
