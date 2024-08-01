@@ -1,5 +1,8 @@
 __pycache__
-/data
+/data/pdb
+/data/out
+/data/fr3d-out
+/fr3d-python
 /*-logs
 /scripts/out*
 /scripts/plots
