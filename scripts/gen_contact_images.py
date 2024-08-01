@@ -594,6 +594,8 @@ def main(argv):
     threads = args.threads
     if threads is None and args.cpu_affinity is not None:
         threads = len(args.cpu_affinity)
+    if threads <= 0:
+        threads = os.cpu_count()
     if threads is None:
         threads = 1
 

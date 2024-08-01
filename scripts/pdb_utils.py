@@ -49,14 +49,14 @@ def _find_or_add_cache(pdbid):
     if cache_file is not None:
         return cache_file
     else:
-        write_path = _get_cache_write_path(pdbid, compression='zst')
+        write_path = _get_cache_write_path(pdbid, compression='gz')
         if write_path is None:
             raise Exception("No cache directory")
         os.makedirs(os.path.dirname(write_path), exist_ok=True)
         with download_pdb(pdbid) as f:
             write_path_ = write_path + ".part" + str(os.getpid())
-            import zstandard
-            with zstandard.open(write_path_, "wt", cctx=zstandard.ZstdCompressor(level=19)) as f2:
+            with gzip.open(write_path_, "wt", compresslevel=9) as f2:
+            # with zstandard.open(write_path_, "wt", cctx=zstandard.ZstdCompressor(level=19)) as f2:
                 f2.write(f.read())
             os.rename(write_path_, write_path)
         return write_path
