@@ -1111,13 +1111,14 @@ def calculate_boundaries(df: pl.DataFrame, pair_type: PairType):
 def main(argv):
     import argparse
     parser = argparse.ArgumentParser(description="Compute KDE densities for the provided basepair classes, generate histogram plot")
-    parser.add_argument("input_file", help="Input file", nargs="+", help="An input Parquet table. May be multiple files, but it must be partitioned by pair class (one file may contain multiple classes, but one class must be in a single file). We do not load multiple files into memory, making it an effective way to reduce RAM cravings")
+    parser.add_argument("input_file", nargs="+", help="An input Parquet table. May be multiple files, but it must be partitioned by pair class (one file may contain multiple classes, but one class must be in a single file). We do not load multiple files into memory, making it an effective way to reduce RAM cravings")
     parser.add_argument("--residue-directory", help="Directory with residue lists, used to select representative set residues. Currently, lists RNA-1.8-3.5, RNA-0-1.8, DNA-1.8-3.5, DNA-0-1.8 are expected.")
     parser.add_argument("--reexport", default='none', choices=['none', 'partitioned'], help="Write out parquet files with calculated statistics columns (log likelihood, mode deviations)")
     parser.add_argument("--include-nears", default=False, action="store_true", help="If FR3D is run in basepair_detailed mode, it reports near basepairs (denoted as ncWW). By default, we ignore them, but this option includes them in the output.")
     parser.add_argument("--filter-pair-type", default=None, help="Comma separated list of pair types to include in the result (formatted as cWW-AC). By default all are included.")
     parser.add_argument("--skip-kde", default=False, action="store_true", help="Skip generating kernel density estimates for histograms, image selection and 'niceness' score calculation.")
     parser.add_argument("--skip-image", default=False, action="store_true", help="Skip generating images for the nicest basepairs (use if the gen_contact_images.py script is broken)")
+    parser.add_argument("--skip-plots", default=False, action="store_true", help="Skip generating all PDF plots (only useful with --reexport)")
     parser.add_argument("--drop-columns", default=[], nargs="*", help="remove the specified columns from the reexport output (regex supported when in ^...$)")
     parser.add_argument("--reexport-noround", default=False, action="store_true", help="Do not round float columns in the reexported data")
     parser.add_argument("--output-dir", "-o", required=True, help="Output directory")
@@ -1202,83 +1203,86 @@ def main(argv):
             output_files = []
         else:
 
-            print("nicest_bps:", nicest_bps, "out of", len(dff) if dff is not None else 0)
-            # output_files = [
-            #     f
-            #     for h in histogram_defs
-            #     for f in make_resolution_comparison_page(df, args.output_dir, pair_type, h, images= [ create_pair_image(df[nicest_bp], args.output_dir, pair_type) ] if nicest_bp is not None else [])
-            # ]
-            if args.skip_image:
-                basepair_images = None
+            if args.skip_plots:
+                output_files = []
             else:
-                try:
-                    basepair_images = [ create_pair_image(dff[bp], args.output_dir, pair_type) if bp >= 0 else None for bp in nicest_bps ] * len(resolutions) if nicest_bps is not None else []
-                except Exception as e:
-                    print(f"Error generating images for {pair_type}: {e}")
-                    print(f"If the image generation doesn't work (e.g. PyMOL is not installed), you can skip it with --skip-image flag")
-                    exit(1)
-            dna_rna_highlights = [ dff[bp] if bp >= 0 else None for bp in nicest_bps ] if nicest_bps is not None else []
-            output_files = []
-            output_files.extend(
-                f for f in make_bond_pages(df, args.output_dir, pair_type, hbond_histogram_defs, images=basepair_images, highlights=dna_rna_highlights, title_suffix=" - H-bonds"
+                print("nicest_bps:", nicest_bps, "out of", len(dff) if dff is not None else 0)
+                # output_files = [
+                #     f
+                #     for h in histogram_defs
+                #     for f in make_resolution_comparison_page(df, args.output_dir, pair_type, h, images= [ create_pair_image(df[nicest_bp], args.output_dir, pair_type) ] if nicest_bp is not None else [])
+                # ]
+                if args.skip_image:
+                    basepair_images = None
+                else:
+                    try:
+                        basepair_images = [ create_pair_image(dff[bp], args.output_dir, pair_type) if bp >= 0 else None for bp in nicest_bps ] * len(resolutions) if nicest_bps is not None else []
+                    except Exception as e:
+                        print(f"Error generating images for {pair_type}: {e}")
+                        print(f"If the image generation doesn't work (e.g. PyMOL is not installed), you can skip it with --skip-image flag")
+                        exit(1)
+                dna_rna_highlights = [ dff[bp] if bp >= 0 else None for bp in nicest_bps ] if nicest_bps is not None else []
+                output_files = []
+                output_files.extend(
+                    f for f in make_bond_pages(df, args.output_dir, pair_type, hbond_histogram_defs, images=basepair_images, highlights=dna_rna_highlights, title_suffix=" - H-bonds"
+                    )
                 )
-            )
-            output_files.extend(
-                make_bond_pages(dff, args.output_dir, pair_type, coplanarity_histogram_defs, highlights=dna_rna_highlights, title_suffix= " - Coplanarity")
-            )
-            output_files.extend(
-                make_bond_pages(dff, args.output_dir, pair_type, coplanarity_histogram_defs2, highlights=dna_rna_highlights, title_suffix= " - coplanarity2")
-            )
-            output_files.extend(
-                make_bond_pages(dff, args.output_dir, pair_type, rmsd_histogram_defs, highlights=dna_rna_highlights, title_suffix= " - RMSD to nicest BP")
-            )
-            # Uncomment to generate KDE pairplots (takes forever, you have been warned)
-            # output_files.extend(
-            #     make_pairplot_page(dff, args.output_dir, pair_type, variables=[
-            #         pl.col(f"C1_C1_euler_phi").alias("Euler Φ"),
-            #         pl.col(f"C1_C1_euler_theta").alias("Euler Θ"),
-            #         pl.col(f"C1_C1_euler_psi").alias("Euler Ψ"),
-            #         pl.col(f"C1_C1_euler_phicospsi").alias("Euler Φ-cos(Θ)Ψ"),
-            #         pl.col(f"C1_C1_yaw1").alias("Yaw 1"),
-            #         pl.col(f"C1_C1_pitch1").alias("Pitch 1"),
-            #         pl.col(f"C1_C1_roll1").alias("Roll 1"),
-            #         pl.col(f"C1_C1_yaw2").alias("Yaw 2"),
-            #         pl.col(f"C1_C1_pitch2").alias("Pitch 2"),
-            #         pl.col(f"C1_C1_roll2").alias("Roll 2"),
-            #     ], title_suffix=" - Various N1-C1' reference frame angles")
-            # )
-            # output_files.extend(
-            #     make_pairplot_page(dff, args.output_dir, pair_type, variables=[
-            #         pl.col(f"coplanarity_angle").alias("Plane normal angle"),
-            #         pl.col(f"C1_C1_yaw1").alias("Yaw 1"),
-            #         pl.col(f"C1_C1_pitch1").alias("Pitch 1"),
-            #         pl.col(f"C1_C1_roll1").alias("Roll 1"),
-            #         pl.col(f"coplanarity_edge_angle1").alias("Edge 1 / plane 2"),
-            #         pl.col(f"coplanarity_edge_angle2").alias("Edge 2 / plane 1"),
-            #         pl.col("hb_1_OOPA1").alias("H-bond 2 / plane 1"),
-            #         pl.col("hb_1_OOPA2").alias("H-bond 2 / plane 2"),
-            #         pl.col("coplanarity_shift1").alias("Edge 1/plane 2 shift"),
-            #         pl.col("coplanarity_shift2").alias("Edge 2/plane 1 shift"),
+                output_files.extend(
+                    make_bond_pages(dff, args.output_dir, pair_type, coplanarity_histogram_defs, highlights=dna_rna_highlights, title_suffix= " - Coplanarity")
+                )
+                output_files.extend(
+                    make_bond_pages(dff, args.output_dir, pair_type, coplanarity_histogram_defs2, highlights=dna_rna_highlights, title_suffix= " - coplanarity2")
+                )
+                output_files.extend(
+                    make_bond_pages(dff, args.output_dir, pair_type, rmsd_histogram_defs, highlights=dna_rna_highlights, title_suffix= " - RMSD to nicest BP")
+                )
+                # Uncomment to generate KDE pairplots (takes forever, you have been warned)
+                # output_files.extend(
+                #     make_pairplot_page(dff, args.output_dir, pair_type, variables=[
+                #         pl.col(f"C1_C1_euler_phi").alias("Euler Φ"),
+                #         pl.col(f"C1_C1_euler_theta").alias("Euler Θ"),
+                #         pl.col(f"C1_C1_euler_psi").alias("Euler Ψ"),
+                #         pl.col(f"C1_C1_euler_phicospsi").alias("Euler Φ-cos(Θ)Ψ"),
+                #         pl.col(f"C1_C1_yaw1").alias("Yaw 1"),
+                #         pl.col(f"C1_C1_pitch1").alias("Pitch 1"),
+                #         pl.col(f"C1_C1_roll1").alias("Roll 1"),
+                #         pl.col(f"C1_C1_yaw2").alias("Yaw 2"),
+                #         pl.col(f"C1_C1_pitch2").alias("Pitch 2"),
+                #         pl.col(f"C1_C1_roll2").alias("Roll 2"),
+                #     ], title_suffix=" - Various N1-C1' reference frame angles")
+                # )
+                # output_files.extend(
+                #     make_pairplot_page(dff, args.output_dir, pair_type, variables=[
+                #         pl.col(f"coplanarity_angle").alias("Plane normal angle"),
+                #         pl.col(f"C1_C1_yaw1").alias("Yaw 1"),
+                #         pl.col(f"C1_C1_pitch1").alias("Pitch 1"),
+                #         pl.col(f"C1_C1_roll1").alias("Roll 1"),
+                #         pl.col(f"coplanarity_edge_angle1").alias("Edge 1 / plane 2"),
+                #         pl.col(f"coplanarity_edge_angle2").alias("Edge 2 / plane 1"),
+                #         pl.col("hb_1_OOPA1").alias("H-bond 2 / plane 1"),
+                #         pl.col("hb_1_OOPA2").alias("H-bond 2 / plane 2"),
+                #         pl.col("coplanarity_shift1").alias("Edge 1/plane 2 shift"),
+                #         pl.col("coplanarity_shift2").alias("Edge 2/plane 1 shift"),
 
-            #     ], title_suffix=" - Other coplanarity metrics")
-            # )
-            # output_files.extend(
-            #     make_pairplot_page(dff, args.output_dir, pair_type, variables=[
-            #         pl.col(f"C1_C1_yaw1").alias("Yaw 1"),
-            #         pl.col(f"C1_C1_pitch1").alias("Pitch 1"),
-            #         pl.col(f"C1_C1_roll1").alias("Roll 1"),
-            #         pl.col(f"rmsd_C1N_frames"),
-            #         pl.col(f"rmsd_edge1"),
-            #         pl.col(f"rmsd_edge2"),
-            #         pl.col(f"rmsd_edge_C1N_frame"),
-            #         pl.col(f"rmsd_all_base"),
-            #     ], title_suffix=" - Various N1-C1' reference frame angles")
-            # )
-            # output_files.extend(
-            #     f
-            #     for column in [0, 1, 2]
-            #     for f in make_bond_pages(df, args.output_dir, pair_type, [ h.select_columns(column) for h in hbond_histogram_defs], images=dna_rna_images, highlights=dna_rna_highlights, title_suffix=f" #{column}")
-            # )
+                #     ], title_suffix=" - Other coplanarity metrics")
+                # )
+                # output_files.extend(
+                #     make_pairplot_page(dff, args.output_dir, pair_type, variables=[
+                #         pl.col(f"C1_C1_yaw1").alias("Yaw 1"),
+                #         pl.col(f"C1_C1_pitch1").alias("Pitch 1"),
+                #         pl.col(f"C1_C1_roll1").alias("Roll 1"),
+                #         pl.col(f"rmsd_C1N_frames"),
+                #         pl.col(f"rmsd_edge1"),
+                #         pl.col(f"rmsd_edge2"),
+                #         pl.col(f"rmsd_edge_C1N_frame"),
+                #         pl.col(f"rmsd_all_base"),
+                #     ], title_suffix=" - Various N1-C1' reference frame angles")
+                # )
+                # output_files.extend(
+                #     f
+                #     for column in [0, 1, 2]
+                #     for f in make_bond_pages(df, args.output_dir, pair_type, [ h.select_columns(column) for h in hbond_histogram_defs], images=dna_rna_images, highlights=dna_rna_highlights, title_suffix=f" #{column}")
+                # )
             all_statistics.extend(statistics)
             hb_filters = [
                 # pl.col(f"hb_{i}_length") <= 4.0 if "C" in hb[1] or "C" in hb[2] else pl.col(f"hb_{i}_length") <= 3.8
@@ -1316,8 +1320,9 @@ def main(argv):
     results.sort(key=lambda r: (1, pair_defs.PairType.from_tuple(r["pair_type"])))
     output_files = [ f for r in results for f in r["files"] ]
 
-    subprocess.run(["gs", "-dBATCH", "-dNOPAUSE", "-q", "-sDEVICE=pdfwrite", "-dPDFSETTINGS=/prepress", f"-sOutputFile={os.path.join(args.output_dir, 'plots-merged.pdf')}", *output_files])
-    print("Wrote", os.path.join(args.output_dir, 'plots-merged.pdf'))
+    if not args.skip_plots:
+        subprocess.run(["gs", "-dBATCH", "-dNOPAUSE", "-q", "-sDEVICE=pdfwrite", "-dPDFSETTINGS=/prepress", f"-sOutputFile={os.path.join(args.output_dir, 'plots-merged.pdf')}", *output_files])
+        print("Wrote", os.path.join(args.output_dir, 'plots-merged.pdf'))
     boundaries_df: pl.DataFrame = pl.concat(boundaries)
     boundaries_df = boundaries_df.sort("family_id", "bases", "family", "boundary", descending=[False, False, False, True])
     boundaries_df.write_csv(os.path.join(args.output_dir, "boundaries.csv"))

@@ -1,10 +1,10 @@
 ## TODO!!
 
 zkontrolovat sazbu
-fallback img na basepairs.datmos.org
 favicon?
 molstar?
 
+--fallback img na basepairs.datmos.org
 --limit na refset datasource
 --shorten links
 

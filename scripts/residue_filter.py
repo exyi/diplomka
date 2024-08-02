@@ -28,7 +28,7 @@ def read_id_list(file) -> pl.DataFrame:
                 ins=m.group("ins") or None,
                 alt=m.group("alt") or None,
             ))
-    return pl.DataFrame(results, schema={ "pdbid": pl.Utf8, "chain": pl.Utf8, "base": pl.Utf8, "id": pl.Int64, "ins": pl.Utf8, "alt": pl.Utf8 })
+    return pl.DataFrame(results, schema={ "pdbid": pl.Utf8, "chain": pl.Utf8, "base": pl.Utf8, "id": pl.Int32, "ins": pl.Utf8, "alt": pl.Utf8 })
 
 def read_id_lists(directory) -> dict[str, pl.DataFrame]:
     return {
@@ -43,8 +43,8 @@ def add_res_filter_columns(df: pl.DataFrame, residue_lists: dict[str, pl.DataFra
     rcols = { f"{name}-r{resix}":
         df.join(
             reslist.with_columns(pl.lit(True).alias("__tmp")),
-            left_on=["pdbid", f"chain{resix}", f"res{resix}", f"nr{resix}", f"alt{resix}", f"ins{resix}"],
-            right_on=["pdbid", "chain", "base", "id", "alt", "ins"],
+            left_on=["pdbid", f"chain{resix}", f"res{resix}", pl.col(f"nr{resix}").cast(pl.Int32), f"alt{resix}", f"ins{resix}"],
+            right_on=["pdbid", "chain", "base", pl.col("id").cast(pl.Int32), "alt", "ins"],
             how="left",
             join_nulls=True
         )

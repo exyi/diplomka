@@ -1387,7 +1387,7 @@ def main_partition(pool: Union[Pool, MockPool], args, pdbid_partition='', ideal_
         StandardMetrics.Translation1,
         StandardMetrics.Translation2,
     ]
-    if ideal_basepairs:
+    if ideal_basepairs is not None:
         print(f"Measuring RMSD against {len(ideal_basepairs)} ideal basepairs")
         pair_metrics.extend([
             RMSDToIdealMetric('C1N_frames1', ideal_basepairs, fit_on='left_C1N', calculate='right_C1N'),
@@ -1459,7 +1459,7 @@ def main(pool: Union[Pool, MockPool], args):
         ideal_basepairs = load_ideal_pairs(pool, args.reference_basepairs)
         print(f"Loaded {len(ideal_basepairs)} ideal basepairs")
     else:
-        ideal_basepairs = None
+        ideal_basepairs = dict()
 
     if args.partition_input_select and args.partition_input:
         raise ValueError("Cannot specify both --partition-input and --partition-input-select")
