@@ -10,4 +10,5 @@ __pycache__
 node_modules
 /att.zip
 /diplomka/tmp
+/webapp-build
 

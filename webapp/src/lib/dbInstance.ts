@@ -35,7 +35,7 @@ for (const pairMeta of metadata) {
   }
 }
 export const host = window.location.hostname.match(/(^|[.])localhost$/) ? 'localhost' : window.location.hostname
-export const assetBaseUri = host == 'localhost' ? config.debugHost : document.baseURI
+export const assetBaseUri = host == 'localhost' && config.debugHost != null ? config.debugHost : document.baseURI
 export const fileBase = (new URL(config.tablesPath, assetBaseUri)).href
 export const imgDir = (new URL(config.imgPath, assetBaseUri)).href
 

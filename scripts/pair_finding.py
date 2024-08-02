@@ -229,7 +229,7 @@ if __name__ == '__main__':
     parser.add_argument('--distance', type=float, default=4.0, help='Distance threshold between residue atoms (in Ångströms)')
     parser.add_argument('--output', type=str, help='An empty output directory (will create a parquet file for each PDB structure)', required=True)
     parser.add_argument("--pdbcache", nargs="+", help="Directories to search for PDB files in order to avoid re-downloading. Last directory will be written to, if the structure is not found and has to be downloaded from RCSB. Also can be specified as PDB_CACHE_DIR env variable.")
-    parser.add_argument('--threads', type=int, default=1, help='Number of threads, `0` to use all available CPU threads. Parallelism only affects processing of multiple PDB files.')
+    parser.add_argument('--threads', type=async_utils.parse_thread_count, default=1, help='Number of threads, 0 for all, 50% for half, -1 to leave one free, ... Parallelism only affects processing of multiple PDB files.')
     args = parser.parse_args()
     for x in args.pdbcache or []:
         pdb_utils.pdb_cache_dirs.append(os.path.abspath(x))

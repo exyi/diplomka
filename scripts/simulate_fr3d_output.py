@@ -11,7 +11,7 @@ import dataclasses
 from pair_csv_parse import scan_pair_csvs
 import pair_defs as pair_defs
 from fr3d_parser import UnitID
-from async_utils import MockPool
+from async_utils import MockPool, parse_thread_count
 
 order_sensitive_pairs = [
     pt
@@ -101,7 +101,7 @@ if __name__ == "__main__":
     parser.add_argument("--only-once", default=False, action="store_true", help="Do not duplicate pairs")
     parser.add_argument("--uppercase", default=False, action="store_true", help="Uppercase PDB IDs")
     parser.add_argument("--comparison-column", default=False, action="store_true", help="Add a column with information from comparison_in_current/comparision_in_baseline")
-    parser.add_argument("--threads", default=None, type=int, help="Parallelism")
+    parser.add_argument("--threads", default=None, type=parse_thread_count, help="Parallelism (number, 0 for all, 50% for half, -1 to leave one free...)")
 
     args = parser.parse_args()
     multiprocessing.set_start_method("spawn")

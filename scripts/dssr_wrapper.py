@@ -7,6 +7,7 @@ import dataclasses
 from dataclasses import dataclass
 import tempfile
 import pdb_utils
+from scripts.async_utils import parse_thread_count
 
 @dataclass(frozen=True, order=True)
 class NucleotideID:
@@ -177,7 +178,7 @@ if __name__ == "__main__":
     parser.add_argument("--pdbcache", nargs="+")
     parser.add_argument("--output", "-o", required=True)
     parser.add_argument("--dssr-binary", required=True)
-    parser.add_argument("--threads", type=int, default=1)
+    parser.add_argument("--threads", type=parse_thread_count, default=1)
     args = parser.parse_args()
 
     for x in args.pdbcache:

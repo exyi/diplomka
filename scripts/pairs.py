@@ -17,7 +17,7 @@ from scipy.spatial.transform import Rotation
 from pair_csv_parse import scan_pair_csvs
 import pdb_utils
 import pair_defs as pair_defs
-from async_utils import MockPool
+from async_utils import MockPool, parse_thread_count
 pdef = pair_defs
 
 class _Sentinel:
@@ -1545,7 +1545,7 @@ if __name__ == "__main__":
     parser.add_argument("inputs", nargs="+", help="Input file - Parquet with a list of basepairs; FR3D basepairing output; CIF/PDB file (all close contacts will be examined)")
     parser.add_argument("--pdbcache", nargs="+", help="Directories to search for PDB files in order to avoid downloading. Last directory will be written to, if the structure is not found and has to be downloaded from RCSB. Also can be specified as PDB_CACHE_DIR env variable.")
     parser.add_argument("--output", "-o", required=True, help="Output CSV/Parquet file name. Both CSV and Parquet are always written.")
-    parser.add_argument("--threads", type=int, default=1, help="Number of worker processes to spawn. Does not affect Polars threading, at the start, the process might use more threads than specified. `0` to use all available CPU threads, `-1` all except one, ...")
+    parser.add_argument("--threads", type=parse_thread_count, default=1, help="Number of worker processes to spawn. Does not affect Polars threading, at the start, the process might use more threads than specified. `0` to use all available CPU threads, `-1` all except one, 50% for half, ...")
     parser.add_argument("--export-only", default=False, action="store_true", help="Only re-export the input as CSV+Parquet files, do not calculate anything")
     parser.add_argument("--partition-input", default=0, type=int, help="Partition the input by N first characters of the PDBID. Reduces memory usage for large datasets.")
     parser.add_argument("--partition-input-select", default='', type=str, help="Select a given input partition (for example '9' will run pdbids starting with '9').")

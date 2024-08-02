@@ -15,6 +15,7 @@ from dataclasses import dataclass
 import shutil
 import subprocess, threading
 import pair_defs
+from scripts.async_utils import parse_thread_count
 
 def residue_selection(chain, nt, ins, alt):
     chain = str(chain)
@@ -573,7 +574,7 @@ def main(argv):
     parser = argparse.ArgumentParser(description="Generate contact images")
     parser.add_argument("input", help="Input CSV file", nargs="+")
     parser.add_argument("--output-dir", "-o", required=True, help="Output directory")
-    parser.add_argument("--threads", "-t", type=int, default=None, help="Number of threads to use. Each thread will process a different PDB structure, the option has no effect if the provided file only contains one structure. PyMOL renderer always runs single-threaded.")
+    parser.add_argument("--threads", "-t", type=parse_thread_count, default=None, help="Number of threads to use. Each thread will process a different PDB structure, the option has no effect if the provided file only contains one structure. PyMOL renderer always runs single-threaded.")
     parser.add_argument("--cpu_affinity", type=int, nargs="*", default=None, help="Which CPUs to use (list of integers, indexed from 0)")
     parser.add_argument("--niceness", type=int, default=None, help="Run the process with the specified niceness (don't change by default)")
     parser.add_argument("--standard-orientation", type=eval, default=False, help="When set to true, orient the base pair such that the first nucleotide is always left and the N1/N9 - C1' is along the y-axis (N is above C)")
