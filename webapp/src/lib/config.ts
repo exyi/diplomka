@@ -2,7 +2,7 @@ import type { ComparisonMode, NucleotideFilterModel } from "./dbModels";
 
 export default Object.freeze({
     defaultOrderBy: 'rmsdD',
-    defaultDataSource: <NucleotideFilterModel["datasource"]>'allcontacts-f',
+    defaultDataSource: <NucleotideFilterModel["datasource"]>'allcontacts-boundaries-f',
     defaultComparisonMode: <ComparisonMode>'union',
     /// default limit of displayed images in the gallery
     imgLimit: 100,
@@ -10,7 +10,7 @@ export default Object.freeze({
     // debugHost: 'https://pairs.exyi.cz',
     debugHost: null,
     imgPath: '/pregen-img',
-    fallbackImgPath: 'https://basepairs.datmos.org', // TODO
+    fallbackImgPath: 'https://basepairs.datmos.org',
     tablesPath: '/tables',
     // disabledDataSources: [ ],
     disabledDataSources: [ "fr3d-nf", "fr3d-n", "fr3d", "allcontacts", "allcontacts-boundaries" ],
@@ -19,7 +19,7 @@ export default Object.freeze({
         'googleTable': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTvEpcubhqyJoPTmL3wtq0677tdIRnkTghJcbPtflUdfvyzt4xovKJxBHvH2Y1VyaFSU5S2BZIimmSD/pub?gid=245758142&single=true&output=csv',
         fr3dData: 'parameter-boundaries.csv'
     },
-    /// URL to basepairs.datmos.org/#s/X will be redirected to the full URL specified here
+    /// URL to basepairs.datmos.org/#short/X will be redirected to the full URL specified here
     shortLinks: {
         // TODO
         "s9pvei": "cWW-G-C/hb0_L=..3.4&hb0_DA=100..140&hb0_AA=100..140&hb1_L=..3.4&hb1_DA=100..140&hb1_AA=100..140&hb2_L=..3.4&hb2_DA=100..140&hb2_AA=100..140&baseline_ds=fr3d-f",
