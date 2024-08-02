@@ -221,7 +221,7 @@
 </style>
 <div>
     <div class="imgpane">
-        {#if pair != null && allowMolstar && (molStar || (imgError && rotError) || (imageUrl == null && videoUrl == null))}
+        {#if pair != null && (molStar || allowMolstar && ((imgError && rotError) || (imageUrl == null && videoUrl == null)))}
             <div class="molstar-container">
                 <MolStarMaybe pairId={pair.id} />
             </div>
@@ -231,7 +231,12 @@
             {:else if !imgError}
             <img src={imageUrl} alt='The basepair in plane with the screen' on:error={_ => { imgError = true }} />
             {:else}
-                <p>Image was not pre-generated</p>
+                <div>
+                    <div>Image was not pre-generated </div>
+                    <button class="button is-link" on:click={() => { molStar = true }} style="margin-bottom: 1rem">
+                        Open the structure in browser
+                    </button>
+                </div>
             {/if}
 
             {#if videoUrl && !videoError}
@@ -245,6 +250,11 @@
             {/if}
         {/if}
     </div>
+    {#if !molStar && !imgError}
+    <div class="control" style="float:right">
+        <button class="button" on:click={() => { molStar = true }}>Open the structure in browser</button>
+    </div>
+    {/if}
     <div>
         <h4>PyMol script<span style="font-size: 1rem; font-weight: 400"> &nbsp;&nbsp;- copy and paste into PyMol command line</span></h4>
         <pre on:click={ev => {

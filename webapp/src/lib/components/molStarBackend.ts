@@ -11,7 +11,7 @@ import { AssemblySymmetry } from 'molstar/lib/extensions/assembly-symmetry'
 import { DownloadStructure, PdbDownloadProvider } from 'molstar/lib/mol-plugin-state/actions/structure';
 import { DownloadDensity } from 'molstar/lib/mol-plugin-state/actions/volume';
 import { StructureRepresentationPresetProvider, presetStaticComponent } from 'molstar/lib/mol-plugin-state/builder/structure/representation-preset'
-import { StateObjectRef } from 'molstar/lib/mol-state'
+import { StateObjectRef, StateObjectSelector } from 'molstar/lib/mol-state'
 import { Material } from 'molstar/lib/mol-util/material'
 import { ResidueQuery, StructureSelectionCategory, StructureSelectionQuery } from 'molstar/lib/mol-plugin-state/helpers/structure-selection-query'
 import { transpiler as pymolTranspiler } from 'molstar/lib/mol-script/transpilers/pymol/parser'
@@ -20,9 +20,13 @@ import { MolScriptBuilder as MS } from 'molstar/lib/mol-script/language/builder'
 import { Transparency } from 'molstar/lib/mol-theme/transparency'
 import { StructureRepresentation3D, TransparencyStructureRepresentation3DFromBundle, TransparencyStructureRepresentation3DFromScript } from 'molstar/lib/mol-plugin-state/transforms/representation'
 import { setStructureTransparency } from 'molstar/lib/mol-plugin-state/helpers/structure-transparency'
-import { StructureSelection } from 'molstar/lib/mol-model/structure'
+import { type ElementIndex, StructureSelection } from 'molstar/lib/mol-model/structure'
 import { Bundle } from 'molstar/lib/mol-model/structure/structure/element/bundle'
-import { RuntimeContext } from 'molstar/lib/mol-task'
+import { RuntimeContext, Task } from 'molstar/lib/mol-task'
+import { SymmetryOperator } from 'molstar/lib/mol-math/geometry'
+import { Vec3 } from 'molstar/lib/mol-math/linear-algebra'
+import { Loci } from 'molstar/lib/mol-model/structure/structure/element/loci'
+import { Script } from 'molstar/lib/mol-script/script'
 
 export async function createContext(element: HTMLElement): Promise<PluginUIContext> {
 
@@ -120,6 +124,33 @@ function pairSelector(s: PairId):StructureSelectionQuery {
     )
 }
 
+
+function meanCoordinates(c: SymmetryOperator.ArrayMapping<ElementIndex>[]): { center: Vec3, r: number } {
+    const n = c.reduce((a, b) => a + b.coordinates.x.length, 0)
+    let x = 0
+    let y = 0
+    let z = 0
+    for (const m of c) {
+        for (let i = 0, _i = m.coordinates.x.length; i < _i; i++) {
+            x += m.x(i as ElementIndex)
+            y += m.y(i as ElementIndex)
+            z += m.z(i as ElementIndex)
+        }
+    }
+    const center = Vec3.create(x / n, y / n, z / n)
+    let r = 0
+    const s = Vec3.create(0, 0, 0)
+    for (const m of c) {
+        for (let i = 0, _i = m.coordinates.x.length; i < _i; i++) {
+            r = Math.max(Vec3.squaredDistance(m.position(i as ElementIndex, s), center))
+        }
+    }
+    return {
+        center,
+        r: Math.sqrt(r)
+    }
+}
+
 const StructurePreset = (pairSelector: StructureSelectionQuery) => StructureRepresentationPresetProvider({
     id: 'preset-structure',
     display: { name: 'Structure' },
@@ -169,6 +200,18 @@ const StructurePreset = (pairSelector: StructureSelectionQuery) => StructureRepr
         // await shinyStyle(plugin);
         plugin.managers.interactivity.setProps({ granularity: 'residue' });
 
+
+        const pairLoci = StructureSelection.toLociWithSourceUnits(Script.getStructureSelection(pairSelector.expression, structureCell.obj.data))
+        console.log(pairLoci)
+        plugin.managers.structure.focus.setFromLoci(pairLoci)
+        plugin.managers.interactivity.lociSelects.select({ loci: pairLoci })
+        plugin.managers.camera.focusLoci(pairLoci, {durationMs: 1000, minRadius: 10 })
+
+        // console.log(components.pair.obj.data.units.map(u => u.conformation))
+        // const center = meanCoordinates(components.pair.obj.data.units.map(u => u.conformation))
+        // plugin.canvas3d.camera.focus(center.center, center.r, 1000)
+        // PluginCommands.Camera.Focus(plugin, { center: center.center, radius: 10, durationMs: 1000 })
+
         return { components, representations };
     }
 });
@@ -208,7 +251,8 @@ export class MolStarViewer {
 
         const mng = this.cx.managers.structure
         const struct = mng.hierarchy.current.structures
-        this.cx.managers.structure.component.applyPreset(struct, StructurePreset(pairSelector(pairId)))
+        const pairSel = pairSelector(pairId)
+        mng.component.applyPreset(struct, StructurePreset(pairSel))
         // PluginCommands.State.SetCurrentObject()
     }
 }
