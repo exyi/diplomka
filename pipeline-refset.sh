@@ -16,8 +16,8 @@ pdbcache="$datadir/pdb"
 pdblist="$datadir/refset/pdbid.list"
 # Select the number of threads (in percent of all logical cores or as a fixed number)
 # threads=1
-# threads=50%
-threads=100%
+threads=50%
+# threads=100%
 
 
 cd ./scripts

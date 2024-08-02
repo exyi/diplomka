@@ -22,9 +22,11 @@ The basepair images are pre-rendered for the entire reference set using the proc
 The visual structures are essential for effective browsing of the basepair examples, as the users can quickly identify what does.
 Although it is possible to render molecules directly in the browser, loading a bitmap image is an order of magnitude faster even if the molecule is small.
 A large fraction of basepairs occur in huge ribosomal structures, making it essentially impossible to render tens of them on one screen even on premium hardware and despite the fact that [MolStar](https://doi.org/10.1093/nar/gkab314) is a comparatively performant renderer.
+However, the application allows the user to load any structure using MolStar in the detail modal dialog.
+In this setting, only a single structure is loaded, which is very much computationally feasible.
 
-<!-- TODO: jesti fixnu ten MolStar, tak se samozřejmě pochlubit
-However, it makes sense to allow the user to load the structure using [MolStar](https://doi.org/10.1093/nar/gkab314) in the detail modal dialog, especially since we have already paid the steep price for integrating it.
+
+<!--
 
 It would most likely significantly help to reduce the loading speed if we used the MolStar Model Server.
 This component runs on the server and allows the client to only request certain parts of the molecule.
@@ -47,7 +49,7 @@ The application supports SQL syntax and functions supported by DuckDB 0.9, which
 
 For effective use, we recommend setting a _closest desired filter_ in the **Parameter ranges** mode and then switching to the **SQL** mode.
 It will get prepopulated with the query, alleviating the need to remember (or lookup) the internal names of all columns and data sources.
-The available columns are displayed under the editor, or in the modal dialog when we click a basepair.
+The available columns are displayed under the text editor, or in the modal dialog displayed after clicking a basepair.
 
 The available tables (i.e., "data sources") are briefly described under the query editor.
 In short, we use the `selectedpair` table to query basepairs of the selected class identified by FR3D, `selectedpair_allcontacts` to get all close contacts (≤ 4.2 Å) and `selectedpair_allcontacts_boundaries` to query basepairs identified by our new set of constraints.

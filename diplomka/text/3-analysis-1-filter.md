@@ -7,7 +7,7 @@ A degree of unbiased noise may be tolerated, as statistical methods can account 
 
 <!-- Even when working with small sample sizes, the uncertainty arising from the noise can be characterized using confidence intervals.
 However, the resulting intervals may be deemed _overconfident_ if the observations are not independent of one another. -->
-![Canonical GC pairs, filtered (left) and unfiltered (right). Without the filter, the plot illustrates a large effect from 2.89 Å hydrogen-bond restraints used in model refining. TODO stejne meritko X osy](../img/hbonds-hist-filter-comparison-GConly.png){#fig:hbonds-hist-filter-comparison-GConly}
+![Canonical GC pairs, filtered (left) and unfiltered (right). Without the filter, the plot illustrates a large effect from 2.89 Å hydrogen-bond restraints used in model refining.<!-- TODO stejne meritko X osy-->](../img/hbonds-hist-filter-comparison-GConly.png){#fig:hbonds-hist-filter-comparison-GConly}
 
 Since multiple entries in the PDB often share a common refined structure with only varying ligands, we need to remove all redundant structures to avoid sampling a single structure multiple times.
 Moreover, nucleotides must satisfy other quality criteria to be useful for further analysis.

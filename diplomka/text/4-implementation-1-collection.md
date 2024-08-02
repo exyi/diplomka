@@ -15,7 +15,7 @@ The components are separated by a vertical bar character (`|`).
 
 Alternatively, the input file may be a table (CSV/Parquet) with columns `pdbid`, `model`, `chain1`, `res1`, `nr1`, `ins1`, `alt1`, `chain2`, `res2`, `nr2`, `ins2`, `alt2`, and `family`.
 Other columns are allowed and preserved on the output.
-This data format provides compatibility with other software tools used at IBT.
+This data format provides compatibility with other software tools used at our institute.
 The same columns identify the basepairs in the output files.
 
 ### Produced information

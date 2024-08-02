@@ -12,6 +12,10 @@
 The directories with code contain a brief README.md file with setup instructions.
 Each Python script writes out how it is used when executed with the `--help` option.
 
+The source code is also available online at GitHub: <https://github.com/exyi/diplomka>).
+Complete pre-computed data files partitioned by basepairing class are available online at <https://basepairs.datmos.org/tables/> (about 10GiB in total).
+
+
 ## Dependencies and build instructions
 
 The data processing scripts are written in Python, and we have verified that it works on versions 3.11 or 3.12.
@@ -37,13 +41,15 @@ The application can be started in development mode using `npm run dev` or compil
 The web application described in @sec:tuning-app is a static website and a limited version is attached in the `webapp-build/` directory.
 The application includes pre-computed Parquet data files for the reference set, while the rendered basepair images and the data files for the entire PDB are omitted to keep the attachment size reasonable.
 
-
 To display the website, it is necessary to start a web server in the directory --- simply opening the index.html file will not work due to security restrictions.
-The simplest option is probably to use the Python built-in module: `python -m http.server 12345`, and navigate to http://localhost:12345
+The simplest option is probably to use the Python built-in module: `python -m http.server 12345`, and navigate to http://localhost:12345.
+The website will attempt to load the basepair images over the network from basepairs.datmos.org, and it also allows to visualize any pair using [Mol*](https://doi.org/10.1093/nar/gkab314) in the modal dialog shown after clicking on it.
 
 ## Example pipeline
 
 The `pipeline-refset.sh` shellscript illustrates how to use the Python scripts to analyze PDB structures, assign basepairs according, compare it with FR3D, and produce the partitioned data files for the web application.
 
-By default, it operates only on structures in the reference set (@sec:filter) to limit the computational resources required.
-Except for the final part (running `pair_distributions.py`), it runs multithreaded, by default on half of the available cores.
+By default, it operates only on PDB structures in the reference set (@sec:filter) to limit the computational resources required.
+Most of the time, it runs multithreaded, by default on half of the available CPU cores.
+Note that each thread requires about a gigabyte of memory.
+

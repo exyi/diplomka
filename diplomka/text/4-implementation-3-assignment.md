@@ -10,7 +10,7 @@ This can be done efficiently using a grid or a [**_k_-d** tree](https://en.wikip
 We performed this search using NeighborSearch functionality of the [Gemmi library](https://doi.org/10.21105/joss.04200).
 
 For each pair candidate, we calculate the specified parameters for each of the twelve Leontis-Westhof families using the `pairs.py` script.
-We omit the `family` column in the input table of all close residues, and substitute it by using the `--override-pair-family=all` CLI option to analyze how each pair fits into all families.
+We omit the `family` column in the input table of all close residues, and substitute it by using the `--override-pair-family=all` option to analyze how each pair fits into all families.
 In a third step, we check that all the parameters lie in the defined ranges using the `apply_filter.py` script.
 
 
