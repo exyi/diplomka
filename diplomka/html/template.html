@@ -178,6 +178,10 @@
             break-inside: avoid;
         }
 
+        .pagebreak {
+            page-break-after: always;
+        }
+
         .flex-columns {
             display: flex;
             flex-direction: row;
@@ -204,6 +208,7 @@
         }
         figure > img {
             max-width: calc(100%);
+            max-height: calc(var(--a4-height) - 3in);
             display: block;
             margin: 0 auto 0.25rem auto;
             /* margin: 1rem; */
@@ -418,8 +423,7 @@
     $endfor$
 
 </head>
-<body class="pagedjs">
-<!-- <body class="nopagedjs"> -->
+<body $if(pagedjs)$ class="pagedjs" $else$ class="nopagedjs" $endif$ >
     <!-- Pandoc include-before: -->
     $for(include-before)$
         $include-before$
@@ -459,9 +463,11 @@
             <!-- Prague 12024 HE -->
             Prague 2024
         </div>
+        $if(final-definitely-not-draft)$$else$
         <div style="flex-grow: 0; color: red">
             Draft $generated_at$, git $generated_from_commit$ #$generated_from_commit_num$
         </div>
+        $endif$
     </div>
 
     <div class="full-page" style="position: relative; min-height: 50vh;">

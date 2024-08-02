@@ -519,7 +519,7 @@ def reexport_pandoc_for_review(files, output_file):
     """
     run(f"Pandoc reexport for review", "pandoc", "--to=markdown", "--wrap=preserve", "--output=" + output_file, *files)
 
-def reexport_docx(files, out_dir, output_file):
+def reexport_docx(files, out_dir, output_file, docx: bool, odt: bool):
     """
     """
     args = [
@@ -531,12 +531,14 @@ def reexport_docx(files, out_dir, output_file):
         "--toc", "--toc-depth=4",
         "--number-sections"
     ]
-    # run(f"Pandoc export docx", "pandoc", *args, "--to=docx", "--output=" + output_file + ".docx", *files)
-    # run(f"Pandoc export odt", "pandoc", *args, "--to=odt", "--output=" + output_file + ".odt", *files)
+    if docx:
+        run(f"Pandoc export docx", "pandoc", *args, "--to=docx", "--output=" + output_file + ".docx", *files)
+    if odt:
+        run(f"Pandoc export odt", "pandoc", *args, "--to=odt", "--output=" + output_file + ".odt", *files)
 
-def pandoc_render(files, output_file):
-    commit = run(f"git current commit", "git", "rev-parse", "--short", "HEAD", check=False, capture_output=True).stdout.strip()
-    commit_num = run(f"git commit number", "git", "rev-list", "--count", "HEAD", check=False, capture_output=True).stdout.strip()
+def pandoc_render(files, output_file, final: bool, pagedjs: bool, epub: bool):
+    commit = run(f"git current commit", "git", "rev-parse", "--short", "HEAD", check=False, capture_output=True).stdout.strip() or '??'
+    commit_num = run(f"git commit number", "git", "rev-list", "--count", "HEAD", check=False, capture_output=True).stdout.strip() or '??'
     cmd = ["pandoc",
            "--from=json",
            "-F", "pandoc-crossref",
@@ -552,17 +554,35 @@ def pandoc_render(files, output_file):
            "--lua-filter=html/shift-headings.lua",
            "--toc", "--toc-depth=4",
            "--number-sections", "--section-divs"]
-    run(f"Render {output_file} with Pandoc", *cmd, "--to=html", "--katex", "--output=" + output_file + ".html", *files)
-    # run(f"Render {output_file}.epub with Pandoc", *cmd, "--to=epub", "--output=" + output_file + ".epub", "--webtex", *files)
+    if final:
+        cmd.append("--metadata=final-definitely-not-draft=true")
+    pagedjs_var = [ "--metadata=pagedjs=true" ] if pagedjs else []
+    run(f"Render {output_file} with Pandoc", *cmd, *pagedjs_var, "--to=html", "--katex", "--output=" + output_file + ".html", *files)
+    if epub:
+        run(f"Render {output_file}.epub with Pandoc", *cmd, "--to=epub", "--output=" + output_file + ".epub", "--webtex", *files)
 
 def main(argv):
-    parser = argparse.ArgumentParser(description='Build the thesis')
+    parser = argparse.ArgumentParser(description="""
+        Build the thesis - converts it to out/thesis.html
+                                     
+        For PDF output,
+            1. run `./build.py --pagedjs`
+            2. run `python -m http.server 12345`
+            3. Open in a Chromium-based browser: http://localhost:12345/out/thesis.html
+            4. Print to PDF
+            5. [optional] run `./build.py --pdf out/thesis.pdf` for post-processing
+        """)
     parser.add_argument('--verbose', action='store_true', help='Verbose output')
-    parser.add_argument('--skip-pdf', action='store_true', help='Verbose output')
+    parser.add_argument('--pagedjs', action='store_true', help='Enables pagedjs in the generated HTML output.')
+    parser.add_argument('--docx', action='store_true', help='Output a docx file (at out/thesis.docx)')
+    parser.add_argument('--epub', action='store_true', help='Output a odt file (at out/thesis.odt)')
+    parser.add_argument('--odt', action='store_true', help='Output a odt file (at out/thesis.epub)')
+    parser.add_argument('--final', action='store_true', help='Omit the draft number and date')
+    # parser.add_argument('--skip-pdf', action='store_true', help='Verbose output')
     parser.add_argument('--pdf', type=str, help="Input PDF file, only perform PDF/A conversion")
     args = parser.parse_args(argv)
     options.verbose = args.verbose
-    options.skip_pdf = args.skip_pdf
+    options.skip_pdf = True
 
     if args.pdf:
         convert_pdfa(args.pdf, "out/thesis-pdfa.pdf")
@@ -573,11 +593,11 @@ def main(argv):
     reexport_pandoc_for_review(files, "out/for_review.md")
     process_links(files, "out/parsed")
     process_typography(files)
-    reexport_docx(files, "out", "out/thesis")
-    pandoc_render(files, "out/thesis")
+    reexport_docx(files, "out", "out/thesis", docx=args.docx, odt=args.odt)
+    pandoc_render(files, "out/thesis", args.final, args.pagedjs, args.epub)
 
-    if not options.skip_pdf:
-        build_pdf("out/thesis.html")
+    # if not options.skip_pdf:
+    #     build_pdf("out/thesis.html")
 
 if __name__ == '__main__':
     main(sys.argv[1:])

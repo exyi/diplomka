@@ -80,8 +80,8 @@ If this would lead to ambiguities due to asymmetry, the second edge letter is lo
 For instance, a **cSs A-C** pair is also reported as the corresponding **csS C-A** pair, both meaning **cSS A-C** in the Leontis-Westhof terminology.
 FR3D does not lower the second **S** if the other orientation is left undefined.
 
-FR3D also lowers the second edge letter if the full class name is symmetric, but the defined hydrogen bonds are not identical when flipped.
-For instance, the exact H-bonds in **cWW A-A** pairs would be ambiguous, as these pairs bind from **N6** to **N1**, and from **N1** to **C2**.
+FR3D also lowers the second edge letter if the full class name is symmetric, but the defined H-bonds are not identical when flipped.
+For instance, the H-bonds in **cWW A-A** pairs would be ambiguous, as these pairs bind from **N6** to **N1**, and from **N1** to **C2**.
 
 <!-- ■⎼▶
 □⎼▷

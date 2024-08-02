@@ -28,6 +28,7 @@ The edge RMSD is the distance to the most typical basepairs (@sec:opt-params-exe
 
 ![The web application showing **tWH A-A** basepairs identified by FR3D on the reference set. The menu on top allows us to switch the class, data source and ordering. https://basepairs.datmos.org/#tWS-A-A/ds=fr3d-f](../img/screenshot-app-fr3dpairs.png){#fig:screenshot-app-fr3dpairs}
 
+![The detailed information about a given basepair instance includes two images rotated along the X axis to quickly see the planarity, information about the source structure, instruction to display it interactively in PyMOL and below the screenshot is a table of all calculated parameters.](../img/screenshot-app-modal-fr3dpair.png){#fig:screenshot-app-modal-fr3dpair}
 
 If the reference set is too small, we have the option to select "FR3D -- Entire PDB".
 However, since the basepair images need to be pre-generated, the application will now mostly show white squares in their place.
@@ -39,7 +40,6 @@ Regardless, we can click on any basepair to display detailed description, first 
 * A [PyMOL](https://github.com/schrodinger/pymol-open-source) script which displays the pair, when pasted to PyMOL command line. It may be used to display basepairs for which the image did not load.
 * The calculated parameters (@sec:basepair-params) with a short description.
 
-![The detailed information about a given basepair instance includes two images rotated along the X axis to quickly see the planarity, information about the source structure, instruction to display it interactively in PyMOL and below the screenshot is a table of all calculated parameters.](../img/screenshot-app-modal-fr3dpair.png){#fig:screenshot-app-modal-fr3dpair}
 
 ### Comparing sets
 

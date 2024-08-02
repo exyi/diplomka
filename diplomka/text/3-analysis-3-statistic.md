@@ -116,6 +116,8 @@ The kernel density estimate can be also computed in two dimensions or in one dim
 Although both methods seem to work well, computing two-dimensional KDE when all points are on a unit circle severely violates the assumption of normal distribution.
 We thus choose to compute the one dimensional KDE on range of $[-360°, 360°)$, and then use only the $[-180°, 180°)$ range.
 
+<div class="pagebreak"></div>  <!-- TODO re-check -->
+
 Unfortunately, other basic statistics like the median, maximum, and minimum cannot be well-defined because we have no notion of comparison in modular (circular) arithmetic.
 However, we can take advantage of the fact that the distributions of our interest do not span the entire range of $360°$.
 In order to be a useful discriminator, any measured basepair parameter must be constrained to a relatively small range.

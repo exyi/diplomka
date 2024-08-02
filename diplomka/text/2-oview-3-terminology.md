@@ -29,6 +29,8 @@ The L-W system leads to 12 basepair families in total; all are shown [in figure 
 The order in which the basepairs are listed is determined by a historically based priority rule: Watson–Crick edge > Hoogsteen edge > Sugar edge <https://doi.org/10.1017/s1355838201002515>.
 Each family has up to 10 or 16 individual basepairing classes.
 
+<div class="pagebreak"></div>  <!-- TODO re-check -->
+
 [Leontis and Westhof](https://doi.org/10.1017/s1355838201002515) define **cis** and **trans** as:
 
 > A given edge of one base can potentially interact in a plane with any one of the three edges of a second base, and can do so in either the cis or trans orientation of the glycosidic bonds (this nomenclature was used before, see, e.g., [Sundaralingam, 1977](https://doi.org/10.1002/qua.560120704)).
@@ -55,7 +57,7 @@ Note that “Sugar” refers to the name of a purine or pyrimidine edge which do
 In RNA, the ribose O2' oxygen can interact with the other base or even the other O2' oxygen.
 Since it is an OH group, it can function both as a hydrogen bond donor and an acceptor, for instance in the **cSS G-G** class (@fig:LWS-all-families-G-G).
 
-![A trans Sugar/Sugar G-G **DNA** pair (5uc6 B4:B17) -- The "Sugar-Sugar" basepair does not involve the ribose at all.](../img/tSS-GG-DNA-5uc6-B_4-B_17-no-oxygens2.png){#fig:tSS-GG-DNA-6n4g-A_2-B_2-no-oxygens .img-width50}
+![A trans Sugar/Sugar G-G **DNA** pair (5uc6 B4:B17) -- The "Sugar-Sugar" basepair does not involve the ribose at all.](../img/tSS-GG-DNA-5uc6-B_4-B_17-no-oxygens2.png){#fig:tSS-GG-DNA-6n4g-A_2-B_2-no-oxygens .img-width75}
 
 <!-- A frequent misconception is that "Sugar" means the base binds to the ribose oxygen.
 Although this is frequently the case that the basepair **includes** a hydrogen bond to the O2' atom, it is definitely not necessary.
