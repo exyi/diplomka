@@ -316,6 +316,7 @@
         }
         #TOC a > * {
             padding-right: 5px;
+            flex-shrink: 0;
         }
         #TOC a > .dot-leader {
             flex-grow: 1;
@@ -330,9 +331,15 @@
         } */
 
         .dot-leader {
+            text-align: right;
+            overflow: hidden;
+            white-space: nowrap;
+            direction: rtl;
+            color: #777;
+            font-weight: normal;
             /* background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' stroke='%23333' stroke-width='4' stroke-dasharray='6%2c 14' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e"); */
-            background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3cline x1='100%25' y1='50%25' x2='2' y2='50%25' stroke='%23777' stroke-width='2' stroke-dasharray='0%2c 7' stroke-dashoffset='2' stroke-linecap='round'/%3e%3c/svg%3e");
-            height: 0.9em;
+            /* background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3cline x1='100%25' y1='50%25' x2='2' y2='50%25' stroke='%23777' stroke-width='2' stroke-dasharray='0%2c 7' stroke-dashoffset='2' stroke-linecap='round'/%3e%3c/svg%3e"); */
+            /* height: 0.9em; */
         }
 
         /* #TOC a::after {
@@ -344,6 +351,10 @@
 
         .pagenumber::after {
             content: target-counter(attr(data-pagehref), page)
+        }
+
+        li::marker {
+            font-weight: bold;
         }
 
         .references-table-row {
@@ -399,6 +410,10 @@
             font-size: 100%;
             line-height: inherit;
             font-variant-position: super;
+        }
+
+        .nowrap {
+            white-space: nowrap;
         }
 
         * {
@@ -555,6 +570,7 @@
 
                 const dotsleader = document.createElement("span");
                 dotsleader.classList.add("dot-leader");
+                dotsleader.textContent = "\u202F.".repeat(100);
                 item.appendChild(dotsleader);
 
                 const pagenumber = document.createElement("span");

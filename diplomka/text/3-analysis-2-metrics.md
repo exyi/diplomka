@@ -96,7 +96,7 @@ We will therefore name the parameters **"Left Plane Angle"** and **"Right Plane 
 
 ![**Hydrogen bond / base plane angles** shown on a **tHW A-C** basepair (same as @fig:metrics-edge2plane-angle-4v9i-1-AA_479-AA_453). We have two hydrogen bonds — N7···N4, and N6···N3, each giving us two angles. **A.** angles relative to the cytosine (right) plane. **B.** angles relative to the adenine (left) plane. Please note that some angles look substantially exaggerated in the 2-dimensional projection.](../img/metrics-hbond2plane-4v9i-1-AA_479-AA_453.svg){#fig:metrics-hbond2plane-4v9i-1-AA_479-AA_453}
 
-### Plane to plane comparison
+### Plane to plane comparison {#sec:basepair-params-planetoplane}
 
 We have a number of other options for comparing the relative orientation of the base planes.
 The obvious choice is the angle between the planes, more specifically the angle between their normal vectors as used for example in <https://doi.org/10.1261/rna.381407>.
@@ -135,7 +135,7 @@ hide everything, not %pair-->
 The above-defined parameters work well on most basepair classes.
 As described in @sec:testing-basepair-params, we can verify that
 by calculating the parameters for all close contacts found in PDB and bounding them by the maximum range observed in basepairs reported by FR3D.
-When we do that with the five H-bond parameters and the five coplanarity measures, we are able to reproduce the FR3D reported set with sufficient fidelity on most classes. 
+When we do that with the five H-bond parameters and the five measures of coplanarity, we are able to reproduce the FR3D reported set with sufficient fidelity on most classes. 
 For instance, in the **cWW U-U** class, we have about 60 _false positives_ out of 750 total basepairs, most of which look "close enough".
 
 <!-- Out of which, we claim that the vast majority of false positives are valid basepairs of this category, albeit slightly stretched or shifted.

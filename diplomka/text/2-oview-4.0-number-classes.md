@@ -1,6 +1,6 @@
 ## Special Cases of the Leontis-Westhof Naming Scheme {#sec:bp-terminology-lw-edgecase}
 
-### Symmetry of L-W classes
+### Symmetry of L-W classes {#sec:bp-terminology-lw-edgecase-sym}
 
 As presented in the previous section, the L-W system theoretically distinguishes 156 distinct classes of basepairs, when treating uracil as equivalent to thymine.
 On each side of the pair, there are three options for the edge and four options for the nucleotide, resulting in a total of twelve unique combinations --- the L-W families.

@@ -2,12 +2,12 @@
 
 | Directory | Description |
 |----|------------------------------|
-| `scripts/` | Data analysis script |
-| `data/`   | Contains the reference set of nucleotides ([sec. @sec:filter]) and the parameter limit table ([sec. @sec:filter]). |
-| `webapp/` | Source code of the basepairs.datmos.org web application. |
-| `webapp-build` | A compiled application including prepared data files. |
-| `thesis/` | Source text of the thesis itself and the associated scripts. |
-| `pipeline-refset.sh` | Example script to run the entire pipeline on the reference set |
+| `scripts/`{.nowrap} | Data analysis script |
+| `data/`{.nowrap} | Contains the reference set of nucleotides ([sec. @sec:filter]) and the parameter limit table. |
+| `webapp/`{.nowrap} | Source code of the basepairs.datmos.org web application. |
+| `webapp-build`{.nowrap} | A compiled application including prepared data files. |
+| `thesis/`{.nowrap} | Source text of the thesis itself and the associated scripts. |
+| `pipeline-refset.sh`{.nowrap} | Example script to run the entire pipeline on the reference set |
 
 The directories with code contain a brief README.md file with setup instructions.
 Each Python script writes out how it is used when executed with the `--help` option.
@@ -16,7 +16,7 @@ The source code is also available online at GitHub: <https://github.com/exyi/dip
 Complete pre-computed data files partitioned by basepairing class are available online at <https://basepairs.datmos.org/tables/> (about 10GiB in total).
 
 
-## Dependencies and build instructions
+## Dependencies and build instructions{.unnumbered}
 
 The data processing scripts are written in Python, and we have verified that it works on versions 3.11 or 3.12.
 We manage dependencies using Poetry by issuing a `poetry install` command in the `scripts/` directory.
@@ -36,7 +36,7 @@ The web application is a SvelteKit application with dependencies managed through
 It is verified to work on Node version 22.3.
 The application can be started in development mode using `npm run dev` or compiled into the static files using `npm run build`.
 
-## Pre-built web application
+## Pre-built web application{.unnumbered}
 
 The web application described in @sec:tuning-app is a static website and a limited version is attached in the `webapp-build/` directory.
 The application includes pre-computed Parquet data files for the reference set, while the rendered basepair images and the data files for the entire PDB are omitted to keep the attachment size reasonable.
@@ -45,7 +45,7 @@ To display the website, it is necessary to start a web server in the directory -
 The simplest option is probably to use the Python built-in module: `python -m http.server 12345`, and navigate to http://localhost:12345.
 The website will attempt to load the basepair images over the network from basepairs.datmos.org, and it also allows to visualize any pair using [Mol*](https://doi.org/10.1093/nar/gkab314) in the modal dialog shown after clicking on it.
 
-## Example pipeline
+## Example pipeline{.unnumbered}
 
 The `pipeline-refset.sh` shellscript illustrates how to use the Python scripts to analyze PDB structures, assign basepairs according, compare it with FR3D, and produce the partitioned data files for the web application.
 

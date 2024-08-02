@@ -11,7 +11,7 @@ py=~/basepairs/venv/bin/python
 cd ~/basepairs
 
 if [ -z "$BASEPAIRS_PAIR_TYPE" ]; then
-    BASEPAIRS_PAIR_TYPE="cWW,cWWa,tWW,tWWa,cWH,tWH,cWS,tWS,cHH,cHHa,tHH,cHS,tHS,cSS,tSS,cWB"
+    BASEPAIRS_PAIR_TYPE="all"
 fi
 
 if [ -z "$BASEPAIRS_PARTITION" ]; then

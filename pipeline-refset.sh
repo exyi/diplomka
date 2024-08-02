@@ -40,7 +40,7 @@ poetry run python pair_finding.py\
 echo "analyzing all of the close contacts in refset"
 rm -rf "$datadir/out/contacts-analyzed"
 mkdir -p "$datadir/out/contacts-analyzed"
-poetry run python pairs.py "--override-pair-family=cWW,cWWa,tWW,tWWa,cWH,tWH,cWS,tWS,cHH,cHHa,tHH,cHS,tHS,cSS,tSS,cWB"\
+poetry run python pairs.py "--override-pair-family=all"\
     --filter --dedupe --postfilter-hb=4.2 --postfilter-shift=2.5\
     "--pdbcache=$pdbcache"\
     "--threads=$threads"\

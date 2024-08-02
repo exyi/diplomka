@@ -1,20 +1,20 @@
 ## The [basepairs.datmos.org](https://basepairs.datmos.org){.link-no-footnote} Applicaton {#sec:impl-webapp}
 
-In [section @sec:tuning-app], we have introduced a web application for browsing the various sets of basepairs (available at https://basepairs.datmos.org/, with its source code attached to this work).
+In [section @sec:tuning-app], we have introduced a web application for browsing the various sets of basepairs (available at <https://basepairs.datmos.org>, with its source code attached to this work).
 In this section, we would like to uncover some inner workings, software design choices and explain some advanced usage options.
 
 ### Software design {#sec:impl-webapp-design}
 
 <!-- The trick why re-running FR3D takes 3 hours on 16 CPU cores while we can adjust the parameters interactively is the precomputation and DuckDB -->
 Re-running FR3D to see the effect of a selection criteria modification takes about two CPU-days for all PDB structures.
-The trick why we can perform this interactively on a website is the pre-computation done in @sec:sw-collection.
+The trick why we can perform these adjustments interactively on a website is the pre-computation done in @sec:sw-collection.
 And [DuckDB-wasm](https://github.com/duckdb/duckdb-wasm).
 We pre-compute the parameters for all close contacts and then only perform filtering in the interactive session.
 The web itself is a purely client-side JavaScript application developed using the [Svelte](https://svelte.dev) framework.
 Rather unconventionally, we run the [DuckDB database](https://github.com/duckdb/duckdb-wasm) in the web browser, and it queries the statically hosted Parquet tables.
 This approach results in a resource-intensive application, but it significantly simplifies the process of implementing flexible filters, even allowing power-users to compose their own SQL queries without the necessity for safeguards against [SQL injection](https://en.wikipedia.org/wiki/SQL_injection).
 
-Internal state such as the selected pair, selected data source and filter is persisted into the URL, making it simple to share with colleagues.
+Internal state such as the selected pair, selected data source and filter is persisted into the URL, making it simple to share it with colleagues.
 
 #### Basepair images {#sec:impl-webapp-images}
 
@@ -22,7 +22,8 @@ The basepair images are pre-rendered for the entire reference set using the proc
 The visual structures are essential for effective browsing of the basepair examples, as the users can quickly identify what does.
 Although it is possible to render molecules directly in the browser, loading a bitmap image is an order of magnitude faster even if the molecule is small.
 A large fraction of basepairs occur in huge ribosomal structures, making it essentially impossible to render tens of them on one screen even on premium hardware and despite the fact that [MolStar](https://doi.org/10.1093/nar/gkab314) is a comparatively performant renderer.
-However, the application allows the user to load any structure using MolStar in the detail modal dialog.
+
+However, in the detail modal dialog, users have the option to open the entire structure with the basepair highlighted in the MolStar viewer. 
 In this setting, only a single structure is loaded, which is very much computationally feasible.
 
 
@@ -34,18 +35,19 @@ to je asi blbost popisovat -->
 
 #### Long-term sustainability {#sec:impl-webapp-sustainability}
 
-[Bioinformatics is plagued with unreliable web services](https://doi.org/10.1093/nar/gkaa1125) or services which are no longer operational, [which is partially rooted in the lack of long-term support grants](https://doi.org/10.1371/journal.pcbi.1011920).
-We do not have a silver bullet solution to the issue, but we can say we tried to lessen the maintenance cost in the hope of extending the website's longevity.
+[Bioinformatics is plagued with unreliable web services](https://doi.org/10.1093/nar/gkaa1125) or services which are no longer operational.
+[The issue is partially rooted in the lack of long-term support grants](https://doi.org/10.1371/journal.pcbi.1011920).
+We do not possess a silver bullet solution to that, but we can at least say we tried to lessen the maintenance cost in the hope of extending the website's longevity.
 After the initial batch processing, our service may be hosted on any static file web server, and it has been verified to function on both Apache and nginx.
 The website can hardly be hosted for free, as it relies on hundreds of gigabytes of pre-rendered basepair images.
 However, the absence of any server-side code alleviates the much higher cost of fixing security bugs and updating vulnerable dependencies.
 While the cost of fast storage is steadily decreasing, the cost of maintaining a codebase usually increases rapidly with its age.
-The web is also an excellent platform for longevity, as it has strong commitment to backward compatibility and allows the same software to work on most hardware that possesses sufficient computational power.
+The web is also an excellent platform for longevity, as it has strong commitment to backward compatibility and allows the same software to work on most hardware with sufficient computational power.
 
 ### Querying using SQL
 
 When we switch the filter editor to **SQL** mode, we gain the freedom to query basepairs or basepair candidates using any expression based on calculated basepair parameters.
-The application supports SQL syntax and functions supported by DuckDB 0.9, which includes most of standard SQL with many extensions.
+The application supports SQL syntax and functions supported by DuckDB 0.9, which includes most of standard SQL and many extensions.
 
 For effective use, we recommend setting a _closest desired filter_ in the **Parameter ranges** mode and then switching to the **SQL** mode.
 It will get prepopulated with the query, alleviating the need to remember (or lookup) the internal names of all columns and data sources.
@@ -63,7 +65,7 @@ We provide the following commonly used examples:
 * Single family, FR3D pairs, reference set: `read_parquet('cWW-*-filtered')`
 * Single family, FR3D pairs, entire PDB: `read_parquet('cWW-*-unfiltered')`
 * Multiple classes, FR3D pairs, entire PDB: `read_parquet(['cWW-G-C', 'cWW-A-U'])`
-* Single family, all close contacts, entire PDB: `read_parquet('cWW-á-unfiltered-allcontacts')`
+* Single family, all close contacts, entire PDB: `read_parquet('cWW-*-unfiltered-allcontacts')`
 * All data, FR3D pairs, reference set: `read_parquet('*-filtered')`
 
 Not only can we use SQL queries to filter basepairs, we can also perform aggregations.

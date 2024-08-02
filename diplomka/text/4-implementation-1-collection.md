@@ -5,22 +5,22 @@ The script `pairs.py` analyzes all classes of basepairs and computes the geometr
 ### Input format
 
 This program does not determine which nucleotides are base-pairing by itself; this information must be provided as input.
-Since we calculate the list of pairs using the fr3d-python package, the input format is identical to FR3D output.
+Since we want to calculate the list of pairs using the fr3d-python package, the input format is identical to FR3D output.
 For each mmCIF file, FR3D generates a `PDBID_basepair.txt` or a `PDBID_basepair_detailed.txt` file.
 The text file contains a line for each determined basepair, formatted as "**UnitID** tab **Family** tab **UnitID**".
 
-The UnitID is a unique identifier for nucleotides and other residues --- it is a structure PDB ID, Model Number, Chain ID, Nucleotide Number, and optionally Atom Name (not used in FR3D), Alternate ID, Insertion ID, and Symmetry Operation.
+The UnitID is a unique identifier for nucleotides and other residues --- it is the structure PDB ID, Model number, Chain name, Nucleotide number, and optionally Atom name (not used in FR3D), Alternate ID, Insertion ID, and the Symmetry Operation.
 The components are separated by a vertical bar character (`|`).
 [Detailed definition is at BGSU website](https://www.bgsu.edu/research/rna/help/rna-3d-hub-help/unit-ids.html)
 
 Alternatively, the input file may be a table (CSV/Parquet) with columns `pdbid`, `model`, `chain1`, `res1`, `nr1`, `ins1`, `alt1`, `chain2`, `res2`, `nr2`, `ins2`, `alt2`, and `family`.
 Other columns are allowed and preserved on the output.
-This data format provides compatibility with other software tools used at our institute.
+This data format ensures interoperability with the `pair_finding.py` script and with other software tools used at our institute.
 The same columns identify the basepairs in the output files.
 
 ### Produced information
 
-The script loads all PDB structures from the input table using the [BioPython library](https://doi.org/10.1093/bioinformatics/btp163) and computes the following:
+The script loads all PDB structures from the input table using the [BioPython library](https://doi.org/10.1093/bioinformatics/btp163) and adds the following:
 
 * The measured parameters, as defined in @sec:basepair-params
     * Distance between heavy atoms of defined H-bonds
@@ -64,19 +64,19 @@ However, we choose to avoid using composite data types to keep the Parquet and C
 Instead of an array of structures `{ length: Float64, donor_angle: Float64, ... }`, we have multiple columns `hb_0_length`, `hb_0_donor_angle`, …, `hb_1_length`, `hb_1_donor_angle`, ….
 Since we never have more than four defined bonds, it is not a significant issue.
 
-We use the [Polars DataFrame library](https://doi.org/10.5281/zenodo.7697217) in Python code and [DuckDB-wasm](https://github.com/duckdb/duckdb-wasm) in the web application as the Parquet reader and writer, and we can recommend both implementations.
+We use the [Polars DataFrame library](https://doi.org/10.5281/zenodo.7697217) in Python code and [DuckDB-wasm](https://github.com/duckdb/duckdb-wasm) in the web application for reading and writing Parquet, and we can recommend both implementations.
 
 ### Deduplication
 
 FR3D reports each pair twice, in both orientations --- if a **cWH G-C** pair is reported, a corresponding **cHW C-G** pair is also reported.
-To avoid redundancy, we deduplicate the pair using the following rules:
+To avoid redundancy (and some edge cases --- @sec:bp-terminology-lw-edgecase-sym), we deduplicate the pair using the following rules:
 
 1. If the pair family is asymmetric, we keep the variant shown in <https://doi.org/10.1093/nar/gkf481>.
-    * The referred families are **WH**, **WS**, **HS** (cis or trans),
+    * The preferred families are **WH**, **WS**, **HS** (cis or trans),
     * while **HW**, **SW**, **SH** pairs are always dropped.
 2. If FR3D lowercased the first family edge letter (@sec:bp-fr3d-lowercasing), we drop the pair.
-3. If the pair nucleotides are not equal, we keep the variant ordered according to the **A** > **G** > **C** > **U** = **T** rule.
-    * For instance, **cWW G-C** is preferred to **cWW C-G**, as `C` is before `G` in the ordering.
+3. If the pair nucleotides are not equal, we keep the variant ordered according to the **A** > **G** > **C** > **U** = **T** priority rule.
+    * For instance, **cWW G-C** is preferred to **cWW C-G**, as `G` is before `C` in the ordering.
 4. Otherwise, the pair type name is completely symmetric (`cWW G-G`).
     * We exclude the pair with longer H-bonds.
     * If the H-bonds are the same, we keep the pair with lower UnitID of the first nucleotide.
@@ -146,10 +146,10 @@ Since DDSR only calculates the base parameters when the `--analyze` is specified
 
 By default, the `pairs.py` script loads all basepairs into memory to group them by PDB ID and subsequently process each structure individually.
 This enables straightforward parallel processing using the Python `multiprocessing` module: we group the table of pairs by PDB ID and use `multiprocessing.Pool.map(...)` to process each structure.
-In an effort to maintain uniform CPU time consumption and to avoid mean emails from the PBS daemon, we split structures with more than 100 000 basepairs into several groups, and prioritize larger groups over smaller ones.
+In an effort to maintain uniform CPU time consumption to avoid mean emails from the PBS daemon, we split structures with more than 100 000 basepairs into several groups, and prioritize larger groups over smaller ones.
 
 In the context of annotating basepairs on the entire PDB (@sec:testing-basepair-params), we must compute the parameters for all _basepair candidates_, i.e., pairs of nucleotides in proximity to one another.
-Given the substantial size of the dataset, it is practical to subdivide it into smaller chunks and process them sequentially.
-This functionality can be invoked using the `--partition-input-select=K/N` command-line option, where **N** is a placeholder for the total number of partitions, and **K** is the specific partition to be processed in the current run.
+As such dataset is of substantial size, we subdivide it into smaller chunks and process them sequentially.
+This functionality can be accessed using the `--partition-input-select=K/N` command-line option, where **N** is a placeholder for the total number of partitions, and **K** is the specific partition to be processed in the current run.
 The parameter `K` can also be specified to be a range, allowing for execution of multiple partitions via a single command, such as `--partition-input-select=0-64/64`.
 Apart from reducing memory usage, the option may be used for parallel processing across multiple machines.

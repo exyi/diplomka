@@ -26,9 +26,7 @@ For better clarity, we will use the following conventions, unless noted otherwis
 * **SVD** --- Singular Value Decomposition
 * **SQL** --- Structured Query Language
 
-**cWW**, **tWW**, **cWH**, **tWH**, **cWS**, **tWS**, **cHH**, **tHH**, **cHS**, **tHS**, **cSS**, **tSS** are abbreviated basepair families according to the Leontis-Westhof terminology. See @sec:bp-terminology-lw or <https://doi.org/10.1017/s1355838201002515> for explanation.
-
-Very common abbreviations such as DNA are omitted for brevity.
+**cWW**, **tWW**, **cWH**, **tWH**, **cWS**, **tWS**, **cHH**, **tHH**, **cHS**, **tHS**, **cSS**, **tSS** are abbreviated basepair families according to the Leontis-Westhof terminology. See @sec:bp-terminology-lw or <https://doi.org/10.1017/s1355838201002515> for explanation. Very common abbreviations such as DNA are omitted for brevity.
 
 ## Single letter abbreviations {.unnumbered}
 

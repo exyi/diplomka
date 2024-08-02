@@ -25,6 +25,8 @@ The terms _false negative_ and _false positive_ are an overstatement, as we do n
 
 TODO: missing from FR3D / only in FR3D, not in FR3D / newly assigned
 
+ehh, ne, celý ten je pak hrozně awkward...
+
 -->
 
 <!--

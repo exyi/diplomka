@@ -1,11 +1,11 @@
 ## Calculation of the Proposed Basepair Parameters {#sec:sw-calculation}
 
-[In section @sec:basepair-params], we have _informally_ described the basepairing measures we experimented with.
+[In section @sec:basepair-params], we have _informally_ described the basepairing parameters we experimented with.
 The section is dedicated to the exact definitions, including simplified Python code.
 
 ### Hydrogen bond lengths and angles
 
-The code in @lst:code-calc-hb-distance-angle assumes the existence of variables `res1` and `res2` with the residues from the BioPython, or a similar library (the `coord` attribute contains a NumPy vector of size 3).
+The code in @lst:code-calc-hb-distance-angle assumes the existence of variables `res1` and `res2` with the residues from BioPython, or a similar library (the `coord` attribute contains a NumPy vector of size 3).
 Moreover, we have a hydrogen bond definition in the `hbond` variable, which includes the atom names as its attributes.
 
 The length is a distance between the interacting heavy atoms.
@@ -39,12 +39,12 @@ def hbond_geometry(res1: Residue, res2: Residue, hbond):
 ### Angle between bases forming a pair
 
 The second set of parameters requires determination of the base planes, represented as a translation vector and an orthonormal basis of the new coordinate system.
-It is important to note that we are looking for the optimal plane by least squared Euclidean (L2) distance, instead of the distance along the Y coordinate.
+It is important to note that we are looking for the optimal plane by least squared Euclidean (L2) distance, instead of the least squared distance along the Y coordinate.
 This makes the procedure more similar to Principal Component Analysis (PCA) or [Kabsch algorithm (_"RMSD alignment"_)](https://doi.org/10.1107/S0567739476001873) than to linear regression.
-The plane fitting implementation in @lst:code-calc-base-plane-fit uses [singular value decomposition (SVD)](https://en.wikipedia.org/wiki/Singular_value_decomposition), a good explanation of [the math can be found on the StackExchange forum.](https://math.stackexchange.com/q/99317)
+The plane fitting implementation in @lst:code-calc-base-plane-fit uses [singular value decomposition (SVD)](https://en.wikipedia.org/wiki/Singular_value_decomposition), a good explanation of [the math can be found on the StackExchange forum](https://math.stackexchange.com/q/99317).
 The SVD decomposes a rectangular matrix into three matrices, the first of which is an orthogonal matrix.
 The first two columns of the matrix are the plane basis, while the last one is the normal vector orthogonal to the plane.
-The other two matrices would allow us to map the atom position into the new vector space, but that is unnecessary for this algorithm.
+The other two matrices would allow us to map atom positions into the new vector space, but that is unnecessary for this algorithm.
 <!-- We also define a projection function, which will be useful in the next step. -->
 
 Listing: Fit a plane to the base atoms using SVD (credit <https://math.stackexchange.com/q/99317>) {#lst:code-calc-base-plane-fit}
@@ -67,8 +67,8 @@ def fit_plane(res: Residue):
 #     tpoint = point - origin
 #     return tpoint @ projection_matrix + origin-->
 
-[The listing @lst:code-calc-bond-to-plane] shows that we can now calculate the dot product of the H-bond vector and the plane normal, getting the cosine of their angle.
-The angle to the plane is the same as the angle to the normal, except shifted from the $[0°, 180°]$ range to $[-90°, 90°]$; in other words, $\mathrm{sin}^{-1} (<h_D - h_A,n>)$ of the dot product, instead of $\mathrm{cos}^{-1}$.
+[Listing @lst:code-calc-bond-to-plane] shows that we can now calculate the dot product of the H-bond vector and the plane normal, getting the cosine of their angle.
+The angle to the plane is the same as the angle to the normal, except shifted from the $[0°, 180°]$ range to $[-90°, 90°]$; in other words, $\mathrm{sin}^{-1} (<h_D - h_A,n>)$, instead of $\mathrm{cos}^{-1}$.
 
 Listing: H-bond to plane angle calculation {#lst:code-calc-bond-to-plane}
 
@@ -83,7 +83,7 @@ def hbond_plane_angle(plane_normal, res1: Residue, res2: Residue, hbond):
 ### Plane to plane comparison
 
 In this block, we calculate the overall **Coplanarity angle**, and the **Edge to plane distance** with the **Edge to plane angle**.
-The **Coplanarity angle** is a trivial dot product, and the **Edge to plane angle** is calculated similarly to the **H-Bond to plane angle** above --
+The **Coplanarity angle** is a trivial dot product of the normals, and the **Edge to plane angle** is calculated similarly to the **H-Bond to plane angle** above --
 instead of the hydrogen bond atoms, we take the first and last atom of the edge.
 The code in @lst:code-calc-edge-to-plane assumes that the `edge1` list contains the pairing edge atom coordinates of the first residue.
 

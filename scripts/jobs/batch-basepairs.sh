@@ -25,7 +25,7 @@ py="$SCRATCH/basepairs-venv/bin/python"
 cd /storage/praha1/home/exyi/basepairs-git/pairclusters
 
 if [ -z "$BASEPAIRS_PAIR_TYPE" ]; then
-    BASEPAIRS_PAIR_TYPE="cWW,tWW,cWH,tWH,cWS,tWS,cHH,tHH,cHS,tHS,cSS,tSS"
+    BASEPAIRS_PAIR_TYPE="all"
 fi
 
 if [ -z "$BASEPAIRS_PARTITION" ]; then

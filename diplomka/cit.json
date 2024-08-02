@@ -34,6 +34,20 @@
         "journal": null,
         "id": "IM"
     },
+    "https://ninja-build.org": {
+        "doi": null,
+        "published_date_parts": [ 2024, 4, 11 ],
+        "title": "Ninja 1.12 — a small build system with a focus on speed",
+        "authors": [
+            [ "Evan", "Martin" ],
+            [ "Nico", "Weber" ],
+            [ "Jan Niklas", "Hasse" ],
+            [ "Scott", "Graham" ],
+            [ "other contributors", "" ]
+        ],
+        "journal": null,
+        "id": "NNJ"
+    },
     "https://math.stackexchange.com/q/99317": {
         "doi": null,
         "published_date_parts": [ 2012, 1, 15 ],

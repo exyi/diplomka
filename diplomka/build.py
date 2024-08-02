@@ -190,6 +190,9 @@ def convert_links(citations: dict[str, CitationInfo]):
                 # print(f"External link: {url} -> {content_text} ({repr(content)})")
                 if 'link-no-footnote' in attr[1]:
                     return # skip css class
+                if url == content_text:
+                    # skip if the link text is the same as the URL
+                    return
                 if url.lower() == (f"https://www.rcsb.org/structure/" + content_text).lower():
                     # skip PDB links, it is obvious
                     return
@@ -503,7 +506,7 @@ def pandoc_parse(input_dir, output_dir):
         if file in ['metadata.yaml']:
             continue
         elif file.endswith(".md"):
-            format = "markdown+smart+gfm_auto_identifiers+superscript+subscript+inline_code_attributes+link_attributes+emoji"
+            format = "markdown+fancy_lists+smart+gfm_auto_identifiers+superscript+subscript+inline_code_attributes+link_attributes+emoji"
         elif file.endswith(".html"):
             format = "html"
         else:

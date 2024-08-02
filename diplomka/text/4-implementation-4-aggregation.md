@@ -1,12 +1,12 @@
-## Data Aggregation Scripts — `pair_distributions.py`
+## Data Aggregation Scripts
 
-The `pair_distributions.py` has multiple, but relatively simple jobs.
+The `pair_distributions.py` script has multiple, but relatively simple jobs.
 First, it calculates the KDE densities for a given table of all pairs.
 It then generates a PDF file with histograms or KDE densitygrams of selected parameters for each class.
-Since we always wanted a different set of parameters in a different layout, the parameter selection is not exposed as a command line option and is instead configured in the source code.
+Since we always wanted a different set of parameters in a different layout, the parameter selection is not exposed as a command line option and is instead _configured_ in the source code.
 The attached version of the script includes histograms for almost all parameters.
 Additionally, it can generate overview 2D KDE pairplots, but the code is commented out in the attachment due to its heavy impact on runtime.
-To quickly introduce each basepair class, the script finds the basepair closest to ideal (@sec:opt-params-exemplar) and renders its image (@sec:impl-basepair-img).
+To quickly introduce each basepair class, the script finds the basepair closest to the ideal (@sec:opt-params-exemplar) and renders its image (@sec:impl-basepair-img).
 
 We also need to run this script to prepare the Parquet files for the web application, as it completes the tables with the `mode_deviations` and `kde_likelihood` columns.
 This feature must be enabled with the `--reexport=partitioned` option, as calculating the KDE likelihood for each datapoint is rather time intensive and would unnecessarily slow down rendering of the histograms.
