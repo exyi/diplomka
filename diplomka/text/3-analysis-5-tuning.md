@@ -21,16 +21,16 @@ Also note that the application is rather gluttonous when it comes to network ban
 Upon first visit, we are greeted with a home page listing all basepair classes in a table format, reminiscent of <https://doi.org/10.1093/nar/gkf481>.
 We are expected to select a class of interest, either by clicking a cell in the table, or using the menu at the top of the screen.
 
-When viewing a specific class, we should select the desired "**Data Source**" -- let us select "**FR3D -- Reference Set**" for this demonstration.
+When viewing a specific class, we should select the desired "**Data Source**" --- let us select "**FR3D --- Reference Set**" for this demonstration.
 As shown in @fig:screenshot-app-fr3dpairs, this displays images of all basepairs of the selected class which were reported by FR3D on the Reference Set (@sec:filter).
 If we are looking for the most typical cases, we should switch "**Order by**" to the "**Smallest Edge RMSD**".
 The edge RMSD is the distance to the most typical basepairs (@sec:opt-params-exemplar), computed as the mean distance of edge (@sec:bp-terminology-lw) atoms, when aligned on all atoms of the second nucleobase.
 
-![The web application showing **tWH A-A** basepairs identified by FR3D on the reference set. The menu on top allows us to switch the class, data source and ordering. https://basepairs.datmos.org/#tWS-A-A/ds=fr3d-f](../img/screenshot-app-fr3dpairs.png){#fig:screenshot-app-fr3dpairs}
+![[The web application showing **tWH A-A** basepairs](https://basepairs.datmos.org/#tWS-A-A/ds=fr3d-f) identified by FR3D on the reference set. The menu on top allows us to switch the class, data source and ordering.](../img/screenshot-app-fr3dpairs.png){#fig:screenshot-app-fr3dpairs}
 
 ![The detailed information about a given basepair instance includes two images rotated along the X axis to quickly see the planarity, information about the source structure, instruction to display it interactively in PyMOL and below the screenshot is a table of all calculated parameters.](../img/screenshot-app-modal-fr3dpair.png){#fig:screenshot-app-modal-fr3dpair}
 
-If the reference set is too small, we have the option to select "FR3D -- Entire PDB".
+If the reference set is too small, we have the option to select "FR3D --- Entire PDB".
 However, since the basepair images need to be pre-generated, the application will now mostly show white squares in their place.
 Regardless, we can click on any basepair to display detailed description, first part of which is shown in @fig:screenshot-app-modal-fr3dpair.
 
@@ -58,7 +58,7 @@ The final results will likely be different from the ones presented here.
 ### Filtering basepairs
 
 To examine the behavior of the parameters from @sec:basepair-params, we can switch from **Basic** to **Parameter Ranges**, and try filtering out basepairs with certain parameter values.
-A frequent request is to see whether we should include basepairs with overly stretched H-bonds -- given that such an interaction typically exhibits [minimal energies at 4.0 Å](https://archive.org/details/introductiontohy0000jeff):
+A frequent request is to see whether we should include basepairs with overly stretched H-bonds --- given that such an interaction typically exhibits [minimal energies at 4.0 Å](https://archive.org/details/introductiontohy0000jeff):
 
 Firstly, the website remembers its state when navigating to another basepair class (selected data source, filters, comparison are kept), but the state can be reset at any time by clicking the **Home** button in the top menu.
 We can select any populated class of basepairs, and switch to **Parameter Ranges**, prompting the display of several numeric input fields.
@@ -68,7 +68,7 @@ To find the _bad_ examples, we set the minimum to 3.6 Å, a threshold for instan
 Typically, only a small fraction of basepairs have all H-bonds >= 3.6 Å, but in @fig:screenshot-app-hb-filters we received three cases in the reference set for the **tWW A-A** class.
 Upon inspection, two of these look arguably borderline, while one case is surprisingly well-structured.
 
-![By applying a 3.6 Å lower bound to H-bond length, we select only the basepairs with overstretched H-bonds. https://basepairs.datmos.org/#tWW-A-A/ds=fr3d-f&hb0_L=3.6..&hb1_L=3.6..](../img/screenshot-app-hb-filters.png){#fig:screenshot-app-hb-filters}
+![[By applying a 3.6 Å lower bound to H-bond length, we select only the basepairs with overstretched H-bonds](https://basepairs.datmos.org/#tWW-A-A/ds=fr3d-f&hb0_L=3.6..&hb1_L=3.6..)](../img/screenshot-app-hb-filters.png){#fig:screenshot-app-hb-filters}
 
 ### Editing the criteria
 

@@ -10,20 +10,20 @@ For better clarity, we will use the following conventions, unless noted otherwis
 
 ## List of abbreviations {.unnumbered}
 
-* **TODO** — means that the part of the work is incomplete
-* **API** - Application Programming Interface (an interface of a software library)
-* **CIF** / **mmCIF** - \[**m**acro**m**olecular\] Crystallographic Information File (standard file format for molecular structures)
-* **PDB** - Protein DataBank (structural biology database; includes nucleic acids, despite the name)
-* **RMSD** - Root Mean Squared Deviation (structure similarity metric)
-* **CSV** - Comma Separated Values (tabular text-based file format)
-* **JSON** - JavaScript Object Notation (hierarchical text-based file format)
-* **KDE** - Kernel Density Estimate (non-parametric probability density estimator)
-* **L-W** - Leontis-Westhof naming system (explained in @sec:bp-terminology-lw)
-* **NAKB** - Nucleic Acid Knowledge Base
-* **SVD** - Singular Value Decomposition
-* **PCA** - Principal Component Analysis
-* **FR3D** - "Find RNA 3D" (nucleic acid analysis program, see @sec:software-FR3D)
-* **DDSR** - "Dissecting the Spatial Structure of RNA" (nucleic acid analysis program, see @sec:software-DSSR)
+* **TODO** --- means that the part of the work is incomplete
+* **API** --- Application Programming Interface (an interface of a software library)
+* **CIF** / **mmCIF** --- \[**m**acro**m**olecular\] Crystallographic Information File (standard file format for molecular structures)
+* **PDB** --- Protein DataBank (structural biology database; includes nucleic acids, despite the name)
+* **RMSD** --- Root Mean Squared Deviation (structure similarity metric)
+* **CSV** --- Comma Separated Values (tabular text-based file format)
+* **JSON** --- JavaScript Object Notation (hierarchical text-based file format)
+* **KDE** --- Kernel Density Estimate (non-parametric probability density estimator)
+* **L-W** --- Leontis-Westhof naming system (explained in @sec:bp-terminology-lw)
+* **NAKB** --- Nucleic Acid Knowledge Base
+* **SVD** --- Singular Value Decomposition
+* **PCA** --- Principal Component Analysis
+* **FR3D** --- "Find RNA 3D" (nucleic acid analysis program, see @sec:software-FR3D)
+* **DDSR** --- "Dissecting the Spatial Structure of RNA" (nucleic acid analysis program, see @sec:software-DSSR)
 
 **cWW**, **tWW**, **cWH**, **tWH**, **cWS**, **tWS**, **cHH**, **tHH**, **cHS**, **tHS**, **cSS**, **tSS** are abbreviated basepair families according to the Leontis-Westhof terminology. See @sec:bp-terminology-lw or <https://doi.org/10.1017/s1355838201002515> for explanation.
 
@@ -32,7 +32,7 @@ Very common abbreviations such as DNA are omitted for brevity.
 ## Single letter abbreviations {.unnumbered}
 
 Single letters are special category because of their ambiguity.
-In this work, we use the letters **A**, **T**, **U**, **G**, **C** as the DNA and RNA bases -- adenine, thymine, uracil, guanine, and cytosine.
+In this work, we use the letters **A**, **T**, **U**, **G**, **C** as the DNA and RNA bases --- adenine, thymine, uracil, guanine, and cytosine.
 The letters **N**, **O**, **P**, **C**, **H** represent atom names.
 **X**, **Y**, **Z** are the axes in three-dimensional space.
 

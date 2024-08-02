@@ -28,7 +28,7 @@ The density estimate requires a bandwidth parameter which has a large impact on 
 The bandwidth is conceptually similar to a bin width in a histogram; the KDE can be thought of as a histogram constructed from Gaussian curves instead of rectangles.
 
 Several automatic bandwidth determination methods exist, and we will use the Scott's formula [recommended in `scipy` documentation](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.gaussian_kde.html), which depends on the number of samples and on the variance of the provided datapoints.
-Optionally, we can specify an adjustment factor of the computed value -- for instance, making the bandwidth 1.5-times larger than the Scott's formula result.
+Optionally, we can specify an adjustment factor of the computed value --- for instance, making the bandwidth 1.5-times larger than the Scott's formula result.
 
 <!--
 Since we might want to compare several programs and experiment with changing the threshold, the resilience to outliers of the KDE mode is very useful.

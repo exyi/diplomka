@@ -75,7 +75,7 @@ In short, they consider three basic rules:
 
 However, RNAView unfortunately does not perform that well in practice; although we find it inspiring that such simplicity is feasible.
 While the algorithm may at first feel to be quite lax, RNAView has more problems identifying good basepairs than misidentifying bad ones.
-For instance, in the **tHS A-C** class, RNAView frequently misidentifies pairs as another family or misses them entirely -- we can see that [on BGSU experimental annotation comparison](http://rna.bgsu.edu/experiments/annotations/compare_v7_tHS_A,C_3.0A.html).
+For instance, in the **tHS A-C** class, RNAView frequently misidentifies pairs as another family or misses them entirely --- we can see that [on BGSU experimental annotation comparison](http://rna.bgsu.edu/experiments/annotations/compare_v7_tHS_A,C_3.0A.html).
 
 ![A clear trans Hoogsteen/Sugar A-C basepair as trans Watson/Sugar basepair misidentified by RNAView. The mistake is very understandable, as the adenine is bound exclusively through the N6 atom, which is part of both Hoogsteen and Watson-Crick edges. See @sec:basepair-params-ypr for more discussion regarding this issue.](../img/rnaView-tHS-AC-misidentified.png){#fig:rnaView-tHS-AC-misidentified .img-width75}
 

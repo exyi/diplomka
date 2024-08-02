@@ -9,7 +9,7 @@ Since we calculate the list of pairs using the fr3d-python package, the input fo
 For each mmCIF file, FR3D generates a `PDBID_basepair.txt` or a `PDBID_basepair_detailed.txt` file.
 The text file contains a line for each determined basepair, formatted as "**UnitID** tab **Family** tab **UnitID**".
 
-The UnitID is a unique identifier for nucleotides and other residues -- it is a structure PDB ID, Model Number, Chain ID, Nucleotide Number, and optionally Atom Name (not used in FR3D), Alternate ID, Insertion ID, and Symmetry Operation.
+The UnitID is a unique identifier for nucleotides and other residues --- it is a structure PDB ID, Model Number, Chain ID, Nucleotide Number, and optionally Atom Name (not used in FR3D), Alternate ID, Insertion ID, and Symmetry Operation.
 The components are separated by a vertical bar character (`|`).
 [Detailed definition is at BGSU website](https://www.bgsu.edu/research/rna/help/rna-3d-hub-help/unit-ids.html)
 
@@ -26,7 +26,7 @@ The script loads all PDB structures from the input table using the [BioPython li
     * Distance between heavy atoms of defined H-bonds
     * Donor and acceptor angles
     * The coplanarity metrics (distances and angles between base planes)
-    * Relative base orientation - the yaw, pitch, and roll angles and also the relative translation
+    * Relative base orientation --- the yaw, pitch, and roll angles and also the relative translation
 * An `is_dinucleotide` column indicating if the basepair is a di-nucleotide (i.e., are covalently bonded through the phosphodiester bonds)
 * An `is_parallel` column indicating if the pair is part of a parallel or an antiparallel chain.
 * Structure Name (`structure_name`), Determination Method (`structure_method`), Structure Deposition Date (`deposition_date`), and Resolution (`resolution`) metadata columns.
@@ -68,7 +68,7 @@ We use the [Polars DataFrame library](https://doi.org/10.5281/zenodo.7697217) in
 
 ### Deduplication
 
-FR3D reports each pair twice, in both orientations -- if a **cWH G-C** pair is reported, a corresponding **cHW C-G** pair is also reported.
+FR3D reports each pair twice, in both orientations --- if a **cWH G-C** pair is reported, a corresponding **cHW C-G** pair is also reported.
 To avoid redundancy, we deduplicate the pair using the following rules:
 
 1. If the pair family is asymmetric, we keep the variant shown in <https://doi.org/10.1093/nar/gkf481>.
@@ -87,7 +87,7 @@ Asymmetric unit, the smallest part of the crystal [from which the whole crystal 
 As an example, double-helical DNA or RNA of a palindromic sequence can have only one nucleotide strand in the asymmetric unit while the biologically relevant structure is the duplex.
 Because PDB files contain coordinates only for one asymmetric unit we have to consider the possibility for the basepair assignment across the symmetry operation as two bases forming the pair can be symmetry-related. 
 
-![The asymmetric unit of [`6ros`](https://www.rcsb.org/structure/6ROS) structure is formed by a single strand, but the **biological assembly** is a duplex. The mmCIF file contains the coordinates of only one strand, and the second one is its symmetric copy. All basepairs are formed between the two strands.](../img/6ros-symmetry-illustration.png)
+![The asymmetric unit of [`6ros`](https://www.rcsb.org/structure/6ROS) structure is formed by a single strand, but the **biological assembly** is a duplex. The mmCIF file contains the coordinates of only one strand, and the second one is its symmetric copy. All basepairs are formed between the two strands.](../img/6ros-symmetry-illustration.png){#fig:6ros-symmetry-illustration}
 
 PDBx/mmCIF files include the information to complete the biological unit as [a rotation matrix and a translation vector in the `pdbx_struct_oper_list` mmCIF category](https://mmcif.wwpdb.org/dictionaries/mmcif_pdbx_v50.dic/Categories/pdbx_struct_oper_list.html).
 This category may contain any number of transformations, labeled by the [PDB symmetry operation code](http://www.bmsc.washington.edu/CrystaLinks/man/pdb/part_74.html).
@@ -118,7 +118,7 @@ _pdbx_struct_oper_list.vector[3]
 ``` -->
 
 Technically, the implementation is still slightly tricky because we are aware of **BioPython** API to access the `pdbx_struct_oper_list` category.
-Another Python library -- [**Gemmi**](https://doi.org/10.21105/joss.04200), has a very good support for crystallographic symmetry.
+Another Python library --- [**Gemmi**](https://doi.org/10.21105/joss.04200), has a very good support for crystallographic symmetry.
 It, however, exposes the information in terms of space groups, instead of the PDB symmetry operation codes.
 Since **FR3D** uses the PDB codes in its output, we need to use these to map the basepairs into atomic coordinates.
 Therefore, we utilize the [**mmcif**](https://github.com/rcsb/py-mmcif) library to get this information.

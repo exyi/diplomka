@@ -166,7 +166,7 @@ fetch 6ros
 split_states %6ros
 ```
 
-This gives us three objects -- `6ros`, `6ros_0001`, and `6ros_0002`.
+This gives us three objects --- `6ros`, `6ros_0001`, and `6ros_0002`.
 We delete the original object (`6ros`), use `6ros_0002` if any symmetry operation is specified for the nucleotide, and `6ros_0001` otherwise.
 We are not aware of a way to map the new objects onto the PDB symmetry codes, although it can be presumed that PyMOL keeps the ordering of the source mmCIF file.
 Fortunately, this is rarely an issue, since only a few nucleic acid structures have more than two repetitions in the assembly and the order does not matter if we have only two states.
@@ -175,4 +175,4 @@ Fortunately, this is rarely an issue, since only a few nucleic acid structures h
 
 Some structures, like [`4Lnt`](https://www.rcsb.org/structure/4Lnt) have multiple biological assemblies.
 If the `assembly` option is non-empty, only one of the assemblies is loaded into PyMOL.
-Since we usually do not know which assembly a given basepair originates from, we only set `assembly=1` when necessary -- when a basepair with symmetry operation exists.
+Since we usually do not know which assembly a given basepair originates from, we only set `assembly=1` when necessary --- when a basepair with symmetry operation exists.

@@ -14,7 +14,7 @@ Below I list the contributions of other members of our group:
 * The basepair selection criteria were checked and adjusted by Lada Biedermannová.
 * We devised the new basepair parameters in brainstorming sessions with Jiří, Bohdan and Lada and were vetted by the entire group.
 * Valuable feedback provided by all members of the working group has had a noticeable impact on my work, mainly on the basepair parameters and the web application.
-* The work described in [sec. Conclusions -- Ongoing Work @sec:concl-future] is primarily being performed by others while I am writing this text.
+* The work described in [sec. Conclusions --- Ongoing Work @sec:concl-future] is primarily being performed by others while I am writing this text.
 
 The working group is coordinated by B. Schneider, and the other active members are H. M. Berman, L. Biedermannová, J. Černý, R. Joosten, M. Magnus, E. Westhof, and C. Zirbel.
 

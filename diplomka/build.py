@@ -411,7 +411,9 @@ def convert_pdfa(infile, outfile):
         "-dColorImageDownsampleType=/Bicubic",
         # "-dFastWebView=true", # first page is loaded faster maybe?
         # "-sColorConversionStrategy=UseDeviceIndependentColor",
+        "-dJPEGQ=100",
         "-sColorConversionStrategy=RGB",
+        # "-pPassThroughJPEGImages=true",
         "-sProcessColorModel=DeviceRGB",
         "-sDEVICE=pdfwrite",
         "-dPDFACompatibilityPolicy=2", # error when incompatible

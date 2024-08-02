@@ -3,7 +3,7 @@
 ### Symmetry of L-W classes
 
 As presented in the previous section, the L-W system theoretically distinguishes 156 distinct classes of basepairs, when treating uracil as equivalent to thymine.
-On each side of the pair, there are three options for the edge and four options for the nucleotide, resulting in a total of twelve unique combinations -- the L-W families.
+On each side of the pair, there are three options for the edge and four options for the nucleotide, resulting in a total of twelve unique combinations --- the L-W families.
 
 We can create a $12 \times 12$ matrix of base-edge combinations.
 Assuming symmetry between pairs, such as **cWH A-G** being equivalent to its flipped counterpart **cHW G-A**, we count the number of elements in the lower triangular matrix, ignoring all entries above the diagonal.
@@ -52,7 +52,7 @@ $$2 \cdot \left( 16 \cdot 3 + 10 \cdot 3 \right) = 156$$ -->
 
 ### Sugar-Sugar symmetry
 
-![The C-A pair is different from A-C -- it is shifted by ~3 Å horizontally, resulting in a different set of H-bonds <https://doi.org/10.1093/nar/gkf481>](../img/cSS-CA-vs-AC.png){#fig:cSS-CA-vs-AC}
+![The C-A pair is different from A-C --- it is shifted by ~3 Å horizontally, resulting in a different set of H-bonds <https://doi.org/10.1093/nar/gkf481>](../img/cSS-CA-vs-AC.png){#fig:cSS-CA-vs-AC}
 
 Unfortunately, the assumption of symmetry we made earlier is generally invalid, as Sugar/Sugar pairs are actually defined asymmetrically — for instance, **cSS A-C** is not a flipped version of **cSS C-A** (@fig:cSS-CA-vs-AC).
 [Leontis and Westhof](https://doi.org/10.1017/s1355838201002515) only define **cis** Sugar/Sugar as non-symmetric, while **trans** Sugar/Sugar should be symmetric:
@@ -61,7 +61,7 @@ Unfortunately, the assumption of symmetry we made earlier is generally invalid, 
 > **The cis Sugar-edge/Sugar-edge geometry (…), however, is not symmetric.**
 > To illustrate this point, two different A-G cis Sugar-edge/Sugar-edge pairs are shown in Figure 7. [note: we show A-C in @fig:cSS-CA-vs-AC]
 
-In spite of that, the tables of examples in [their 2002 publication](https://doi.org/10.1093/nar/gkf481) do not treat Sugar/Sugar symmetrically either -- see @fig:tSS-CA-vs-AC.
+In spite of that, the tables of examples in [their 2002 publication](https://doi.org/10.1093/nar/gkf481) do not treat Sugar/Sugar symmetrically either --- see @fig:tSS-CA-vs-AC.
 However, only the **tSS A-G** and **tSS G-A** classes are defined in such _conflict_, and they differ only slightly.
 
 ![In trans Sugar/Sugar, C-A is defined while A-C is left undefined. In contrast, in W/W and H/H the C-A and A-C show the same pair (turned upside down)](../img/tSS-CA-vs-AC.png){#fig:tSS-CA-vs-AC}

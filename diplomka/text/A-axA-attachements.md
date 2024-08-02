@@ -34,9 +34,9 @@ The application can be started in development mode using `npm run dev` or compil
 
 ## Pre-built web application
 
-The web application described in @sec:tuning-app is a static website and a limited version is part of the attachment in the `webapp-build/` directory.
-The application includes pre-computed Parquet data files for the reference set.
-Images of basepairs and the data files for the entire PDB are omitted to keep the attachment size reasonable.
+The web application described in @sec:tuning-app is a static website and a limited version is attached in the `webapp-build/` directory.
+The application includes pre-computed Parquet data files for the reference set, while the rendered basepair images and the data files for the entire PDB are omitted to keep the attachment size reasonable.
+
 
 To display the website, it is necessary to start a web server in the directory --- simply opening the index.html file will not work due to security restrictions.
 The simplest option is probably to use the Python built-in module: `python -m http.server 12345`, and navigate to http://localhost:12345

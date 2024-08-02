@@ -68,7 +68,7 @@ As shown [in figure @fig:cWW-GC-length-and-covalent-angles], an ideal **cWW G-C*
 We must allow some deviations, as in reality, no ideal pair exists, and 0.5 Å and 20° tolerance is very conservative.
 Yet, we still find false positives like the one shown in @fig:cWW-GC-false-positive-hbond-lengthsangles.
 Tightening the limits slightly would dismiss this example, but we are hitting the other limit of this simple approach as we are already losing many good pairs, as we can see using the
-[basepairs.datmos.org](https://basepairs.datmos.org/#cWW-G-C/hb0_L=..3.4&hb0_DA=100..140&hb0_AA=100..140&hb1_L=..3.4&hb1_DA=100..140&hb1_AA=100..140&hb2_L=..3.4&hb2_DA=100..140&hb2_AA=100..140&baseline_ds=fr3d-f) web application.
+[basepairs.datmos.org](https://basepairs.datmos.org/#short/s9pvei) web application.
 
 
 ![A canonical **cWW G-C** basepair (3cpw A1103:A1240). The distance between O2 and N2 is indicated together with the donor and acceptor angles of the other four involved atoms. Note that the hydrogens are not considered in the calculation, they were added in PyMOL to easily recognize donors and acceptors.](../img/cWW-GC-length-and-covalent-angles.png){#fig:cWW-GC-length-and-covalent-angles}
@@ -129,7 +129,7 @@ show sticks, %pair
 orient %pair
 hide everything, not %pair-->
 
-![**Edge to plane distance** shown on another **tHW A-C** basepair (4dv6 A1200:A1055). Parts A and B show the two possible orientations of the same basepair -- in this case, we observe substantial difference between the distance of right edge to left plane (part A, about 0 Å), and the distance from left edge to right plane (part B, over 1 Å).](../img/metrics-edge2plane-distance-4dv6-1-A_1200-A_1055.svg){#fig:metrics-edge2plane-distance-4dv6-1-A_1200-A_1055}
+![**Edge to plane distance** shown on another **tHW A-C** basepair (4dv6 A1200:A1055). Parts A and B show the two possible orientations of the same basepair --- in this case, we observe substantial difference between the distance of right edge to left plane (part A, about 0 Å), and the distance from left edge to right plane (part B, over 1 Å).](../img/metrics-edge2plane-distance-4dv6-1-A_1200-A_1055.svg){#fig:metrics-edge2plane-distance-4dv6-1-A_1200-A_1055}
 
 
 The above-defined parameters work well on most basepair classes.
@@ -145,7 +145,7 @@ We would like to encourage the readers to [judge for themselves in the basepairs
 
 The remaining weak point of our parameter set is the assignment of basepair classes defined by only a single hydrogen bond.
 Such a basepair is free to rotate by 180 degrees around the H-bonded atoms, remaining planar, but at the same time changing the Leontis-Westhof class. 
-An example of this issue is shown in figure @fig:metrics-ypr-necessity-tHH-GG-misassignment, and the [web application demonstrates this issue interactively](https://basepairs.datmos.org/#tHH-A-G/hb0_L=..4&hb0_DA=100..150&hb0_AA=100..165&hb0_OOPA1=-25..35&hb0_OOPA2=-10..35&min_bond_length=..3.8&coplanarity_a=..40&coplanarity_edge_angle1=-10..25&coplanarity_edge_angle2=-10..30&coplanarity_shift1=-0.2..1.5&coplanarity_shift2=-0.3..1.3&baseline_ds=fr3d-f).
+An example of this issue is shown in figure @fig:metrics-ypr-necessity-tHH-GG-misassignment, and the [web application demonstrates this issue interactively](https://basepairs.datmos.org/#short/eris40).
 
 ![**A.** An example of a correctly assigned **tHH A-G** basepair (3cd6 913:1071 in chain 0). **B.** The **tHH A-G** candidates also include a clear Watson-Crick/Hoogsteen basepair (7osm 407:390 in chain 18S). The coplanarity is perfect and the N6 ··· O6 H-bond cannot distinguish it either, as both of these two classes define it.](../img/metrics-ypr-necessity-tHH-GG-misassignment.svg){#fig:metrics-ypr-necessity-tHH-GG-misassignment}
 
@@ -183,10 +183,10 @@ In our case, "the aircraft", i.e. the base, is pointing from the glycosidic bond
 
 For clarity, this is the list of all parameters we defined above:
 
-* **"H-bond length"** -- The distance between heavy atoms of each H-bond.
-* **"H-bond acceptor/donor angle"** -- The angle H-bond acceptor, donor a third atom on each base.
-* **"H-bond to plane angle"** -- The angles between the H-bond and each base plane.
-* **"Coplanarity angle"** -- The angle between base planes.
-* **"Edge to plane angle"** -- The angles between each base plane and the other base interacting edge.
-* **"Edge to plane distance"** -- The shortest distances between each base plane and an atom of the other base interacting edge.
-* **"Yaw, Pitch, Roll angles"** -- The 3D rotation between the bases, rooted in the glycosidic bond.
+* **"H-bond length"** --- The distance between heavy atoms of each H-bond.
+* **"H-bond acceptor/donor angle"** --- The angle H-bond acceptor, donor a third atom on each base.
+* **"H-bond to plane angle"** --- The angles between the H-bond and each base plane.
+* **"Coplanarity angle"** --- The angle between base planes.
+* **"Edge to plane angle"** --- The angles between each base plane and the other base interacting edge.
+* **"Edge to plane distance"** --- The shortest distances between each base plane and an atom of the other base interacting edge.
+* **"Yaw, Pitch, Roll angles"** --- The 3D rotation between the bases, rooted in the glycosidic bond.

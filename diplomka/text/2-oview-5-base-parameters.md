@@ -14,7 +14,7 @@ The rest of the publication backs the premise, and we agree that it is the case 
 ### The standard reference frame
 
 [A standard reference frame was defined as the “Tsukuba convention”](https://doi.org/10.1006/jmbi.2001.4987), a few years after the <https://doi.org/10.1006/jmbi.1998.2390> publication.
-The reference frame essentially defines a coordinate system for each of the five common nucleotides -- the Tsukuba convention includes a table of coordinates for each heavy atom in each base.
+The reference frame essentially defines a coordinate system for each of the five common nucleotides --- the Tsukuba convention includes a table of coordinates for each heavy atom in each base.
 <!-- We can fit the reference frame onto an observed molecule using the [Kabsch algorithm](https://doi.org/10.1107/S0567739476001873), which gives us the translation and rotation between the two molecules. -->
 The reference frame **X** axis is defined to be parallel with the Watson-Crick edge, **Y** axis run alongside the rest of the base.
 Since all bases are planar under ideal conditions, this enables us to have the **Z** nearly equal to **0**.
@@ -25,7 +25,7 @@ Without the **Y**-flip, all bases overlap in the same region, with the glycosidi
 
 ![Guanine reference frame and uracil (or thymine) frame with negated Y coordinates form a “perfect” GC canonical pair. The small cross shows the origin **(0, 0, 0)**.](../img/reference-frame-GC-pair.png){#fig:reference-frame-GC-pair .img-width50}
 
-This property allows us to easily judge an observed basepair by comparing the position and orientation of their reference frame -- comparing the coordinates of frame origins and the vectors of the X, Y, Z axes.
+This property allows us to easily judge an observed basepair by comparing the position and orientation of their reference frame --- comparing the coordinates of frame origins and the vectors of the X, Y, Z axes.
 The DSSR papers <https://doi.org/10.1093/nar/gkg680> and <https://doi.org/10.1038/nprot.2008.104> do not contain details on the parameters calculation, but [the DSSR webpage shows quite detailed description in a blog post](https://x3dna.org/highlights/details-on-the-simple-base-pair-parameters).
 As x3dna.org post shows, we get the translational parameters from projecting one origin into the other reference frame coordinate system.
 **Shear** is the **X** coordinate, **Stretch** is **Y**, **stagger** is **Z**.
@@ -41,7 +41,7 @@ When the standard reference frame is applied to all types of basepairs, the mean
 The values can still be useful, but we need to be cautious in their intuitive interpretation.
 As an example, @fig:1ehz-A8-A14-dssrexample-reframe-fit shows a nearly perfect trans Hoogsteen/Watson-Crick basepair from the [1ehz](https://www.rcsb.org/structure/1EHZ) structure.
 In the figure below, we can see that Watson-Crick edges of the two
-nucleotides are at an angle slightly below 90° -- implying that the **opening** should be above 90°.
+nucleotides are at an angle slightly below 90° --- implying that the **opening** should be above 90°.
 Indeed, DSSR reports an **opening** of 103°.
 
 Normally, **stretch** of **-1.9 Å** would mean that the bases clash with each other.
@@ -77,7 +77,7 @@ Since these pairs are approximately rotated **90°**, **propeller** and **buckle
 Notably, this example demonstrates that the base parameters, as calculated by DSSR, are not symmetric when pushed to such extremes.
 We are always using one reference frame as the coordinate system for the other, which can lead to issues if the coordinate systems have a significant relative rotation.
 In this instance, the adenine origin is examined relative to the uracil reference frame.
-If it was inverted, we would observe a positive **stretch** -- the adenine origin has a positive Y coordinate in the uracil reference frame as shown in @fig:1ehz-A8-A14-dssrexample-translation-measure-comparison.
+If it was inverted, we would observe a positive **stretch** --- the adenine origin has a positive Y coordinate in the uracil reference frame as shown in @fig:1ehz-A8-A14-dssrexample-translation-measure-comparison.
 It could be interesting to observe how DSSR decides which nucleotide is used as the primary reference frame in each basepair.
 
 <!-- 
@@ -88,8 +88,8 @@ It could also knowbe easily remedied by averaging the two possible results, or d
 We do not  exactly how DSSR handles this problem, but Curves+ claims to take the average. -->
 
 
-![A) Adenine origin (green) position in the uracil reference frame (brown) - **x = shear ≈ -4.1 Å**, and **y = stretch ≈ -1.9 Å**. B) Uracil origin position in adenine reference frame - **x = shear ≈ 1 Å**, and **y = stretch ≈ 4.4 Å**. Shown on the basepair from @fig:1ehz-A8-A14-dssrexample-reframe-fit](../img/1ehz-A8-A14-dssrexample-translation-measure-comparison.svg){#fig:1ehz-A8-A14-dssrexample-translation-measure-comparison}
+![A) Adenine origin (green) position in the uracil reference frame (brown) --- **x = shear ≈ -4.1 Å**, and **y = stretch ≈ -1.9 Å**. B) Uracil origin position in adenine reference frame --- **x = shear ≈ 1 Å**, and **y = stretch ≈ 4.4 Å**. Shown on the basepair from @fig:1ehz-A8-A14-dssrexample-reframe-fit](../img/1ehz-A8-A14-dssrexample-translation-measure-comparison.svg){#fig:1ehz-A8-A14-dssrexample-translation-measure-comparison}
 
 On the other hand, the [Curves+ paper](https://doi.org/10.1093/nar/gkp608) explicitly addresses the issue of symmetry, Lavery et al. write: "To do this as symmetrically as possible, we choose an average frame that is obtained by rotation and translation of the first base reference system but now through the half angle $θ_A/2$, about the same axis vector $U_A$, and with the half translation $λ_A/2$".
-This exact approach will cause other issues if applied to non-canonical basepairs -- notably we would see the "average reference frame" being perpendicular to the basepair plane if one of the pairs is rotated 180° around the Y axis, such as in trans Watson-Crick basepairs.
+This exact approach will cause other issues if applied to non-canonical basepairs --- notably we would see the "average reference frame" being perpendicular to the basepair plane if one of the pairs is rotated 180° around the Y axis, such as in trans Watson-Crick basepairs.
 In this case, **opening** and **buckle** would have interchanged meaning.

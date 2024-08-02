@@ -26,7 +26,7 @@ Rule A assumes that the alternative residues are distinct — the alternative po
 However, Rule B allows multiple alternatives of a single residue on each edge, effectively treating the alternatives as a single entity.
 
 To enforce the rule in the least disruptive way, we want to keep the _“best”_ subset of pairs and to remove as little as possible.
-To quantify that, we need a rudimentary scoring function for basepairs -- which we calculate as the sum of both edge-to-plane distances and the H-bond lengths.
+To quantify that, we need a rudimentary scoring function for basepairs --- which we calculate as the sum of both edge-to-plane distances and the H-bond lengths.
 Fortunately, this step is not crucial for decent results, and we can afford to simplify it at the cost of being fine-grained.
 To avoid giving an unfair advantage to basepairs with a lower number of defined H-bonds, the undefined lengths are filled with value **4.0**, which is usually the H-bond length upper limit.
 

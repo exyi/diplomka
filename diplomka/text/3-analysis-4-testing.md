@@ -76,7 +76,7 @@ Essentially all _false negatives_ can be attributed to the 4 Å length limit on 
 <!-- cite https://biomodel.uah.es/en/water/hbonds.htm? -->
 Although a _real_ H-bond cannot be significantly longer than that, it is simply practical to not require this in every single case.
 In the **cSS A-G** class, the issues lies in the **N3**···**O2'** H-bond, which often involves a water molecule as the basepair geometry contains a natural cavity (@fig:testing-missed-cases).
-The **tHS A-G** class has a different issue with a **O2'** H-bond -- the glycosidic bonds may rotate, substituting O2' with O4' as the H-bond donor.
+The **tHS A-G** class has a different issue with a **O2'** H-bond --- the glycosidic bonds may rotate, substituting O2' with O4' as the H-bond donor.
 Strictly speaking, this behavior defies the **tHS A-G** class definition, but we want to allow that, when it is fairly common and gentle “violation”.
 **cSS G-A** is essentially the same case, a third, **O2'**-related H-bond is often missing, marking the entire basepair as invalid.
 
