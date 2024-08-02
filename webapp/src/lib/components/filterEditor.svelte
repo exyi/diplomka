@@ -255,12 +255,12 @@
                 on:change={ev => {
                   dataSourceChange(ev.currentTarget.value)
                 }}>
-                <option value="fr3d-f">FR3D — Reference Set</option>
-                <option value="fr3d">FR3D — Entire PDB</option>
+                <option value="fr3d-f" disabled={config.disabledDataSources.includes("fr3d-f")}>FR3D — Reference Set</option>
+                <option value="fr3d" disabled={config.disabledDataSources.includes("fr3d")}>FR3D — Entire PDB</option>
                 <!-- <option value="fr3d-nf">FR3D with nears, RS</option>
                 <option value="fr3d-n">FR3D with nears, PDB</option> -->
-                <option value="allcontacts-f" title="All polar contacts reminiscent of the basepair - nucleotide pair with <= 4 Å between any polar atoms, <= 4.2 Å on at least one defined H-bond, and <= 2.5 Å edge to plane distance">All Polar Contacts — Reference Set</option>
-                <option value="allcontacts-boundaries-f">Pairs Selected by New Parameters</option>
+                <option value="allcontacts-f" disabled={config.disabledDataSources.includes("allcontacts-f")} title="All polar contacts reminiscent of the basepair - nucleotide pair with <= 4 Å between any polar atoms, <= 4.2 Å on at least one defined H-bond, and <= 2.5 Å edge to plane distance">All Polar Contacts — Reference Set</option>
+                <option value="allcontacts-boundaries-f" disabled={config.disabledDataSources.includes("allcontacts-boundaries-f")}>Pairs Selected by New Parameters</option>
               </select>
             </div>
           </div>
@@ -534,14 +534,14 @@
                   on:change={ev => {
                     dataSourceChange(ev.currentTarget.value)
                   }}>
-                  <option value="fr3d-f">FR3D, Representative Set</option>
-                  <option value="fr3d">FR3D, Entire PDB</option>
-                  <option value="fr3d-nf">FR3D with nears, RS</option>
-                  <option value="fr3d-n">FR3D with nears, PDB</option>
-                  <option value="allcontacts-f">All Polar Contacts, RS</option>
-                  <option value="allcontacts">All Polar Contacts, PDB</option>
-                  <option value="allcontacts-boundaries-f">Pairs Selected by New Parameters, RS</option>
-                  <option value="allcontacts-boundaries">Pairs Selected by New Parameters, PDB</option>
+                  <option value="fr3d-f" disabled={config.disabledDataSources.includes("fr3d-f")}>FR3D, Representative Set</option>
+                  <option value="fr3d" disabled={config.disabledDataSources.includes("fr3d")}>FR3D, Entire PDB</option>
+                  <option value="fr3d-nf" disabled={config.disabledDataSources.includes("fr3d-nf")}>FR3D with nears, RS</option>
+                  <option value="fr3d-n" disabled={config.disabledDataSources.includes("fr3d-n")}>FR3D with nears, PDB</option>
+                  <option value="allcontacts-f" disabled={config.disabledDataSources.includes("allcontacts-f")}>All Polar Contacts, RS</option>
+                  <option value="allcontacts" disabled={config.disabledDataSources.includes("allcontacts")}>All Polar Contacts, PDB</option>
+                  <option value="allcontacts-boundaries-f" disabled={config.disabledDataSources.includes("allcontacts-boundaries-f")}>Pairs Selected by New Parameters, RS</option>
+                  <option value="allcontacts-boundaries" disabled={config.disabledDataSources.includes("allcontacts-boundaries")}>Pairs Selected by New Parameters, PDB</option>
                 </select>
               </div>
             </div>

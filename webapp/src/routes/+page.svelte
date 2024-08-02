@@ -66,6 +66,15 @@
   }
   function setModeFromUrl(url: string) {
     url = url.replace(/^#/, '')
+    if (url.startsWith('short/')) {
+      const id = url.replace(/^short\//, '')
+      const realUrl = config.shortLinks[id] ?? config.shortLinks[id.toLowerCase()]
+      if (realUrl == null) {
+        alert(`Short link ${id} not found`)
+        return
+      }
+      url = realUrl
+    }
     const x = parseUrl(url)
     filterMode = x.mode
     filter = x.filter

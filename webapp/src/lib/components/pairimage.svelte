@@ -5,6 +5,7 @@
 	import DetailModal from "./DetailModal.svelte";
   import type { Context } from 'svelte-simple-modal';
 	import MolStarMaybe from "./MolStarMaybe.svelte";
+	import config from "$lib/config";
 
 
   export let url: string | undefined
@@ -22,13 +23,21 @@
 
   let pngFallback = false,
     webpFallback = false,
+    domainFallback = false,
     videoLoaded = false,
     imgFailed = false,
     videoFailed = false
   const resolutions = [ [450, 800 ], [720, 1280], [1080, 1980], [1440, 2560 ] ],
     webpResolution = [ [450, 800 ], [1440, 2560 ] ]
 
-  function generateSrcset(url: string, webpFallback: boolean) {
+  function getUrl(url: string, domainFallback: boolean) {
+    if (!domainFallback) return url
+    const u = new URL(url)
+    return `${config.fallbackImgPath}/${u.pathname}`
+  }
+
+  function generateSrcset(url: string, domainFallback: boolean, webpFallback: boolean) {
+    url = getUrl(url, domainFallback)
     const stripExt = url.replace(/\.\w+$/, '')
     const avifs = (webpFallback ? webpResolution : resolutions).map(r => `${stripExt}-${r[0]}.avif ${r[1]}w`).join(', ')
     return `${avifs}`
@@ -36,6 +45,7 @@
 
   $: {
     url
+    domainFallback = false
     pngFallback = false
     webpFallback = false
     videoLoaded = false
@@ -152,12 +162,18 @@
     {:else if imgFailed}
       <span title="{alttext}">Image for the basepair is not available</span>
     {:else if pngFallback}
-      <img src={url} alt="A {alttext}"
-        on:error={_ => { imgFailed = true } }
+      <img src={getUrl(url, domainFallback)} alt="A {alttext}"
+        on:error={_ => {
+          if (!domainFallback && config.fallbackImgPath && !url.startsWith(config.fallbackImgPath)) {
+            domainFallback = true
+          } else {
+            imgFailed = true
+          }
+        } }
         loading="lazy" />
     {:else}
-      <img src={url} alt="A {alttext}"
-        srcset={generateSrcset(url, webpFallback)} loading="lazy" on:error={imgonerror1} />
+      <img src={getUrl(url, domainFallback)} alt="A {alttext}"
+        srcset={generateSrcset(url, domainFallback, webpFallback)} loading="lazy" on:error={imgonerror1} />
     {/if}
   </div>
 </div>
