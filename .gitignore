@@ -8,3 +8,6 @@ __pycache__
 /scripts/plots
 /scripts/*.cif
 node_modules
+/att.zip
+/diplomka/tmp
+
