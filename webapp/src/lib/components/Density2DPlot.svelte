@@ -10,7 +10,7 @@
     let svg: SVGGElement, canvas: HTMLCanvasElement
     const widthPx = 640
     const heightPx = 480
-    const marginPx = {top: 50, right: 50, bottom: 40, left: 50}
+    const marginPx = {top: 60, right: 60, bottom: 40, left: 50}
     const colors = ['#e41a1c','#377eb8','#4daf4a','#984ea3','#ff7f00','#ffff33','#a65628','#f781bf','#999999']
 
     function getColor(column: string) {
@@ -304,7 +304,7 @@
         )
         miniHistogramCalc(
             node.append("g")
-                .attr("transform", `rotate(90, ${widthPx}, ${marginPx.top}) translate(${widthPx},${marginPx.top})`),
+                .attr("transform", `rotate(90, ${widthPx}, ${marginPx.top}) translate(${widthPx+heightPx - marginPx.top - marginPx.bottom},${marginPx.top}) scale(-1, 1)`),
             marginPx.right,
             heightPx - marginPx.top - marginPx.bottom,
             y,

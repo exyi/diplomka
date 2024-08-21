@@ -795,7 +795,7 @@ export function getColumnLabel(column: string, metadata: UnwrapArray<typeof meta
     if (column == 'C1_C1_euler_phicospsi') {
         return [ `C1'—N Euler φ+cos(θ)ψ`, 'φ+cos(θ)ψ ≈ "total Z-axis rotation"' ]
     }
-    if ((m = /^C1_C1_euler_(\w+)$/.exec(column))) {
+    if ((m = /^C1_C1_euler_([a-zA-Z]+)$/.exec(column))) {
         const angleName = m[1]
         const [b1, b2] = formatBaseNames(metadata, true, false)
         const [n1, n2] = metadata.pair_type[1].toUpperCase().split('-').map(baseNitrogen)
