@@ -585,6 +585,14 @@
           {#if filter.filtered && filter.resolution?.max && filter.resolution?.max > 3.5}
             <p class="help is-danger">Representative set only<br> contains structures ≤3.5 Å</p>
           {/if}
+
+          <div class="field">
+            <label class="label" for="ntfilter-validation">Validation score:</label>
+            <div class="control">
+              <RangeEditor bind:range={filter.validation_score} step={1} min={0} max={100} />
+            </div>
+          </div>
+
         </div>
 
         <div class="column">

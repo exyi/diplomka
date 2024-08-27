@@ -20,6 +20,7 @@
     let realFilter: NucleotideFilterModel | undefined = undefined
     let filterLabel: string | undefined = undefined
     let pairDB: PairingInfo | undefined = undefined
+    let detailedTable: boolean = false // include likelihood, mode dev
     $: { filter; updateRealFilter() }
 
     async function updateRealFilter() {
@@ -178,7 +179,10 @@
 
         return Object.entries(tuple).filter(([colName, value]) => !hideColumn(colName, meta, value) && !columnBlacklist.includes(colName)).map(([colName, value]) => {
             const [ label, tooltip ] = getColumnLabel(colName, meta) ?? [ null, null ]
-            return { colName, label, tooltip, value }
+            const quantile = tuple[colName + "_quantile"]
+            const logLikelihood = tuple[colName + "_log_likelihood"]
+            const modeDeviation = tuple[colName + "_mode_deviation"]
+            return { colName, label, tooltip, value, quantile, logLikelihood, modeDeviation }
         })
     }
 </script>
@@ -216,6 +220,19 @@
         width: 70%;
         height: 70vh;
         position: relative;
+    }
+
+    .quantile {
+        font-weight: bold;
+    }
+    .quantile.quantile-low {
+        color: rgb(172, 0, 0);
+    }
+    .quantile.quantile-med {
+        color: rgb(143, 105, 0);
+    }
+    .quantile.quantile-high {
+        color: #006d09;
     }
 
 </style>
@@ -265,7 +282,7 @@
             selection.addRange(range)
         }}>{generatePymolScript(pair.id).join("\n")}</pre>
     </div>
-    <div style="display: flex; flex-direction: row; justify-content: space-evenly; gap: 2rem">
+    <div style="display: flex; flex-direction: row; flex-wrap: wrap; justify-content: space-evenly; gap: 2rem; align-items: flex-start;">
     {#if pairDB?.hbonds}
         <table class="table is-narrow is-striped" style="width: fit-content">
             <tr>
@@ -331,6 +348,27 @@
                         {hb.OOPA2 == null ? 'NULL' : hb.OOPA2?.toFixed(0)+"°"}
                     </td>
                 {/each}
+            </tr>
+        </table>
+    {/if}
+    {#if pairDB?.originalRow?.quantile_mean_Q != null}
+        {@const r = pairDB.originalRow}
+        <table class="table is-narrow is-striped" style="width: fit-content">
+            <tr>
+                <th>Validation score</th>
+                <td class="quantile {r.quantile_mean_Q < 0.3 ? "quantile-low" : r.quantile_mean_Q < 0.7 ? "quantile-med" : "quantile-high"}">{(r.quantile_mean_Q*100).toFixed(1)}%</td>
+            </tr>
+            <tr>
+                <th>Percentile mean</th>
+                <td>{(r.quantile_mean*100).toFixed(1)}%</td>
+            </tr>
+            <tr>
+                <th>Percentile min</th>
+                <td>{(r.quantile_min*100).toFixed(1)}%</td>
+            </tr>
+            <tr>
+                <th>Percentile second min</th>
+                <td>{(r.quantile_min2*100).toFixed(1)}%</td>
             </tr>
         </table>
     {/if}
@@ -403,7 +441,7 @@
             <tr>
                 <td><b><code>{r.colName}</code></b></td>
                 <td>{r.label ?? ''}</td>
-                <td colspan={['structure_name', 'structure_method', 'pairid', 'deposition_date'].includes(r.colName) ? 2 : 1}
+                <td colspan={['structure_name', 'structure_method', 'pairid', 'deposition_date'].includes(r.colName) ? 3 : 1}
                     style="font-weigth: 700; text-align: {[ "bigint", "number", "boolean" ].includes(typeof r.value) ? 'right' : 'left'};"
                     data-debug-filter-range={JSON.stringify(filterRange)}
                     data-debug-nofilter={filterRange == null}
@@ -412,6 +450,11 @@
                     title={getRangeValueTitle(val, filterRange)}
                     data-type={typeof val}>
                     {typeof val == "number" ? val.toFixed(3) : val == null ? (filterRange != null ? "NULL" : "") : "" + val}
+                </td>
+                <td>
+                    {#if r.quantile != null}
+                        <span title="Validation score - likelihood percentile" class="quantile {r.quantile < 0.3 ? "quantile-low" : r.quantile < 0.7 ? "quantile-med" : "quantile-high"}">{(r.quantile*100).toFixed(1)}%</span>
+                    {/if}
                 </td>
                 <td><i>{r.tooltip ?? ''}</i></td>
             </tr>

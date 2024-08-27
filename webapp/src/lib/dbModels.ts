@@ -32,6 +32,7 @@ export type NucleotideFilterModel = {
     coplanarity_edge_angle1?: NumRange
     coplanarity_edge_angle2?: NumRange
     resolution?: NumRange
+    validation_score?: NumRange
     dna?: true | false | undefined
     orderBy: string
     filtered: boolean
@@ -135,6 +136,8 @@ export function filterToSqlCondition(filter: NucleotideFilterModel): string[] {
     conditions.push(...rangeToCondition(`C1_C1_roll1`, filter.roll1))
     conditions.push(...rangeToCondition(`C1_C1_roll2`, filter.roll2))
 
+    conditions.push(...rangeToCondition(`quantile_mean_Q*100`, filter.validation_score))
+
     if (filter.dna != null) {
         if (filter.dna)
             conditions.push(`(res1 LIKE 'D%' OR res2 LIKE 'D%')`)
@@ -216,7 +219,9 @@ export const orderByOptions = [
     { id: "LLD", expr: "-log_likelihood", title: "↑ DESCENDING - best to worst - Multiplied likelihoods of all H-bond parameters in their Kernel Density Estimate distribution. Use to list &quot;nicest&quot; pairs without disqualifying secondary modes.", label: "KDE likelihood ↑" },
     { id: "LLA", expr: "log_likelihood", title: "↓ ASCENDING - best to worst - Multiplied likelihoods of all H-bond parameters in their Kernel Density Estimate distribution. Use to list &quot;nicest&quot; pairs without disqualifying secondary modes.", label: "KDE likelihood ↓" },
     { id: "rmsdA", expr: "(rmsd_edge1+rmsd_edge2)", title: "↓ ASCENDING ('best first') - edge RMSD to the 'nicest' basepair", label: "Smallest Edge RMSD" },
-    { id: "rmsdD", expr: "(rmsd_edge1+rmsd_edge2) DESC", title: "↑ DESCENDING ('worst first') - edge RMSD to the 'nicest' basepair", label: "Largest Edge RMSD" }
+    { id: "rmsdD", expr: "(rmsd_edge1+rmsd_edge2) DESC", title: "↑ DESCENDING ('worst first') - edge RMSD to the 'nicest' basepair", label: "Largest Edge RMSD" },
+    { id: "quantile_mean_Q", expr: "quantile_mean_Q DESC", title: "↑ DESCENDING ('best first') - Mean quantile of all parameter likelihoods.", label: "Validation score ↑" },
+    { id: "quantile_mean_QA", expr: "quantile_mean_Q ASC", title: "↓ ASCENDING ('worst first') - Mean quantile of all parameter likelihoods.", label: "Validation score ↓" },
 ]
 
 function orderToExpr(opt: string | null, prefix = '') {
@@ -431,6 +436,7 @@ export function addFilterParams(params: URLSearchParams, filter: NucleotideFilte
     addMaybe(`pitch2`, range(filter.pitch2))
     addMaybe(`roll1`, range(filter.roll1))
     addMaybe(`roll2`, range(filter.roll2))
+    addMaybe(`valid`, range(filter.validation_score))
     for (const c of filter.sql_conditions ?? []) {
         add('condition', c)
     }
@@ -563,6 +569,7 @@ function parseFilter(f: URLSearchParams, filter: NucleotideFilterModel | undefin
     for (const prop of [ "coplanarity_edge_angle1", "coplanarity_edge_angle2", "coplanarity_shift1", "coplanarity_shift2", "yaw1", "yaw2", "pitch1", "pitch2", "roll1", "roll2" ]) {
         filter[prop] = parseRangeMaybe(f.get(`${prefix}${prop}`))
     }
+    filter.validation_score = parseRangeMaybe(f.get(`${prefix}valid`))
     filter.resolution = parseRangeMaybe(f.get(`${prefix}resolution`) || f.get(`${prefix}resol`))
     filter.orderBy = f.get(`${prefix}order`) ?? filter.orderBy
     if (filter.orderBy) {
