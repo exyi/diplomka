@@ -2,7 +2,7 @@ import multiprocessing.pool
 from typing import Any, Callable, Generator, Iterator, List, Literal, Optional, Sequence, Tuple, TypeVar, Union
 import Bio.PDB, Bio.PDB.Structure, Bio.PDB.Model, Bio.PDB.Residue, Bio.PDB.Atom, Bio.PDB.Chain, Bio.PDB.Entity
 import os, sys, io, gzip, math, json, numpy as np, re, functools, itertools
-import multiprocessing, async_utils
+import multiprocessing, para_utils
 import pdb_utils
 import polars as pl
 
@@ -210,7 +210,7 @@ def _main_1structure(pdb: str, output_directory: str, distance: float):
     result_df.write_parquet(f"{output_directory}/{pdbid}.parquet")
     print(f"Processed {pdbid}: {len(result_df)} contacts ({len(result_df.filter(pl.col("symmetry_operation2").is_not_null()))} with symmetry operation)")
 
-def _main(args, pool: Union[async_utils.MockPool, multiprocessing.pool.Pool]):
+def _main(args, pool: Union[para_utils.MockPool, multiprocessing.pool.Pool]):
     if os.path.exists(args.output):
         if os.listdir(args.output):
             raise ValueError(f"Output directory {args.output} is not empty")
@@ -229,14 +229,14 @@ if __name__ == '__main__':
     parser.add_argument('--distance', type=float, default=4.0, help='Distance threshold between residue atoms (in Ångströms)')
     parser.add_argument('--output', type=str, help='An empty output directory (will create a parquet file for each PDB structure)', required=True)
     parser.add_argument("--pdbcache", nargs="+", help="Directories to search for PDB files in order to avoid re-downloading. Last directory will be written to, if the structure is not found and has to be downloaded from RCSB. Also can be specified as PDB_CACHE_DIR env variable.")
-    parser.add_argument('--threads', type=async_utils.parse_thread_count, default=1, help='Number of threads, 0 for all, 50% for half, -1 to leave one free, ... Parallelism only affects processing of multiple PDB files.')
+    parser.add_argument('--threads', type=para_utils.parse_thread_count, default=1, help='Number of threads, 0 for all, 50% for half, -1 to leave one free, ... Parallelism only affects processing of multiple PDB files.')
     args = parser.parse_args()
     for x in args.pdbcache or []:
         pdb_utils.pdb_cache_dirs.append(os.path.abspath(x))
     os.environ["PDB_CACHE_DIR"] = ';'.join(pdb_utils.pdb_cache_dirs)
 
     if args.threads == 1:
-        pool = async_utils.MockPool()
+        pool = para_utils.MockPool()
         _main(args, pool)
     else:
         with multiprocessing.Pool(args.threads if args.threads > 0 else max(1, os.cpu_count() + args.threads)) as pool:

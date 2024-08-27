@@ -7,7 +7,7 @@ import dataclasses
 from dataclasses import dataclass
 import tempfile
 import pdb_utils
-from scripts.async_utils import parse_thread_count
+from para_utils import parse_thread_count
 
 @dataclass(frozen=True, order=True)
 class NucleotideID:

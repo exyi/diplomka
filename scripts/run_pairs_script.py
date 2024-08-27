@@ -2,7 +2,7 @@
 
 import os, sys, re, argparse, subprocess, threading, time, math
 
-from scripts.async_utils import parse_thread_count
+from para_utils import parse_thread_count
 
 def run(outfile, input_files, pdbcache, threads, pair_type):
     a = [

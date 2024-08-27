@@ -15,7 +15,7 @@ from dataclasses import dataclass
 import shutil
 import subprocess, threading
 import pair_defs
-from scripts.async_utils import parse_thread_count
+from para_utils import parse_thread_count
 
 def residue_selection(chain, nt, ins, alt):
     chain = str(chain)

@@ -17,7 +17,7 @@ from scipy.spatial.transform import Rotation
 from pair_csv_parse import scan_pair_csvs
 import pdb_utils
 import pair_defs as pair_defs
-from async_utils import MockPool, parse_thread_count
+from para_utils import MockPool, parse_thread_count
 pdef = pair_defs
 
 class _Sentinel:

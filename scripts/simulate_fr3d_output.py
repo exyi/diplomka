@@ -11,7 +11,7 @@ import dataclasses
 from pair_csv_parse import scan_pair_csvs
 import pair_defs as pair_defs
 from fr3d_parser import UnitID
-from async_utils import MockPool, parse_thread_count
+from para_utils import MockPool, parse_thread_count
 
 order_sensitive_pairs = [
     pt

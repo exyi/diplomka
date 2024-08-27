@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 import itertools
+import multiprocessing.pool
+from para_utils import MockPool, SharedMemoryInstance, batched_map, parse_thread_count
 import subprocess
 from typing import Any, Generator, Optional, Union
 from matplotlib.axes import Axes
@@ -17,6 +19,7 @@ import matplotlib.pyplot as plt
 import residue_filter
 from dataclasses import dataclass
 import dataclasses
+import threading
 
 bins_per_width = 50
 hist_kde = True
@@ -785,36 +788,83 @@ def get_kde_mode(kde: scipy.stats.gaussian_kde, data: np.ndarray):
     data_argmax = np.argmax(kde.logpdf(fine_data))
     return float(fine_data[data_argmax])
 
-def calculate_stats(df: pl.DataFrame, pair_type, skip_kde: bool):
+@dataclass
+class KDEResult:
+    mode: float
+    kde_std: float
+    result_LL: pl.Series | None
+    result_MD: pl.Series | None
+
+def spread_nulls(null_bitmap, data, dtype) -> pl.Series:
+    l = []
+    i = 0
+    for is_null in null_bitmap:
+        if is_null:
+            l.append(None)
+        else:
+            l.append(data[i])
+            i += 1
+    return pl.Series(l, dtype=dtype)
+
+
+def calc_diff(data, cname):
+    if is_angular_modular(cname):
+        return angular_modulo(data)
+    else:
+        return data
+
+def calculate_kde_columns(data: np.ndarray, column_name: str, eval_data: pl.Series | None) -> KDEResult | None:
+    if len(data) < 5:
+        return None
+
+    bw_factor = 1.5
+    if is_angular_modular(column_name):
+        kde = angular_modular_kde(sample_for_kde(data))
+    else:
+        kde = scipy.stats.gaussian_kde(sample_for_kde(data))
+    kde.set_bandwidth(kde.scotts_factor() * bw_factor)
+
+    mode = get_kde_mode(kde, data)
+
+    if is_angular_modular(column_name):
+        std = angular_modular_std(data, mean=mode) or -1
+    else:
+        std = float(math.sqrt(np.mean((data - mode) ** 2)))
+
+    if eval_data is None or (eval_data.is_null() | eval_data.is_nan()).all():
+        result_LL = None
+        result_MD = None
+    else:
+        null_bitmap = eval_data.is_null().to_numpy()
+        LL = kde.logpdf(eval_data.drop_nulls().to_numpy())
+        result_LL = spread_nulls(null_bitmap, LL, pl.Float32)
+        MD = np.abs(calc_diff(eval_data.drop_nulls().to_numpy() - mode, column_name)) / std
+        result_MD = spread_nulls(null_bitmap, MD, pl.Float32)
+
+    return KDEResult(mode, std, result_LL, result_MD)
+
+
+def calculate_stats(pool: multiprocessing.pool.ThreadPool | multiprocessing.pool.Pool | MockPool, df: pl.DataFrame, result_df: pl.DataFrame | None, pair_type: PairType, skip_kde: bool): # type: ignore
     if len(df) == 0:
         raise ValueError("No data")
-    def make_kde(data, cname):
-        if is_angular_modular(cname):
-            kde = angular_modular_kde(sample_for_kde(data))
-        else:
-            kde = scipy.stats.gaussian_kde(sample_for_kde(data))
-        kde.set_bandwidth(kde.scotts_factor() * 1.5)
-        return kde
+
     def calc_mean(data, cname):
         if is_angular_modular(cname):
             return angular_modular_mean(sample_for_kde(data))
         else:
             return float(np.mean(data))
+
     def calc_std(data, cname, mean=None):
         if is_angular_modular(cname):
             return angular_modular_std(sample_for_kde(data), mean=mean)
         else:
             return float(np.std(data))
 
-    def calc_diff(data, cname):
-        if is_angular_modular(cname):
-            return angular_modulo(data)
-        else:
-            return data
 
     # columns = df.select(pl.col("^hb_\\d+_(length|donor_angle|acceptor_angle)$")).columns
     # columns = df.select(pl.col("^hb_\\d+_length$"), pl.col("^C1_C1_(yaw|pitch|roll)(1|2)$")).columns
-    columns = df.select(pl.col("^hb_\\d+_(length|donor_angle|acceptor_angle)$"), pl.col("^C1_C1_(yaw|pitch|roll)(1|2)$")).columns
+    # columns = df.select(pl.col("^hb_\\d+_(length|donor_angle|acceptor_angle)$"), pl.col("^C1_C1_(yaw|pitch|roll)(1|2)$")).columns
+    columns = df.select(pl.col("^hb_\\d+_.*$"), pl.col("^C1_C1_.*$"), pl.col("^coplanarity_.*$")).columns
     # print(f"{columns=}")
     cdata = [ df[c].drop_nulls().to_numpy() for c in columns ]
     medians = [ float(np.median(c)) if len(c) > 0 and not is_angular_modular(cname) else None for c, cname in zip(cdata, columns) ]
@@ -822,46 +872,55 @@ def calculate_stats(df: pl.DataFrame, pair_type, skip_kde: bool):
     stds = [ calc_std(c, cname) if len(c) > 1 else None for c, cname in zip(cdata, columns) ]
 
     if skip_kde:
-        kdes = [ None ] * len(columns)
+        kde_results = [ None ] * len(columns)
     else:
-        kdes = [ make_kde(c, cname) if len(c) > 5 else None for c, cname in zip(cdata, columns) ]
+        kde_results = pool.starmap(calculate_kde_columns, zip(cdata, columns, [ result_df[col] if result_df is not None else None for col in columns ]))
 
-    kde_modes = [ None if kde is None else float(get_kde_mode(kde, c)) for kde, c in zip(kdes, cdata) ]
-    kde_mode_stds = [ None if kde_mode is None else calc_std(c, cname, mean=kde_mode) for kde_mode, c, cname in zip(kde_modes, cdata, columns) ]
-    def calc_datapoint_mode_deviations(df):
-        ms = [ median if kde_mode is None else kde_mode for kde_mode, median in zip(kde_modes, medians) ]
-        ss = [ std if kde_std is None else kde_std for kde_std, std in zip(kde_mode_stds, stds) ]
-        return np.sum([
-            (calc_diff(df[c] - kde_mode, c).abs() / abs(kde_mode_std)).fill_null(10).to_numpy()
-            for kde_mode, kde_mode_std, c in zip(ms, ss, columns)
-            if kde_mode is not None and kde_mode_std
-        ] + [ [0] * len(df) ], axis=0)
-    def calc_datapoint_log_likelihood(df):
-        return np.sum([ kde.logpdf(df[c].fill_null(0).to_numpy()) if kde is not None else np.zeros(len(df)) for kde, c in zip(kdes, columns) ], axis=0)
-    # print("datapoint_mode_deviations:", datapoint_mode_deviations)
-    # print("datapoint_log_likelihood:", datapoint_log_likelihood)
-    # nicest_basepair = int(np.argmax(datapoint_log_likelihood))
-    score = -calc_datapoint_mode_deviations(df)
-    min_score = np.min(score)
-    score = score - min_score + 1
-    nicest_basepair = int(np.argmax(score))
-    nicest_basepairs = [
-        int(np.argmax(np.concatenate([ [0.1], score * df.select(r.alias("x"))["x"].fill_null(False).to_numpy()]))) - 1
-        for _, r in resolutions
-    ]
-    # print(f"{nicest_basepairs=}")
-    # print(f"{nicest_basepair=} LL={calc_datapoint_log_likelihood(df[nicest_basepair, :])} Σσ={score[nicest_basepair]} {next(df[nicest_basepair, columns].iter_rows())}")
+    kde_modes = [ None if res is None else res.mode for res in kde_results ]
+    kde_mode_stds = [ None if res is None else res.kde_std for res in kde_results ]
+    if result_df is None or not any(r is not None and r.result_LL is not None and r.result_MD is not None for r in kde_results):
+        nicest_basepairs = []
+        total_MD = None
+        total_LL = None
+    else:
+        total_MD = np.mean([
+            res.result_MD.fill_null(2).fill_nan(2)
+            for res in kde_results
+            if res is not None and res.result_MD is not None
+        ], axis=0)
+        total_LL = np.mean([
+            res.result_LL.fill_null(-5).fill_nan(-5)
+            for res in kde_results
+            if res is not None and res.result_LL is not None
+        ], axis=0)
+        print(f"{total_MD=}")
+        assert len(total_MD) == len(result_df), f"{len(total_MD)} != {len(result_df)}"
+        assert len(total_LL) == len(result_df), f"{len(total_LL)} != {len(result_df)}"
+        score = -total_MD
+        min_score = np.min(score)
+        score = score - min_score + 1
+        nicest_basepairs = [
+            int(np.argmax(np.concatenate([ [0.1], score * result_df.select(r.alias("x"))["x"].fill_null(False).to_numpy()]))) - 1
+            for _, r in resolutions
+        ]
 
     new_df_columns = {
-        "mode_deviations": calc_datapoint_mode_deviations,
-        "log_likelihood": calc_datapoint_log_likelihood,
+        "mode_deviations": total_MD,
+        "log_likelihood": total_LL,
     }
+
+    for kde, col in zip(kde_results, columns):
+        new_df_columns[f"{col}_mode_deviation"] = kde.result_MD if kde is not None else None
+        new_df_columns[f"{col}_log_likelihood"] = kde.result_LL if kde is not None else None
 
     result_stats = {
         "count": len(df),
         "bp_class": determine_bp_class(df, pair_type, throw=False),
-        "nicest_bp": list(next(df[nicest_basepair, ["pdbid", "model", "chain1", "res1", "nr1", "ins1", "alt1", "chain2", "res2", "nr2", "ins2", "alt2"]].iter_rows())),
-        "nicest_bp_index": nicest_basepair,
+        "nicest_bp": [
+            list(next(result_df[ix, ["pdbid", "model", "chain1", "res1", "nr1", "ins1", "alt1", "chain2", "res2", "nr2", "ins2", "alt2"]].iter_rows()))
+            for ix in nicest_basepairs
+            if result_df is not None
+        ],
         "nicest_bp_indices": nicest_basepairs,
         # **{
         #     f"hb_{i}_label": get_label(f"hb_{i}_length", pair_type) for i in range(len(pair_defs.get_hbonds(pair_type)))
@@ -905,16 +964,38 @@ def create_pair_image(row: pl.DataFrame, output_dir: str, pair_type: PairType) -
     print(p.stderr.decode('utf-8'))
     raise ValueError(f"Could not find PyMOL generated image file")
 
-def reexport_df(df: pl.DataFrame, columns, drop: list[str], round:bool):
+def calculate_likelihood_percentiles(df: pl.DataFrame):
+    dflen = max(1, len(df)-1)
+    ll_columns = [ (col, col[:-len("_log_likelihood")]) for col in df.columns if col.endswith("_log_likelihood") ]
+    if len(ll_columns) == 0:
+        return df
+    perc_columns = [ (df[col].rank(descending=False) / dflen).cast(pl.Float32).alias(f"{col_core}_quantile") for col, col_core in ll_columns ]
+    print(f"{ll_columns=} {perc_columns=}")
+    mean_percentile = pl.mean_horizontal(perc_columns)
+    min_percentile = pl.min_horizontal(perc_columns)
+    min2_percentile = pl.min_horizontal([ pl.when(c <= min_percentile).then(None).otherwise(c) for c in perc_columns ])
+
+    return df.with_columns(
+        *perc_columns,
+        mean_percentile.alias("quantile_mean"),
+        min_percentile.alias("quantile_min"),
+        min2_percentile.alias("quantile_min2"),
+        (mean_percentile.rank(descending=False).cast(pl.Float32) / dflen).alias("quantile_mean_Q"),
+    )
+
+def reexport_df(df: pl.DataFrame, filter: pl.Expr | None, columns, drop: list[str], round:bool):
     df = df.with_columns(
         is_some_quality.alias("jirka_approves"),
-        *[
-            pl.Series(columns[col](df)).alias(col)
-            for col in columns
-        ]
+        *[ pl.Series(col, columns[col]).alias(col)
+           for col in columns
+           if columns[col] is not None ]
     )
+    if filter is not None:
+        df = df.filter(filter)
+    df = calculate_likelihood_percentiles(df)
     df = df.drop([col for col in df.columns if re.match(r"[DR]NA-(0-1[.]8|1[.]8-3[.]5)(-r\d+)?", col)])
-    df = df.drop([col for col in df.columns if col.startswith('^') in drop])
+    df = df.drop(drop, strict=False)
+    df = df.drop(col for col in df.columns if any(re.fullmatch(d, col) for d in drop if d.startswith("^") and d.endswith("$")))
     df = df.drop(["label"])
     # round float columns
     if round:
@@ -927,12 +1008,12 @@ def reexport_df(df: pl.DataFrame, columns, drop: list[str], round:bool):
         ])
     return df
 
-def enumerate_pair_types(files: list[str], include_nears: bool) -> Generator[tuple[PairType, pl.DataFrame], None, None]:
+def enumerate_pair_types(files: list[str], include_nears: bool) -> Generator[tuple[PairType, pl.DataFrame, dict], None, None]:
     assert len(files) > 0 and isinstance(files, list) and isinstance(files[0], str)
     for file in files:
         pair_type = infer_pair_type(os.path.basename(file))
         if pair_type is not None:
-            yield PairType.from_tuple(pair_type), load_pair_table(file)
+            yield PairType.from_tuple(pair_type), load_pair_table(file), {}
         else:
             df = load_pair_table(file)
             assert "type" in df.columns, f"{file} does not contain type column"
@@ -942,9 +1023,10 @@ def enumerate_pair_types(files: list[str], include_nears: bool) -> Generator[tup
                 ).alias("pair_bases")
             )
             groups = df.group_by("type", "pair_bases")
-            print(f"{file}: {len(df)} rows, types: {dict(sorted([ (str(pair_defs.PairType.from_tuple(k)), len(gdf)) for k, gdf in groups ], key=lambda x: x[1], reverse=True))}")
+            # print(f"{file}: {len(df)} rows, types: {dict(sorted([ (str(pair_defs.PairType.from_tuple(k)), len(gdf)) for k, gdf in groups ], key=lambda x: x[1], reverse=True))}")
+            print(f"{file}: {len(df)} rows, {len(list(groups))} types")
             all_pairs_types = set(pair_defs.PairType.from_tuple(pt) for pt, _ in groups)
-            for k, gdf in groups:
+            for k, gdf in sorted(groups, key=lambda x: len(x[1]), reverse=True):
                 k: Any
                 pair_type = pair_defs.PairType.from_tuple(k)
                 if len(set(pair_type.bases).difference(["A", "C", "G", "U", "T"])) > 0:
@@ -955,9 +1037,7 @@ def enumerate_pair_types(files: list[str], include_nears: bool) -> Generator[tup
                     continue
                 if pair_type.type[1].islower() and pair_type.type[2].isupper() and pair_type.type[1] == pair_type.type[2].lower():
                     continue
-                if pair_type.n and not include_nears:
-                    continue
-                yield pair_type, gdf
+                yield pair_type, gdf, { "size_fraction": len(gdf) / len(df) }
 
 def save_statistics(all_statistics, output_dir):
     df = pl.DataFrame(all_statistics, infer_schema_length=100_000)
@@ -1108,56 +1188,18 @@ def calculate_boundaries(df: pl.DataFrame, pair_type: PairType):
     })
     return boundaries
 
-def main(argv):
-    import argparse
-    parser = argparse.ArgumentParser(description="Compute KDE densities for the provided basepair classes, generate histogram plot")
-    parser.add_argument("input_file", nargs="+", help="An input Parquet table. May be multiple files, but it must be partitioned by pair class (one file may contain multiple classes, but one class must be in a single file). We do not load multiple files into memory, making it an effective way to reduce RAM cravings")
-    parser.add_argument("--residue-directory", help="Directory with residue lists, used to select representative set residues. Currently, lists RNA-1.8-3.5, RNA-0-1.8, DNA-1.8-3.5, DNA-0-1.8 are expected.")
-    parser.add_argument("--reexport", default='none', choices=['none', 'partitioned'], help="Write out parquet files with calculated statistics columns (log likelihood, mode deviations)")
-    parser.add_argument("--include-nears", default=False, action="store_true", help="If FR3D is run in basepair_detailed mode, it reports near basepairs (denoted as ncWW). By default, we ignore them, but this option includes them in the output.")
-    parser.add_argument("--filter-pair-type", default=None, help="Comma separated list of pair types to include in the result (formatted as cWW-AC). By default all are included.")
-    parser.add_argument("--skip-kde", default=False, action="store_true", help="Skip generating kernel density estimates for histograms, image selection and 'niceness' score calculation.")
-    parser.add_argument("--skip-image", default=False, action="store_true", help="Skip generating images for the nicest basepairs (use if the gen_contact_images.py script is broken)")
-    parser.add_argument("--skip-plots", default=False, action="store_true", help="Skip generating all PDF plots (only useful with --reexport)")
-    parser.add_argument("--drop-columns", default=[], nargs="*", help="remove the specified columns from the reexport output (regex supported when in ^...$)")
-    parser.add_argument("--reexport-noround", default=False, action="store_true", help="Do not round float columns in the reexported data")
-    parser.add_argument("--output-dir", "-o", required=True, help="Output directory")
-    args = parser.parse_args(argv)
-
-    only_pairtypes = None if args.filter_pair_type is None else set(pair_defs.PairType.parse(pt) for pt in args.filter_pair_type.split(","))
-
-    if args.residue_directory:
-        residue_lists = residue_filter.read_id_lists(args.residue_directory)
+def process_pair_type(pool: multiprocessing.pool.Pool | MockPool, args, residue_lists: dict[str, pl.DataFrame] | None, pair_type: PairType, df: pl.DataFrame):
+    if residue_lists:
+        df = residue_filter.add_res_filter_columns(df, residue_lists)
     else:
-        residue_lists = None
-        global is_some_quality # TODO: configurable resolution cutoffs
-        is_some_quality = pl.lit(True)
-    
-    if args.skip_kde:
-        global hist_kde
-        hist_kde = False
-
-    results = []
-    boundaries = []
-    all_statistics = []
-
-    os.makedirs(args.output_dir, exist_ok=True)
-    for pair_type, df in enumerate_pair_types(args.input_file, args.include_nears):
-        if only_pairtypes is not None and pair_type.without_n() not in only_pairtypes:
-            print(f"Skipping {pair_type} because it is not in {only_pairtypes}")
-            continue
-        
-        if residue_lists:
-            df = residue_filter.add_res_filter_columns(df, residue_lists)
-        else:
-            df = df.with_columns(**{
+        df = df.with_columns(**{
                 "RNA-0-1.8": is_rna & (pl.col("resolution") <= 1.8),
                 "RNA-1.8-3.5": is_rna & (pl.col("resolution") <= 3.5) & (pl.col("resolution") > 1.8),
                 "DNA-0-1.8": is_dna & (pl.col("resolution") <= 1.8),
                 "DNA-1.8-3.5": is_dna & (pl.col("resolution") <= 3.5) & (pl.col("resolution") > 1.8),
             })
-        print(f"{pair_type}: total count = {len(df)}, quality count = {len(df.filter(is_some_quality))}")
-        print(df.select(pl.col("^hb_\\d+_length$"), pl.col("resolution"), is_some_quality.alias("some_quality")).describe())
+    print(f"{pair_type}: total count = {len(df)}, quality count = {len(df.filter(is_some_quality))}")
+    print(df.select(pl.col("^hb_\\d+_length$"), pl.col("resolution"), is_some_quality.alias("some_quality")).describe())
 
         # good_bonds = [ i for i, bond in enumerate(pair_defs.get_hbonds(pair_type, throw=False) or []) if not pair_defs.is_bond_hidden(pair_type, bond) ]
         # df = df.filter(pl.all_horizontal(pl.lit(True), *[
@@ -1165,14 +1207,14 @@ def main(argv):
         #     for i in good_bonds
         # ]))
 
-        dff = None
-        stat_columns = {
-            "mode_deviations": lambda df: [ None ] * len(df),
-            "log_likelihood": lambda df: [ None ] * len(df),
+    dff = None
+    stat_columns = {
+            "mode_deviations": [ None ] * len(df),
+            "log_likelihood": [ None ] * len(df),
         }
-        nicest_bps: Optional[list[int]] = None
-        statistics = []
-        for resolution_label, resolution_filter in {
+    nicest_bps: Optional[list[int]] = None
+    statistics = []
+    for resolution_label, resolution_filter in {
             # "unfiltered": True,
             "1.8 Å": (pl.col("resolution") <= 1.8) & is_some_quality,
             "2.5 Å": (pl.col("resolution") <= 2.5) & is_some_quality,
@@ -1180,60 +1222,60 @@ def main(argv):
             "DNA 3.0": (pl.col("resolution") <= 3.0) & is_some_quality & is_dna,
             "3.0 Å": (pl.col("resolution") <= 3.0) & is_some_quality,
         }.items():
-            dff = df.filter(resolution_filter)\
-                    .filter(pl.any_horizontal(pl.col("^hb_\\d+_length$").is_not_null()))
-            if len(dff) == 0:
-                continue
-            stat_columns, stats = calculate_stats(dff, pair_type, args.skip_kde)
-            statistics.append({
+        dff = df.filter(resolution_filter).filter(pl.any_horizontal(pl.col("^hb_\\d+_length$").is_not_null()))
+        if len(dff) == 0:
+            continue
+        stat_columns, stats = calculate_stats(pool, dff, df, pair_type, args.skip_kde)
+        statistics.append({
                 "pair": pair_type.bases_str,
                 "pair_type": pair_type.full_type,
                 "resolution_cutoff": resolution_label,
                 **stats,
             })
-            if "nicest_bp_indices" in statistics[-1]:
-                nicest_bps = statistics[-1]["nicest_bp_indices"]
-                del statistics[-1]["nicest_bp_indices"]
-            print(f"{pair_type} {resolution_label}: {len(dff)}/{len(df)} ")
-        if dff is None or stat_columns is None:
-            print(f"WARNING: No data in {pair_type} ({len(df)=}, len(filtered)={len(df.filter(is_some_quality))}")
-            output_files = []
-        elif not pair_defs.get_hbonds(pair_type, throw=False):
-            print(f"WARNING: No hbonds for {pair_type}")
+        if "nicest_bp_indices" in statistics[-1]:
+            nicest_bps = statistics[-1]["nicest_bp_indices"]
+            del statistics[-1]["nicest_bp_indices"]
+        print(f"{pair_type} {resolution_label}: {len(dff)}/{len(df)} ")
+    if dff is None or stat_columns is None:
+        print(f"WARNING: No data in {pair_type} ({len(df)=}, len(filtered)={len(df.filter(is_some_quality))}")
+        output_files = []
+        boundaries = None
+    elif not pair_defs.get_hbonds(pair_type, throw=False):
+        print(f"WARNING: No hbonds for {pair_type}")
+        output_files = []
+        boundaries = None
+    else:
+        if args.skip_plots:
             output_files = []
         else:
-
-            if args.skip_plots:
-                output_files = []
-            else:
-                print("nicest_bps:", nicest_bps, "out of", len(dff) if dff is not None else 0)
+            print("nicest_bps:", nicest_bps, "out of", len(dff) if dff is not None else 0)
                 # output_files = [
                 #     f
                 #     for h in histogram_defs
                 #     for f in make_resolution_comparison_page(df, args.output_dir, pair_type, h, images= [ create_pair_image(df[nicest_bp], args.output_dir, pair_type) ] if nicest_bp is not None else [])
                 # ]
-                if args.skip_image:
-                    basepair_images = None
-                else:
-                    try:
-                        basepair_images = [ create_pair_image(dff[bp], args.output_dir, pair_type) if bp >= 0 else None for bp in nicest_bps ] * len(resolutions) if nicest_bps is not None else []
-                    except Exception as e:
-                        print(f"Error generating images for {pair_type}: {e}")
-                        print(f"If the image generation doesn't work (e.g. PyMOL is not installed), you can skip it with --skip-image flag")
-                        exit(1)
-                dna_rna_highlights = [ dff[bp] if bp >= 0 else None for bp in nicest_bps ] if nicest_bps is not None else []
-                output_files = []
-                output_files.extend(
+            if args.skip_image:
+                basepair_images = None
+            else:
+                try:
+                    basepair_images = [ create_pair_image(dff[bp], args.output_dir, pair_type) if bp >= 0 else None for bp in nicest_bps ] * len(resolutions) if nicest_bps is not None else []
+                except Exception as e:
+                    print(f"Error generating images for {pair_type}: {e}")
+                    print(f"If the image generation doesn't work (e.g. PyMOL is not installed), you can skip it with --skip-image flag")
+                    exit(1)
+            dna_rna_highlights = [ dff[bp] if bp >= 0 else None for bp in nicest_bps ] if nicest_bps is not None else []
+            output_files = []
+            output_files.extend(
                     f for f in make_bond_pages(df, args.output_dir, pair_type, hbond_histogram_defs, images=basepair_images, highlights=dna_rna_highlights, title_suffix=" - H-bonds"
                     )
                 )
-                output_files.extend(
+            output_files.extend(
                     make_bond_pages(dff, args.output_dir, pair_type, coplanarity_histogram_defs, highlights=dna_rna_highlights, title_suffix= " - Coplanarity")
                 )
-                output_files.extend(
+            output_files.extend(
                     make_bond_pages(dff, args.output_dir, pair_type, coplanarity_histogram_defs2, highlights=dna_rna_highlights, title_suffix= " - coplanarity2")
                 )
-                output_files.extend(
+            output_files.extend(
                     make_bond_pages(dff, args.output_dir, pair_type, rmsd_histogram_defs, highlights=dna_rna_highlights, title_suffix= " - RMSD to nicest BP")
                 )
                 # Uncomment to generate KDE pairplots (takes forever, you have been warned)
@@ -1283,22 +1325,23 @@ def main(argv):
                 #     for column in [0, 1, 2]
                 #     for f in make_bond_pages(df, args.output_dir, pair_type, [ h.select_columns(column) for h in hbond_histogram_defs], images=dna_rna_images, highlights=dna_rna_highlights, title_suffix=f" #{column}")
                 # )
-            all_statistics.extend(statistics)
-            hb_filters = [
+        hb_filters = [
                 # pl.col(f"hb_{i}_length") <= 4.0 if "C" in hb[1] or "C" in hb[2] else pl.col(f"hb_{i}_length") <= 3.8
                 # for i, hb in enumerate(pair_defs.get_hbonds(pair_type, throw=False))
                 # if f"hb_{i}_length" in df.columns
             ]
-            boundaries.append(calculate_boundaries(
+        boundaries = calculate_boundaries(
                 df.filter(
                     pl.all_horizontal(is_some_quality, *hb_filters)
                 ),
                 pair_type
-            ))
-        if args.reexport == "partitioned":
-            reexport_df(df, stat_columns or [], drop=args.drop_columns, round=not args.reexport_noround).write_parquet(os.path.join(args.output_dir, f"{pair_type.normalize_capitalization()}.parquet"))
-            reexport_df(df.filter(is_some_quality), stat_columns or [], drop=args.drop_columns, round=not args.reexport_noround).write_parquet(os.path.join(args.output_dir, f"{pair_type.normalize_capitalization()}-filtered.parquet"))
-        results.append({
+            )
+    if args.reexport == "partitioned":
+        reexport_df(df, None, stat_columns or dict(), drop=args.drop_columns, round=not args.reexport_noround).write_parquet(os.path.join(args.output_dir, f"{pair_type.normalize_capitalization()}.parquet"))
+        reexport_df(df, is_some_quality, stat_columns or dict(), drop=args.drop_columns, round=not args.reexport_noround).write_parquet(os.path.join(args.output_dir, f"{pair_type.normalize_capitalization()}-filtered.parquet"))
+        print(f'Re-exported {os.path.join(args.output_dir, f"{pair_type.normalize_capitalization()}.parquet")}')
+    return {
+        'results': {
             # "input_file": file,
             "pair_type": pair_type.to_tuple(),
             "count": len(df),
@@ -1312,7 +1355,158 @@ def main(argv):
                 get_label(f"hb_{i}_length", pair_type, throw=False) for i in range(3)
             ],
             "atoms": pair_defs.get_hbonds(pair_type, throw=False),
-        })
+        } ,
+        'statistics': statistics,
+        'boundaries': boundaries,
+    }
+
+def process_pair_type_wrapper(threads: int, args, residue_lists: dict[str, pl.DataFrame] | None, pair_type: PairType, df: pl.DataFrame):
+    with MockPool.make_process_pool(threads) as pool:
+        return process_pair_type(pool, args, residue_lists, pair_type, df)
+
+def process_pair_type_wrapper2(pool: multiprocessing.pool.Pool | MockPool, semaphore: threading.Semaphore, threads: int, args, residue_lists: dict[str, pl.DataFrame] | None, pair_type: PairType, df: pl.DataFrame):
+    for i in range(math.ceil(threads/2)):
+        semaphore.acquire()
+    for i in range(threads - math.ceil(threads/2)):
+        if not semaphore.acquire(blocking=False):
+            threads -= 1
+    print(f"Starting {pair_type} with {threads} threads")
+    f = None
+
+    def finally_(*_):
+        for _ in range(threads):
+            semaphore.release()
+    try:
+        return (f := pool.apply_async(process_pair_type_wrapper, args=(threads, args, residue_lists, pair_type, df), callback=finally_, error_callback=finally_))
+    finally:
+        if f is None:
+            finally_()
+
+class PairTypeFilter:
+    def __init__(self, value: str | None, near_is_identical: bool):
+        if value is None:
+            value = "*"
+        values = value.split(",")
+        self.whitelist = set()
+        self.blacklist = set()
+        self.fam_whitelist = set()
+        self.fam_blacklist = set()
+        self.default = False
+        self.defaultN = False
+        self.near_is_identical = near_is_identical
+
+        for v in values:
+            neg, v = (True, v[1:]) if v.startswith("!") else (False, v)
+            if v == "*":
+                self.default = not neg
+            elif v == "n*":
+                self.defaultN = not neg
+            elif m := re.fullmatch("(n?)([ct*])([WHSB*]{2})(a|b|c|d)?(-*)?", v):
+                g = m.groups()
+                for cistrans in [ g[1] ] if g[1] != "*" else [ 'c', 't' ]:
+                    for e1 in [ g[2][0] ] if g[2][0] != "*" else [ 'W', 'H', 'S' ]:
+                        for e2 in [ g[2][1] ] if g[2][1] != "*" else [ 'W', 'H', 'S', 'B' ]:
+                            fam = f"{g[0] or ''}{cistrans}{e1}{e2}{g[3] or ''}"
+                            if neg: self.fam_blacklist.add(fam.lower())
+                            else:   self.fam_whitelist.add(fam.lower())
+            else:
+                pt = PairType.parse(v)
+                if neg: self.blacklist.add(pt)
+                else:   self.whitelist.add(pt)
+
+    def __call__(self, pt: PairType):
+        if pt in self.whitelist:
+            return True
+        if pt in self.blacklist:
+            return False
+        
+        if pt.full_family.lower() in self.fam_whitelist:
+            return True
+        if pt.full_family.lower() in self.fam_blacklist:
+            return False
+
+        if self.near_is_identical and pt.n:
+            return self(pt.without_n())
+
+        if pt.n:
+            return self.defaultN
+        else:
+            return self.default
+        
+    def __repr__(self):
+        values = []
+        if self.default:
+            values.append("*")
+        if self.defaultN and not self.near_is_identical:
+            values.append("n*")
+
+        for pt in self.fam_whitelist:
+            values.append(str(pt))
+        for pt in self.fam_blacklist:
+            values.append("!" + str(pt))
+        for pt in self.whitelist:
+            values.append(str(pt))
+        for pt in self.blacklist:
+            values.append("!" + str(pt))
+
+        return ",".join(values)
+
+def main(argv):
+    import argparse
+    parser = argparse.ArgumentParser(description="Compute KDE densities for the provided basepair classes, generate histogram plot")
+    parser.add_argument("input_file", nargs="+", help="An input Parquet table. May be multiple files, but it must be partitioned by pair class (one file may contain multiple classes, but one class must be in a single file). We do not load multiple files into memory, making it an effective way to reduce RAM cravings")
+    parser.add_argument("--residue-directory", help="Directory with residue lists, used to select representative set residues. Currently, lists RNA-1.8-3.5, RNA-0-1.8, DNA-1.8-3.5, DNA-0-1.8 are expected.")
+    parser.add_argument("--reexport", default='none', choices=['none', 'partitioned'], help="Write out parquet files with calculated statistics columns (log likelihood, mode deviations)")
+    parser.add_argument("--include-nears", default=False, action="store_true", help="If FR3D is run in basepair_detailed mode, it reports near basepairs (denoted as ncWW). By default, we ignore them, but this option includes them in the output.")
+    parser.add_argument("--filter-pair-type", default=None, help="Comma separated list of pair types to include in the result (formatted as cWW-AC). By default all are included.")
+    parser.add_argument("--skip-kde", default=False, action="store_true", help="Skip generating kernel density estimates for histograms, image selection and 'niceness' score calculation.")
+    parser.add_argument("--skip-image", default=False, action="store_true", help="Skip generating images for the nicest basepairs (use if the gen_contact_images.py script is broken)")
+    parser.add_argument("--skip-plots", default=False, action="store_true", help="Skip generating all PDF plots (only useful with --reexport)")
+    parser.add_argument("--drop-columns", default=[], nargs="*", help="remove the specified columns from the reexport output (regex supported when in ^...$)")
+    parser.add_argument("--reexport-noround", default=False, action="store_true", help="Do not round float columns in the reexported data")
+    parser.add_argument("--output-dir", "-o", required=True, help="Output directory")
+    parser.add_argument("--threads", type=parse_thread_count, default=1, help="Number of threads to use for processing")
+    args = parser.parse_args(argv)
+
+    pt_filter = PairTypeFilter(args.filter_pair_type, args.include_nears)
+
+    if args.residue_directory:
+        residue_lists = residue_filter.read_id_lists(args.residue_directory)
+    else:
+        residue_lists = None
+        global is_some_quality # TODO: configurable resolution cutoffs
+        is_some_quality = pl.lit(True)
+    
+    if args.skip_kde:
+        global hist_kde
+        hist_kde = False
+
+    semaphore = threading.BoundedSemaphore(args.threads)
+    process_pool_size = 1 # math.ceil(args.threads / 2) "daemonic processes are not allowed to have children" 🤦
+    min_proc_threads = min(math.ceil(args.threads / process_pool_size), args.threads)
+
+    os.makedirs(args.output_dir, exist_ok=True)
+    futures = []
+    with MockPool.make_process_pool(process_pool_size) as pool:
+        for pair_type, df, dfmeta in enumerate_pair_types(args.input_file, args.include_nears):
+            if not pt_filter(pair_type):
+                print(f"Skipping {pair_type} because it is not in {pt_filter}")
+                continue
+
+            threads_here = max(min_proc_threads, min(args.threads, math.ceil(args.threads * 2 * dfmeta.get("size_fraction", 0))))
+            futures.append(process_pair_type_wrapper2(pool, semaphore, threads_here, args, residue_lists, pair_type, df))
+
+    results = []
+    boundaries = []
+    all_statistics = []
+    for x in futures:
+        x = x.get()
+        if x is not None:
+            results.append(x['results'])
+            if x['boundaries'] is not None:
+                boundaries.append(x['boundaries'])
+            all_statistics.extend(x['statistics'])
+
 
     # results.sort(key=lambda r: r["score"], reverse=True)
     # results.sort(key=lambda r: r["pair_type"])
@@ -1341,7 +1535,12 @@ def main(argv):
 
     with open(os.path.join(args.output_dir, "output.json"), "w") as f:
         import json
-        json.dump(results, f, indent=4)
+        def json_default(val):
+            if np.isscalar(val):
+                return float(val)
+            raise TypeError(f"Cannot serialize {val} of type {type(val)}")
+        json.dump(results, f, indent=4, default=json_default)
+
 
 if __name__ == "__main__":
     main(sys.argv[1:])
