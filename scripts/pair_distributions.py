@@ -864,7 +864,7 @@ def calculate_stats(pool: multiprocessing.pool.ThreadPool | multiprocessing.pool
     # columns = df.select(pl.col("^hb_\\d+_(length|donor_angle|acceptor_angle)$")).columns
     # columns = df.select(pl.col("^hb_\\d+_length$"), pl.col("^C1_C1_(yaw|pitch|roll)(1|2)$")).columns
     # columns = df.select(pl.col("^hb_\\d+_(length|donor_angle|acceptor_angle)$"), pl.col("^C1_C1_(yaw|pitch|roll)(1|2)$")).columns
-    columns = df.select(pl.col("^hb_\\d+_.*$"), pl.col("^C1_C1_.*$"), pl.col("^coplanarity_.*$")).columns
+    columns = df.select(pl.col("^hb_\\d+_.*$"), pl.col("C1_C1_distance"), pl.col("C1_C1_total_angle"), pl.col("^C1_C1_(yaw|pitch|roll)(1|2)$"), pl.col("^coplanarity_.*$")).columns
     # print(f"{columns=}")
     cdata = [ df[c].drop_nulls().to_numpy() for c in columns ]
     medians = [ float(np.median(c)) if len(c) > 0 and not is_angular_modular(cname) else None for c, cname in zip(cdata, columns) ]
@@ -969,18 +969,24 @@ def calculate_likelihood_percentiles(df: pl.DataFrame):
     ll_columns = [ (col, col[:-len("_log_likelihood")]) for col in df.columns if col.endswith("_log_likelihood") ]
     if len(ll_columns) == 0:
         return df
-    perc_columns = [ (df[col].rank(descending=False) / dflen).cast(pl.Float32).alias(f"{col_core}_quantile") for col, col_core in ll_columns ]
+    perc_columns = [ ((df[col].rank(descending=False) - 1) / dflen).cast(pl.Float32).alias(f"{col_core}_quantile") for col, col_core in ll_columns ]
     print(f"{ll_columns=} {perc_columns=}")
     mean_percentile = pl.mean_horizontal(perc_columns)
+    hmean_percentile = 1/pl.mean_horizontal([ 1/x for x in perc_columns ])
+    prod_percentile = pl.sum_horizontal([ x.log() for x in perc_columns ]).exp()
     min_percentile = pl.min_horizontal(perc_columns)
     min2_percentile = pl.min_horizontal([ pl.when(c <= min_percentile).then(None).otherwise(c) for c in perc_columns ])
 
     return df.with_columns(
         *perc_columns,
         mean_percentile.alias("quantile_mean"),
+        hmean_percentile.alias("quantile_hmean"),
+        prod_percentile.alias("quantile_prod"),
         min_percentile.alias("quantile_min"),
         min2_percentile.alias("quantile_min2"),
-        (mean_percentile.rank(descending=False).cast(pl.Float32) / dflen).alias("quantile_mean_Q"),
+        ((mean_percentile.rank(descending=False) - 1).cast(pl.Float32) / dflen).alias("quantile_mean_Q"),
+        ((hmean_percentile.rank(descending=False) - 1).cast(pl.Float32) / dflen).alias("quantile_hmean_Q"),
+        ((prod_percentile.rank(descending=False) - 1).cast(pl.Float32) / dflen).alias("quantile_prod_Q"),
     )
 
 def reexport_df(df: pl.DataFrame, filter: pl.Expr | None, columns, drop: list[str], round:bool):
@@ -1209,9 +1215,9 @@ def process_pair_type(pool: multiprocessing.pool.Pool | MockPool, args, residue_
 
     dff = None
     stat_columns = {
-            "mode_deviations": [ None ] * len(df),
-            "log_likelihood": [ None ] * len(df),
-        }
+        "mode_deviations": [ None ] * len(df),
+        "log_likelihood": [ None ] * len(df),
+    }
     nicest_bps: Optional[list[int]] = None
     statistics = []
     for resolution_label, resolution_filter in {
