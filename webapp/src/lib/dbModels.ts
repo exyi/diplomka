@@ -213,7 +213,7 @@ export function makeSqlQuery(filter: NucleotideFilterModel, from: string, limit?
 export const orderByOptions = [
     { id: "pdbid", expr: "", label: "pdbid" },
     { id: "pdbidD", expr: "pdbid DESC, model DESC, chain1 DESC, nr1 DESC", title: "", label: "pdbid descending" },
-    { id: "resolutionA", expr: "resolution NULLS LAST, pdbid, model, chain1, nr1", title: "Reported resolution of the source PDB structure", value: "resolution" },
+    { id: "resolutionA", expr: "resolution NULLS LAST, pdbid, model, chain1, nr1", title: "Reported resolution of the source PDB structure", label: "resolution" },
     { id: "modedevA", expr: "mode_deviations", title: "ASCENDING - best to worst - Number of standard deviations between the H-bond parameters and the modes (peaks) calculated from Kernel Density Estimate. Use to list &quot;nicest&quot; pairs and avoid secondary modes.", label: "Deviation from KDE mode ↓" },
     { id: "modedevD", expr: "-mode_deviations", title: "DESCENDING - worst to best - Number of standard deviations between the H-bond parameters and the modes (peaks) calculated from Kernel Density Estimate. Use to list &quot;nicest&quot; pairs and avoid secondary modes.", label: "Deviation from KDE mode ↑" },
     { id: "LLD", expr: "-log_likelihood", title: "↑ DESCENDING - best to worst - Multiplied likelihoods of all H-bond parameters in their Kernel Density Estimate distribution. Use to list &quot;nicest&quot; pairs without disqualifying secondary modes.", label: "KDE likelihood ↑" },
