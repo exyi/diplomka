@@ -53,7 +53,7 @@ def main(args):
     for b in boundaries.iter_rows(named=True):
         pair_type = pair_defs.PairType.from_tuple((b["family"], b["bases"])).normalize_capitalization()
         hbond = pair_defs.get_hbonds(pair_type)
-        hbond_default_lengths = [ pair_defs.is_ch_bond(pair_type, hb) or pair_defs.is_bond_to_sugar(pair_type, hb) for hb in hbond ]
+        # hbond_default_lengths = [ pair_defs.is_ch_bond(pair_type, hb) or pair_defs.is_bond_to_sugar(pair_type, hb) for hb in hbond ]
 
         row_conditions = []
         row_score = []
@@ -107,10 +107,13 @@ def main(args):
     #     #validate="m:1",
     # )
 
-    df = df.filter(monster_condition)
+    if args.accepted_column is not None:
+        df = df.with_columns((monster_condition == True).alias(args.accepted_column))
+    else:
+        df = df.filter(monster_condition)
 
     if args.best_fit is not None and args.best_fit != "none":
-        df = best_fitting_nucleotides(df, args.best_fit)
+        df = best_fitting_nucleotides(df, args.best_fit, args.accepted_column)
     
     df = df.sort("pdbid", "model", "chain1", "nr1", "alt1", "ins1", "chain2", "nr2", "alt2", "ins2", "symmetry_operation1", "symmetry_operation2", "family")
 
@@ -203,11 +206,15 @@ def best_fitting_edges_greedy(df: pl.DataFrame) -> pl.DataFrame:
         raise
 
 
-def best_fitting_nucleotides(df: pl.LazyFrame, method: str) -> pl.LazyFrame:
+def best_fitting_nucleotides(df: pl.LazyFrame, method: str, accepted_column: str|None) -> pl.LazyFrame:
+    if accepted_column is not None:
+        orig_df = df
+        df = df.filter(pl.col(accepted_column).is_not_null())
     df = df.sort(conflict_resolution_score)
 
     # first, select best matching assignment for each pair
-    gr = df.group_by(pl.col("pdbid").str.to_lowercase(), "model", "chain1", "nr1", "alt1", "ins1", "chain2", "nr2", "alt2", "ins2", "symmetry_operation1", "symmetry_operation2", maintain_order=True)
+    id_columns = [pl.col("pdbid").str.to_lowercase(), "model", "chain1", "nr1", "alt1", "ins1", "chain2", "nr2", "alt2", "ins2", "symmetry_operation1", "symmetry_operation2"]
+    gr = df.group_by(id_columns, maintain_order=True)
     df = gr.first()
 
     # second, select best matching partner for each nt/edge
@@ -219,6 +226,17 @@ def best_fitting_nucleotides(df: pl.LazyFrame, method: str) -> pl.LazyFrame:
         df = df.group_by(["pdbid"]).map_groups(best_fitting_edges_greedy, schema=None)
 
     df = df.collect().lazy()
+
+    if accepted_column is not None:
+        df = orig_df.drop(accepted_column).join(df.with_columns(pl.lit(True).alias(accepted_column)),
+            left_on=id_columns,
+            right_on=id_columns,
+            how="left",
+            suffix="_right",
+        )
+        assert f"accepted_column_right" not in df.columns
+        df = df.drop(c for c in df.columns if c.endswith("_right"))
+        df = df.with_columns(pl.col(accepted_column) == pl.lit(True))
 
     return df
 
@@ -233,6 +251,7 @@ if __name__ == "__main__":
     parser.add_argument("--boundaries", type=str, required=False, default="https://docs.google.com/spreadsheets/d/e/2PACX-1vTvEpcubhqyJoPTmL3wtq0677tdIRnkTghJcbPtflUdfvyzt4xovKJxBHvH2Y1VyaFSU5S2BZIimmSD/pub?gid=245758142&single=true&output=csv", help="Input file with boundaries. May be URL and the Google table is default.")
     parser.add_argument("--null-is-fine", default=False, action="store_true", help="Columns with NULL values are considered to be within boundaries. Rows with all NULL columns are still discarded")
     parser.add_argument("--best-fit", default=None, type=str, help="Only the best fitting family for each basepair is kept", choices=["none", "single-pair", "greedy-edges", "graph-edges"])
+    parser.add_argument("--accepted-column", default=None, type=str, help="If specified, instead of filtering the file, add a boolean column indication whether the pair is accepted or not")
 
     args = parser.parse_args()
     main(args)
