@@ -108,7 +108,7 @@ def main(args):
     # )
 
     if args.accepted_column is not None:
-        df = df.with_columns((monster_condition == True).alias(args.accepted_column))
+        df = df.with_columns((monster_condition == pl.lit(True)).alias(args.accepted_column))
     else:
         df = df.filter(monster_condition)
 
