@@ -353,15 +353,25 @@
     {/if}
     {#if pairDB?.originalRow?.quantile_mean_Q != null}
         {@const r = pairDB.originalRow}
+        {@const score = r.quantile_hmean_Q != null ? r.quantile_hmean_Q : r.quantile_mean_Q}
         <table class="table is-narrow is-striped" style="width: fit-content">
             <tr>
                 <th>Validation score</th>
-                <td class="quantile {r.quantile_mean_Q < 0.3 ? "quantile-low" : r.quantile_mean_Q < 0.7 ? "quantile-med" : "quantile-high"}">{(r.quantile_mean_Q*100).toFixed(1)}%</td>
+                <td class="quantile {score < 0.3 ? "quantile-low" : score < 0.7 ? "quantile-med" : "quantile-high"}"
+                    title="Harmonic mean percentile = {r.quantile_hmean_Q*100}, arithmetic mean percentile = {r.quantile_mean_Q*100}">
+                    {(score*100).toFixed(1)}%
+                </td>
             </tr>
             <tr>
                 <th>Percentile mean</th>
                 <td>{(r.quantile_mean*100).toFixed(1)}%</td>
             </tr>
+            {#if r.quantile_hmean}
+            <tr>
+                <th>Percentile harmonic mean</th>
+                <td title="1/∑(1/pₖ) = {r.quantile_hmean*100}">{(r.quantile_hmean*100).toFixed(1)}%</td>
+            </tr>
+            {/if}
             <tr>
                 <th>Percentile min</th>
                 <td>{(r.quantile_min*100).toFixed(1)}%</td>
