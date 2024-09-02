@@ -25,7 +25,7 @@ bins_per_width = 50
 hist_kde = True
 
 is_high_quality = pl.col("RNA-0-1.8") | pl.col("DNA-0-1.8")
-is_some_quality = pl.col("RNA-0-1.8") | pl.col("DNA-0-1.8") | pl.col("DNA-1.8-3.5") | pl.col("RNA-1.8-3.5")
+is_some_quality = (pl.col("RNA-0-1.8") | pl.col("DNA-0-1.8") | pl.col("DNA-1.8-3.5") | pl.col("RNA-1.8-3.5")) & pl.all_horizontal(pl.col('^accepted$'))
 is_med_quality = pl.col("RNA-1.8-3.5") | pl.col("DNA-1.8-3.5")
 is_dna = pl.col("res1").str.starts_with("D") | pl.col("res2").str.starts_with("D")
 is_rna = pl.col("res1").str.starts_with("D").not_() | pl.col("res2").str.starts_with("D").not_()
@@ -970,7 +970,7 @@ def calculate_likelihood_percentiles(df: pl.DataFrame):
     if len(ll_columns) == 0:
         return df
     perc_columns = [ ((df[col].rank(descending=False) - 1) / dflen).cast(pl.Float32).alias(f"{col_core}_quantile") for col, col_core in ll_columns ]
-    print(f"{ll_columns=} {perc_columns=}")
+    # print(f"{ll_columns=} {perc_columns=}")
     mean_percentile = pl.mean_horizontal(perc_columns)
     hmean_percentile = 1/pl.mean_horizontal([ 1/x for x in perc_columns ])
     prod_percentile = pl.sum_horizontal([ x.log() for x in perc_columns ]).exp()
