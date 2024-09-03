@@ -973,7 +973,7 @@ def calculate_likelihood_percentiles(df: pl.DataFrame):
     perc_columns = [ ((df[col].rank(descending=False) - 1) / dflen).cast(pl.Float32).alias(f"{col_core}_quantile") for col, col_core in ll_columns ]
     # print(f"{ll_columns=} {perc_columns=}")
     mean_percentile = pl.mean_horizontal(perc_columns)
-    hmean_percentile = 1/pl.mean_horizontal([ 1/x for x in perc_columns ])
+    hmean_percentile = 1/pl.mean_horizontal([ 1/(x+0.01) for x in perc_columns ]) - 0.01
     prod_percentile = pl.sum_horizontal([ x.log() for x in perc_columns ]).exp()
     min_percentile = pl.min_horizontal(perc_columns)
     min2_percentile = pl.min_horizontal([ pl.when(c <= min_percentile).then(None).otherwise(c) for c in perc_columns ])
@@ -986,7 +986,7 @@ def calculate_likelihood_percentiles(df: pl.DataFrame):
         min_percentile.alias("quantile_min"),
         min2_percentile.alias("quantile_min2"),
         ((mean_percentile.rank(descending=False) - 1).cast(pl.Float32) / dflen).alias("quantile_mean_Q"),
-        ((hmean_percentile.rank(descending=False) - 1).cast(pl.Float32) / dflen).alias("quantile_hmean_Q"),
+        ((pl.struct([hmean_percentile, mean_percentile]).rank(descending=False) - 1).cast(pl.Float32) / dflen).alias("quantile_hmean_Q"),
         ((prod_percentile.rank(descending=False) - 1).cast(pl.Float32) / dflen).alias("quantile_prod_Q"),
     )
 

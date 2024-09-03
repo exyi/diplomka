@@ -366,7 +366,7 @@
                 <th>Percentile mean</th>
                 <td>{(r.quantile_mean*100).toFixed(1)}%</td>
             </tr>
-            {#if r.quantile_hmean}
+            {#if r.quantile_hmean != null}
             <tr>
                 <th>Percentile harmonic mean</th>
                 <td title="1/∑(1/pₖ) = {r.quantile_hmean*100}">{(r.quantile_hmean*100).toFixed(1)}%</td>
