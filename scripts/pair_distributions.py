@@ -25,7 +25,8 @@ bins_per_width = 50
 hist_kde = True
 
 is_high_quality = pl.col("RNA-0-1.8") | pl.col("DNA-0-1.8")
-is_some_quality = (pl.col("RNA-0-1.8") | pl.col("DNA-0-1.8") | pl.col("DNA-1.8-3.5") | pl.col("RNA-1.8-3.5")) & pl.all_horizontal(pl.col('^accepted$'))
+is_some_quality = (pl.col("RNA-0-1.8") | pl.col("DNA-0-1.8") | pl.col("DNA-1.8-3.5") | pl.col("RNA-1.8-3.5"))
+is_accepted_pair = pl.all_horizontal(pl.col('^accepted$'))
 is_med_quality = pl.col("RNA-1.8-3.5") | pl.col("DNA-1.8-3.5")
 is_dna = pl.col("res1").str.starts_with("D") | pl.col("res2").str.starts_with("D")
 is_rna = pl.col("res1").str.starts_with("D").not_() | pl.col("res2").str.starts_with("D").not_()
@@ -37,7 +38,7 @@ subplots = (2, 2)
 
 resolutions = [
     # ("DNA ≤3 Å", is_some_quality & is_rna.not_() & (pl.col("resolution") <= 3)),
-    ("RNA ≤3 Å", is_some_quality & is_rna & (pl.col("resolution") <= 3)),
+    ("RNA ≤3 Å", is_some_quality & is_accepted_pair & is_rna & (pl.col("resolution") <= 3)),
     # ("RNA ≤3 Å", is_some_quality & (pl.col("resolution") <= 3)),
     # ("No filter ≤3 Å", (pl.col("resolution") <= 3)),
     # ("DNA >3 Å", is_rna.not_() & (pl.col("resolution") > 3)),
@@ -1205,7 +1206,7 @@ def process_pair_type(pool: multiprocessing.pool.Pool | MockPool, args, residue_
                 "DNA-1.8-3.5": is_dna & (pl.col("resolution") <= 3.5) & (pl.col("resolution") > 1.8),
             })
     print(f"{pair_type}: total count = {len(df)}, quality count = {len(df.filter(is_some_quality))}")
-    print(df.select(pl.col("^hb_\\d+_length$"), pl.col("resolution"), is_some_quality.alias("some_quality")).describe())
+    # print(df.select(pl.col("^hb_\\d+_length$"), pl.col("resolution"), is_some_quality.alias("some_quality")).describe())
 
         # good_bonds = [ i for i, bond in enumerate(pair_defs.get_hbonds(pair_type, throw=False) or []) if not pair_defs.is_bond_hidden(pair_type, bond) ]
         # df = df.filter(pl.all_horizontal(pl.lit(True), *[
@@ -1222,11 +1223,11 @@ def process_pair_type(pool: multiprocessing.pool.Pool | MockPool, args, residue_
     statistics = []
     for resolution_label, resolution_filter in {
             # "unfiltered": True,
-            "1.8 Å": (pl.col("resolution") <= 1.8) & is_some_quality,
-            "2.5 Å": (pl.col("resolution") <= 2.5) & is_some_quality,
-            "RNA 3.0 Å": (pl.col("resolution") <= 3.0) & is_some_quality & is_rna,
-            "DNA 3.0": (pl.col("resolution") <= 3.0) & is_some_quality & is_dna,
-            "3.0 Å": (pl.col("resolution") <= 3.0) & is_some_quality,
+            "1.8 Å": (pl.col("resolution") <= 1.8) & is_some_quality & is_accepted_pair,
+            "2.5 Å": (pl.col("resolution") <= 2.5) & is_some_quality & is_accepted_pair,
+            "RNA 3.0 Å": (pl.col("resolution") <= 3.0) & is_some_quality & is_rna & is_accepted_pair,
+            "DNA 3.0": (pl.col("resolution") <= 3.0) & is_some_quality & is_dna & is_accepted_pair,
+            "3.0 Å": (pl.col("resolution") <= 3.0) & is_some_quality & is_accepted_pair,
         }.items():
         dff = df.filter(resolution_filter).filter(pl.any_horizontal(pl.col("^hb_\\d+_length$").is_not_null()))
         if len(dff) == 0:
@@ -1338,7 +1339,7 @@ def process_pair_type(pool: multiprocessing.pool.Pool | MockPool, args, residue_
             ]
         boundaries = calculate_boundaries(
                 df.filter(
-                    pl.all_horizontal(is_some_quality, *hb_filters)
+                    pl.all_horizontal(is_some_quality & is_accepted_pair, *hb_filters)
                 ),
                 pair_type
             )
