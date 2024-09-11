@@ -136,7 +136,11 @@ export function filterToSqlCondition(filter: NucleotideFilterModel): string[] {
     conditions.push(...rangeToCondition(`C1_C1_roll1`, filter.roll1))
     conditions.push(...rangeToCondition(`C1_C1_roll2`, filter.roll2))
 
-    conditions.push(...rangeToCondition(`quantile_mean_Q*100`, filter.validation_score))
+    if (['quantile_mean_Q', 'quantile_mean_QA'].includes(filter.orderBy)) {
+        conditions.push(...rangeToCondition(`quantile_mean_Q*100`, filter.validation_score))
+    } else {
+        conditions.push(...rangeToCondition(`quantile_hmean_Q*100`, filter.validation_score))
+    }
 
     if (filter.dna != null) {
         if (filter.dna)
@@ -220,8 +224,10 @@ export const orderByOptions = [
     { id: "LLA", expr: "log_likelihood", title: "↓ ASCENDING - best to worst - Multiplied likelihoods of all H-bond parameters in their Kernel Density Estimate distribution. Use to list &quot;nicest&quot; pairs without disqualifying secondary modes.", label: "KDE likelihood ↓" },
     { id: "rmsdA", expr: "(rmsd_edge1+rmsd_edge2)", title: "↓ ASCENDING ('best first') - edge RMSD to the 'nicest' basepair", label: "Smallest Edge RMSD" },
     { id: "rmsdD", expr: "(rmsd_edge1+rmsd_edge2) DESC", title: "↑ DESCENDING ('worst first') - edge RMSD to the 'nicest' basepair", label: "Largest Edge RMSD" },
-    { id: "quantile_mean_Q", expr: "quantile_mean_Q DESC", title: "↑ DESCENDING ('best first') - Mean quantile of all parameter likelihoods.", label: "Validation score ↑" },
-    { id: "quantile_mean_QA", expr: "quantile_mean_Q ASC", title: "↓ ASCENDING ('worst first') - Mean quantile of all parameter likelihoods.", label: "Validation score ↓" },
+    { id: "quantile_hmean_Q", expr: "quantile_hmean_Q DESC", title: "↑ DESCENDING ('best first') - Harmonic mean quantile of all parameter likelihoods.", label: "Probability percentile ↑" },
+    { id: "quantile_hmean_QA", expr: "quantile_hmean_Q ASC", title: "↓ ASCENDING ('worst first') - Harmonic mean quantile of all parameter likelihoods.", label: "Probability percentile ↓" },
+    { id: "quantile_mean_Q", expr: "quantile_mean_Q DESC", title: "↑ DESCENDING ('best first') - Mean quantile of all parameter likelihoods.", label: "Probability percentile (arithmetic mean) ↑" },
+    { id: "quantile_mean_QA", expr: "quantile_mean_Q ASC", title: "↓ ASCENDING ('worst first') - Mean quantile of all parameter likelihoods.", label: "Probability percentile (arithmetic mean) ↓" },
 ]
 
 function orderToExpr(opt: string | null, prefix = '') {

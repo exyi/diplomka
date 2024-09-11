@@ -353,10 +353,10 @@
     {/if}
     {#if pairDB?.originalRow?.quantile_mean_Q != null}
         {@const r = pairDB.originalRow}
-        {@const score = r.quantile_hmean_Q != null ? r.quantile_hmean_Q : r.quantile_mean_Q}
+        {@const score = !['quantile_mean_Q', 'quantile_mean_QA'].includes(realFilter.orderBy) && r.quantile_hmean_Q != null ? r.quantile_hmean_Q : r.quantile_mean_Q}
         <table class="table is-narrow is-striped" style="width: fit-content">
             <tr>
-                <th>Validation score</th>
+                <th>Probability percentile</th>
                 <td class="quantile {score < 0.3 ? "quantile-low" : score < 0.7 ? "quantile-med" : "quantile-high"}"
                     title="Harmonic mean percentile = {r.quantile_hmean_Q*100}, arithmetic mean percentile = {r.quantile_mean_Q*100}">
                     {(score*100).toFixed(1)}%
@@ -463,7 +463,7 @@
                 </td>
                 <td>
                     {#if r.quantile != null}
-                        <span title="Validation score - likelihood percentile" class="quantile {r.quantile < 0.3 ? "quantile-low" : r.quantile < 0.7 ? "quantile-med" : "quantile-high"}">{(r.quantile*100).toFixed(1)}%</span>
+                        <span title="Probability likelihood percentile" class="quantile {r.quantile < 0.3 ? "quantile-low" : r.quantile < 0.7 ? "quantile-med" : "quantile-high"}">{(r.quantile*100).toFixed(1)}%</span>
                     {/if}
                 </td>
                 <td><i>{r.tooltip ?? ''}</i></td>
