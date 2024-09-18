@@ -262,14 +262,21 @@ rmsd_histogram_defs = [
 ]
 
 def is_angular_modular(column: str):
+    """
+    Returns true, if the column is an angular value that should be kept in the -180...180 range
+    """
     return re.match(r".*(\b|_)(yaw|pitch|roll|euler_theta|euler_psi|euler_phi)\d*$", column) is not None
 
 def angular_modulo(x):
+    """
+    Fits angles into the -180...180 range (x may be float, numpy array or polars series)
+    """
     return (x + (180 + 2*360)) % 360 - 180
     #                  ^^^^ polars broken modulo workaround
 
 def angular_modular_mean(data: Union[pl.Series, np.ndarray], throw_if_empty = False) -> Optional[float]:
     """
+    Calculates the circular mean of angles in degrees (https://en.wikipedia.org/wiki/Circular_mean)
     >>> np.angle(np.mean(np.exp(1j * np.radians([-170, 175]))), deg=True)
     -177.5
     """
@@ -286,6 +293,7 @@ def angular_modular_mean(data: Union[pl.Series, np.ndarray], throw_if_empty = Fa
 
 def angular_modular_std(data: Union[pl.Series, np.ndarray], throw_if_empty = False, mean = None) -> Optional[float]:
     """
+    Circular standard deviation of angles in degrees
     """
     if isinstance(data, pl.Series):
         data = data.drop_nulls().to_numpy()
@@ -305,6 +313,12 @@ def angular_modular_std(data: Union[pl.Series, np.ndarray], throw_if_empty = Fal
 
 def angular_modular_minmax(data: Union[pl.Series, np.ndarray], throw_if_empty = False, percentiles = (0, 100)) -> Optional[tuple[float, float]]:
     """
+    Heuristic which calculates some quasi min/max boundaries of angles in degrees
+
+    - the *mean* angle is calculated
+    - the values are "centered" - shifted by the *mean* to 0
+    - minimum and maximum are taken (or other *percentiles* as specified in the parameter)
+    - the values are shifted back by the *mean*
     """
     if isinstance(data, pl.Series):
         data = data.drop_nulls().to_numpy()
@@ -333,7 +347,8 @@ def angular_modular_kde(data:Union[pl.Series, np.ndarray], bw_factor = 1) -> sci
     data_right = data[data > 0] - 360
     return scipy.stats.gaussian_kde(np.concatenate([ data_left, data, data_right ]))
 
-def format_angle_label(atoms: tuple[str, str, str], swap=False):
+def format_angle_label(atoms: tuple[str, str, str], swap=False) -> str:
+    """ Human-readable label for an angle between three atoms (one covalent, one H-bond) """
     first = "B" if swap else "A"
     residue0 = atoms[0][0]
     if residue0 != first:
@@ -347,6 +362,7 @@ def format_angle_label(atoms: tuple[str, str, str], swap=False):
         atoms[2][1:]
     ])
 def format_length_label(atoms: tuple[str, str], swap=False):
+    """Human-readable label for H-bond distance"""
     a,b=atoms
     first = "B" if swap else "A"
     residue0 = atoms[0][0]
@@ -732,13 +748,20 @@ def infer_pair_type(filename: str):
         return None
     
 def tranpose_dict(d, columns):
+    """
+    Maybe flattening is a better term...
+    
+    >>> tranpose_dict({ "a": [1, 2, 3], "b": [4, 5, 6] }, ["x", "y", "z"])
+    {'x_a': 1, 'x_b': 4, 'y_a': 2, 'y_b': 5, 'z_a': 3, 'z_b': 6}
+    """
     return {
         (c + "_" + k): v[i]
         for i, c in enumerate(columns)
         for k, v in d.items()
     }
 
-def sample_for_kde(x: np.ndarray, threshold = 5_000):
+def sample_for_kde(x: np.ndarray, threshold = 15_000):
+    "Subsample x to at most threshold elements to avoid the steep performance cost of KDE for insignificantly better results"
     if len(x) <= threshold:
         return x
     else:
@@ -797,6 +820,10 @@ class KDEResult:
     result_MD: pl.Series | None
 
 def spread_nulls(null_bitmap, data, dtype) -> pl.Series:
+    """
+    Inverse of drop_nulls:
+    spread_nulls(col.is_null(), col.drop_nulls(), ...) == col
+    """
     l = []
     i = 0
     for is_null in null_bitmap:
@@ -808,13 +835,17 @@ def spread_nulls(null_bitmap, data, dtype) -> pl.Series:
     return pl.Series(l, dtype=dtype)
 
 
-def calc_diff(data, cname):
-    if is_angular_modular(cname):
+def modulo_maybe(data, col_name):
+    """
+    Applies mod 360° if the column is angular
+    """
+    if is_angular_modular(col_name):
         return angular_modulo(data)
     else:
         return data
 
 def calculate_kde_columns(data: np.ndarray, column_name: str, eval_data: pl.Series | None) -> KDEResult | None:
+    print(f"Fitting {column_name} KDE on {len(data)} samples, evaluating on {len(eval_data) if eval_data is not None else None}")
     if len(data) < 5:
         return None
 
@@ -839,7 +870,7 @@ def calculate_kde_columns(data: np.ndarray, column_name: str, eval_data: pl.Seri
         null_bitmap = eval_data.is_null().to_numpy()
         LL = kde.logpdf(eval_data.drop_nulls().to_numpy())
         result_LL = spread_nulls(null_bitmap, LL, pl.Float32)
-        MD = np.abs(calc_diff(eval_data.drop_nulls().to_numpy() - mode, column_name)) / std
+        MD = np.abs(modulo_maybe(eval_data.drop_nulls().to_numpy() - mode, column_name)) / std
         result_MD = spread_nulls(null_bitmap, MD, pl.Float32)
 
     return KDEResult(mode, std, result_LL, result_MD)
@@ -873,8 +904,10 @@ def calculate_stats(pool: multiprocessing.pool.ThreadPool | multiprocessing.pool
     stds = [ calc_std(c, cname) if len(c) > 1 else None for c, cname in zip(cdata, columns) ]
 
     if skip_kde:
+        print("KDE is skipped")
         kde_results = [ None ] * len(columns)
     else:
+        print(f"Calculating KDEs for {len(columns)} columns: {len(cdata[0])} {len(result_df)}")
         kde_results = pool.starmap(calculate_kde_columns, zip(cdata, columns, [ result_df[col] if result_df is not None else None for col in columns ]))
 
     kde_modes = [ None if res is None else res.mode for res in kde_results ]
@@ -910,9 +943,10 @@ def calculate_stats(pool: multiprocessing.pool.ThreadPool | multiprocessing.pool
         "log_likelihood": total_LL,
     }
 
-    for kde, col in zip(kde_results, columns):
-        new_df_columns[f"{col}_mode_deviation"] = kde.result_MD if kde is not None else None
-        new_df_columns[f"{col}_log_likelihood"] = kde.result_LL if kde is not None else None
+    if not skip_kde:
+        for kde, col in zip(kde_results, columns):
+            new_df_columns[f"{col}_mode_deviation"] = kde.result_MD if kde is not None else None
+            new_df_columns[f"{col}_log_likelihood"] = kde.result_LL if kde is not None else None
 
     result_stats = {
         "count": len(df),
@@ -966,11 +1000,25 @@ def create_pair_image(row: pl.DataFrame, output_dir: str, pair_type: PairType) -
     raise ValueError(f"Could not find PyMOL generated image file")
 
 def calculate_likelihood_percentiles(df: pl.DataFrame):
+    def masked_quantile(col: pl.Expr):
+        if 'accepted' not in df.columns:
+            return (col.rank(descending=True) - 1) / max(len(df) - 1, 1)
+        else:
+            total = df['accepted'].sum()
+            df_sorted = df.lazy().with_row_index("_tmp_ix").sort([col, pl.col("log_likelihood")], descending=[True, True])
+            df_sorted = (
+                df_sorted
+                    .with_columns(pl.col('accepted').cast(pl.Int32).alias('_tmp_rank_mask'))
+                    .with_columns(pl.col("_tmp_rank_mask").cum_sum().alias("_tmp_rank"))
+            )
+            return df_sorted.sort("_tmp_ix").select((pl.col("_tmp_rank") / total).cast(pl.Float32)).collect()['_tmp_rank']
+
+
     dflen = max(1, len(df)-1)
     ll_columns = [ (col, col[:-len("_log_likelihood")]) for col in df.columns if col.endswith("_log_likelihood") ]
     if len(ll_columns) == 0:
         return df
-    perc_columns = [ ((df[col].rank(descending=False) - 1) / dflen).cast(pl.Float32).alias(f"{col_core}_quantile") for col, col_core in ll_columns ]
+    perc_columns = [ masked_quantile(pl.col(col)).alias(f"{col_core}_quantile") for col, col_core in ll_columns ]
     # print(f"{ll_columns=} {perc_columns=}")
     mean_percentile = pl.mean_horizontal(perc_columns)
     hmean_percentile = 1/pl.mean_horizontal([ 1/(x+0.01) for x in perc_columns ]) - 0.01
@@ -985,9 +1033,9 @@ def calculate_likelihood_percentiles(df: pl.DataFrame):
         prod_percentile.alias("quantile_prod"),
         min_percentile.alias("quantile_min"),
         min2_percentile.alias("quantile_min2"),
-        ((mean_percentile.rank(descending=False) - 1).cast(pl.Float32) / dflen).alias("quantile_mean_Q"),
-        ((pl.struct([hmean_percentile, mean_percentile]).rank(descending=False) - 1).cast(pl.Float32) / dflen).alias("quantile_hmean_Q"),
-        ((prod_percentile.rank(descending=False) - 1).cast(pl.Float32) / dflen).alias("quantile_prod_Q"),
+        masked_quantile(mean_percentile).alias("quantile_mean_Q"),
+        masked_quantile(pl.struct([hmean_percentile, mean_percentile])).alias("quantile_hmean_Q"),
+        masked_quantile(prod_percentile).alias("quantile_prod_Q"),
     )
 
 def reexport_df(df: pl.DataFrame, filter: pl.Expr | None, columns, drop: list[str], round:bool):
@@ -1223,13 +1271,14 @@ def process_pair_type(pool: multiprocessing.pool.Pool | MockPool, args, residue_
     statistics = []
     for resolution_label, resolution_filter in {
             # "unfiltered": True,
-            "1.8 Å": (pl.col("resolution") <= 1.8) & is_some_quality & is_accepted_pair,
-            "2.5 Å": (pl.col("resolution") <= 2.5) & is_some_quality & is_accepted_pair,
-            "RNA 3.0 Å": (pl.col("resolution") <= 3.0) & is_some_quality & is_rna & is_accepted_pair,
-            "DNA 3.0": (pl.col("resolution") <= 3.0) & is_some_quality & is_dna & is_accepted_pair,
+            # "1.8 Å": (pl.col("resolution") <= 1.8) & is_some_quality & is_accepted_pair,
+            # "2.5 Å": (pl.col("resolution") <= 2.5) & is_some_quality & is_accepted_pair,
+            # "RNA 3.0 Å": (pl.col("resolution") <= 3.0) & is_some_quality & is_rna & is_accepted_pair,
+            # "DNA 3.0": (pl.col("resolution") <= 3.0) & is_some_quality & is_dna & is_accepted_pair,
             "3.0 Å": (pl.col("resolution") <= 3.0) & is_some_quality & is_accepted_pair,
         }.items():
         dff = df.filter(resolution_filter).filter(pl.any_horizontal(pl.col("^hb_\\d+_length$").is_not_null()))
+        print("calc stats: ", resolution_filter, dff)
         if len(dff) == 0:
             continue
         stat_columns, stats = calculate_stats(pool, dff, df, pair_type, args.skip_kde)
