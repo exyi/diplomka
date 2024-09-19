@@ -17,7 +17,7 @@ export default Object.freeze({
     // disabledDataSources: [ "fr3d-nf", "fr3d-n", "fr3d", "allcontacts", "allcontacts-boundaries" ],
 
     parameterBoundariesUrls: {
-        'googleTable': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTvEpcubhqyJoPTmL3wtq0677tdIRnkTghJcbPtflUdfvyzt4xovKJxBHvH2Y1VyaFSU5S2BZIimmSD/pub?gid=245758142&single=true&output=csv',
+        'googleTable': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQpIjMym1SejcSksbVfnV5WM89jYiR9PcmRcxiJd_0CihxZwVPN5vV-eH-w-dKS_ifCxcYNJqVc6HfG/pub?gid=245758142&single=true&output=csv',
         fr3dData: 'parameter-boundaries.csv'
     },
     /// URL to basepairs.datmos.org/#short/X will be redirected to the full URL specified here

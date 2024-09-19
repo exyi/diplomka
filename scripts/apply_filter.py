@@ -248,7 +248,7 @@ if __name__ == "__main__":
         formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument("inputs", nargs="+")
     parser.add_argument("--output", "-o", required=True, help="Output CSV/Parquet file name.")
-    parser.add_argument("--boundaries", type=str, required=False, default="https://docs.google.com/spreadsheets/d/e/2PACX-1vTvEpcubhqyJoPTmL3wtq0677tdIRnkTghJcbPtflUdfvyzt4xovKJxBHvH2Y1VyaFSU5S2BZIimmSD/pub?gid=245758142&single=true&output=csv", help="Input file with boundaries. May be URL and the Google table is default.")
+    parser.add_argument("--boundaries", type=str, required=False, default="https://docs.google.com/spreadsheets/d/e/2PACX-1vQpIjMym1SejcSksbVfnV5WM89jYiR9PcmRcxiJd_0CihxZwVPN5vV-eH-w-dKS_ifCxcYNJqVc6HfG/pub?gid=245758142&single=true&output=csv", help="Input file with boundaries. May be URL and the Google table is default.")
     parser.add_argument("--null-is-fine", default=False, action="store_true", help="Columns with NULL values are considered to be within boundaries. Rows with all NULL columns are still discarded")
     parser.add_argument("--best-fit", default=None, type=str, help="Only the best fitting family for each basepair is kept", choices=["none", "single-pair", "greedy-edges", "graph-edges"])
     parser.add_argument("--accepted-column", default=None, type=str, help="If specified, instead of filtering the file, add a boolean column indication whether the pair is accepted or not")
