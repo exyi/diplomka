@@ -24,6 +24,13 @@ def main(args):
     boundaries = pl.read_csv(args.boundaries, infer_schema_length=10000)
     df = scan_pair_csvs(args.inputs)
 
+    df = apply_filter(df, boundaries, args.null_is_fine, args.accepted_column, args.best_fit)
+
+    df = df.sort("pdbid", "model", "chain1", "nr1", "alt1", "ins1", "chain2", "nr2", "alt2", "ins2", "symmetry_operation1", "symmetry_operation2", "family")
+
+    save_output(args, df)
+
+def apply_filter(df: pl.LazyFrame, boundaries: pl.DataFrame, null_is_fine: bool, accepted_column: str | None, best_fit: ty.Literal["none", "single-pair", "greedy-edges", "graph-edges"]) -> pl.LazyFrame:
     if "hb_0_length" not in df.columns or "C1_C1_yaw1" not in df.columns:
         raise ValueError("The input data is missing the necessary columns")
 
@@ -56,7 +63,6 @@ def main(args):
         # hbond_default_lengths = [ pair_defs.is_ch_bond(pair_type, hb) or pair_defs.is_bond_to_sugar(pair_type, hb) for hb in hbond ]
 
         row_conditions = []
-        row_score = []
         for c in checked_columns:
             min, max = (b.get(c + "_min", None), b.get(c + "_max", None))
             if not isinstance(min, (int, float, NoneType)):
@@ -75,7 +81,7 @@ def main(args):
             else:
                 row_conditions.append(pl.col(c).is_between(min - prec_tolerance, max + prec_tolerance))
 
-            if args.null_is_fine:
+            if null_is_fine:
                 row_conditions[-1] = row_conditions[-1] | pl.col(c).is_null()
 
         if len(row_conditions) == 0:
@@ -107,17 +113,15 @@ def main(args):
     #     #validate="m:1",
     # )
 
-    if args.accepted_column is not None:
-        df = df.with_columns((monster_condition == pl.lit(True)).alias(args.accepted_column))
+    if accepted_column is not None:
+        df = df.with_columns((monster_condition == pl.lit(True)).alias(accepted_column))
     else:
         df = df.filter(monster_condition)
 
-    if args.best_fit is not None and args.best_fit != "none":
-        df = best_fitting_nucleotides(df, args.best_fit, args.accepted_column)
-    
-    df = df.sort("pdbid", "model", "chain1", "nr1", "alt1", "ins1", "chain2", "nr2", "alt2", "ins2", "symmetry_operation1", "symmetry_operation2", "family")
+    if best_fit is not None and best_fit != "none":
+        df = best_fitting_nucleotides(df, best_fit, accepted_column)
 
-    save_output(args, df)
+    return df
 
 conflict_resolution_score = ((pl.sum_horizontal(pl.col("^hb_\\d+_length$") - 4).fill_null(0)) + pl.col("coplanarity_shift1") + pl.col("coplanarity_shift2")).alias("conflict_resolution_score")
 
@@ -240,9 +244,9 @@ def best_fitting_nucleotides(df: pl.LazyFrame, method: str, accepted_column: str
 
     return df
 
-if __name__ == "__main__":
+def parser(parser = None):
     import argparse
-    parser = argparse.ArgumentParser(description="""
+    parser = parser or argparse.ArgumentParser(description="""
         Filters the input CSV/Parquet file according to the specified boundaries files (columns ending with _min and _max).
         """,
         formatter_class=argparse.RawTextHelpFormatter)
@@ -252,7 +256,9 @@ if __name__ == "__main__":
     parser.add_argument("--null-is-fine", default=False, action="store_true", help="Columns with NULL values are considered to be within boundaries. Rows with all NULL columns are still discarded")
     parser.add_argument("--best-fit", default=None, type=str, help="Only the best fitting family for each basepair is kept", choices=["none", "single-pair", "greedy-edges", "graph-edges"])
     parser.add_argument("--accepted-column", default=None, type=str, help="If specified, instead of filtering the file, add a boolean column indication whether the pair is accepted or not")
+    return parser
 
-    args = parser.parse_args()
-    main(args)
+
+if __name__ == "__main__":
+    main(parser().parse_args())
 

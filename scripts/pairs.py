@@ -947,9 +947,12 @@ def get_stats_for_csv(df_: pl.DataFrame, structure: Bio.PDB.Structure.Structure,
         except KeyError as keyerror:
             print(f"Could not find residue1 {pdbid}.{model}.{chain}.{str(nr)+ins} ({keyerror=})")
             return None
+        
+
+    print(list(residues_df.iter_rows()))
 
     residue_cache = {
-        (model, chain, res, nr, ins, alt, symop): residue_cache_create_entry(model, chain, res, nr, ins, alt, symop)
+        (model, chain, res, nr, (ins or '').strip(), (alt or '').strip(), symop): residue_cache_create_entry(model, chain, res, nr, ins, alt, symop)
         for model, chain, res, nr, ins, alt, symop in residues_df.iter_rows()
     }
 
@@ -1095,6 +1098,17 @@ def remove_duplicate_pairs(df: pl.DataFrame):
     df = df.drop(["_tmp_pair_id", "_tmp_row_nr"])
     return df
 
+def postfilter_hb(df: pl.DataFrame, length: Optional[float]):
+    if length:
+        df = df.filter(pl.any_horizontal(pl.col("^hb_\\d+_length$") <= length))
+    return df
+
+def postfilter_shift(df: pl.DataFrame, shift: Optional[float]):
+    if shift:
+        df = df.filter((pl.col("coplanarity_shift1").abs() < shift) & (pl.col("coplanarity_shift2").abs() < shift))
+    return df
+
+
 def get_max_bond_count(df: pl.DataFrame):
     """Gets the maximum number of hydrogen bonds in the given DataFrame.  """
     pair_types = list(set(pair_defs.PairType.create(type, res1, res2, name_map=resname_map) for type, res1, res2 in df[["family", "res1", "res2"]].unique().iter_rows()))
@@ -1150,9 +1164,19 @@ def make_backbone_columns(df: pl.DataFrame, structure: Optional[Bio.PDB.Structur
 
 
 
-def make_stats_columns(pdbid: str, df: pl.DataFrame, add_metadata_columns: bool, max_bond_count: int, metrics: list[PairMetric], max_hb_length: Optional[float]) -> Tuple[str, pl.DataFrame, np.ndarray]:
+def make_stats_columns(pdbid: str, df: pl.DataFrame, add_metadata_columns: bool, max_bond_count: int, metrics: list[PairMetric], max_hb_length: Optional[float] = None, structure: Bio.PDB.Structure.Structure | None = None) -> Tuple[str, pl.DataFrame, np.ndarray]:
     """
-    Adds the columns with basepair stats to the DataFrame.
+    Creates a DataFrame with calculated basepair parameters for each basepair in `df`.
+    Returns: (pdbid, DataFrame with parameters, bitmap of rows where the parameters were successfully calculated)
+
+    Arguments:
+    - pdbid: PDB ID of the structure, or path to a mmCIF file. The structure will be loaded and pairs listed in `df` will be analyzed.
+    - df: DataFrame with columns `model`, `chain1`, `res1`, `nr1`, `ins1`, `alt1`, `chain2`, `res2`, `nr2`, `ins2`, `alt2`, `symmetry_operation1`, `symmetry_operation2`, `family`
+    - add_metadata_columns: If True, adds columns with metadata about the structure (deposition date, structure name, resolution, structure method)
+    - max_bond_count: Maximum number of hydrogen bonds to calculate for each basepair
+    - metrics: List of parameters to calculate for each basepair
+    - max_hb_length: Ignore pairs with H-bonds longer than this value
+    - structure: Optional Bio.PDB.Structure.Structure object with the structure data. If not provided, the structure will be loaded.
     """
     bond_params = [ x.name for x in dataclasses.fields(HBondStats) ]
     valid = np.zeros(len(df), dtype=np.bool_)
@@ -1169,19 +1193,19 @@ def make_stats_columns(pdbid: str, df: pl.DataFrame, add_metadata_columns: bool,
     ]
 
     structure_data = lazy(lambda: pdb_utils.load_sym_data(None, pdbid))
-    structure = None
-    try:
-        structure = pdb_utils.load_pdb(None, pdbid)
-        # structure, cif_block = pdb_utils.load_pdb_gemmi(None, pdbid)
-        # structure_data = lazy(lambda: pdb_utils.load_sym_data_gemmi()(cif_block)
-    except HTTPError as e:
-        print(f"Could not load structure {pdbid} due to http error")
-        print(e)
-    except Exception as e:
-        import traceback
-        print(f"Could not load structure {pdbid} due to unknown error")
-        print(e)
-        print(traceback.format_exc())
+    if structure is None:
+        try:
+            structure = pdb_utils.load_pdb(None, pdbid)
+            # structure, cif_block = pdb_utils.load_pdb_gemmi(None, pdbid)
+            # structure_data = lazy(lambda: pdb_utils.load_sym_data_gemmi()(cif_block)
+        except HTTPError as e:
+            print(f"Could not load structure {pdbid} due to http error")
+            print(e)
+        except Exception as e:
+            import traceback
+            print(f"Could not load structure {pdbid} due to unknown error")
+            print(e)
+            print(traceback.format_exc())
 
     if structure is not None:
         for i, hbonds, metric_values in get_stats_for_csv(df, structure, structure_data, metrics, max_hb_length):
@@ -1417,14 +1441,11 @@ def main_partition(pool: Union[Pool, MockPool], args, pdbid_partition='', ideal_
         ])
 
     def postfilter(df: pl.DataFrame):
-        if args.postfilter_hb:
-            df = df.filter(pl.any_horizontal(pl.col("^hb_\\d+_length$") < args.postfilter_hb))
-        if args.postfilter_shift:
-            df = df.filter((pl.col("coplanarity_shift1").abs() < args.postfilter_shift) & (pl.col("coplanarity_shift2").abs() < args.postfilter_shift))
+        df = postfilter_hb(df, args.postfilter_hb)
+        df = postfilter_shift(df, args.postfilter_shift)
         if args.dedupe:
             df = remove_duplicate_pairs(df)
         return df
-
 
     result_chunks = []
     for ((_pdbid,), group), ps in zip(groups, zip(*processes)):
@@ -1502,6 +1523,7 @@ def main(pool: Union[Pool, MockPool], args):
             for p in p_results.values():
                 os.remove(p)
 
+all_familites = "cWW,cWWa,tWW,tWWa,cWH,tWH,cWS,tWS,cHH,cHHa,tHH,cHS,tHS,cSS,tSS,cWB"
 
 def save_output(args, df: pl.LazyFrame, partition_select = ''):
     file = args.output
@@ -1545,7 +1567,7 @@ if __name__ == "__main__":
     parser.add_argument("inputs", nargs="+", help="Input file - Parquet with a list of basepairs; FR3D basepairing output; CIF/PDB file (all close contacts will be examined)")
     parser.add_argument("--pdbcache", nargs="+", help="Directories to search for PDB files in order to avoid downloading. Last directory will be written to, if the structure is not found and has to be downloaded from RCSB. Also can be specified as PDB_CACHE_DIR env variable.")
     parser.add_argument("--output", "-o", required=True, help="Output CSV/Parquet file name. Both CSV and Parquet are always written.")
-    parser.add_argument("--threads", type=parse_thread_count, default=1, help="Number of worker processes to spawn. Does not affect Polars threading, at the start, the process might use more threads than specified. `0` to use all available CPU threads, `-1` all except one, 50% for half, ...")
+    parser.add_argument("--threads", type=parse_thread_count, default=1, help="Number of worker processes to spawn. Does not affect Polars threading, at the start, the process might use more threads than specified. `0` to use all available CPU threads, `-1` all except one, 50%% for half, ...")
     parser.add_argument("--export-only", default=False, action="store_true", help="Only re-export the input as CSV+Parquet files, do not calculate anything")
     parser.add_argument("--partition-input", default=0, type=int, help="Partition the input by N first characters of the PDBID. Reduces memory usage for large datasets.")
     parser.add_argument("--partition-input-select", default='', type=str, help="Select a given input partition (for example '9' will run pdbids starting with '9').")
@@ -1562,7 +1584,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.override_pair_family == "all":
-        args.override_pair_family = "cWW,cWWa,tWW,tWWa,cWH,tWH,cWS,tWS,cHH,cHHa,tHH,cHS,tHS,cSS,tSS,cWB"
+        args.override_pair_family = all_familites
 
     for x in args.pdbcache or []:
         pdb_utils.pdb_cache_dirs.append(os.path.abspath(x))

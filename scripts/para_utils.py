@@ -74,59 +74,6 @@ def batched_map(pool: MockPool | multiprocessing.pool.Pool | multiprocessing.poo
         results.append(pool.apply_async(f, (*batch, *more_args)))
     return [ r.get() for r in results ]
 
-
-def _make_shmem(size, mgr: multiprocessing.managers.SharedMemoryManager | None = None):
-    if mgr is None:
-        return multiprocessing.shared_memory.SharedMemory(create=True, size=size)
-    else:
-        return mgr.SharedMemory(size=size)
-
-
-class SharedMemoryInstance:
-    def __init__(self, mem: multiprocessing.shared_memory.SharedMemory, own: bool, dim, dtype: np.dtype):
-        self.mem = mem
-        self.dim = dim
-        self.dtype = dtype
-        self.own = own
-        self.array = np.ndarray(dim, dtype=dtype, buffer=mem.buf)
-        self.handle = SharedMemoryHandle(mem.name, dim, dtype)
-
-    @staticmethod
-    def create_arr(array: np.ndarray, mgr: multiprocessing.managers.SharedMemoryManager | None = None):
-        size = array.size * array.itemsize
-        mem = _make_shmem(size, mgr)
-        arr2 = np.ndarray(array.shape, dtype=array.dtype, buffer=mem.buf)
-        arr2[...] = array
-        return SharedMemoryInstance(mem, True, array.shape, array.dtype)
-    
-    @staticmethod
-    def create_zeros(shape, dtype, mgr: multiprocessing.managers.SharedMemoryManager | None = None):
-        size = np.prod(shape) * np.dtype(dtype).itemsize
-        mem = _make_shmem(size, mgr)
-        arr = np.ndarray(shape, dtype=dtype, buffer=mem.buf)
-        arr[...] = 0
-        return SharedMemoryInstance(mem, True, shape, dtype)
-
-    def __enter__(self):
-        return self.array
-
-    def __exit__(self, *args):
-        self.array = None
-        if self.own:
-            self.mem.unlink()
-        self.mem.close()
-
-
-class SharedMemoryHandle:
-    def __init__(self, name, dim, dtype):
-        self.name = name
-        self.dim = dim
-        self.dtype = dtype
-    
-    def instantiate(self):
-        mem = multiprocessing.shared_memory.SharedMemory(name=self.name)
-        return SharedMemoryInstance(mem, False, self.dim, self.dtype)
-
 def parse_thread_count(x: str):
     def t_round(x):
         if x <= 0:

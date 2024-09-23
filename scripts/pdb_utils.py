@@ -80,22 +80,26 @@ def open_pdb_file(file: Optional[str], pdbid: Optional[str] = None) -> TextIO:
     Either file or pdbid must be specified: open_pdb_file(None, '1ehz') or open_pdb_file('../data/1ehz.cif.gz')
     """
     if file is None and pdbid is not None:
-        if len(pdb_cache_dirs) == 0:
+        if "/" in pdbid or "\\" in pdbid:
+            # actually, it's a file path
+            return open_pdb_file(pdbid, None)
+        elif len(pdb_cache_dirs) == 0:
             return download_pdb(pdbid)
         else:
             return open_pdb_file(_find_or_add_cache(pdbid), pdbid)
 
     elif isinstance(file, str):
-        if file.endswith(".gz"):
+        if file.lower().endswith(".gz"):
             return gzip.open(file, "rt")
-        elif file.endswith(".zst"):
+        elif file.lower().endswith(".zst"):
             import zstandard
             return zstandard.open(file, "rt")
-        elif file.endswith(".bz2"):
+        elif file.lower().endswith(".bz2"):
             import bz2
             return bz2.open(file, "rt")
         else:
-            print("Warning: unknown file extension", file)
+            if not file.lower().endswith(".cif"):
+                print("Warning: unknown file extension", file)
             return open(file, "rt")
     elif file is None:
         raise Exception("No file specified")
