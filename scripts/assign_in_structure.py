@@ -103,7 +103,7 @@ def analyze_structure(pdbid: str, min_atom_distance: float, boundaries: pl.DataF
     try:
         structure, sym_data, pdbid = pair_finding.load_structure(pdbid)
     except Exception as e:
-        print(f"Error loading {pdbid}: {e}")
+        eprint(f"Error loading {pdbid}: {e}")
         return None
 
     df = pair_finding.find_contacts(structure, sym_data, 4.2)

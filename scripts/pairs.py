@@ -947,9 +947,6 @@ def get_stats_for_csv(df_: pl.DataFrame, structure: Bio.PDB.Structure.Structure,
         except KeyError as keyerror:
             print(f"Could not find residue1 {pdbid}.{model}.{chain}.{str(nr)+ins} ({keyerror=})")
             return None
-        
-
-    print(list(residues_df.iter_rows()))
 
     residue_cache = {
         (model, chain, res, nr, (ins or '').strip(), (alt or '').strip(), symop): residue_cache_create_entry(model, chain, res, nr, ins, alt, symop)
@@ -1264,7 +1261,7 @@ def override_pair_family(df: pl.DataFrame, fam: Optional[str]) -> pl.DataFrame:
         return df
     df = df.drop("type", "family")
     override: list[str] = fam.split(",")
-    print("override pair family: ", override)
+    # print("override pair family: ", override)
     if len(override) == 1:
         df = df.select(
             pl.lit(override[0]).alias("type"),
