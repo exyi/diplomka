@@ -197,6 +197,7 @@ def _to_contact_df(index: StructureIndex, s: Bio.PDB.Model.Model, sym: Optional[
     )
 
 def load_structure(pdb: str) -> tuple[Bio.PDB.Structure.Structure, pdb_utils.StructureData, str]:
+    """Loads the given mmCIF file or PDB ID"""
     if "." in pdb:
         pdbid = re.search(r"(\w{4})[.](pdb|cif|mmcif)([.](gz|zstd?))?$", pdb, re.IGNORECASE).group(1)
         s = pdb_utils.load_pdb(pdb, pdbid.lower())

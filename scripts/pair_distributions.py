@@ -876,7 +876,18 @@ def calculate_kde_columns(data: np.ndarray, column_name: str, eval_data: pl.Seri
     return KDEResult(mode, std, result_LL, result_MD)
 
 
-def calculate_stats(pool: multiprocessing.pool.ThreadPool | multiprocessing.pool.Pool | MockPool, df: pl.DataFrame, result_df: pl.DataFrame | None, pair_type: PairType, skip_kde: bool): # type: ignore
+def calculate_stats(pool: multiprocessing.pool.ThreadPool | multiprocessing.pool.Pool | MockPool, df: pl.DataFrame, result_df: pl.DataFrame | None, pair_type: PairType, skip_kde: bool):
+    """
+    Calculates statistics for a given basepairing class
+    Args:
+    - df: DataFrame with the data to calculate statistics on
+    - result_df: DataFrame with all other data in the class, to calculate KDE likelihoods and mode deviations
+    - skip_kde: if True, KDE calculations are not performed
+
+    Returns:
+    - result_stats: dict with single numbers
+    - new_df_columns: dict with new columns to add to the DataFrame (numpy arrays or polars Series)
+    """
     if len(df) == 0:
         raise ValueError("No data")
 

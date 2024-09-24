@@ -31,6 +31,14 @@ def main(args):
     save_output(args, df)
 
 def apply_filter(df: pl.LazyFrame, boundaries: pl.DataFrame, null_is_fine: bool, accepted_column: str | None, best_fit: ty.Literal["none", "single-pair", "greedy-edges", "graph-edges"]) -> pl.LazyFrame:
+    """
+    Filters `df` according to the limits in `boundaries`.
+
+    Additional arguments:
+    - `null_is_fine` - if a column is NULL, treat is as "in range". When null_is_fine=False, all rows will null columns are rejected.
+    - `accepted_column` - instead of removing the non-matching rows, create a new boolean column with the specified name and set it to True, when the pair matches the criteria in `boundaries`
+    - best_fit - See --best-fit help
+    """
     if "hb_0_length" not in df.columns or "C1_C1_yaw1" not in df.columns:
         raise ValueError("The input data is missing the necessary columns")
 
@@ -55,11 +63,12 @@ def apply_filter(df: pl.LazyFrame, boundaries: pl.DataFrame, null_is_fine: bool,
         print(f"WARNING: The data is missing the following columns with boundaries specified: {[*missing_columns]}")
         checked_columns.difference_update(missing_columns)
 
+    # Create a Polars logical expression for each basepair family which checks that all parameters are in range
     prec_tolerance = 0.01
     conditions: dict[pair_defs.PairType, pl.Expr] = dict()
     for b in boundaries.iter_rows(named=True):
         pair_type = pair_defs.PairType.from_tuple((b["family"], b["bases"])).normalize_capitalization()
-        hbond = pair_defs.get_hbonds(pair_type)
+        # hbond = pair_defs.get_hbonds(pair_type)
         # hbond_default_lengths = [ pair_defs.is_ch_bond(pair_type, hb) or pair_defs.is_bond_to_sugar(pair_type, hb) for hb in hbond ]
 
         row_conditions = []
@@ -91,6 +100,12 @@ def apply_filter(df: pl.LazyFrame, boundaries: pl.DataFrame, null_is_fine: bool,
         conditions[pair_type] = pl.all_horizontal(row_conditions)
 
 
+    # combine all pair_type conditions into a single conditional expression:
+    # if (_tmp_bases == 'A-A' and family == 'cWW')
+    #    then ...
+    # elseif (_tmp_bases == 'A-C' and family == 'cWW')
+    #    then ...
+    # ...
     monster_condition = pl.when(pl.lit(False)).then(False)
     for pt, c in conditions.items():
         monster_condition = monster_condition.when(
@@ -100,20 +115,8 @@ def apply_filter(df: pl.LazyFrame, boundaries: pl.DataFrame, null_is_fine: bool,
             )).then(c)
     monster_condition = monster_condition.otherwise(False)
 
-    # df = df.join(boundaries.select(pl.col(c).alias("boundaries_" + c) for c in boundaries.columns),
-    #     left_on=[
-    #         pl.col("family").str.to_lowercase(),
-    #         bases
-    #     ],
-    #     right_on=[
-    #         pl.col("boundaries_family").str.to_lowercase(),
-    #         pl.col("boundaries_bases").str.to_uppercase(),
-    #     ],
-    #     how="left",
-    #     #validate="m:1",
-    # )
-
     if accepted_column is not None:
+        # add `accepted` column with the result of the condition
         df = df.with_columns((monster_condition == pl.lit(True)).alias(accepted_column))
     else:
         df = df.filter(monster_condition)
@@ -211,6 +214,11 @@ def best_fitting_edges_greedy(df: pl.DataFrame) -> pl.DataFrame:
 
 
 def best_fitting_nucleotides(df: pl.LazyFrame, method: str, accepted_column: str|None) -> pl.LazyFrame:
+    """
+    Includes only the best fitting basepair class
+    * for each nucleotide pair.
+    * for each nucleotide edge (if method != 'single-pair')
+    """
     if accepted_column is not None:
         orig_df = df
         df = df.filter(pl.col(accepted_column).is_not_null())

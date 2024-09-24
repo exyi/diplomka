@@ -106,9 +106,7 @@ def analyze_structure(pdbid: str, min_atom_distance: float, boundaries: pl.DataF
         print(f"Error loading {pdbid}: {e}")
         return None
 
-    result_df = pair_finding.find_contacts(structure, sym_data, 4.2)
-
-    df = pair_finding.main_1structure(pdbid, None, min_atom_distance)
+    df = pair_finding.find_contacts(structure, sym_data, 4.2)
     assert df is not None
 
     df = pairs.override_pair_family(df, pairs.all_familites)
@@ -117,12 +115,13 @@ def analyze_structure(pdbid: str, min_atom_distance: float, boundaries: pl.DataF
     df = df.with_columns(stat_columns)
 
     df = pairs.postfilter_hb(df, 4.2)
-    df = pairs.postfilter_shift(df, 2.2) # TODO: do we need this?
+    df = pairs.postfilter_shift(df, 2.2)
     df = pairs.remove_duplicate_pairs(df) # TODO: dedupe after main filter or before?
     df = apply_filter.apply_filter(df.lazy(), boundaries, False, None, best_fit).collect()
     return pdbid, df
 
 def main_structure(structure: str, boundaries: pl.DataFrame, out: str | None, format: str, best_fit: ty.Literal["none", "single-pair", "greedy-edges", "graph-edges"]):
+    """Loads the structure file, performs assignment and writes results"""
     x = analyze_structure(structure, 4.2, boundaries, best_fit)
     if x is None:
         return
@@ -140,11 +139,13 @@ def main2(pool: multiprocessing.pool.Pool | para_utils.MockPool, threads: int, a
     os.makedirs(out, exist_ok=True)
 
     results = []
-
     for i, structure in enumerate(inputs):
         if args.verbose:
             eprint(f'Processing {structure} ({i+1}/{len(inputs)})')
         results.append(pool.apply_async(main_structure, (structure, boundaries, out, args.format, args.best_fit)))
+
+    for r in results:
+        r.get()
 
 def main(args):
     for x in args.pdbcache or []:
@@ -161,10 +162,12 @@ def main(args):
         main2(para_utils.MockPool(), 1, args)
 
 def parser(parser = None):
-    parser = parser or argparse.ArgumentParser()
+    parser = parser or argparse.ArgumentParser(description="""
+        Performs basepair assignment for a given mmCIF structure or PDB ID.
+        """)
     parser.add_argument('inputs', nargs='+', type=str, help='Input mmCIF/PDBx file or PDB ID to analyze')
-    parser.add_argument('--out', type=str, help='Output directory for results. `-` for stdout when a single format is selected', required=True)
-    parser.add_argument('-f', '--format', type=str, default='csv,parquet,fr3d,json', help='Output format(s) to generate. By default, all are selected')
+    parser.add_argument('--out', type=str, help='Output directory for results.', required=True)
+    parser.add_argument('-f', '--format', type=str, default='csv,parquet,fr3d,json', help='Output format(s) to generate. By default, all are selected. Supported formats are csv, parquet, fr3d, json, ndjson. One file per input structure will be created.')
     parser.add_argument('--verbose', action='store_true', help='Print verbose output')
     parser.add_argument('--min-atom-distance', type=float, default=4.0, help='Distance threshold between any residue atoms (in Ångströms)')
     parser.add_argument('--boundaries', type=str, default='https://docs.google.com/spreadsheets/d/e/2PACX-1vQpIjMym1SejcSksbVfnV5WM89jYiR9PcmRcxiJd_0CihxZwVPN5vV-eH-w-dKS_ifCxcYNJqVc6HfG/pub?gid=245758142&single=true&output=csv', help='URL/filepath to the boundaries CSV file')

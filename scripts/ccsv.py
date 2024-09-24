@@ -86,10 +86,10 @@ def main(args):
             write_directory(g.lazy(), out_p, not args.quiet)
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('input', nargs="+", type=str)
+    parser = argparse.ArgumentParser(description="Converts tabular Parquet files to 'columnar CSV' - i.e. a folder of single-column line separated text files (CSVs without header)")
+    parser.add_argument('input', nargs="+", type=str, help='Input file(s) in Parquet of CSV format')
     parser.add_argument('output_dir', type=str)
-    parser.add_argument('--partition', type=str)
+    parser.add_argument('--partition', type=str, help='Partition by the results by these column(s), for example "family,res1,res2". `res1_` and `res2_` column may also be used, which contain an RNA-normalized residue (i.e. no DC, DG, ...')
     parser.add_argument('--quiet', '-q', default=False, action="store_true")
     args = parser.parse_args()
     main(args)
