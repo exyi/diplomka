@@ -417,7 +417,7 @@ def is_bond_to_sugar(pair_type: PairType, b: tuple[str, str, str, str]) -> bool:
     """Is the bond to the O2' (or other sugar) atom?"""
     return b[1].endswith("'") or b[2].endswith("'")
 
-def is_bond_hidden(pair_type: PairType, b: tuple[str, str, str, str]) -> bool:
+def is_bond_hidden(pair_type: PairType | tuple, b: tuple[str, str, str, str]) -> bool:
     """Return true to hide a given bond from the generated plots"""
     return False
     return is_ch_bond(pair_type, b)

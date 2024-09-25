@@ -153,6 +153,7 @@ def _to_contact_df(index: StructureIndex, s: Bio.PDB.Model.Model, sym: Optional[
 
     Returns DataFrame with columns chain1, res1, nr1, ins1, alt1, chain2, res2, nr2, ins2, alt2, pdbid, model, symmetry_operation1, symmetry_operation2.
     """
+    assert s.parent is not None
     pdbid = s.parent.id
     if sym and sym.pdbname != '1_555':
         s = s.copy()
@@ -165,6 +166,7 @@ def _to_contact_df(index: StructureIndex, s: Bio.PDB.Model.Model, sym: Optional[
         #     continue
         for alt1 in _get_alts(r1):
             for alt2 in _get_alts(r2):
+                assert r1.parent is not None and r2.parent is not None
                 result.append({
                     'chain1': r1.parent.id,
                     'res1': r1.resname,
@@ -199,8 +201,11 @@ def _to_contact_df(index: StructureIndex, s: Bio.PDB.Model.Model, sym: Optional[
 def load_structure(pdb: str) -> tuple[Bio.PDB.Structure.Structure, pdb_utils.StructureData, str]:
     """Loads the given mmCIF file or PDB ID"""
     if "." in pdb:
-        pdbid = re.search(r"(\w{4})[.](pdb|cif|mmcif)([.](gz|zstd?))?$", pdb, re.IGNORECASE).group(1)
-        s = pdb_utils.load_pdb(pdb, pdbid.lower())
+        match = re.search(r"(\w{4})[.](pdb|cif|mmcif)([.](gz|zstd?))?$", pdb, re.IGNORECASE)
+        if not match:
+            raise ValueError(f"Invalid file name: {pdb}")
+        pdbid = match.group(1).lower()
+        s = pdb_utils.load_pdb(pdb, pdbid)
         sym = pdb_utils.load_sym_data(pdb, pdbid)
     else:
         s = pdb_utils.load_pdb(None, pdb)

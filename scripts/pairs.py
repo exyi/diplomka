@@ -48,7 +48,7 @@ class AltResidue:
                 # don't crash on uninteresting atoms
                 if a.id.startswith('H') or a.id in ['P', 'OP1', 'OP2', 'OP3', "O5'", "C5'", "C4'", "O4'", "C3'", "O3'", "O2'", "C2'", "C1'"]:
                     return a.disordered_get(a.disordered_get_id_list()[0])
-                elif np.allclose(a.disordered_get(ids[0]).coord, a.disordered_get(ids[1]).coord, atol=0.05):
+                elif np.allclose(a.disordered_get(ids[0]).coord, a.disordered_get(ids[1]).coord, atol=0.05): # type:ignore
                     return a.disordered_get(ids[0])
             if not a.disordered_has_id(self.alt):
                 raise KeyError(f"Atom {self.res.full_id}:{a.id} is disordered, but alt='{self.alt}' must be one of {a.disordered_get_id_list()}")
@@ -406,6 +406,7 @@ def load_pair_information_by_idtuple(pdbid: str, data: list[tuple[Union[tuple[st
 
         res1 = get_residue(structure, None, model, chain1, resname1, nr1, ins1, alt1, None)
         res2 = get_residue(structure, None, model, chain2, resname2, nr2, ins2, alt2, None)
+        assert res1 is not None and res2 is not None, f"Ideal basepairS not found: {identifier}"
         # detach parent to lower memory usage (all structures would get replicated to all workers)
         res1 = res1.copy()
         res2 = res2.copy()
@@ -687,8 +688,8 @@ class RMSDToIdealMetric(PairMetric):
     Various RMSD distances between the singular "ideal" basepair the observed one
     """
     def __init__(self, name, ideal: dict[pair_defs.PairType, PairInformation],
-        fit_on: Literal['all', 'left_C1N', 'left', 'right', 'both_edges'],
-        calculate: Literal['all', 'right_C1N', 'both_C1N', 'left_edge', 'right_edge', 'both_edges'],
+        fit_on: Literal['all', 'left_C1N', 'right_C1N', 'left', 'right', 'both_edges'],
+        calculate: Literal['all', 'right_C1N', 'left_C1N', 'both_C1N', 'left_edge', 'right_edge', 'both_edges'],
     ) -> None:
         self.ideal = ideal
         self.columns = [ f"rmsd_{name}" ]
@@ -908,7 +909,7 @@ def get_residue(structure: Bio.PDB.Structure.Structure, strdata: Optional[Callab
     ins = ins or ' '
     alt = alt or ''
     ch: Bio.PDB.Chain.Chain = structure[model-1][chain]
-    found: Bio.PDB.Residue.Residue = ch.child_dict.get((' ', nr, ins), None)
+    found: Bio.PDB.Residue.Residue | None = ch.child_dict.get((' ', nr, ins), None)
     if found is None:
         found = next((r for r in ch.get_residues() if r.id[1] == nr and r.id[2] == ins), None)
     if found is None:
@@ -1236,7 +1237,7 @@ def make_stats_columns(pdbid: str, df: pl.DataFrame, add_metadata_columns: bool,
     ])
     result_df = to_float32_df(result_df)
     if add_metadata_columns:
-        h = structure.header if structure is not None else dict()
+        h = structure.header if structure is not None else dict() # type: ignore
         result_df = result_df.with_columns(
             pl.lit(h.get('deposition_date', None), dtype=pl.Utf8).alias("deposition_date"),
             pl.lit(h.get('name', None), dtype=pl.Utf8).alias("structure_name"),

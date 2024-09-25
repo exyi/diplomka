@@ -81,7 +81,7 @@ def main(args):
         write_directory(df, out, not args.quiet)
     else:
         for key, g in df.collect().group_by(args.partition.split(",")):
-            out_p = os.path.join(out, "-".join(key))
+            out_p = os.path.join(out, "-".join(str(k) for k in key))
             os.makedirs(out_p, exist_ok=True)
             write_directory(g.lazy(), out_p, not args.quiet)
 

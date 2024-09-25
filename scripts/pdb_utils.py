@@ -74,7 +74,7 @@ def download_pdb(pdb_id: str) -> TextIO:
     # download from https://files.rcsb.org/download/XXXX.cif.gz
     url = f"https://files.rcsb.org/download/{pdb_id}.cif.gz"
     response = urllib.request.urlopen(url)
-    return gzip.open(io.BytesIO(response.read()), "rt", encoding='utf-8-sig')
+    return gzip.open(io.BytesIO(response.read()), "rt", encoding='utf-8-sig') #type:ignore
 
 def get_pdb_file(file: Optional[str], pdbid: Optional[str] = None) -> str:
     if file is not None:

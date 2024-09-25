@@ -189,7 +189,7 @@ if __name__ == "__main__":
 
         procs = [
             pool.apply_async(add_dssr_info, args=[pdbid, group, args.dssr_binary])
-            for pdbid, group in df.groupby(pl.col("pdbid"))
+            for pdbid, group in df.group_by(pl.col("pdbid"))
         ]
-        df = pl.concat([ p for p in [ p.get()[0] for p in procs ] if len(p) > 0 ])
+        df = pl.concat([ p for p in [ p.get()[1] for p in procs ] if len(p) > 0 ])
         df.sort('pdbid', 'model', 'nr1', 'nr2').write_csv(args.output)

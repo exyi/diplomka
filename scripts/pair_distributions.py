@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import itertools
 import multiprocessing.pool
-from para_utils import MockPool, SharedMemoryInstance, batched_map, parse_thread_count
+from para_utils import MockPool, batched_map, parse_thread_count
 import subprocess
 from typing import Any, Generator, Optional, Union
 from matplotlib.axes import Axes
@@ -597,7 +597,7 @@ def make_histogram_group(dataframes: list[pl.DataFrame], axes: list[Axes], title
 
 def make_subplots(sp = subplots):
     fig, sp = plt.subplots(*sp)
-    return fig, list(sp.reshape(-1))
+    return fig, list(sp.reshape(-1)) # type:ignore
 
 def draw_pair_img_highligh(ax, img, highlight: Optional[pl.DataFrame]):
     if img is None:
@@ -918,7 +918,7 @@ def calculate_stats(pool: multiprocessing.pool.ThreadPool | multiprocessing.pool
         print("KDE is skipped")
         kde_results = [ None ] * len(columns)
     else:
-        print(f"Calculating KDEs for {len(columns)} columns: {len(cdata[0])} {len(result_df)}")
+        print(f"Calculating KDEs for {len(columns)} columns: {len(cdata[0])} {len(result_df) if result_df is not None else None}")
         kde_results = pool.starmap(calculate_kde_columns, zip(cdata, columns, [ result_df[col] if result_df is not None else None for col in columns ]))
 
     kde_modes = [ None if res is None else res.mode for res in kde_results ]
@@ -1091,7 +1091,8 @@ def enumerate_pair_types(files: list[str], include_nears: bool) -> Generator[tup
             groups = df.group_by("type", "pair_bases")
             # print(f"{file}: {len(df)} rows, types: {dict(sorted([ (str(pair_defs.PairType.from_tuple(k)), len(gdf)) for k, gdf in groups ], key=lambda x: x[1], reverse=True))}")
             print(f"{file}: {len(df)} rows, {len(list(groups))} types")
-            all_pairs_types = set(pair_defs.PairType.from_tuple(pt) for pt, _ in groups)
+            all_pairs_types = set(pair_defs.PairType.from_tuple(pt) # type:ignore
+                                  for pt, _ in groups)
             for k, gdf in sorted(groups, key=lambda x: len(x[1]), reverse=True):
                 k: Any
                 pair_type = pair_defs.PairType.from_tuple(k)
@@ -1604,7 +1605,7 @@ def main(argv):
         import json
         def json_default(val):
             if np.isscalar(val):
-                return float(val)
+                return float(val) # type:ignore
             raise TypeError(f"Cannot serialize {val} of type {type(val)}")
         json.dump(results, f, indent=4, default=json_default)
 
