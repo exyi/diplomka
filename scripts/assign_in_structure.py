@@ -148,9 +148,7 @@ def main2(pool: multiprocessing.pool.Pool | para_utils.MockPool, threads: int, a
         r.get()
 
 def main(args):
-    for x in args.pdbcache or []:
-        pdb_utils.pdb_cache_dirs.append(os.path.abspath(x))
-    os.environ["PDB_CACHE_DIR"] = ';'.join(pdb_utils.pdb_cache_dirs)
+    pdb_utils.set_pdb_cache_dirs(args.pdbcache)
 
     threads = min(len(args.inputs), args.threads)
     if threads > 1:

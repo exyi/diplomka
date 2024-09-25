@@ -261,9 +261,8 @@ if __name__ == '__main__':
     parser.add_argument("--pdbcache", nargs="+", help="Directories to search for PDB files in order to avoid re-downloading. Last directory will be written to, if the structure is not found and has to be downloaded from RCSB. Also can be specified as PDB_CACHE_DIR env variable.")
     parser.add_argument('--threads', type=para_utils.parse_thread_count, default=1, help='Number of threads, 0 for all, 50%% for half, -1 to leave one free, ... Parallelism only affects processing of multiple PDB files.')
     args = parser.parse_args()
-    for x in args.pdbcache or []:
-        pdb_utils.pdb_cache_dirs.append(os.path.abspath(x))
-    os.environ["PDB_CACHE_DIR"] = ';'.join(pdb_utils.pdb_cache_dirs)
+    
+    pdb_utils.set_pdb_cache_dirs(args.pdbcache)
 
     if args.threads == 1:
         pool = para_utils.MockPool()

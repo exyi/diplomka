@@ -884,6 +884,14 @@ def to_csv_row(df: pl.DataFrame, i: int = 0, max_len = None) -> str:
 
 T = TypeVar("T")
 def lazy(create: Callable[..., T], *args) -> Callable[[], T]:
+    """
+    Lazily creates a value using the given function and arguments
+
+    val = lazy(lambda: create_something())
+    ...
+    val().do_something() # create_something() is called here
+    val().do_something() # create_something() is not called again
+    """
     cache: T
     has_value = False
     def core():
@@ -928,16 +936,19 @@ def get_stats_for_csv(df_: pl.DataFrame, structure: Bio.PDB.Structure.Structure,
     """
     Iterates over all basepairs in the given DataFrame, calculating the stats for each one. Works on a single PDB structure.
     """
-    df = df_.with_row_count()
-    pair_type_col = df["family" if "family" in df.columns else "type"]
+    df = df_.with_row_index("row_nr")
+    family_col = df["family" if "family" in df.columns else "type"]
     metric_columns = [ tuple(m.get_columns()) for m in metrics ]
     assert df["pdbid"].str.to_lowercase().eq(structure.id.lower()).all(), f"pdbid mismatch: {structure.id} != {df['pdbid'].str.to_lowercase().to_list()}"
     pdbid = structure.id
 
+    # list of all residues (res1 and res2) which form any pair:
     residues_df = pl.concat([
         df.select(pl.col("model"), chain=pl.col("chain1"), res=pl.col("res1"), nr=pl.col("nr1"), ins=pl.col("ins1"), alt=pl.col("alt1"), symop=pl.col("symmetry_operation1")),
         df.select(pl.col("model"), chain=pl.col("chain2"), res=pl.col("res2"), nr=pl.col("nr2"), ins=pl.col("ins2"), alt=pl.col("alt2"), symop=pl.col("symmetry_operation2"))
     ]).unique()
+
+    # pre-compute ResidueInformation (i.e. plane fit) for all residues which form some pair to avoid calculating it multiple times
     def residue_cache_create_entry(model, chain, res, nr, ins, alt, symop):
         try:
             r = get_residue(structure, strdata, model, chain, res, nr, ins, alt, symop)
@@ -947,13 +958,12 @@ def get_stats_for_csv(df_: pl.DataFrame, structure: Bio.PDB.Structure.Structure,
         except KeyError as keyerror:
             print(f"Could not find residue1 {pdbid}.{model}.{chain}.{str(nr)+ins} ({keyerror=})")
             return None
-
     residue_cache = {
         (model, chain, res, nr, (ins or '').strip(), (alt or '').strip(), symop): residue_cache_create_entry(model, chain, res, nr, ins, alt, symop)
         for model, chain, res, nr, ins, alt, symop in residues_df.iter_rows()
     }
 
-    for (pair_family, i, model, chain1, resname1, nr1, ins1, alt1, symop1, chain2, resname2, nr2, ins2, alt2, symop2) in zip(pair_type_col.to_list(), df["row_nr"].to_list(), df["model"].to_list(), df["chain1"].to_list(), df['res1'].to_list(), df["nr1"].to_list(), df["ins1"].to_list(), df["alt1"].to_list(), df["symmetry_operation1"].to_list(), df["chain2"].to_list(), df['res2'].to_list(), df["nr2"].to_list(), df["ins2"].to_list(), df["alt2"].to_list(), df["symmetry_operation2"].to_list()):
+    for (pair_family, i, model, chain1, resname1, nr1, ins1, alt1, symop1, chain2, resname2, nr2, ins2, alt2, symop2) in zip(family_col.to_list(), df["row_nr"].to_list(), df["model"].to_list(), df["chain1"].to_list(), df['res1'].to_list(), df["nr1"].to_list(), df["ins1"].to_list(), df["alt1"].to_list(), df["symmetry_operation1"].to_list(), df["chain2"].to_list(), df['res2'].to_list(), df["nr2"].to_list(), df["ins2"].to_list(), df["alt2"].to_list(), df["symmetry_operation2"].to_list()):
         try:
             ins1 = (ins1 or '').strip()
             ins2 = (ins2 or '').strip()
@@ -1042,12 +1052,15 @@ def remove_duplicate_pairs_phase1(df: pl.DataFrame):
         df = df.filter(pl.col("_tmp_row_nr").is_in(duplicated_set).not_())
         return df
 
+    # prefer WS over SW family, ... (W > H > S > B)
     df = core(df, family_col.str.contains("^(?i)n?(c|t)(SH|HW|SW|BW)a?$"))
-    # print(f"Removed duplicates - family orientation {original_len} -> {len(df)}")
+    #print(f"Removed duplicates - family orientation {original_len} -> {len(df)}")
 
+    # prefer uppercase over lowercase family (Ss > sS)
     df = core(df, family_col.str.contains("^n?[ct][whsb][WHSB]a?$"))
-    # print(f"Removed duplicates - FR3D small letter is second {original_len} -> {len(df)}")
+    #print(f"Removed duplicates - FR3D small letter is second {original_len} -> {len(df)}")
 
+    # prefer GC over CG, ... (G > A > C > U)
     base_ordering = { 'A': 1, 'G': 2, 'C': 3, 'U': 4, 'T': 4 }
     df = core(df,
                 family_col.str.to_lowercase().is_in(["tss", "css"]).not_() &
@@ -1065,6 +1078,7 @@ def remove_duplicate_pairs(df: pl.DataFrame):
     """
     df = remove_duplicate_pairs_phase1(df)
 
+    # keep the one with shorter H-bonds
     def pair_id(type, res1, res2, chain1, nr1, ins1, alt1, chain2, nr2, ins2, alt2):
         pair = [ (chain1, nr1, ins1, alt1), (chain2, nr2, ins2, alt2) ]
         pair.sort()
@@ -1079,7 +1093,7 @@ def remove_duplicate_pairs(df: pl.DataFrame):
     null_count = pl.lit(0, dtype=pl.Int64)
     for col in df.columns:
         if col.startswith("hb_") and col.endswith("_length"):
-            score += pl.col(col).fill_null(0)
+            score += pl.col(col).fill_null(4)
             null_count += pl.col(col).is_null().cast(pl.Int64)
         if col.startswith("dssr_"):
             score += pl.col(col).is_null().cast(pl.Float64) * 0.03
@@ -1189,12 +1203,11 @@ def make_stats_columns(pdbid: str, df: pl.DataFrame, add_metadata_columns: bool,
         for name in m.get_columns()
     ]
 
+    # metadata about symmetry operations is not available in the BioPython data structure
     structure_data = lazy(lambda: pdb_utils.load_sym_data(None, pdbid))
     if structure is None:
         try:
             structure = pdb_utils.load_pdb(None, pdbid)
-            # structure, cif_block = pdb_utils.load_pdb_gemmi(None, pdbid)
-            # structure_data = lazy(lambda: pdb_utils.load_sym_data_gemmi()(cif_block)
         except HTTPError as e:
             print(f"Could not load structure {pdbid} due to http error")
             print(e)
@@ -1583,9 +1596,7 @@ if __name__ == "__main__":
     if args.override_pair_family == "all":
         args.override_pair_family = all_familites
 
-    for x in args.pdbcache or []:
-        pdb_utils.pdb_cache_dirs.append(os.path.abspath(x))
-    os.environ["PDB_CACHE_DIR"] = ';'.join(pdb_utils.pdb_cache_dirs)
+    pdb_utils.set_pdb_cache_dirs(args.pdbcache)
 
     multiprocessing.set_start_method("spawn")
     if args.threads == 1:

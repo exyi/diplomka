@@ -7,6 +7,13 @@ import numpy as np
 pdb_cache_dirs: list[str] = [ x for x in os.environ.get("PDB_CACHE_DIR", "").split(";") if x.strip() != "" ]
 tmp_dir = "/tmp/pdb_files"
 
+def set_pdb_cache_dirs(dirs: list[str]|None):
+
+    for x in dirs or []:
+        pdb_cache_dirs.append(os.path.abspath(x))
+    # set the env variable to remember the cache dirs
+    os.environ["PDB_CACHE_DIR"] = ';'.join(pdb_cache_dirs)
+
 def _get_pdbid(file):
     """Extract PDBID from file name."""
     pdbid = os.path.basename(file).split(".")[0]
