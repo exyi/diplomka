@@ -1123,11 +1123,12 @@ def postfilter_shift(df: pl.DataFrame, shift: Optional[float]):
 
 def get_max_bond_count(df: pl.DataFrame):
     """Gets the maximum number of hydrogen bonds in the given DataFrame.  """
-    pair_types = list(set(pair_defs.PairType.create(type, res1, res2, name_map=resname_map) for type, res1, res2 in df[["family", "res1", "res2"]].unique().iter_rows()))
-    bond_count = max(len(pair_defs.get_hbonds(p, throw=False)) for p in pair_types)
-    # print("Analyzing pair types:", pair_types, "with bond count =", bond_count)
-    print(f"Analyzing {len(pair_types)} pairtypes with bond count =", bond_count)
-    return max(3, bond_count)
+    return max(len(x) for x in pair_defs.hbonding_atoms.values())
+    # pair_types = list(set(pair_defs.PairType.create(type, res1, res2, name_map=resname_map) for type, res1, res2 in df[["family", "res1", "res2"]].unique().iter_rows()))
+    # bond_count = max(len(pair_defs.get_hbonds(p, throw=False)) for p in pair_types)
+    # # print("Analyzing pair types:", pair_types, "with bond count =", bond_count)
+    # print(f"Analyzing {len(pair_types)} pairtypes with bond count =", bond_count)
+    # return max(3, bond_count)
 
 def make_backbone_columns(df: pl.DataFrame, structure: Optional[Bio.PDB.Structure.Structure]) -> list[pl.Series]:
     """Calculates is_dinucleotide and is_parallel columns"""
@@ -1422,7 +1423,7 @@ def main_partition(pool: Union[Pool, MockPool], args, pdbid_partition='', ideal_
         StandardMetrics.Translation1,
         StandardMetrics.Translation2,
     ]
-    if ideal_basepairs is not None:
+    if ideal_basepairs is not None and len(ideal_basepairs) > 0:
         print(f"Measuring RMSD against {len(ideal_basepairs)} ideal basepairs")
         pair_metrics.extend([
             RMSDToIdealMetric('C1N_frames1', ideal_basepairs, fit_on='left_C1N', calculate='right_C1N'),
@@ -1479,6 +1480,9 @@ def main_partition(pool: Union[Pool, MockPool], args, pdbid_partition='', ideal_
         if len(chunk) > 0:
             result_chunks.append(chunk)
 
+    if len(result_chunks) == 0:
+        return None
+
     validate_missing_columns(result_chunks)
     df = pl.concat(result_chunks)
     df = postfilter(df)
@@ -1510,7 +1514,8 @@ def main(pool: Union[Pool, MockPool], args):
             partitions = [ select ]
         for partition in partitions:
             df = main_partition(pool, args, partition, ideal_basepairs)
-            save_output(args, df.lazy(), partition)
+            if df is not None and len(df) > 0:
+                save_output(args, df.lazy(), partition)
     else:
         pdbids = load_input_pdbids(args.inputs)
         partitions = {}
@@ -1523,7 +1528,7 @@ def main(pool: Union[Pool, MockPool], args):
             for p in sorted(partitions.keys()):
                 print("Processing partition", p)
                 p_result = main_partition(pool, args, p, ideal_basepairs)
-                if len(p_result) > 0:
+                if df is not None and len(p_result) > 0:
                     file = f"{args.output}_part{p}"
                     p_result.write_parquet(file)
                     p_results[p] = file
