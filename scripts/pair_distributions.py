@@ -1072,7 +1072,7 @@ def reexport_df(df: pl.DataFrame, filter: pl.Expr | None, columns, drop: list[st
     df = df.drop([col for col in df.columns if re.match(r"[DR]NA-(0-1[.]8|1[.]8-3[.]5)(-r\d+)?", col)])
     df = df.drop(drop, strict=False)
     df = df.drop(col for col in df.columns if any(re.fullmatch(d, col) for d in drop if d.startswith("^") and d.endswith("$")))
-    df = df.drop(["label"])
+    df = df.drop(["label"], strict=False)
     # round float columns
     if round:
         df = df.with_columns([

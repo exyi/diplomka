@@ -240,7 +240,7 @@ def best_fitting_nucleotides(df: pl.LazyFrame, method: str, accepted_column: str
     df = df.collect().lazy()
 
     if accepted_column is not None:
-        df = orig_df.drop(accepted_column).join(df.with_columns(pl.lit(True).alias(accepted_column)),
+        df = orig_df.drop(accepted_column, strict=False).join(df.with_columns(pl.lit(True).alias(accepted_column)),
             left_on=id_columns,
             right_on=id_columns,
             how="left",

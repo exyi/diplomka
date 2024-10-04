@@ -54,9 +54,9 @@ def format_output(f: ty.Any, df: pl.DataFrame, format: str, header: bool, parame
     def json_lines(df: pl.DataFrame, include_pdbid: bool = True, include_params: bool = True):
         df = df.select(json_columns)
         if not include_pdbid:
-            df = df.drop('pdbid')
+            df = df.drop('pdbid', strict=False)
         if not include_params:
-            df = df.drop('params')
+            df = df.drop('params', strict=False)
         def dict_drop_nulls(d):
             if not isinstance(d, dict):
                 return d

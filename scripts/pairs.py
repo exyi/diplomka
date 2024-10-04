@@ -1274,7 +1274,7 @@ def load_input_pdbids(inputs: list[str]) -> list[str]:
 def override_pair_family(df: pl.DataFrame, fam: Optional[str]) -> pl.DataFrame:
     if not fam:
         return df
-    df = df.drop("type", "family")
+    df = df.drop("type", "family", strict=False)
     override: list[str] = fam.split(",")
     # print("override pair family: ", override)
     if len(override) == 1:
