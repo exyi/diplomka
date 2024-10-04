@@ -7,6 +7,13 @@ import numpy as np
 pdb_cache_dirs: list[str] = [ x for x in os.environ.get("PDB_CACHE_DIR", "").split(";") if x.strip() != "" ]
 tmp_dir = "/tmp/pdb_files"
 
+def set_pdb_cache_dirs(dirs: list[str]|None):
+
+    for x in dirs or []:
+        pdb_cache_dirs.append(os.path.abspath(x))
+    # set the env variable to remember the cache dirs
+    os.environ["PDB_CACHE_DIR"] = ';'.join(pdb_cache_dirs)
+
 def _get_pdbid(file):
     """Extract PDBID from file name."""
     pdbid = os.path.basename(file).split(".")[0]
@@ -67,7 +74,7 @@ def download_pdb(pdb_id: str) -> TextIO:
     # download from https://files.rcsb.org/download/XXXX.cif.gz
     url = f"https://files.rcsb.org/download/{pdb_id}.cif.gz"
     response = urllib.request.urlopen(url)
-    return gzip.open(io.BytesIO(response.read()), "rt", encoding='utf-8-sig')
+    return gzip.open(io.BytesIO(response.read()), "rt", encoding='utf-8-sig') #type:ignore
 
 def get_pdb_file(file: Optional[str], pdbid: Optional[str] = None) -> str:
     if file is not None:
@@ -80,22 +87,26 @@ def open_pdb_file(file: Optional[str], pdbid: Optional[str] = None) -> TextIO:
     Either file or pdbid must be specified: open_pdb_file(None, '1ehz') or open_pdb_file('../data/1ehz.cif.gz')
     """
     if file is None and pdbid is not None:
-        if len(pdb_cache_dirs) == 0:
+        if "/" in pdbid or "\\" in pdbid:
+            # actually, it's a file path
+            return open_pdb_file(pdbid, None)
+        elif len(pdb_cache_dirs) == 0:
             return download_pdb(pdbid)
         else:
             return open_pdb_file(_find_or_add_cache(pdbid), pdbid)
 
     elif isinstance(file, str):
-        if file.endswith(".gz"):
+        if file.lower().endswith(".gz"):
             return gzip.open(file, "rt")
-        elif file.endswith(".zst"):
+        elif file.lower().endswith(".zst"):
             import zstandard
             return zstandard.open(file, "rt")
-        elif file.endswith(".bz2"):
+        elif file.lower().endswith(".bz2"):
             import bz2
             return bz2.open(file, "rt")
         else:
-            print("Warning: unknown file extension", file)
+            if not file.lower().endswith(".cif"):
+                print("Warning: unknown file extension", file)
             return open(file, "rt")
     elif file is None:
         raise Exception("No file specified")

@@ -7,7 +7,7 @@ import dataclasses
 from dataclasses import dataclass
 import tempfile
 import pdb_utils
-from scripts.async_utils import parse_thread_count
+from para_utils import parse_thread_count
 
 @dataclass(frozen=True, order=True)
 class NucleotideID:
@@ -181,9 +181,7 @@ if __name__ == "__main__":
     parser.add_argument("--threads", type=parse_thread_count, default=1)
     args = parser.parse_args()
 
-    for x in args.pdbcache:
-        pdb_utils.pdb_cache_dirs.append(os.path.abspath(x))
-    os.environ["PDB_CACHE_DIR"] = ';'.join(pdb_utils.pdb_cache_dirs)
+    pdb_utils.set_pdb_cache_dirs(args.pdbcache)
 
     multiprocessing.set_start_method("spawn")
     with multiprocessing.Pool(processes=args.threads) as pool:
@@ -191,7 +189,7 @@ if __name__ == "__main__":
 
         procs = [
             pool.apply_async(add_dssr_info, args=[pdbid, group, args.dssr_binary])
-            for pdbid, group in df.groupby(pl.col("pdbid"))
+            for pdbid, group in df.group_by(pl.col("pdbid"))
         ]
-        df = pl.concat([ p for p in [ p.get()[0] for p in procs ] if len(p) > 0 ])
+        df = pl.concat([ p for p in [ p.get()[1] for p in procs ] if len(p) > 0 ])
         df.sort('pdbid', 'model', 'nr1', 'nr2').write_csv(args.output)

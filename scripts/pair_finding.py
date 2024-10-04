@@ -1,8 +1,8 @@
 import multiprocessing.pool
-from typing import Any, Callable, Generator, Iterator, List, Literal, Optional, Sequence, Tuple, TypeVar, Union
+from typing import Any, Callable, Generator, Iterable, Iterator, List, Literal, Optional, Sequence, Tuple, TypeVar, Union
 import Bio.PDB, Bio.PDB.Structure, Bio.PDB.Model, Bio.PDB.Residue, Bio.PDB.Atom, Bio.PDB.Chain, Bio.PDB.Entity
 import os, sys, io, gzip, math, json, numpy as np, re, functools, itertools
-import multiprocessing, async_utils
+import multiprocessing, para_utils
 import pdb_utils
 import polars as pl
 
@@ -48,15 +48,24 @@ _directions = [
 
 _na_residues = { 'A', 'T', 'G', 'C', 'U', 'DA', 'DT', 'DU', 'DG', 'DC', '5MC' }
 
-def _matches_wblist(wlist, blist, x):
-    if blist and x in blist:
+def _matches_wblist[T](whitelist: Iterable[T] | None, blacklist: Iterable[T] | None, x: T) -> bool:
+    """
+    Does x match the whitelist and blacklist? When whitelist is None, all values not in blacklist are allowed.
+    """
+    if blacklist is not None and x in blacklist:
         return False
 
-    if wlist and x not in wlist:
+    if whitelist is not None and x not in whitelist:
         return False
     return True
 
 class StructureIndex:
+    """
+    Index for finding close atoms in a structure.
+
+    The structure is divided into a grid of cells with the specified `distance` between them.
+    Finding atoms within the `distance` then involves only looking into the 9 neighboring cells.
+    """
     def __init__(self, distance: float, atoms: Iterator[Bio.PDB.Atom.Atom]) -> None:
         self.distance = distance
         self.sqdistance = distance ** 2
@@ -139,6 +148,12 @@ def _get_alts(r: Bio.PDB.Residue.Residue) -> list[str]:
 
 
 def _to_contact_df(index: StructureIndex, s: Bio.PDB.Model.Model, sym: Optional[pdb_utils.SymmetryOperation]) -> pl.DataFrame:
+    """
+    Finds contacts between the indexed structure and `s` in symmetry `sym`.
+
+    Returns DataFrame with columns chain1, res1, nr1, ins1, alt1, chain2, res2, nr2, ins2, alt2, pdbid, model, symmetry_operation1, symmetry_operation2.
+    """
+    assert s.parent is not None
     pdbid = s.parent.id
     if sym and sym.pdbname != '1_555':
         s = s.copy()
@@ -151,6 +166,7 @@ def _to_contact_df(index: StructureIndex, s: Bio.PDB.Model.Model, sym: Optional[
         #     continue
         for alt1 in _get_alts(r1):
             for alt2 in _get_alts(r2):
+                assert r1.parent is not None and r2.parent is not None
                 result.append({
                     'chain1': r1.parent.id,
                     'res1': r1.resname,
@@ -182,35 +198,54 @@ def _to_contact_df(index: StructureIndex, s: Bio.PDB.Model.Model, sym: Optional[
         symmetry_operation2=pl.lit(sym.pdbname if sym and sym.pdbname != '1_555' else None, pl.Utf8),
     )
 
-def _main_1structure(pdb: str, output_directory: str, distance: float):
+def load_structure(pdb: str) -> tuple[Bio.PDB.Structure.Structure, pdb_utils.StructureData, str]:
+    """Loads the given mmCIF file or PDB ID"""
+    if "." in pdb:
+        match = re.search(r"(\w{4})[.](pdb|cif|mmcif)([.](gz|zstd?))?$", pdb, re.IGNORECASE)
+        if not match:
+            raise ValueError(f"Invalid file name: {pdb}")
+        pdbid = match.group(1).lower()
+        s = pdb_utils.load_pdb(pdb, pdbid)
+        sym = pdb_utils.load_sym_data(pdb, pdbid)
+    else:
+        s = pdb_utils.load_pdb(None, pdb)
+        sym = pdb_utils.load_sym_data(None, pdb)
+
+    pdbid: str = s.id
+    pdbid = pdbid.lower()
+
+    return s, sym, pdbid
+
+def find_contacts(s: Bio.PDB.Structure.Structure, sym: pdb_utils.StructureData, distance: float) -> pl.DataFrame:
+    """Finds contacting residues in the structure `s` within `distance` Ångströms."""
+    result_dfs: list[pl.DataFrame] = []
+    for model_i, m in enumerate(s.get_models()):
+        ix = StructureIndex.from_model(distance, m)
+        result_dfs.append(_to_contact_df(ix, m, None))
+        for symop in sym.assembly:
+            if symop.pdbname != '1_555':
+                result_dfs.append(_to_contact_df(ix, m, symop))
+
+    return pl.concat(result_dfs)
+
+
+def main_1structure(pdb: str, output_directory: str | None, distance: float):
     try:
-        if "." in pdb:
-            pdbid = re.search(r"(\w{4})[.](pdb|cif|mmcif)([.](gz|zstd?))?$", pdb, re.IGNORECASE).group(1)
-            s = pdb_utils.load_pdb(pdb, pdbid.lower())
-            sym = pdb_utils.load_sym_data(pdb, pdbid)
-        else:
-            s = pdb_utils.load_pdb(None, pdb)
-            sym = pdb_utils.load_sym_data(None, pdb)
+        s, sym, pdbid = load_structure(pdb)
     except Exception as e:
         print(f"Error loading {pdb}: {e}")
         return
 
-    result_df = []
-    pdbid: str = s.id
-    pdbid = pdbid.lower()
+    result_df = find_contacts(s, sym, distance)
 
-    for model_i, m in enumerate(s.get_models()):
-        ix = StructureIndex.from_model(distance, m)
-        result_df.append(_to_contact_df(ix, m, None))
-        for symop in sym.assembly:
-            if symop.pdbname != '1_555':
-                result_df.append(_to_contact_df(ix, m, symop))
+    if output_directory is not None:
+        result_df.write_parquet(os.path.join(output_directory, f"{pdbid}.parquet"))
+        print(f"Processed {pdbid}: {len(result_df)} contacts ({len(result_df.filter(pl.col("symmetry_operation2").is_not_null()))} with symmetry operation)")
+    else:
+        return result_df
+    
 
-    result_df = pl.concat(result_df)
-    result_df.write_parquet(f"{output_directory}/{pdbid}.parquet")
-    print(f"Processed {pdbid}: {len(result_df)} contacts ({len(result_df.filter(pl.col("symmetry_operation2").is_not_null()))} with symmetry operation)")
-
-def _main(args, pool: Union[async_utils.MockPool, multiprocessing.pool.Pool]):
+def _main(args, pool: Union[para_utils.MockPool, multiprocessing.pool.Pool]):
     if os.path.exists(args.output):
         if os.listdir(args.output):
             raise ValueError(f"Output directory {args.output} is not empty")
@@ -218,7 +253,7 @@ def _main(args, pool: Union[async_utils.MockPool, multiprocessing.pool.Pool]):
         os.makedirs(args.output)
     
     inputs = args.inputs
-    r = [ pool.apply_async(_main_1structure, args=[pdb, args.output, args.distance]) for pdb in inputs ]
+    r = [ pool.apply_async(main_1structure, args=[pdb, args.output, args.distance]) for pdb in inputs ]
     for i, x in enumerate(r):
         x.get()
 
@@ -229,14 +264,13 @@ if __name__ == '__main__':
     parser.add_argument('--distance', type=float, default=4.0, help='Distance threshold between residue atoms (in Ångströms)')
     parser.add_argument('--output', type=str, help='An empty output directory (will create a parquet file for each PDB structure)', required=True)
     parser.add_argument("--pdbcache", nargs="+", help="Directories to search for PDB files in order to avoid re-downloading. Last directory will be written to, if the structure is not found and has to be downloaded from RCSB. Also can be specified as PDB_CACHE_DIR env variable.")
-    parser.add_argument('--threads', type=async_utils.parse_thread_count, default=1, help='Number of threads, 0 for all, 50% for half, -1 to leave one free, ... Parallelism only affects processing of multiple PDB files.')
+    parser.add_argument('--threads', type=para_utils.parse_thread_count, default=1, help='Number of threads, 0 for all, 50%% for half, -1 to leave one free, ... Parallelism only affects processing of multiple PDB files.')
     args = parser.parse_args()
-    for x in args.pdbcache or []:
-        pdb_utils.pdb_cache_dirs.append(os.path.abspath(x))
-    os.environ["PDB_CACHE_DIR"] = ';'.join(pdb_utils.pdb_cache_dirs)
+    
+    pdb_utils.set_pdb_cache_dirs(args.pdbcache)
 
     if args.threads == 1:
-        pool = async_utils.MockPool()
+        pool = para_utils.MockPool()
         _main(args, pool)
     else:
         with multiprocessing.Pool(args.threads if args.threads > 0 else max(1, os.cpu_count() + args.threads)) as pool:

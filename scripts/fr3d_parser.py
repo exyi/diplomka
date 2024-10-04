@@ -10,7 +10,7 @@ import polars as pl
 
 import numpy as np
 
-from async_utils import MockPool
+from para_utils import MockPool
 
 def pdb_funny_case(pdbid: str):
     """Lowercase PDBID with uppercase L"""

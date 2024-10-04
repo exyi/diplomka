@@ -17,7 +17,7 @@ from scipy.spatial.transform import Rotation
 from pair_csv_parse import scan_pair_csvs
 import pdb_utils
 import pair_defs as pair_defs
-from async_utils import MockPool, parse_thread_count
+from para_utils import MockPool, parse_thread_count
 pdef = pair_defs
 
 class _Sentinel:
@@ -48,7 +48,7 @@ class AltResidue:
                 # don't crash on uninteresting atoms
                 if a.id.startswith('H') or a.id in ['P', 'OP1', 'OP2', 'OP3', "O5'", "C5'", "C4'", "O4'", "C3'", "O3'", "O2'", "C2'", "C1'"]:
                     return a.disordered_get(a.disordered_get_id_list()[0])
-                elif np.allclose(a.disordered_get(ids[0]).coord, a.disordered_get(ids[1]).coord, atol=0.05):
+                elif np.allclose(a.disordered_get(ids[0]).coord, a.disordered_get(ids[1]).coord, atol=0.05): # type:ignore
                     return a.disordered_get(ids[0])
             if not a.disordered_has_id(self.alt):
                 raise KeyError(f"Atom {self.res.full_id}:{a.id} is disordered, but alt='{self.alt}' must be one of {a.disordered_get_id_list()}")
@@ -406,6 +406,7 @@ def load_pair_information_by_idtuple(pdbid: str, data: list[tuple[Union[tuple[st
 
         res1 = get_residue(structure, None, model, chain1, resname1, nr1, ins1, alt1, None)
         res2 = get_residue(structure, None, model, chain2, resname2, nr2, ins2, alt2, None)
+        assert res1 is not None and res2 is not None, f"Ideal basepairS not found: {identifier}"
         # detach parent to lower memory usage (all structures would get replicated to all workers)
         res1 = res1.copy()
         res2 = res2.copy()
@@ -687,8 +688,8 @@ class RMSDToIdealMetric(PairMetric):
     Various RMSD distances between the singular "ideal" basepair the observed one
     """
     def __init__(self, name, ideal: dict[pair_defs.PairType, PairInformation],
-        fit_on: Literal['all', 'left_C1N', 'left', 'right', 'both_edges'],
-        calculate: Literal['all', 'right_C1N', 'both_C1N', 'left_edge', 'right_edge', 'both_edges'],
+        fit_on: Literal['all', 'left_C1N', 'right_C1N', 'left', 'right', 'both_edges'],
+        calculate: Literal['all', 'right_C1N', 'left_C1N', 'both_C1N', 'left_edge', 'right_edge', 'both_edges'],
     ) -> None:
         self.ideal = ideal
         self.columns = [ f"rmsd_{name}" ]
@@ -884,6 +885,14 @@ def to_csv_row(df: pl.DataFrame, i: int = 0, max_len = None) -> str:
 
 T = TypeVar("T")
 def lazy(create: Callable[..., T], *args) -> Callable[[], T]:
+    """
+    Lazily creates a value using the given function and arguments
+
+    val = lazy(lambda: create_something())
+    ...
+    val().do_something() # create_something() is called here
+    val().do_something() # create_something() is not called again
+    """
     cache: T
     has_value = False
     def core():
@@ -900,7 +909,7 @@ def get_residue(structure: Bio.PDB.Structure.Structure, strdata: Optional[Callab
     ins = ins or ' '
     alt = alt or ''
     ch: Bio.PDB.Chain.Chain = structure[model-1][chain]
-    found: Bio.PDB.Residue.Residue = ch.child_dict.get((' ', nr, ins), None)
+    found: Bio.PDB.Residue.Residue | None = ch.child_dict.get((' ', nr, ins), None)
     if found is None:
         found = next((r for r in ch.get_residues() if r.id[1] == nr and r.id[2] == ins), None)
     if found is None:
@@ -928,16 +937,19 @@ def get_stats_for_csv(df_: pl.DataFrame, structure: Bio.PDB.Structure.Structure,
     """
     Iterates over all basepairs in the given DataFrame, calculating the stats for each one. Works on a single PDB structure.
     """
-    df = df_.with_row_count()
-    pair_type_col = df["family" if "family" in df.columns else "type"]
+    df = df_.with_row_index("row_nr")
+    family_col = df["family" if "family" in df.columns else "type"]
     metric_columns = [ tuple(m.get_columns()) for m in metrics ]
     assert df["pdbid"].str.to_lowercase().eq(structure.id.lower()).all(), f"pdbid mismatch: {structure.id} != {df['pdbid'].str.to_lowercase().to_list()}"
     pdbid = structure.id
 
+    # list of all residues (res1 and res2) which form any pair:
     residues_df = pl.concat([
         df.select(pl.col("model"), chain=pl.col("chain1"), res=pl.col("res1"), nr=pl.col("nr1"), ins=pl.col("ins1"), alt=pl.col("alt1"), symop=pl.col("symmetry_operation1")),
         df.select(pl.col("model"), chain=pl.col("chain2"), res=pl.col("res2"), nr=pl.col("nr2"), ins=pl.col("ins2"), alt=pl.col("alt2"), symop=pl.col("symmetry_operation2"))
     ]).unique()
+
+    # pre-compute ResidueInformation (i.e. plane fit) for all residues which form some pair to avoid calculating it multiple times
     def residue_cache_create_entry(model, chain, res, nr, ins, alt, symop):
         try:
             r = get_residue(structure, strdata, model, chain, res, nr, ins, alt, symop)
@@ -947,13 +959,12 @@ def get_stats_for_csv(df_: pl.DataFrame, structure: Bio.PDB.Structure.Structure,
         except KeyError as keyerror:
             print(f"Could not find residue1 {pdbid}.{model}.{chain}.{str(nr)+ins} ({keyerror=})")
             return None
-
     residue_cache = {
-        (model, chain, res, nr, ins, alt, symop): residue_cache_create_entry(model, chain, res, nr, ins, alt, symop)
+        (model, chain, res, nr, (ins or '').strip(), (alt or '').strip(), symop): residue_cache_create_entry(model, chain, res, nr, ins, alt, symop)
         for model, chain, res, nr, ins, alt, symop in residues_df.iter_rows()
     }
 
-    for (pair_family, i, model, chain1, resname1, nr1, ins1, alt1, symop1, chain2, resname2, nr2, ins2, alt2, symop2) in zip(pair_type_col.to_list(), df["row_nr"].to_list(), df["model"].to_list(), df["chain1"].to_list(), df['res1'].to_list(), df["nr1"].to_list(), df["ins1"].to_list(), df["alt1"].to_list(), df["symmetry_operation1"].to_list(), df["chain2"].to_list(), df['res2'].to_list(), df["nr2"].to_list(), df["ins2"].to_list(), df["alt2"].to_list(), df["symmetry_operation2"].to_list()):
+    for (pair_family, i, model, chain1, resname1, nr1, ins1, alt1, symop1, chain2, resname2, nr2, ins2, alt2, symop2) in zip(family_col.to_list(), df["row_nr"].to_list(), df["model"].to_list(), df["chain1"].to_list(), df['res1'].to_list(), df["nr1"].to_list(), df["ins1"].to_list(), df["alt1"].to_list(), df["symmetry_operation1"].to_list(), df["chain2"].to_list(), df['res2'].to_list(), df["nr2"].to_list(), df["ins2"].to_list(), df["alt2"].to_list(), df["symmetry_operation2"].to_list()):
         try:
             ins1 = (ins1 or '').strip()
             ins2 = (ins2 or '').strip()
@@ -1042,12 +1053,15 @@ def remove_duplicate_pairs_phase1(df: pl.DataFrame):
         df = df.filter(pl.col("_tmp_row_nr").is_in(duplicated_set).not_())
         return df
 
+    # prefer WS over SW family, ... (W > H > S > B)
     df = core(df, family_col.str.contains("^(?i)n?(c|t)(SH|HW|SW|BW)a?$"))
-    # print(f"Removed duplicates - family orientation {original_len} -> {len(df)}")
+    #print(f"Removed duplicates - family orientation {original_len} -> {len(df)}")
 
+    # prefer uppercase over lowercase family (Ss > sS)
     df = core(df, family_col.str.contains("^n?[ct][whsb][WHSB]a?$"))
-    # print(f"Removed duplicates - FR3D small letter is second {original_len} -> {len(df)}")
+    #print(f"Removed duplicates - FR3D small letter is second {original_len} -> {len(df)}")
 
+    # prefer GC over CG, ... (G > A > C > U)
     base_ordering = { 'A': 1, 'G': 2, 'C': 3, 'U': 4, 'T': 4 }
     df = core(df,
                 family_col.str.to_lowercase().is_in(["tss", "css"]).not_() &
@@ -1065,6 +1079,7 @@ def remove_duplicate_pairs(df: pl.DataFrame):
     """
     df = remove_duplicate_pairs_phase1(df)
 
+    # keep the one with shorter H-bonds
     def pair_id(type, res1, res2, chain1, nr1, ins1, alt1, chain2, nr2, ins2, alt2):
         pair = [ (chain1, nr1, ins1, alt1), (chain2, nr2, ins2, alt2) ]
         pair.sort()
@@ -1079,7 +1094,7 @@ def remove_duplicate_pairs(df: pl.DataFrame):
     null_count = pl.lit(0, dtype=pl.Int64)
     for col in df.columns:
         if col.startswith("hb_") and col.endswith("_length"):
-            score += pl.col(col).fill_null(0)
+            score += pl.col(col).fill_null(4)
             null_count += pl.col(col).is_null().cast(pl.Int64)
         if col.startswith("dssr_"):
             score += pl.col(col).is_null().cast(pl.Float64) * 0.03
@@ -1094,6 +1109,17 @@ def remove_duplicate_pairs(df: pl.DataFrame):
     df = df.sort("_tmp_row_nr")
     df = df.drop(["_tmp_pair_id", "_tmp_row_nr"])
     return df
+
+def postfilter_hb(df: pl.DataFrame, length: Optional[float]):
+    if length:
+        df = df.filter(pl.any_horizontal(pl.col("^hb_\\d+_length$") <= length))
+    return df
+
+def postfilter_shift(df: pl.DataFrame, shift: Optional[float]):
+    if shift:
+        df = df.filter((pl.col("coplanarity_shift1").abs() < shift) & (pl.col("coplanarity_shift2").abs() < shift))
+    return df
+
 
 def get_max_bond_count(df: pl.DataFrame):
     """Gets the maximum number of hydrogen bonds in the given DataFrame.  """
@@ -1150,9 +1176,19 @@ def make_backbone_columns(df: pl.DataFrame, structure: Optional[Bio.PDB.Structur
 
 
 
-def make_stats_columns(pdbid: str, df: pl.DataFrame, add_metadata_columns: bool, max_bond_count: int, metrics: list[PairMetric], max_hb_length: Optional[float]) -> Tuple[str, pl.DataFrame, np.ndarray]:
+def make_stats_columns(pdbid: str, df: pl.DataFrame, add_metadata_columns: bool, max_bond_count: int, metrics: list[PairMetric], max_hb_length: Optional[float] = None, structure: Bio.PDB.Structure.Structure | None = None) -> Tuple[str, pl.DataFrame, np.ndarray]:
     """
-    Adds the columns with basepair stats to the DataFrame.
+    Creates a DataFrame with calculated basepair parameters for each basepair in `df`.
+    Returns: (pdbid, DataFrame with parameters, bitmap of rows where the parameters were successfully calculated)
+
+    Arguments:
+    - pdbid: PDB ID of the structure, or path to a mmCIF file. The structure will be loaded and pairs listed in `df` will be analyzed.
+    - df: DataFrame with columns `model`, `chain1`, `res1`, `nr1`, `ins1`, `alt1`, `chain2`, `res2`, `nr2`, `ins2`, `alt2`, `symmetry_operation1`, `symmetry_operation2`, `family`
+    - add_metadata_columns: If True, adds columns with metadata about the structure (deposition date, structure name, resolution, structure method)
+    - max_bond_count: Maximum number of hydrogen bonds to calculate for each basepair
+    - metrics: List of parameters to calculate for each basepair
+    - max_hb_length: Ignore pairs with H-bonds longer than this value
+    - structure: Optional Bio.PDB.Structure.Structure object with the structure data. If not provided, the structure will be loaded.
     """
     bond_params = [ x.name for x in dataclasses.fields(HBondStats) ]
     valid = np.zeros(len(df), dtype=np.bool_)
@@ -1168,20 +1204,19 @@ def make_stats_columns(pdbid: str, df: pl.DataFrame, add_metadata_columns: bool,
         for name in m.get_columns()
     ]
 
+    # metadata about symmetry operations is not available in the BioPython data structure
     structure_data = lazy(lambda: pdb_utils.load_sym_data(None, pdbid))
-    structure = None
-    try:
-        structure = pdb_utils.load_pdb(None, pdbid)
-        # structure, cif_block = pdb_utils.load_pdb_gemmi(None, pdbid)
-        # structure_data = lazy(lambda: pdb_utils.load_sym_data_gemmi()(cif_block)
-    except HTTPError as e:
-        print(f"Could not load structure {pdbid} due to http error")
-        print(e)
-    except Exception as e:
-        import traceback
-        print(f"Could not load structure {pdbid} due to unknown error")
-        print(e)
-        print(traceback.format_exc())
+    if structure is None:
+        try:
+            structure = pdb_utils.load_pdb(None, pdbid)
+        except HTTPError as e:
+            print(f"Could not load structure {pdbid} due to http error")
+            print(e)
+        except Exception as e:
+            import traceback
+            print(f"Could not load structure {pdbid} due to unknown error")
+            print(e)
+            print(traceback.format_exc())
 
     if structure is not None:
         for i, hbonds, metric_values in get_stats_for_csv(df, structure, structure_data, metrics, max_hb_length):
@@ -1202,7 +1237,7 @@ def make_stats_columns(pdbid: str, df: pl.DataFrame, add_metadata_columns: bool,
     ])
     result_df = to_float32_df(result_df)
     if add_metadata_columns:
-        h = structure.header if structure is not None else dict()
+        h = structure.header if structure is not None else dict() # type: ignore
         result_df = result_df.with_columns(
             pl.lit(h.get('deposition_date', None), dtype=pl.Utf8).alias("deposition_date"),
             pl.lit(h.get('name', None), dtype=pl.Utf8).alias("structure_name"),
@@ -1240,7 +1275,7 @@ def override_pair_family(df: pl.DataFrame, fam: Optional[str]) -> pl.DataFrame:
         return df
     df = df.drop("type", "family")
     override: list[str] = fam.split(",")
-    print("override pair family: ", override)
+    # print("override pair family: ", override)
     if len(override) == 1:
         df = df.select(
             pl.lit(override[0]).alias("type"),
@@ -1417,14 +1452,11 @@ def main_partition(pool: Union[Pool, MockPool], args, pdbid_partition='', ideal_
         ])
 
     def postfilter(df: pl.DataFrame):
-        if args.postfilter_hb:
-            df = df.filter(pl.any_horizontal(pl.col("^hb_\\d+_length$") < args.postfilter_hb))
-        if args.postfilter_shift:
-            df = df.filter((pl.col("coplanarity_shift1").abs() < args.postfilter_shift) & (pl.col("coplanarity_shift2").abs() < args.postfilter_shift))
+        df = postfilter_hb(df, args.postfilter_hb)
+        df = postfilter_shift(df, args.postfilter_shift)
         if args.dedupe:
             df = remove_duplicate_pairs(df)
         return df
-
 
     result_chunks = []
     for ((_pdbid,), group), ps in zip(groups, zip(*processes)):
@@ -1502,6 +1534,7 @@ def main(pool: Union[Pool, MockPool], args):
             for p in p_results.values():
                 os.remove(p)
 
+all_familites = "cWW,cWWa,tWW,tWWa,cWH,tWH,cWS,tWS,cHH,cHHa,tHH,cHS,tHS,cSS,tSS,cWB"
 
 def save_output(args, df: pl.LazyFrame, partition_select = ''):
     file = args.output
@@ -1545,7 +1578,7 @@ if __name__ == "__main__":
     parser.add_argument("inputs", nargs="+", help="Input file - Parquet with a list of basepairs; FR3D basepairing output; CIF/PDB file (all close contacts will be examined)")
     parser.add_argument("--pdbcache", nargs="+", help="Directories to search for PDB files in order to avoid downloading. Last directory will be written to, if the structure is not found and has to be downloaded from RCSB. Also can be specified as PDB_CACHE_DIR env variable.")
     parser.add_argument("--output", "-o", required=True, help="Output CSV/Parquet file name. Both CSV and Parquet are always written.")
-    parser.add_argument("--threads", type=parse_thread_count, default=1, help="Number of worker processes to spawn. Does not affect Polars threading, at the start, the process might use more threads than specified. `0` to use all available CPU threads, `-1` all except one, 50% for half, ...")
+    parser.add_argument("--threads", type=parse_thread_count, default=1, help="Number of worker processes to spawn. Does not affect Polars threading, at the start, the process might use more threads than specified. `0` to use all available CPU threads, `-1` all except one, 50%% for half, ...")
     parser.add_argument("--export-only", default=False, action="store_true", help="Only re-export the input as CSV+Parquet files, do not calculate anything")
     parser.add_argument("--partition-input", default=0, type=int, help="Partition the input by N first characters of the PDBID. Reduces memory usage for large datasets.")
     parser.add_argument("--partition-input-select", default='', type=str, help="Select a given input partition (for example '9' will run pdbids starting with '9').")
@@ -1562,11 +1595,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.override_pair_family == "all":
-        args.override_pair_family = "cWW,cWWa,tWW,tWWa,cWH,tWH,cWS,tWS,cHH,cHHa,tHH,cHS,tHS,cSS,tSS,cWB"
+        args.override_pair_family = all_familites
 
-    for x in args.pdbcache or []:
-        pdb_utils.pdb_cache_dirs.append(os.path.abspath(x))
-    os.environ["PDB_CACHE_DIR"] = ';'.join(pdb_utils.pdb_cache_dirs)
+    pdb_utils.set_pdb_cache_dirs(args.pdbcache)
 
     multiprocessing.set_start_method("spawn")
     if args.threads == 1:

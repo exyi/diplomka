@@ -287,7 +287,7 @@
           <div class="control">
             <div class="select">
               <select bind:value={filter.orderBy} id="ntfilter-order-by">
-                {#each getOrderByOptions(filter.orderBy ?? '', ["pdbid", "rmsdA", "rmsdD"]) as opt}
+                {#each getOrderByOptions(filter.orderBy ?? '', ["pdbid", "rmsdA", "rmsdD", "quantile_hmean_Q", "quantile_hmean_QA"]) as opt}
                   <option value={opt.id} title={opt.title}>{opt.label}</option>
                 {/each}
               </select>
@@ -585,6 +585,14 @@
           {#if filter.filtered && filter.resolution?.max && filter.resolution?.max > 3.5}
             <p class="help is-danger">Representative set only<br> contains structures ≤3.5 Å</p>
           {/if}
+
+          <div class="field">
+            <label class="label" for="ntfilter-validation">Probability percentile:</label>
+            <div class="control">
+              <RangeEditor bind:range={filter.validation_score} step={1} min={0} max={100} />
+            </div>
+          </div>
+
         </div>
 
         <div class="column">

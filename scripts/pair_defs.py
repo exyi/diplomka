@@ -7,7 +7,7 @@ from typing import Literal, Optional, Union
 @dataclasses.dataclass(frozen=True)
 class PairType:
     """
-    Represent type of basepairs, like cWW-A-U, cWWa-U-U, ntHS-A-G, ...
+    Represent basepairing class, such as cWW-A-U, cWWa-U-U, ntHS-A-G, ...
     """
     type: str
     bases: tuple[str, str]
@@ -15,13 +15,6 @@ class PairType:
     n:bool = False
 
     def __post_init__(self):
-        # assert len(self.type) == 3
-        # assert len(self.bases) == 2
-        # assert self.type[0] in "ct"
-        # assert self.type[1] in "WSH"
-        # assert self.type[2] in "WSH"
-        # assert self.bases[0] in "ACGU"
-        # assert self.bases[1] in "ACGU"
         if len(self.type) != 3 or len(self.bases) != 2 or self.type[0] not in "ct" or self.type[1].upper() not in "BWSH" or self.type[2].upper() not in "WSHB" or (len(self.bases[0]) == 1 and self.bases[0] not in "ACGU") or (len(self.bases[1]) == 1 and self.bases[1] not in "ACGU"):
             raise ValueError(f"Invalid pair type: PairType({repr(self.type)}, {self.bases})")
     @property
@@ -148,6 +141,7 @@ resname_map = {
     'T': 'U',
 }
 def map_resname(resname: str) -> str:
+    """Replaces DX with X, and T with U"""
     return resname_map.get(resname.upper(), resname)
 
 def read_pair_definitions(file = os.path.join(os.path.dirname(__file__), "H_bonding_Atoms_from_Isostericity_Table.csv")) -> dict[tuple[str, str], list[tuple[str, str, str, str]]]:
@@ -423,7 +417,7 @@ def is_bond_to_sugar(pair_type: PairType, b: tuple[str, str, str, str]) -> bool:
     """Is the bond to the O2' (or other sugar) atom?"""
     return b[1].endswith("'") or b[2].endswith("'")
 
-def is_bond_hidden(pair_type: PairType, b: tuple[str, str, str, str]) -> bool:
+def is_bond_hidden(pair_type: PairType | tuple, b: tuple[str, str, str, str]) -> bool:
     """Return true to hide a given bond from the generated plots"""
     return False
     return is_ch_bond(pair_type, b)
