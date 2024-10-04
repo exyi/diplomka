@@ -48,7 +48,8 @@ _directions = [
 
 _na_residues = { 'A', 'T', 'G', 'C', 'U', 'DA', 'DT', 'DU', 'DG', 'DC', '5MC' }
 
-def _matches_wblist[T](whitelist: Iterable[T] | None, blacklist: Iterable[T] | None, x: T) -> bool:
+T = TypeVar('T')
+def _matches_wblist(whitelist: Iterable[T] | None, blacklist: Iterable[T] | None, x: T) -> bool:
     """
     Does x match the whitelist and blacklist? When whitelist is None, all values not in blacklist are allowed.
     """
