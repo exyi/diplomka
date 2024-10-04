@@ -82,7 +82,7 @@ def parse_thread_count(x: str):
             return 1
         return round(x)
     x = x.strip()
-    cpus = len(os.sched_getaffinity(0)) # returns the number of assigned cores from taskset, while os.cpu_count() returns all cores on the machine (funny way how to run out of memory in MetaCentrum...)
+    cpus = len(os.sched_getaffinity(0)) if hasattr(os, "sched_getaffinity") else os.cpu_count() # returns the number of assigned cores from taskset, while os.cpu_count() returns all cores on the machine (funny way how to run out of memory in MetaCentrum...)
     if x == "0" or x == "all":
         return cpus
     if re.fullmatch(r"\d+", x):
