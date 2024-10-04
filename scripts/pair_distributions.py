@@ -10,7 +10,6 @@ import pairs
 import pair_defs
 from pair_defs import PairType
 import pair_csv_parse
-import seaborn as sns
 import scipy.stats
 import residue_filter
 from dataclasses import dataclass
@@ -27,7 +26,9 @@ def matplotlib_init():
     plt.rcParams["figure.figsize"] = (16, 9)
     return plt
 
+
 plt = pairs.lazy(matplotlib_init)
+
 
 bins_per_width = 50
 hist_kde = True
@@ -554,6 +555,7 @@ def make_histogram_group(dataframes: list[pl.DataFrame], axes: list[Axes], title
 
         print(bin_width, xmin, xmax, len(renamed_columns), len(renamed_columns.columns), renamed_columns.null_count().to_dicts()[0], title)
         binses = np.arange(xmin, xmax, bin_width)
+        import seaborn as sns
         sns.histplot(data=renamed_columns.to_pandas(),
                     #  binwidth=bin_width if len(renamed_columns) > 2 else None,
                     #  binwidth=bin_width,
@@ -708,6 +710,7 @@ def make_resolution_comparison_page(df: pl.DataFrame, outdir: str, pair_type: Pa
 
 def make_pairplot_page(df: pl.DataFrame, outdir: str, pair_type: PairType, variables: list[pl.Expr], title_suffix = ""):
     title = f"{format_pair_type(pair_type)} Pairplot{title_suffix}"
+    import seaborn as sns
     grid: sns.PairGrid = sns.pairplot(df.select(*variables).to_pandas(),
                                         kind="scatter" if len(df) < 400 else "kde",
                                         #  kind="hist"
