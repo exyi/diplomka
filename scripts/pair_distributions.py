@@ -3,10 +3,7 @@ import itertools
 import multiprocessing.pool
 from para_utils import MockPool, batched_map, parse_thread_count
 import subprocess
-from typing import Any, Generator, Optional, Union
-from matplotlib.axes import Axes
-from matplotlib.figure import Figure
-import matplotlib.patheffects
+from typing import Any, Generator, Optional, Union, TypeAlias, TYPE_CHECKING
 import polars as pl, numpy as np, numpy.typing as npt
 import os, sys, math, re
 import pairs
@@ -15,11 +12,22 @@ from pair_defs import PairType
 import pair_csv_parse
 import seaborn as sns
 import scipy.stats
-import matplotlib.pyplot as plt
 import residue_filter
 from dataclasses import dataclass
 import dataclasses
 import threading
+if TYPE_CHECKING:
+    import matplotlib, matplotlib.axes, matplotlib.figure
+# matplotlib sometimes leads to segfaults, this makes sure it's not even loaded when --skip-plot is used
+Axes:TypeAlias = 'matplotlib.axes.Axes'
+Figure: TypeAlias = 'matplotlib.figure.Figure'
+
+def matplotlib_init():
+    import matplotlib.pyplot as plt
+    plt.rcParams["figure.figsize"] = (16, 9)
+    return plt
+
+plt = pairs.lazy(matplotlib_init)
 
 bins_per_width = 50
 hist_kde = True
@@ -31,10 +39,8 @@ is_med_quality = pl.col("RNA-1.8-3.5") | pl.col("DNA-1.8-3.5")
 is_dna = pl.col("res1").str.starts_with("D") | pl.col("res2").str.starts_with("D")
 is_rna = pl.col("res1").str.starts_with("D").not_() | pl.col("res2").str.starts_with("D").not_()
 
-plt.rcParams["figure.figsize"] = (16, 9)
 subplots = (2, 2)
 # subplots = None
-# plt.rcParams["figure.figsize"] = (10, 6)
 
 resolutions = [
     # ("DNA ≤3 Å", is_some_quality & is_rna.not_() & (pl.col("resolution") <= 3)),
@@ -567,6 +573,7 @@ def make_histogram_group(dataframes: list[pl.DataFrame], axes: list[Axes], title
                 ax.plot([ x[peak] ], [ y[peak] ], marker="o", color=line.get_color())
                 # text label for the peak
                 peak_fmt = f"{x[peak]:.0f}°" if "angle" in title.lower() else f"{x[peak]:.2f}"
+                import matplotlib.patheffects
                 ax.annotate(peak_fmt, (x[peak], y[peak]), xytext=(0, 5), textcoords="offset points", ha='center', va='bottom', color=line.get_color(), fontsize=8, path_effects=[
                     matplotlib.patheffects.withStroke(linewidth=3, foreground="white") # text outline
                 ])
@@ -596,13 +603,13 @@ def make_histogram_group(dataframes: list[pl.DataFrame], axes: list[Axes], title
 
 
 def make_subplots(sp = subplots):
-    fig, sp = plt.subplots(*sp)
+    fig, sp = plt().subplots(*sp)
     return fig, list(sp.reshape(-1)) # type:ignore
 
 def draw_pair_img_highligh(ax, img, highlight: Optional[pl.DataFrame]):
     if img is None:
         return
-    img_data=crop_image(plt.imread(img), padding=(0, 30, 0, 0))
+    img_data=crop_image(plt().imread(img), padding=(0, 30, 0, 0))
     print(f"image {img} {img_data.shape}")
     ax.imshow(img_data)
     # ax.annotate("bazmek", (0, 1))
@@ -661,7 +668,7 @@ def make_bond_pages(df: pl.DataFrame, outdir: str, pair_type: PairType, hs: list
     for p, title, df in zip(pages, titles, dataframes):
         if len(df) == 0:
             # make "NO DATA" page
-            fig, ax = plt.subplots(1)
+            fig, ax = plt().subplots(1)
             fig.suptitle(title)
             ax.axis("off")
             ax.text(0.5, 0.5,'NO DATA',fontsize=30,horizontalalignment='center',verticalalignment='center',transform = ax.transAxes)
@@ -678,17 +685,17 @@ def make_resolution_comparison_page(df: pl.DataFrame, outdir: str, pair_type: Pa
 
     if subplots:
         titles = [ f"{resolution_lbl}" for resolution_lbl, _ in resolutions ]
-        main_fig, axes = plt.subplots(*subplots)
+        main_fig, axes = plt().subplots(*subplots)
         main_fig.tight_layout(pad=3.0)
         axes = list(axes.reshape(-1))
         assert len(axes) == len(resolutions) + len(images)
         for ax_i, img in enumerate(images):
             ax_i += len(resolutions)
-            axes[ax_i].imshow(plt.imread(img))
+            axes[ax_i].imshow(plt().imread(img))
     else:
         titles = [ f"{title} {resolution_lbl}" for resolution_lbl, _ in resolutions ]
         main_fig = None
-        axes = [ plt.gca() for _ in resolutions ]
+        axes = [ plt().gca() for _ in resolutions ]
     make_histogram_group(dataframes, axes, titles, pair_type, h)
 
     if subplots:
@@ -715,7 +722,7 @@ def save(fig: Figure, title, outdir):
         pdf=os.path.join(outdir, title + ".pdf")
         fig.savefig(pdf, dpi=300)
         fig.savefig(os.path.join(outdir, title + ".png"))
-        plt.close(fig)
+        plt().close(fig)
         print(f"Wrote {pdf}")
         return pdf
     except Exception as e:
