@@ -39,13 +39,15 @@ def apply_filter(df: pl.LazyFrame, boundaries: pl.DataFrame, null_is_fine: bool,
     - `accepted_column` - instead of removing the non-matching rows, create a new boolean column with the specified name and set it to True, when the pair matches the criteria in `boundaries`
     - best_fit - See --best-fit help
     """
-    if "hb_0_length" not in df.columns or "C1_C1_yaw1" not in df.columns:
+    columns = df.collect_schema().names()
+    if "hb_0_length" not in columns or "C1_C1_yaw1" not in columns:
         raise ValueError("The input data is missing the necessary columns")
 
     df = df.with_columns(
         _tmp_bases=pl.col("res1").replace(pair_defs.resname_map).str.to_uppercase() + "-" + pl.col("res2").replace(pair_defs.resname_map).str.to_uppercase(),
         _tmp_min_bond_length = pl.min_horizontal(pl.col("^hb_\\d+_length$")),
     )
+    columns = df.collect_schema().names()
 
     colname_mapping = {
         "yaw1": "C1_C1_yaw1",
@@ -59,7 +61,7 @@ def apply_filter(df: pl.LazyFrame, boundaries: pl.DataFrame, null_is_fine: bool,
 
     checked_columns = set(c[:-4] for c in boundaries.columns if c.endswith("_min") or c.endswith("_max"))
     checked_columns = set(colname_mapping.get(c, c) for c in checked_columns)
-    if len(missing_columns := checked_columns - set(df.columns)) > 0:
+    if len(missing_columns := checked_columns - set(columns)) > 0:
         print(f"WARNING: The data is missing the following columns with boundaries specified: {[*missing_columns]}")
         checked_columns.difference_update(missing_columns)
 
@@ -117,7 +119,7 @@ def apply_filter(df: pl.LazyFrame, boundaries: pl.DataFrame, null_is_fine: bool,
 
     if accepted_column is not None:
         # add `accepted` column with the result of the condition
-        df = df.with_columns((monster_condition == pl.lit(True)).alias(accepted_column))
+        df = df.with_columns(monster_condition.fill_null(False).alias(accepted_column))
     else:
         df = df.filter(monster_condition)
 
@@ -221,11 +223,11 @@ def best_fitting_nucleotides(df: pl.LazyFrame, method: str, accepted_column: str
     """
     if accepted_column is not None:
         orig_df = df
-        df = df.filter(pl.col(accepted_column).is_not_null())
+        df = df.filter(pl.col(accepted_column))
     df = df.sort(conflict_resolution_score)
 
     # first, select best matching assignment for each pair
-    id_columns = [pl.col("pdbid").str.to_lowercase(), "model", "chain1", "nr1", "alt1", "ins1", "chain2", "nr2", "alt2", "ins2", "symmetry_operation1", "symmetry_operation2"]
+    id_columns = ["family", pl.col("pdbid").str.to_lowercase(), "model", "chain1", "nr1", "alt1", "ins1", "chain2", "nr2", "alt2", "ins2", "symmetry_operation1", "symmetry_operation2"]
     gr = df.group_by(id_columns, maintain_order=True)
     df = gr.first()
 
@@ -245,10 +247,11 @@ def best_fitting_nucleotides(df: pl.LazyFrame, method: str, accepted_column: str
             right_on=id_columns,
             how="left",
             suffix="_right",
+            join_nulls=True
         )
-        assert f"accepted_column_right" not in df.columns
-        df = df.drop(c for c in df.columns if c.endswith("_right"))
-        df = df.with_columns(pl.col(accepted_column) == pl.lit(True))
+        assert f"{accepted_column}_right" not in df.collect_schema().names()
+        df = df.drop("^.*_right$")
+        df = df.with_columns(pl.col(accepted_column).fill_null(False))
 
     return df
 

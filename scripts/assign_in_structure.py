@@ -39,12 +39,14 @@ def format_output(f: ty.Any, df: pl.DataFrame, format: str, header: bool, parame
     table_columns = [
         *id_columns,
         class_col,
+        *(["accepted"] if "accepted" in df.columns else []),
         *[x + '1' for x in nt_id_columns],
         *[x + '2' for x in nt_id_columns],
         *parameter_columns
     ]
     json_columns = [
         *id_columns,
+        *(["accepted"] if "accepted" in df.columns else []),
         pl.struct(pl.col(c + '1').alias(c) for c in nt_id_columns).alias('nt1'),
         pl.struct(pl.col(c + '2').alias(c) for c in nt_id_columns).alias('nt2'),
         pl.struct(pl.col(c) for c in parameter_columns).alias('params')
@@ -99,7 +101,7 @@ basic_parameters = [
     pairs.StandardMetrics.YawPitchRoll2,
 ]
 
-def analyze_structure(pdbid: str, min_atom_distance: float, boundaries: pl.DataFrame, best_fit: ty.Literal["none", "single-pair", "greedy-edges", "graph-edges"]) -> tuple[str, pl.DataFrame] | None:
+def analyze_structure(pdbid: str, min_atom_distance: float, boundaries: pl.DataFrame, best_fit: ty.Literal["none", "single-pair", "greedy-edges", "graph-edges"], output_all: bool) -> tuple[str, pl.DataFrame] | None:
     try:
         structure, sym_data, pdbid = pair_finding.load_structure(pdbid)
     except Exception as e:
@@ -117,12 +119,14 @@ def analyze_structure(pdbid: str, min_atom_distance: float, boundaries: pl.DataF
     df = pairs.postfilter_hb(df, 4.2)
     df = pairs.postfilter_shift(df, 2.2)
     df = pairs.remove_duplicate_pairs(df) # TODO: dedupe after main filter or before?
-    df = apply_filter.apply_filter(df.lazy(), boundaries, False, None, best_fit).collect()
+    df = apply_filter.apply_filter(df.lazy(), boundaries, False, "accepted" if output_all else None, best_fit)\
+        .sort([pl.col("pdbid").str.to_lowercase(), "model", "chain1", "nr1", "alt1", "ins1", "chain2", "nr2", "alt2", "ins2", "symmetry_operation1", "symmetry_operation2", "family"])\
+        .collect()
     return pdbid, df
 
-def main_structure(structure: str, boundaries: pl.DataFrame, out: str | None, format: str, best_fit: ty.Literal["none", "single-pair", "greedy-edges", "graph-edges"]):
+def main_structure(structure: str, boundaries: pl.DataFrame, out: str | None, format: str, best_fit: ty.Literal["none", "single-pair", "greedy-edges", "graph-edges"], output_all: bool):
     """Loads the structure file, performs assignment and writes results"""
-    x = analyze_structure(structure, 4.2, boundaries, best_fit)
+    x = analyze_structure(structure, 4.2, boundaries, best_fit, output_all)
     if x is None:
         return
     pdbid, df = x
@@ -142,7 +146,7 @@ def main2(pool: multiprocessing.pool.Pool | para_utils.MockPool, threads: int, a
     for i, structure in enumerate(inputs):
         if args.verbose:
             eprint(f'Processing {structure} ({i+1}/{len(inputs)})')
-        results.append(pool.apply_async(main_structure, (structure, boundaries, out, args.format, args.best_fit)))
+        results.append(pool.apply_async(main_structure, (structure, boundaries, out, args.format, args.best_fit, args.output_all)))
 
     for r in results:
         r.get()
@@ -170,7 +174,8 @@ def parser(parser = None):
     parser.add_argument('--min-atom-distance', type=float, default=4.0, help='Distance threshold between any residue atoms (in Ångströms)')
     parser.add_argument('--boundaries', type=str, default='https://docs.google.com/spreadsheets/d/e/2PACX-1vQpIjMym1SejcSksbVfnV5WM89jYiR9PcmRcxiJd_0CihxZwVPN5vV-eH-w-dKS_ifCxcYNJqVc6HfG/pub?gid=245758142&single=true&output=csv', help='URL/filepath to the boundaries CSV file')
     parser.add_argument("--pdbcache", nargs="+", help="Directories to search for PDB files in order to avoid re-downloading. Last directory will be written to, if the structure is not found and has to be downloaded from RCSB. Also can be specified as PDB_CACHE_DIR env variable.")
-    parser.add_argument("--best-fit", default='graph-edges', type=str, help="Only the best fitting family for each basepair is kept", choices=["none", "single-pair", "greedy-edges", "graph-edges"])
+    parser.add_argument("--best-fit", default='single-pair', type=str, help="Only the best fitting family for each basepair is kept", choices=["none", "single-pair", "greedy-edges", "graph-edges"])
+    parser.add_argument("--output-all", action='store_true', help="Output all pairs of nucleotides which are close enough. This can be useful for debugging the parameter boundaries to see why a specific pair was *not* assigned. Basepairs which would be assigned as such will have assigned=true.")
     parser.add_argument('--threads', type=para_utils.parse_thread_count, default=1, help='Number of threads, 0 for all, 50%% for half, -1 to leave one free, ... Parallelism only affects processing of multiple PDB files.')
     return parser
 
