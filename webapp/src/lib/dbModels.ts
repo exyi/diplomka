@@ -9,6 +9,7 @@ export type NumRange = {
     max?: number
 }
 export type NucleotideFilterModel = {
+    displayMode?: 'basic' | 'gui' | 'sql'
     sql?: string
     min_bond_length?: NumRange
     bond_length: (NumRange)[]
@@ -397,11 +398,14 @@ export function aggregateBondParameters(query: string, bondColumns: string[]) {
 }
 
 
-export function filterToUrl(filter: NucleotideFilterModel, filterBaseline: NucleotideFilterModel | null | undefined = undefined, mode = 'ranges') {
+export function filterToUrl(filter: NucleotideFilterModel, filterBaseline: NucleotideFilterModel | null | undefined = undefined, mode = 'gui') {
     const params = new URLSearchParams()
+    if (mode != 'basic') {
+        params.append('dev', "1")
+    }
     addFilterParams(params, filter, mode, '')
     if (filterBaseline != null) {
-        addFilterParams(params, filterBaseline, filterBaseline.sql ? "sql" : "ranges", 'baseline_')
+        addFilterParams(params, filterBaseline, filterBaseline.sql ? "sql" : "gui", 'baseline_')
     }
     return params
 }
@@ -471,7 +475,7 @@ export function addFilterParams(params: URLSearchParams, filter: NucleotideFilte
 type UrlParseResult = {
     pairFamily: string | null
     pairType: string | null
-    mode: 'basic' | 'ranges' | 'sql'
+    mode: 'basic' | 'gui' | 'sql'
     filter: NucleotideFilterModel
     baselineFilter: NucleotideFilterModel | null | undefined
     stats: StatisticsSettingsModel | null
@@ -582,7 +586,9 @@ function parseFilter(f: URLSearchParams, filter: NucleotideFilterModel | undefin
         // map expression back to orderBy ID
         filter.orderBy = orderByOptions.find(o => o.expr == filter.orderBy)?.id ?? filter.orderBy
     }
-    const mode = filter.sql ? 'sql' : filter.bond_length.length || filter.bond_acceptor_angle.length || filter.bond_donor_angle.length || filter.coplanarity_angle || filter.bond_plane_angle1.length || filter.bond_plane_angle2.length || filter.coplanarity_edge_angle1 || filter.coplanarity_edge_angle2 || filter.coplanarity_shift1 || filter.coplanarity_shift2 || filter.pitch1 || filter.pitch2 || filter.yaw1 || filter.yaw2 || filter.roll1 || filter.roll2 || filter.resolution ? 'ranges' : 'basic'
+    
+    const mode = !f.has('dev') ? 'basic' :
+                 filter.sql ? 'sql' : 'gui'
     return [filter, mode]
 }
 

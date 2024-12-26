@@ -17,7 +17,7 @@
     export let comparisonMode: ComparisonMode | undefined = undefined
     export let selectingFromTable: string | null = null
     export let metadata: typeof metadataModule[0] | null = null
-    export let mode: "ranges" | "sql" | "basic" = "basic"
+    export let mode: "gui" | "sql" | "basic" = "basic"
 
     let bonds = ["Bond 0", "Bond 1", "Bond 2"]
     $: bonds = metadata?.labels?.filter(l => l != null) ?? ["Bond 0", "Bond 1", "Bond 2"]
@@ -66,27 +66,6 @@
         array.push({})
       }
     }
-    // let ranges = {
-    //     length: bonds.map(_ => ({ min: "", max: "" })),
-    //     accAngle: bonds.map(_ => ({ min: "", max: "" })),
-    //     donAngle: bonds.map(_ => ({ min: "", max: "" })),
-    // }
-    // function updateFilter() {
-    //     function convertRange(x: any) {
-    //         return { min: (isNaN(Number.parseFloat(x.min)) ? null : Number.parseFloat(x.min)),
-    //                  max: (isNaN(Number.parseFloat(x.max)) ? null : Number.parseFloat(x.max)) }
-    //     }
-    //     filter = { ...filter,
-    //         bond_length: bonds.map((_, i) => convertRange(ranges.length[i])),
-    //         bond_acceptor_angle: bonds.map((_, i) => convertRange(ranges.accAngle[i])),
-    //         bond_donor_angle: bonds.map((_, i) => convertRange(ranges.donAngle[i]))
-    //     }
-    // }
-
-    // $:{
-    //     ranges
-    //     updateFilter()
-    // }
 
     function modeChange(e: Event & { currentTarget:EventTarget & HTMLInputElement }) {
       mode = e.currentTarget.value as any
@@ -205,20 +184,22 @@
 </style>
 
 <div>
+    {#if mode != 'basic'}
     <div class="control mode-selection">
         <label class="radio" title="Filter by constraining the H-bond parameters.">
           <input type="radio" checked={mode=="basic"} value="basic" name="editor_mode" on:change={modeChange}>
-          Basic
+          Standard
         </label>
         <label class="radio" title="Filter by constraining the H-bond parameters.">
-          <input type="radio" checked={mode=="ranges"} value="ranges" name="editor_mode" on:change={modeChange}>
-          Parameter ranges
+          <input type="radio" checked={mode=="gui"} value="gui" name="editor_mode" on:change={modeChange}>
+          Dev GUI
         </label>
         <label class="radio" title="Filter by anything you want using SQL.">
           <input type="radio" checked={mode=="sql"} value="sql" name="editor_mode" on:change={modeChange}>
-          SQL
+          Dev SQL
         </label>
     </div>
+    {/if}
 
     {#if mode=="basic"}
     {@const biggestStat = metadata?.statistics.reduce((prev, x) => (prev && prev.count > x.count ? prev : x), null)}
@@ -307,7 +288,7 @@
 
         {#if allowFilterBaseline && filterBaseline == null}
           {#if filter.datasource?.startsWith("allcontacts")}
-            <button class="button" type="button" on:click={() => setBaseline({ ...defaultFilter(), datasource: filter.filtered ? "fr3d-f" : "fr3d" }, "ranges")}>
+            <button class="button" type="button" on:click={() => setBaseline({ ...defaultFilter(), datasource: filter.filtered ? "fr3d-f" : "fr3d" }, "gui")}>
               Enable FR3D comparison
             </button>
           {:else}
@@ -334,7 +315,7 @@
       </div>
     </div>
     
-    {:else if mode=="ranges"}
+    {:else if mode=="gui"}
     <div class="flex-columns" >
         <div class="column" style="font-variant: small-caps; font-weight: bold">
           <div class="panel-title"></div>
@@ -351,11 +332,6 @@
             <h3 class="panel-title">{bonds[0]}</h3>
             {#each hb_params as p}
               {@const i = 0}
-              <!-- <div class="panel-field range-slider-wrapper">
-                <RangeSlider min={0} max={6} step={0.1} pushy={true} suffix="Å" float={true}
-                            values={[Number(ranges.length[i].min || 0), Number(ranges.length[i].max || 6)]}
-                            on:change={e => { ranges.length[i].min = ""+e.detail.values[0]; ranges.length[i].max = ""+e.detail.values[1] }} />
-              </div> -->
               <div class="panel-field field is-horizontal">
                 <div class="field-body">
                   <div class="field">
@@ -615,7 +591,7 @@
             <div class="control">
               {#if filterBaseline == null}
                 <div class="buttons has-addons">
-                  <button class="button is-small" on:click={() => setBaseline({ ...defaultFilter(), datasource: filter.filtered ? "fr3d-f" : "fr3d", filtered: filter.filtered }, "ranges")}
+                  <button class="button is-small" on:click={() => setBaseline({ ...defaultFilter(), datasource: filter.filtered ? "fr3d-f" : "fr3d", filtered: filter.filtered }, "gui")}
                     title="Sets the current filters as the filter baseline, allowing you to change some parameters and observe the changed">
                     FR3D
                   </button>
@@ -705,7 +681,7 @@
           <button class="button" type="button" on:click={() => setBaseline(structuredClone(filter), mode)}>
             Set as baseline
           </button>
-          <button class="button" type="button" on:click={() => setBaseline({ ...defaultFilter(), datasource: filter.filtered ? "fr3d-f" : "fr3d" }, "ranges")}>
+          <button class="button" type="button" on:click={() => setBaseline({ ...defaultFilter(), datasource: filter.filtered ? "fr3d-f" : "fr3d" }, "gui")}>
             Compare with FR3D
           </button>
         {:else}

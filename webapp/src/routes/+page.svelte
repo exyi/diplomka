@@ -27,7 +27,7 @@
   const totalRowLimit = 30_000
   let normalTableLimit = 100
 
-  let filterMode: "basic"|"ranges" | "sql" = "basic"
+  let filterMode: "basic" | "gui" | "sql" = "basic"
   let filter: NucleotideFilterModel = defaultFilter()
   let filterBaseline: NucleotideFilterModel | undefined = undefined
   let comparisonMode: ComparisonMode = config.defaultComparisonMode
