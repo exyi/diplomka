@@ -342,7 +342,7 @@
       isSymmetrical ? [ 'A-A', 'A-C', 'A-G', 'A-U', 'C-C', 'C-U', 'G-C', 'G-G', 'G-U', 'U-U' ]
                    : [ 'A-A', 'A-C', 'A-G', 'A-U', 'C-A', 'C-C', 'C-G', 'C-U', 'G-A', 'G-C', 'G-G', 'G-U', 'U-A', 'U-C', 'U-G', 'U-U' ]);
     const pairs =
-      db.pairTypes.filter(p => selectedFamily == null || p[0].toLowerCase() == selectedFamily.toLowerCase())
+      db.pairTypes.filter(p => selectedFamily == null || p[0].toLowerCase().replace(/a$/, '') == selectedFamily.toLowerCase())
                   .map(p => ({ family: p[0], bases: p[1], real: true, conventional: selectedFamily == null || allPairTypes.has(p[1].toUpperCase()) }))
     const existingPairs = new Set(pairs.map(p => p.bases.toUpperCase()))
     for (const p of allPairTypes) {
@@ -442,7 +442,14 @@
         }
         ev.preventDefault()
         return false
-      }}><b>{selectedFamily == null ? p.family + "-" : ""}{p.bases}</b>{#if m && location.host != "xxbasepairs.datmos.org"}&nbsp;({m.med_quality + m.high_quality}){/if}</a>
+      }}>
+        <b>
+          {p.family?.toLowerCase() != selectedFamily?.toLowerCase() ? p.family + "-" : ""}{p.bases}
+        </b>
+        {#if m && location.host != "xxbasepairs.datmos.org"}
+          &nbsp;({m.med_quality + m.high_quality})
+        {/if}
+      </a>
   {/each}
 </nav>
 {#if selectedPairing && selectedPairing[1] == selectedPairing[2] && selectedPairing.slice(1, 3) != 'SS' && selectedPairing.slice(4) != selectedPairing.slice(4).split('-').toReversed().join('-')}

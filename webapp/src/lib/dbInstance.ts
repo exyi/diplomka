@@ -11,7 +11,7 @@ let db: AsyncDuckDB | null = null
 export const parquetFiles: { [s: string]: string } = {
 }
 export const pairTypes: [ string, string ][] = metadata.map(m => m.pair_type as [string, string]).filter(p => !p[0].startsWith('n'))
-export const pairFamilies: string[] = [...new Set(pairTypes.map(t => normalizePairFamily(t[0])))]
+export const pairFamilies: string[] = [...new Set(pairTypes.map(t => normalizePairFamily(t[0]).replace(/a$/, '')))]
 const registeredFiles = new Set<string>()
 
 pairFamilies.sort(compareFamilies)
